@@ -9,8 +9,8 @@ const faqs = [
     category: "Getting Started",
     questions: [
       {
-        q: "Can I try GrowVia for free?",
-        a: "Yes. GrowVia offers a Freemium plan that includes your first mentoring session completely free, plus one use of our AI Smart Matching feature. No credit card is required to sign up or book your first session.",
+        q: "How do I get started on GrowVia?",
+        a: "Sign up, complete your profile, and book a Discovery Session for 9.99€. This 15–20 minute intro session lets you meet a mentor and try our AI Smart Matching feature once. No long-term commitment required.",
       },
       {
         q: "Do I need an account to browse mentors?",
@@ -44,15 +44,15 @@ const faqs = [
     questions: [
       {
         q: "How does payment work?",
-        a: "After choosing a mentor and selecting a time, you are guided through a secure checkout powered by Stripe. Payment is required at the time of booking for paid sessions. Your subscription renews monthly and can be cancelled anytime.",
+        a: "After choosing a mentor and selecting a time, you are guided through a secure checkout powered by Stripe. The Discovery Session costs 9.99€ (one-time). Monthly plans (Basic 19.99€ or Premium 39.99€) renew monthly and can be cancelled anytime.",
       },
       {
         q: "Is payment secure?",
         a: "Absolutely. All payments are processed through Stripe, which uses bank-grade TLS encryption. GrowVia never stores your card information on our servers. Your financial data is always protected.",
       },
       {
-        q: "What is included in the subscription?",
-        a: "The monthly subscription (39€/month) includes 3 sessions per month, unlimited AI Smart Matching, priority booking, and personalized mentor recommendations. You can cancel anytime.",
+        q: "What is included in the subscription plans?",
+        a: "Basic (19.99€/month) includes 2 sessions per month and 1 AI Smart Matching use. Premium (39.99€/month) includes 4 sessions per month, unlimited AI Smart Matching, priority booking, and personalized recommendations. Both plans can be cancelled anytime.",
       },
       {
         q: "Are there any hidden fees?",

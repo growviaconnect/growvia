@@ -9,21 +9,26 @@ export default function MentorAgreementPage() {
             Legal
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Mentor Agreement</h1>
-          <p className="text-gray-400 text-sm">Last updated: April 9, 2026</p>
+          <p className="text-gray-400 text-sm">Last updated: April 2026 · Applies to all mentors on GrowVia.</p>
+          <p className="text-gray-400 text-sm mt-1">Available in: English · Español · Français</p>
         </div>
 
         <div className="space-y-8 text-gray-600">
           {[
             {
               title: "1. Independent Contractor Status",
-              content: "By becoming a mentor on GrowVia, you acknowledge that you are acting as an independent contractor and not as an employee, agent, or partner of GrowVia. You are solely responsible for your conduct during sessions and for the guidance you provide.",
+              content: "By becoming a mentor on GrowVia, you acknowledge that you are acting as an independent contractor and not as an employee, agent, or partner of GrowVia. GrowVia operates as a two-sided marketplace platform — similar to Airbnb or Malt — and does not direct or control the content of your mentoring sessions. You are solely responsible for your conduct during sessions and for the guidance you provide.",
             },
             {
-              title: "2. Application & Approval Process",
+              title: "2. Payments & Commission",
+              content: "GrowVia collects payment from mentees on your behalf and remits your share after deducting a platform commission of 5–10% per completed session. This commission covers lead generation, payment processing, scheduling infrastructure, and dashboard access. Payouts are processed through Stripe. You are responsible for declaring and paying any applicable taxes on your earnings. GrowVia does not withhold tax on your behalf.",
+            },
+            {
+              title: "3. Application & Approval Process",
               content: "Becoming a mentor on GrowVia requires submitting an application and completing our verification process. Your application will be reviewed manually by our team. You will be notified of the outcome. GrowVia reserves the right to approve or decline any application at its discretion.",
             },
             {
-              title: "3. Mentor Responsibilities",
+              title: "4. Mentor Responsibilities",
               items: [
                 "Provide honest, accurate, and up-to-date information in your profile",
                 "Conduct sessions professionally and respectfully",
@@ -34,23 +39,23 @@ export default function MentorAgreementPage() {
               ],
             },
             {
-              title: "4. Code of Conduct",
+              title: "5. Code of Conduct",
               content: "Mentors must maintain the highest standards of professionalism and respect. Harassment, discrimination, or inappropriate conduct of any kind will result in immediate suspension and removal from the platform.",
             },
             {
-              title: "5. Session Guidelines",
+              title: "6. Session Guidelines",
               content: "Sessions are conducted via Google Meet, integrated directly into the GrowVia platform. Mentors must use the platform-generated meeting link for all sessions. Recording sessions is only permitted with explicit consent from both parties.",
             },
             {
-              title: "6. Disclaimer of Advice",
+              title: "7. Disclaimer of Advice",
               content: "Sessions on GrowVia are informational mentoring only and do not constitute professional legal, financial, medical, or other regulated advice. Mentors must not present themselves as providing such professional services.",
             },
             {
-              title: "7. Termination",
+              title: "8. Termination",
               content: "GrowVia reserves the right to suspend or terminate a mentor's account at any time for violations of this agreement, the Terms of Service, or for conduct deemed harmful to the community.",
             },
             {
-              title: "8. Contact",
+              title: "9. Contact",
               content: "Questions about this agreement? Contact us at mentors@growvia.com.",
             },
           ].map((section) => (

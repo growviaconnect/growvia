@@ -40,10 +40,10 @@ const steps = [
   {
     icon: Gift,
     num: "03",
-    title: "Try a free session",
-    desc: "Your first session is completely free. No credit card required. Meet your mentor, explore the fit, and experience GrowVia risk-free.",
+    title: "Book a Discovery Session",
+    desc: "Start with a 15–20 minute Discovery Session for 9.99€. Meet your mentor, explore the fit, and experience GrowVia before committing to a plan.",
     detail: [
-      "30 or 60 minute session options",
+      "15–20 minute intro session · 9.99€",
       "Fully integrated Google Meet link generated automatically",
       "Same link shared with mentor and mentee",
     ],
@@ -65,9 +65,9 @@ const steps = [
     title: "Book your session",
     desc: "Pick a time that works for both of you. Confirm, pay, and you are all set. Sessions are booked directly through the platform.",
     detail: [
-      "Freemium: first session free",
-      "Pay-per-session: 29€",
-      "Subscription: 3 sessions/month for 39€",
+      "Discovery Session: 9.99€ · 15–20 min",
+      "Basic: 19.99€/month · 2 sessions",
+      "Premium: 39.99€/month · 4 sessions + unlimited AI",
     ],
   },
   {
@@ -85,11 +85,11 @@ const steps = [
     icon: RefreshCw,
     num: "07",
     title: "Continue your growth",
-    desc: "After your session, decide how you want to continue. Subscribe for ongoing guidance or pay per session. The choice is yours.",
+    desc: "After your Discovery Session, subscribe to Basic (19.99€/month) or Premium (39.99€/month) for regular sessions and ongoing guidance.",
     detail: [
-      "Subscription unlocks unlimited AI matching",
-      "Priority booking for subscribers",
-      "Personalized mentor recommendations",
+      "Basic: 2 sessions/month · 19.99€",
+      "Premium: 4 sessions/month + unlimited AI · 39.99€",
+      "Cancel anytime, no hidden fees",
     ],
   },
 ];
@@ -246,13 +246,13 @@ export default function HowItWorksPage() {
         <div className="max-w-2xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4">Ready to take the first step?</h2>
           <p className="text-purple-100 mb-8 text-lg">
-            Create your profile and start your free session today. No commitment required.
+            Create your profile, get AI-matched, and book your first Discovery Session. No long-term commitment.
           </p>
           <Link
             href="/auth/register"
             className="inline-flex items-center gap-2 bg-white text-purple-700 font-semibold px-8 py-4 rounded-2xl hover:bg-purple-50 transition-colors"
           >
-            Get Started for Free <ArrowRight className="w-4 h-4" />
+            Find my mentor <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
