@@ -4,126 +4,90 @@ import {
   Sparkles,
   ArrowRight,
   Star,
-  BookOpen,
-  Briefcase,
-  TrendingUp,
-  GraduationCap,
-  Video,
-  Shield,
   Users,
   UserCheck,
-  Calendar,
+  GraduationCap,
+  Briefcase,
+  TrendingUp,
   Heart,
+  Quote,
 } from "lucide-react";
-
-const trustBadges = [
-  { icon: Users, label: "One-to-one mentoring" },
-  { icon: UserCheck, label: "Verified mentors" },
-  { icon: Sparkles, label: "AI Smart Matching available" },
-];
-
-const heroStats = [
-  { icon: Star, value: "4.9/5", label: "Avg. Rating" },
-  { icon: Users, value: "50K+", label: "Sessions" },
-  { icon: UserCheck, value: "98%", label: "Satisfaction" },
-];
 
 const categories = [
   {
     icon: GraduationCap,
     label: "Students",
-    desc: "Helping students choose their future path, academic specialization, and university direction.",
-    color: "bg-violet-50 text-violet-600",
-    count: "320 mentors",
+    desc: "Helping students choose their future path, academic specialization, and university direction with guidance from experienced mentors.",
+    iconColor: "#8b5cf6",
+    bgColor: "bg-violet-50",
+    count: 320,
+    href: "/auth/register?category=students",
   },
   {
     icon: Briefcase,
     label: "Career",
     desc: "Navigate career transitions, discover your path, and land your dream job.",
-    color: "bg-blue-50 text-blue-600",
-    count: "450 mentors",
+    iconColor: "#3b82f6",
+    bgColor: "bg-blue-50",
+    count: 450,
+    href: "/auth/register?category=career",
   },
   {
     icon: TrendingUp,
     label: "Business",
     desc: "Start, scale, and grow your professional or entrepreneurial journey.",
-    color: "bg-green-50 text-green-600",
-    count: "380 mentors",
+    iconColor: "#22c55e",
+    bgColor: "bg-green-50",
+    count: 380,
+    href: "/auth/register?category=business",
   },
   {
     icon: Heart,
     label: "Personal Growth",
     desc: "Build confidence, clarity, and unlock your full potential.",
-    color: "bg-pink-50 text-pink-600",
-    count: "410 mentors",
+    iconColor: "#ec4899",
+    bgColor: "bg-pink-50",
+    count: 410,
+    href: "/auth/register?category=personal_growth",
   },
 ];
 
-const steps = [
+const featuredMentors = [
   {
-    number: "01",
-    title: "Create Your Profile",
-    description:
-      "Sign up and complete your profile by adding your career interests, goals, industry preferences, and experience level. This information helps GrowVia recommend the most relevant mentors for you.",
-    color: "from-blue-500 to-blue-600",
-    details: ["Career interests & goals", "Industry preferences", "Experience level", "What you want to achieve"],
-    highlight: false,
+    name: "Sophie Chen",
+    title: "Product Manager at Spotify",
+    expertise: ["Career Change", "Product"],
+    rating: 5.0,
+    sessions: 128,
+    avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop",
+    initials: "SC",
   },
   {
-    number: "02",
-    title: "Try GrowVia With a Free Session",
-    description:
-      "New users can start with a Freemium trial session — completely free. This first session lets you discover the platform, connect with a mentor, and try the AI Smart Matching system once.",
-    color: "from-green-500 to-emerald-600",
-    details: [
-      "First session is free",
-      "1 trial AI Smart Match",
-      "Personalized mentor recommendation",
-      "No commitment required",
-    ],
-    highlight: true,
+    name: "Marcus Dubois",
+    title: "Founder, TechStart Paris",
+    expertise: ["Entrepreneurship", "Business"],
+    rating: 4.9,
+    sessions: 94,
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop",
+    initials: "MD",
   },
   {
-    number: "03",
-    title: "Choose Your Mentor",
-    description:
-      "After receiving your AI recommendation, you can accept the suggestion or browse mentors manually. Each mentor profile includes their experience, expertise, ratings, and feedback from other mentees.",
-    color: "from-purple-500 to-purple-600",
-    details: [
-      "Accept AI recommendation",
-      "Or browse manually",
-      "Read mentor reviews",
-      "Filter by expertise",
-    ],
-    highlight: false,
+    name: "Aisha Patel",
+    title: "HR Director at L'Oréal",
+    expertise: ["Personal Growth", "Students"],
+    rating: 5.0,
+    sessions: 212,
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop",
+    initials: "AP",
   },
   {
-    number: "04",
-    title: "Book a Session",
-    description:
-      "Choose an available time slot in your mentor's calendar. Once booked, a Google Meet session is automatically generated and both mentor and mentee receive the same meeting link.",
-    color: "from-orange-500 to-orange-600",
-    details: [
-      "Pick a time slot",
-      "Google Meet auto-generated",
-      "Both receive the same link",
-      "Reminder emails sent",
-    ],
-    highlight: false,
-  },
-  {
-    number: "05",
-    title: "Continue Your Journey",
-    description:
-      "After your free session, continue growing with GrowVia by booking individual sessions or subscribing to the monthly plan for unlimited AI Smart Matching.",
-    color: "from-pink-500 to-rose-600",
-    details: [
-      "Book individual sessions (€29)",
-      "Or subscribe monthly (€39/mo)",
-      "3 sessions + unlimited AI matching",
-      "Cancel anytime",
-    ],
-    highlight: false,
+    name: "James Miller",
+    title: "Engineering Lead at Airbnb",
+    expertise: ["Career", "Tech"],
+    rating: 4.8,
+    sessions: 76,
+    avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop",
+    initials: "JM",
   },
 ];
 
@@ -133,7 +97,7 @@ const testimonials = [
       "GrowVia connected me with a mentor who completely transformed my career trajectory. Within 3 months, I landed my dream role at a top tech company.",
     author: "Emily Rodriguez",
     role: "Product Manager at Google",
-    avatar: "ER",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop",
     rating: 5,
   },
   {
@@ -141,15 +105,15 @@ const testimonials = [
       "The quality of mentors on this platform is exceptional. My business mentor helped me scale my startup from $0 to $2M ARR in just one year.",
     author: "Marcus Chen",
     role: "Founder, TechFlow",
-    avatar: "MC",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop",
     rating: 5,
   },
   {
     content:
       "I was skeptical at first, but the personalized matching and the depth of expertise available here exceeded all my expectations. Truly life-changing.",
     author: "Sarah Johnson",
-    role: "Senior Software Engineer",
-    avatar: "SJ",
+    role: "Engineering Lead at Meta",
+    avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&auto=format&fit=crop",
     rating: 5,
   },
 ];
@@ -158,27 +122,48 @@ export default function HomePage() {
   return (
     <>
       {/* ─── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-white pt-12 pb-20 lg:pt-20 lg:pb-28">
-        {/* background blobs */}
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-purple-100 opacity-50 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-32 w-96 h-96 rounded-full bg-violet-100 opacity-30 blur-3xl pointer-events-none" />
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Full gradient background */}
+        <div className="absolute inset-0 gradient-bg-soft" />
+        {/* Blur orbs */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-purple-200/30 rounded-full blur-3xl animate-pulse-soft" />
+        <div
+          className="absolute bottom-20 left-20 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse-soft"
+          style={{ animationDelay: "1s" }}
+        />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* ── LEFT: Text ── */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-sm font-medium px-4 py-2 rounded-full mb-7">
-                <Sparkles className="w-4 h-4" />
-                Mentorship reimagined with AI
+              {/* Avatar strip badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur border border-purple-100 shadow-sm mb-8">
+                <div className="flex -space-x-2">
+                  {[
+                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
+                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
+                    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100",
+                  ].map((src, i) => (
+                    <img
+                      key={i}
+                      src={src}
+                      alt=""
+                      className="w-7 h-7 rounded-full border-2 border-white object-cover"
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-600">
+                  <span className="font-semibold text-purple-700">2,500+</span> mentors worldwide
+                </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
                 Grow with mentors who{" "}
                 <span className="gradient-text">truly understand</span>{" "}
                 your journey
               </h1>
 
-              <p className="text-lg text-gray-500 mb-8 leading-relaxed max-w-xl">
+              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl">
                 Connect with experienced professionals who share real-world insights to help you make better career
                 decisions and accelerate your personal and professional growth.
               </p>
@@ -186,13 +171,13 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <Link
                   href="/auth/register"
-                  className="inline-flex items-center justify-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 text-base w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 text-base w-full sm:w-auto"
                 >
                   Find a Mentor <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/auth/register?role=mentor"
-                  className="inline-flex items-center justify-center gap-2 border border-purple-200 text-purple-700 font-semibold px-8 py-4 rounded-2xl hover:bg-purple-50 transition-colors text-base w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 border border-purple-200 hover:bg-purple-50 text-purple-700 font-semibold px-8 py-4 rounded-2xl transition-colors text-base w-full sm:w-auto"
                 >
                   <Heart className="w-4 h-4" />
                   Become a Mentor
@@ -201,24 +186,32 @@ export default function HomePage() {
 
               {/* Trust badges */}
               <div className="flex flex-wrap gap-x-6 gap-y-2 mb-10">
-                {trustBadges.map((b) => (
-                  <div key={b.label} className="flex items-center gap-1.5 text-sm text-gray-500">
+                {[
+                  { icon: Users, text: "One-to-one mentoring" },
+                  { icon: UserCheck, text: "Verified mentors" },
+                  { icon: Sparkles, text: "AI Smart Matching available" },
+                ].map((b) => (
+                  <div key={b.text} className="flex items-center gap-1.5 text-sm text-gray-500">
                     <b.icon className="w-4 h-4 text-purple-500" />
-                    <span>{b.label}</span>
+                    <span>{b.text}</span>
                   </div>
                 ))}
               </div>
 
               {/* Stats */}
               <div className="flex flex-wrap gap-8">
-                {heroStats.map((s) => (
+                {[
+                  { icon: Star, value: "4.9/5", label: "Avg. Rating" },
+                  { icon: Users, value: "50K+", label: "Sessions" },
+                  { icon: UserCheck, value: "98%", label: "Satisfaction" },
+                ].map((s) => (
                   <div key={s.label} className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
                       <s.icon className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900 leading-none">{s.value}</p>
-                      <p className="text-sm text-gray-500 mt-0.5">{s.label}</p>
+                      <p className="font-bold text-gray-900">{s.value}</p>
+                      <p className="text-sm text-gray-500">{s.label}</p>
                     </div>
                   </div>
                 ))}
@@ -227,326 +220,185 @@ export default function HomePage() {
 
             {/* ── RIGHT: Image ── */}
             <div className="relative hidden lg:block">
-              {/* Main image */}
-              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl shadow-purple-500/20">
-                <img
-                  src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop"
-                  alt="Mentor and mentee in a one-to-one session"
-                  className="w-full h-[500px] object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent" />
-              </div>
-
-              {/* Floating card – mentor info */}
-              <div className="absolute -left-8 top-20 bg-white rounded-2xl p-4 shadow-xl shadow-purple-500/10 z-20 animate-bounce-slow">
-                <div className="flex items-center gap-3">
+              <div className="relative">
+                {/* Main image */}
+                <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl shadow-purple-500/20">
                   <img
-                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&auto=format&fit=crop"
-                    alt="Sarah Chen"
-                    className="w-12 h-12 rounded-full object-cover"
+                    src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800"
+                    alt="Mentor and mentee in a one-to-one session"
+                    className="w-full h-[500px] object-cover"
                   />
-                  <div>
-                    <p className="font-semibold text-sm text-gray-900">Sarah Chen</p>
-                    <p className="text-xs text-gray-500">Leadership Coach</p>
-                    <p className="text-xs text-purple-600 font-medium">342 sessions</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent" />
+                </div>
+
+                {/* Floating card – mentor */}
+                <div className="absolute -left-8 top-20 bg-white rounded-2xl p-4 shadow-xl shadow-purple-500/10 z-20 animate-bounce-slow">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100"
+                      alt=""
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-sm">Sarah Chen</p>
+                      <p className="text-xs text-gray-500">Leadership Coach</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs font-medium">5.0</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Floating card – match */}
-              <div className="absolute -right-6 bottom-24 bg-white rounded-2xl p-4 shadow-xl shadow-purple-500/10 z-20">
-                <div className="flex items-center gap-2 mb-1">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="text-xs font-semibold text-gray-900">AI Match Found</span>
+                {/* Floating card – success stories */}
+                <div
+                  className="absolute -right-6 bottom-32 bg-white rounded-2xl p-4 shadow-xl shadow-purple-500/10 z-20"
+                  style={{ animation: "bounce-slow 5s ease-in-out infinite" }}
+                >
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-700">15K+</p>
+                    <p className="text-xs text-gray-500">Success Stories</p>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500">98% compatibility</p>
-                <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
-                  <div className="gradient-bg h-1.5 rounded-full" style={{ width: "98%" }} />
-                </div>
+
+                {/* Background decoration */}
+                <div className="absolute -z-10 -bottom-8 -right-8 w-72 h-72 bg-purple-100 rounded-3xl" />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── LOGOS / TRUST BAR ─────────────────────────────────── */}
-      <section className="py-12 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm font-medium text-gray-400 mb-8 uppercase tracking-wider">
-            Trusted by professionals from leading companies
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-10 opacity-50">
-            {["Google", "Spotify", "L'Oréal", "BNP Paribas", "Adobe", "Airbnb"].map((c) => (
-              <span key={c} className="text-gray-400 font-semibold text-lg tracking-tight">{c}</span>
-            ))}
           </div>
         </div>
       </section>
 
       {/* ─── CATEGORIES ─────────────────────────────────────────── */}
-      <section className="section-padding bg-white">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Find your area of growth</h2>
-            <p className="text-gray-500 text-lg max-w-xl mx-auto">
-              Whatever direction you want to grow, we have mentors who have been there before.
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Explore mentoring categories
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              GrowVia supports people at every stage of life — from students choosing their path to professionals
+              seeking growth or a new direction.
             </p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((cat) => (
               <Link
                 key={cat.label}
-                href="/auth/register"
-                className="group flex flex-col items-start gap-4 p-6 rounded-2xl border border-gray-100 bg-white card-shadow-hover card-shadow"
+                href={cat.href}
+                className="group block p-6 rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 bg-white h-full"
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${cat.color}`}>
-                  <cat.icon className="w-6 h-6" />
+                <div className="flex items-start justify-between mb-4">
+                  <div
+                    className={`w-14 h-14 rounded-2xl ${cat.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                  >
+                    <cat.icon className="w-7 h-7" style={{ color: cat.iconColor }} />
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors mb-1">
-                    {cat.label}
-                  </h3>
-                  <p className="text-xs text-gray-400 leading-snug hidden sm:block">{cat.desc}</p>
-                </div>
-                <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full mt-auto">
-                  {cat.count}
-                </span>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                  {cat.label}
+                </h3>
+                <p className="text-gray-500 text-sm mb-4 leading-relaxed">{cat.desc}</p>
+                <p className="text-sm text-purple-600 font-medium">{cat.count}+ mentors</p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS ───────────────────────────────────────── */}
-      <section className="section-padding gradient-bg-soft">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 bg-white text-purple-700 text-sm font-medium px-4 py-2 rounded-full mb-5 card-shadow">
-              The mentoring process
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-            <p className="text-gray-500 text-lg max-w-xl mx-auto">
-              From sign-up to your first session in minutes. Everything is structured to get you results fast.
-            </p>
-          </div>
-
-          <div className="space-y-5">
-            {steps.map((step) => (
-              <div
-                key={step.number}
-                className={`relative rounded-2xl p-6 sm:p-8 ${
-                  step.highlight
-                    ? "bg-white border-2 border-green-200 shadow-lg shadow-green-100"
-                    : "bg-white border border-gray-100 card-shadow"
-                }`}
-              >
-                {step.highlight && (
-                  <div className="absolute -top-3 left-6 bg-green-500 text-white text-xs font-bold px-4 py-1 rounded-full">
-                    FREE
-                  </div>
-                )}
-                <div className="flex flex-col sm:flex-row gap-5 sm:gap-8">
-                  <div className="flex-shrink-0">
-                    <div
-                      className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center text-white font-black text-lg`}
-                    >
-                      {step.number}
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{step.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {step.details.map((d) => (
-                        <span
-                          key={d}
-                          className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg ${
-                            step.highlight
-                              ? "bg-green-50 text-green-700"
-                              : "bg-gray-50 text-gray-600"
-                          }`}
-                        >
-                          <CheckCircle className="w-3 h-3 flex-shrink-0" />
-                          {d}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <Link
-              href="/how-it-works"
-              className="inline-flex items-center gap-2 text-purple-700 font-semibold hover:gap-3 transition-all"
-            >
-              See full details <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── PRICING TEASER ─────────────────────────────────────── */}
-      <section className="section-padding bg-white">
+      {/* ─── FEATURED MENTORS ──────────────────────────────────── */}
+      <section className="py-24 gradient-bg-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Invest in your growth</h2>
-            <p className="text-gray-500 text-lg">Start for free. Upgrade when you're ready. No hidden fees.</p>
-          </div>
-
-          {/* AI Matching callout */}
-          <div className="max-w-3xl mx-auto mb-10">
-            <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900 mb-0.5">About AI Smart Matching</p>
-                <p className="text-sm text-gray-500">
-                  AI Smart Matching analyzes your career goals, experience, and interests to recommend the most compatible
-                  mentors. One free use on sign-up. Unlimited with the monthly plan.
-                </p>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured mentors</h2>
+              <p className="text-lg text-gray-600 max-w-xl">Hand-picked experts ready to guide you to success</p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {[
-              {
-                name: "Free Trial",
-                price: "Free",
-                desc: "Discover the platform",
-                features: [
-                  "1 free mentoring session",
-                  "1 trial AI Smart Match",
-                  "Personalized mentor recommendation",
-                  "No commitment required",
-                ],
-                cta: "Start Free Session",
-                href: "/auth/register",
-                highlight: false,
-                badge: null,
-              },
-              {
-                name: "Pay-Per-Session",
-                price: "€29",
-                per: "/ session",
-                desc: "Flexible access",
-                features: [
-                  "Pay as you go",
-                  "Choose any mentor",
-                  "Google Meet included",
-                  "No monthly commitment",
-                ],
-                cta: "Book a Session",
-                href: "/auth/register",
-                highlight: false,
-                badge: null,
-              },
-              {
-                name: "Monthly Plan",
-                price: "€39",
-                per: "/ month",
-                desc: "Best value for growth",
-                features: [
-                  "3 sessions per month",
-                  "Unlimited AI Smart Matching",
-                  "Priority booking",
-                  "Cancel anytime",
-                ],
-                cta: "Subscribe",
-                href: "/auth/register",
-                highlight: true,
-                badge: "BEST VALUE",
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-2xl p-7 flex flex-col relative ${
-                  plan.highlight
-                    ? "gradient-bg text-white shadow-2xl shadow-purple-300"
-                    : "bg-white border border-gray-100 card-shadow"
-                }`}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
-                    {plan.badge}
-                  </div>
-                )}
-                <div className={`text-sm font-semibold mb-2 ${plan.highlight ? "text-purple-200" : "text-purple-600"}`}>
-                  {plan.name}
-                </div>
-                <div className="flex items-end gap-1 mb-1">
-                  <span className={`text-4xl font-black ${plan.highlight ? "text-white" : "text-gray-900"}`}>
-                    {plan.price}
-                  </span>
-                  {plan.per && (
-                    <span className={`text-sm mb-1 ${plan.highlight ? "text-purple-200" : "text-gray-400"}`}>
-                      {plan.per}
-                    </span>
-                  )}
-                </div>
-                <p className={`text-sm mb-6 ${plan.highlight ? "text-purple-100" : "text-gray-400"}`}>{plan.desc}</p>
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm">
-                      <CheckCircle
-                        className={`w-4 h-4 flex-shrink-0 ${plan.highlight ? "text-purple-200" : "text-purple-500"}`}
-                      />
-                      <span className={plan.highlight ? "text-white" : "text-gray-600"}>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={plan.href}
-                  className={`block text-center font-semibold py-3 rounded-xl transition-all text-sm ${
-                    plan.highlight
-                      ? "bg-white text-purple-700 hover:bg-purple-50"
-                      : "gradient-bg text-white hover:opacity-90"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/pricing" className="inline-flex items-center gap-1.5 text-sm text-purple-600 font-medium hover:text-purple-800 transition-colors">
-              View full pricing details <ArrowRight className="w-3.5 h-3.5" />
+            <Link
+              href="/auth/register"
+              className="inline-flex items-center gap-2 text-purple-700 hover:text-purple-800 font-medium mt-4 md:mt-0 text-sm"
+            >
+              View all mentors <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredMentors.map((mentor) => (
+              <Link
+                key={mentor.name}
+                href="/auth/register"
+                className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 border border-gray-100"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={mentor.avatar}
+                    alt={mentor.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur px-2 py-1 rounded-lg">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-semibold">{mentor.rating.toFixed(1)}</span>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors mb-1">
+                    {mentor.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-3">{mentor.title}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {mentor.expertise.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-md font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <span className="text-sm text-gray-500">{mentor.sessions} sessions</span>
+                    <span className="font-semibold text-purple-700">€29/hr</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ─── TESTIMONIALS (dark bg) ──────────────────────────────── */}
-      <section className="section-padding bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Trusted by thousands of professionals</h2>
-            <p className="text-gray-400 text-lg">See how our mentors have helped people achieve their goals</p>
+      <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by thousands of professionals</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              See how our mentors have helped people achieve their goals
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div
-                key={t.author}
-                className="bg-gray-800/50 backdrop-blur rounded-2xl p-7 border border-gray-700/50"
-              >
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-gray-300 leading-relaxed mb-6 text-sm">"{t.content}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 gradient-bg rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {t.avatar}
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((t, i) => (
+              <div key={t.author} className="relative">
+                <div className="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-8 h-full hover:border-purple-500/50 transition-colors">
+                  <Quote className="w-10 h-10 text-purple-500/30 mb-6" />
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: t.rating }).map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    ))}
                   </div>
-                  <div>
-                    <div className="font-semibold text-white text-sm">{t.author}</div>
-                    <div className="text-xs text-gray-400">{t.role}</div>
+                  <p className="text-gray-300 mb-8 leading-relaxed">"{t.content}"</p>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={t.avatar}
+                      alt={t.author}
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-purple-500/30"
+                    />
+                    <div>
+                      <p className="font-semibold text-white">{t.author}</p>
+                      <p className="text-sm text-gray-400">{t.role}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -555,61 +407,43 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── FOR SCHOOLS ─────────────────────────────────────────── */}
-      <section className="py-16 bg-white">
+      {/* ─── FINAL CTA ─────────────────────────────────────────── */}
+      <section className="py-24 gradient-bg-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="gradient-bg rounded-3xl p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8">
-            <div className="text-white">
-              <div className="text-purple-200 text-sm font-semibold mb-2 uppercase tracking-wide">For Institutions</div>
-              <h2 className="text-3xl font-bold mb-3">Bring structured mentoring to your school</h2>
-              <p className="text-purple-100 max-w-xl leading-relaxed">
-                Connect students with verified professionals from any industry, anywhere in the world. Track
-                participation, measure impact, and build a culture of growth.
+          <div className="relative bg-gradient-to-br from-purple-700 via-purple-800 to-purple-900 rounded-3xl p-12 md:p-16 overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
+            <div className="relative text-center max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 mb-8">
+                <Sparkles className="w-4 h-4 text-purple-300" />
+                <span className="text-sm text-purple-200">Start your growth journey today</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                Ready to accelerate your success?
+              </h2>
+              <p className="text-lg md:text-xl text-purple-200 mb-10 max-w-2xl mx-auto">
+                Join thousands of professionals who have transformed their careers with personalized mentorship from
+                world-class experts.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/auth/register"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-purple-800 font-semibold px-8 py-4 rounded-2xl hover:bg-gray-100 shadow-xl shadow-purple-900/30 text-base"
+                >
+                  Find a Mentor <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link
+                  href="/how-it-works"
+                  className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/10 transition-colors text-base"
+                >
+                  Learn More
+                </Link>
+              </div>
+              <p className="text-sm text-purple-300 mt-8">
+                No commitment required • Free to browse • Book your first session in minutes
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
-              <Link
-                href="/for-schools"
-                className="inline-flex items-center justify-center gap-2 bg-white text-purple-700 font-semibold px-7 py-3.5 rounded-xl hover:bg-purple-50 transition-colors whitespace-nowrap"
-              >
-                For Schools & Universities
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/20 transition-colors whitespace-nowrap"
-              >
-                Contact Us
-              </Link>
-            </div>
           </div>
-        </div>
-      </section>
-
-      {/* ─── FINAL CTA (purple gradient) ─────────────────────────── */}
-      <section className="py-24 gradient-bg text-white text-center px-4">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-5">Ready to accelerate your success?</h2>
-          <p className="text-purple-100 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of professionals who have transformed their careers with personalized mentorship from
-            world-class experts.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="inline-flex items-center justify-center gap-2 bg-white text-purple-800 font-semibold px-8 py-4 rounded-2xl hover:bg-gray-100 shadow-xl shadow-purple-900/30 text-lg"
-            >
-              Find a Mentor <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/how-it-works"
-              className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/10 transition-colors text-lg"
-            >
-              Learn More
-            </Link>
-          </div>
-          <p className="text-sm text-purple-300 mt-8">
-            No commitment required &nbsp;•&nbsp; Free to browse &nbsp;•&nbsp; Book your first session for free
-          </p>
         </div>
       </section>
     </>

@@ -11,6 +11,7 @@ interface NavbarProps {
 }
 
 const platformLinks = [
+  { href: "/who-we-are", label: "Who We Are", icon: BookOpen, desc: "Our story & founders" },
   { href: "/how-it-works", label: "How It Works", icon: BookOpen, desc: "The mentoring process" },
   { href: "/pricing", label: "Pricing", icon: Star, desc: "Simple, transparent pricing" },
   { href: "/ai-smart-matching", label: "AI Smart Matching", icon: Sparkles, desc: "Premium AI mentor matching" },
@@ -21,6 +22,7 @@ const forYouLinks = [
   { href: "/auth/register?role=mentor", label: "Become a Mentor", icon: UserPlus, desc: "Share your expertise" },
   { href: "/for-schools", label: "For Schools", icon: GraduationCap, desc: "Institutional programs" },
   { href: "/dashboard", label: "Profile", icon: LayoutDashboard, desc: "View and edit your account" },
+  { href: "/pricing", label: "Pricing", icon: Star, desc: "Plans and pricing" },
 ];
 
 const supportLinks = [
@@ -62,7 +64,7 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
               </button>
 
               {megaOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[580px] bg-white rounded-2xl card-shadow border border-gray-100 p-5 grid grid-cols-3 gap-5">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[640px] bg-white rounded-2xl card-shadow border border-gray-100 p-5 grid grid-cols-3 gap-5">
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Platform</p>
                     <div className="space-y-1">
