@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, Globe, Sparkles, Users, BookOpen, Shield, CircleHelp, Mail, GraduationCap, UserPlus, Star, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, Globe, Sparkles, Users, BookOpen, Shield, CircleHelp, Mail, GraduationCap, UserPlus, Star, LayoutDashboard, BadgeCheck } from "lucide-react";
 import { locales, localeNames, type Locale } from "@/lib/i18n";
 
 interface NavbarProps {
@@ -19,10 +19,14 @@ const platformLinks = [
 
 const forYouLinks = [
   { href: "/auth/register", label: "Find Mentors", icon: Users, desc: "Browse expert mentors" },
-  { href: "/auth/register?role=mentor", label: "Become a Mentor", icon: UserPlus, desc: "Share your expertise" },
   { href: "/for-schools", label: "For Schools", icon: GraduationCap, desc: "Institutional programs" },
   { href: "/dashboard", label: "Profile", icon: LayoutDashboard, desc: "View and edit your account" },
   { href: "/pricing", label: "Pricing", icon: Star, desc: "Plans and pricing" },
+];
+
+const mentorLinks = [
+  { href: "/auth/register?role=mentor", label: "Become a Mentor", icon: UserPlus, desc: "Share your expertise" },
+  { href: "/mentor-certification", label: "Mentor Certification", icon: BadgeCheck, desc: "Get certified before going live" },
 ];
 
 const supportLinks = [
@@ -64,7 +68,7 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
               </button>
 
               {megaOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[640px] bg-white rounded-2xl card-shadow border border-gray-100 p-5 grid grid-cols-3 gap-5">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[820px] bg-white rounded-2xl card-shadow border border-gray-100 p-5 grid grid-cols-4 gap-5">
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Platform</p>
                     <div className="space-y-1">
@@ -82,12 +86,28 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">For You</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">For Mentees</p>
                     <div className="space-y-1">
                       {forYouLinks.map((l) => (
                         <Link key={l.href} href={l.href} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-purple-50 group transition-colors">
                           <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                             <l.icon className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-800 group-hover:text-purple-700 transition-colors">{l.label}</p>
+                            <p className="text-xs text-gray-400">{l.desc}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">For Mentors</p>
+                    <div className="space-y-1">
+                      {mentorLinks.map((l) => (
+                        <Link key={l.href} href={l.href} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-purple-50 group transition-colors">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(29,158,117,0.1)" }}>
+                            <l.icon className="w-4 h-4" style={{ color: "#1D9E75" }} />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-800 group-hover:text-purple-700 transition-colors">{l.label}</p>
@@ -197,11 +217,20 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
               </Link>
             ))}
 
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-2 mt-4">For You</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-2 mt-4">For Mentees</p>
             {forYouLinks.map((l) => (
               <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
                 <l.icon className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                {l.label}
+              </Link>
+            ))}
+
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-2 mt-4">For Mentors</p>
+            {mentorLinks.map((l) => (
+              <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
+                <l.icon className="w-4 h-4 flex-shrink-0" style={{ color: "#1D9E75" }} />
                 {l.label}
               </Link>
             ))}
