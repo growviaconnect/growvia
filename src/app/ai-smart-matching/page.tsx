@@ -69,8 +69,8 @@ export default function AISmartMatchingPage() {
               </p>
               <ul className="space-y-3">
                 {[
-                  "One free AI match included on sign-up",
-                  "Unlimited matches with the monthly subscription",
+                  "One AI match included with Discovery Session (9.99€)",
+                  "Unlimited matches with Basic (19.99€/mo) or Premium (39.99€/mo)",
                   "Compatibility score shown for each mentor",
                   "Based on goals, personality, and experience",
                 ].map((item) => (
@@ -178,11 +178,11 @@ export default function AISmartMatchingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="bg-white rounded-2xl p-7 card-shadow flex flex-col">
-              <div className="text-sm font-semibold text-purple-600 mb-2">Free</div>
-              <div className="text-3xl font-black text-gray-900 mb-1">1 match</div>
-              <p className="text-sm text-gray-400 mb-5">Included with your free trial session</p>
+              <div className="text-sm font-semibold text-purple-600 mb-2">Discovery Session</div>
+              <div className="text-3xl font-black text-gray-900 mb-1">9.99€</div>
+              <p className="text-sm text-gray-400 mb-5">1 AI match included · 15–20 min session</p>
               <ul className="space-y-2.5 mb-7 flex-1">
-                {["One AI Smart Match on sign-up", "Compatibility score shown", "Accept or browse manually"].map((f) => (
+                {["One AI Smart Match included", "Compatibility score shown", "Accept or browse manually"].map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-purple-500 flex-shrink-0" />
                     {f}
@@ -190,15 +190,15 @@ export default function AISmartMatchingPage() {
                 ))}
               </ul>
               <Link href="/auth/register" className="block text-center gradient-bg text-white font-semibold py-3 rounded-xl hover:opacity-90 transition-opacity text-sm">
-                Get Started Free
+                Book Discovery Session
               </Link>
             </div>
             <div className="gradient-bg rounded-2xl p-7 flex flex-col text-white shadow-2xl shadow-purple-300">
-              <div className="text-sm font-semibold text-purple-200 mb-2">Monthly Plan</div>
+              <div className="text-sm font-semibold text-purple-200 mb-2">Premium Plan</div>
               <div className="text-3xl font-black text-white mb-1">Unlimited</div>
-              <p className="text-sm text-purple-100 mb-5">Included with your €39/month subscription</p>
+              <p className="text-sm text-purple-100 mb-5">Included with your 39.99€/month subscription</p>
               <ul className="space-y-2.5 mb-7 flex-1">
-                {["Unlimited AI matches", "3 sessions per month", "Priority booking", "Cancel anytime"].map((f) => (
+                {["Unlimited AI matches", "4 sessions per month", "Priority booking", "Cancel anytime"].map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-white">
                     <CheckCircle className="w-4 h-4 text-purple-200 flex-shrink-0" />
                     {f}

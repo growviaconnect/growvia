@@ -15,8 +15,9 @@ export default function Footer() {
                 Grow<span className="gradient-text">Via</span>
               </span>
             </Link>
+            <p className="text-sm font-medium text-purple-400 mb-2">Where careers are built.</p>
             <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-xs">
-              Bringing clarity to your future. Connect with experienced mentors who understand your journey.
+              GrowVia matches ambitious students and young professionals with experienced mentors through AI — in minutes, not months.
             </p>
             <div className="flex gap-3">
               {["Instagram", "LinkedIn", "X"].map((social) => (

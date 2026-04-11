@@ -12,6 +12,9 @@ import {
   UserPlus,
   Clock,
   Star,
+  Zap,
+  Settings,
+  Award,
 } from "lucide-react";
 
 const categories = [
@@ -49,6 +52,24 @@ const categories = [
   },
 ];
 
+const mentorBenefits = [
+  {
+    icon: Zap,
+    title: "Lead generation on autopilot",
+    desc: "Qualified mentees come to you — no cold outreach, no self-promotion. GrowVia brings the right people to your profile.",
+  },
+  {
+    icon: Settings,
+    title: "Zero admin",
+    desc: "GrowVia handles scheduling, payments, and session tracking. You focus entirely on the mentee in front of you.",
+  },
+  {
+    icon: Award,
+    title: "Your legacy, structured",
+    desc: "Track mentee progress over time and earn your Certified Mentor badge — a mark of trust visible to every mentee on the platform.",
+  },
+];
+
 export default function HomePage() {
   return (
     <>
@@ -65,45 +86,44 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* ── LEFT ── */}
             <div>
-              {/* Pre-launch badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur border border-purple-100 shadow-sm mb-8">
                 <Rocket className="w-4 h-4 text-purple-600" />
                 <span className="text-sm text-gray-700 font-medium">Now launching — early access open</span>
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                Grow with mentors who{" "}
-                <span className="gradient-text">truly understand</span>{" "}
-                your journey
+                Find the mentor who&apos;s been{" "}
+                <span className="gradient-text">exactly where</span>{" "}
+                you want to go
               </h1>
 
               <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl">
-                Connect with experienced professionals who share real-world insights to help you make better career
-                decisions and accelerate your personal and professional growth.
+                GrowVia matches ambitious students and young professionals with experienced mentors through AI — in
+                minutes, not months.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <Link
                   href="/auth/register"
-                  className="inline-flex items-center justify-center gap-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 text-base w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 text-base w-full sm:w-auto"
                 >
-                  Find a Mentor <ArrowRight className="w-5 h-5" />
+                  Find my mentor <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/auth/register?role=mentor"
-                  className="inline-flex items-center justify-center gap-2 border border-purple-200 hover:bg-purple-50 text-purple-700 font-semibold px-8 py-4 rounded-2xl transition-colors text-base w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 text-white font-semibold px-8 py-4 rounded-2xl transition-all text-base w-full sm:w-auto"
+                  style={{ background: "linear-gradient(135deg, #1D9E75 0%, #22b87f 100%)" }}
                 >
                   <Heart className="w-4 h-4" />
-                  Become a Mentor
+                  Become a mentor
                 </Link>
               </div>
 
-              {/* Feature badges */}
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 {[
                   { icon: Users, text: "One-to-one mentoring" },
                   { icon: UserCheck, text: "Verified mentors" },
-                  { icon: Sparkles, text: "AI Smart Matching available" },
+                  { icon: Sparkles, text: "AI Smart Matching" },
                 ].map((b) => (
                   <div key={b.text} className="flex items-center gap-1.5 text-sm text-gray-500">
                     <b.icon className="w-4 h-4 text-purple-500" />
@@ -125,15 +145,15 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent" />
                 </div>
 
-                {/* Floating card – first session free */}
+                {/* Floating card – discovery session */}
                 <div className="absolute -left-8 top-20 bg-white rounded-2xl p-4 shadow-xl shadow-purple-500/10 z-20 animate-bounce-slow">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-                      <Star className="w-5 h-5 text-green-600" />
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <Star className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-gray-900">First session free</p>
-                      <p className="text-xs text-gray-500">No commitment required</p>
+                      <p className="font-semibold text-sm text-gray-900">Discovery Session</p>
+                      <p className="text-xs text-gray-500">9.99€ · 15–20 min</p>
                     </div>
                   </div>
                 </div>
@@ -141,8 +161,8 @@ export default function HomePage() {
                 {/* Floating card – become a mentor */}
                 <div className="absolute -right-6 bottom-32 bg-white rounded-2xl p-4 shadow-xl shadow-purple-500/10 z-20">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
-                      <UserPlus className="w-5 h-5 text-purple-600" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#d1f5e9" }}>
+                      <UserPlus className="w-5 h-5" style={{ color: "#1D9E75" }} />
                     </div>
                     <div>
                       <p className="font-semibold text-sm text-gray-900">Mentors welcome</p>
@@ -198,6 +218,53 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── MENTOR VALUE SECTION ──────────────────────────────── */}
+      <section className="py-24 bg-gray-950 text-white relative overflow-hidden">
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #0f1a16 0%, #111827 100%)" }} />
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: "#1D9E75" }} />
+        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-10" style={{ background: "#1D9E75" }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-6 text-sm font-medium" style={{ borderColor: "#1D9E75", color: "#1D9E75", background: "rgba(29,158,117,0.08)" }}>
+              <Award className="w-4 h-4" />
+              For mentors
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Turn your experience into{" "}
+              <span style={{ color: "#1D9E75" }}>someone&apos;s breakthrough</span>
+            </h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              Your career took years to build. GrowVia lets you turn that expertise into real impact — on your schedule, with zero overhead.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-14">
+            {mentorBenefits.map((b) => (
+              <div key={b.title} className="rounded-2xl p-8 border" style={{ background: "rgba(29,158,117,0.06)", borderColor: "rgba(29,158,117,0.2)" }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(29,158,117,0.15)" }}>
+                  <b.icon className="w-6 h-6" style={{ color: "#1D9E75" }} />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-3">{b.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{b.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/auth/register?role=mentor"
+              className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-2xl transition-all shadow-xl text-base"
+              style={{ background: "linear-gradient(135deg, #1D9E75 0%, #22b87f 100%)", boxShadow: "0 12px 32px rgba(29,158,117,0.3)" }}
+            >
+              <UserPlus className="w-5 h-5" />
+              Apply to become a mentor
+            </Link>
+            <p className="text-sm text-gray-500 mt-4">Manual review · Earn your Certified Mentor badge</p>
+          </div>
+        </div>
+      </section>
+
       {/* ─── MENTOR PROFILES (pre-launch placeholder) ─────────── */}
       <section className="py-24 gradient-bg-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -210,7 +277,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/auth/register?role=mentor"
-              className="inline-flex items-center gap-2 text-purple-700 hover:text-purple-800 font-medium mt-4 md:mt-0 text-sm"
+              className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium mt-4 md:mt-0 text-sm"
             >
               Apply as a mentor <ArrowRight className="w-4 h-4" />
             </Link>
@@ -241,14 +308,14 @@ export default function HomePage() {
 
           <p className="text-center text-sm text-gray-500 mt-8">
             Are you an expert in your field?{" "}
-            <Link href="/auth/register?role=mentor" className="text-purple-700 font-semibold hover:underline">
+            <Link href="/auth/register?role=mentor" className="text-purple-600 font-semibold hover:underline">
               Apply to become a mentor →
             </Link>
           </p>
         </div>
       </section>
 
-      {/* ─── FIRST SUCCESS STORY CTA (replaces testimonials) ─────── */}
+      {/* ─── FIRST SUCCESS STORY CTA ─────────────────────────────── */}
       <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
@@ -267,14 +334,14 @@ export default function HomePage() {
               href="/auth/register"
               className="inline-flex items-center justify-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-2xl hover:opacity-90 transition-opacity shadow-xl text-base"
             >
-              Join as a Mentee <ArrowRight className="w-5 h-5" />
+              Find my mentor <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/auth/register?role=mentor"
               className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/10 transition-colors text-base"
             >
               <UserPlus className="w-5 h-5" />
-              Apply as a Mentor
+              Apply as a mentor
             </Link>
           </div>
         </div>
@@ -289,31 +356,31 @@ export default function HomePage() {
             <div className="relative text-center max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 mb-8">
                 <Sparkles className="w-4 h-4 text-purple-300" />
-                <span className="text-sm text-purple-200">Start your growth journey today</span>
+                <span className="text-sm text-purple-200">Where careers are built.</span>
               </div>
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                 Ready to accelerate your success?
               </h2>
               <p className="text-lg md:text-xl text-purple-200 mb-10 max-w-2xl mx-auto">
-                GrowVia is open for early access. Sign up now, get matched with your first mentor, and experience
-                your first session completely free.
+                GrowVia is open for early access. Sign up now, get matched with your first mentor, and start with a
+                Discovery Session at just 9.99€.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/auth/register"
                   className="inline-flex items-center justify-center gap-2 bg-white text-purple-800 font-semibold px-8 py-4 rounded-2xl hover:bg-gray-100 shadow-xl shadow-purple-900/30 text-base"
                 >
-                  Find a Mentor <ArrowRight className="w-5 h-5" />
+                  Find my mentor <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/how-it-works"
                   className="inline-flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/10 transition-colors text-base"
                 >
-                  Learn More
+                  Learn more
                 </Link>
               </div>
               <p className="text-sm text-purple-300 mt-8">
-                No commitment required • Free to browse • First session free
+                No commitment required • Free to browse • Discovery Session from 9.99€
               </p>
             </div>
           </div>

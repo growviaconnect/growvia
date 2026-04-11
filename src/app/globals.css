@@ -1,8 +1,28 @@
 @import "tailwindcss";
 
+/* ── Brand colour overrides ───────────────────────────────────── */
+@theme {
+  /* Primary purple: #534AB7 */
+  --color-purple-50:  #eeeeff;
+  --color-purple-100: #dddcfd;
+  --color-purple-200: #bebcfb;
+  --color-purple-300: #9e9af8;
+  --color-purple-400: #7e78f5;
+  --color-purple-500: #6960d9;
+  --color-purple-600: #534AB7;
+  --color-purple-700: #433B99;
+  --color-purple-800: #332C7A;
+  --color-purple-900: #231E5C;
+  --color-purple-950: #130F3D;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #0f0f1a;
+  /* Mentor teal */
+  --color-teal: #1D9E75;
+  --color-teal-dark: #178060;
+  --color-teal-light: #d1f5e9;
 }
 
 * {
@@ -21,22 +41,36 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
+  background: linear-gradient(135deg, #534AB7 0%, #6960d9 50%, #9e9af8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #534AB7 0%, #6960d9 100%);
 }
 
 .gradient-bg-soft {
-  background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%);
+  background: linear-gradient(135deg, #eeeeff 0%, #f5f4ff 100%);
+}
+
+/* Mentor-specific teal accent */
+.mentor-bg {
+  background: linear-gradient(135deg, #1D9E75 0%, #22b87f 100%);
+}
+.mentor-text {
+  color: #1D9E75;
+}
+.mentor-border {
+  border-color: #1D9E75;
+}
+.mentor-bg-light {
+  background-color: #d1f5e9;
 }
 
 .card-shadow {
-  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.08), 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 24px rgba(83, 74, 183, 0.08), 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .card-shadow-hover {
@@ -44,7 +78,7 @@ body {
 }
 
 .card-shadow-hover:hover {
-  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.15), 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 12px 40px rgba(83, 74, 183, 0.15), 0 4px 12px rgba(0,0,0,0.06);
   transform: translateY(-2px);
 }
 
