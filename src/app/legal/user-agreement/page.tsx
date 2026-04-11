@@ -9,7 +9,8 @@ export default function UserAgreementPage() {
             Legal
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-3">User Agreement</h1>
-          <p className="text-gray-400 text-sm">Last updated: April 9, 2026</p>
+          <p className="text-gray-400 text-sm">Last updated: April 2026 · Applies to all users of GrowVia.</p>
+          <p className="text-gray-400 text-sm mt-1">Available in: English · Español · Français</p>
         </div>
 
         <div className="space-y-8 text-gray-600">
@@ -43,7 +44,7 @@ export default function UserAgreementPage() {
             },
             {
               title: "6. Payments",
-              content: "Paid sessions and subscriptions are processed through Stripe. By completing a payment, you authorize GrowVia to charge your payment method for the applicable amount. All sales are final and no refunds are offered unless required by law.",
+              content: "GrowVia operates as a marketplace and collects payments from mentees on behalf of independent mentors. Paid sessions and subscriptions are processed through Stripe. By completing a payment, you authorize GrowVia to charge your payment method for the applicable amount. The contractual relationship for the delivery of mentoring services exists between you and the independent mentor. All sales are final and no refunds are offered unless required by applicable law.",
             },
             {
               title: "7. Content & Confidentiality",
