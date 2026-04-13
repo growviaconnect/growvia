@@ -152,7 +152,7 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8 border-t border-gray-100">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8">
               {[
                 { icon: Clock, label: "15 to 20 minutes" },
                 { icon: Sparkles, label: "AI matching included" },
@@ -180,19 +180,19 @@ export default function PricingPage() {
       </section>
 
       {/* ── SECTION 3 — For mentors ──────────────────────────────── */}
-      <section className="py-20" style={{ background: "linear-gradient(135deg, #0f1a16 0%, #111827 100%)" }}>
+      <section className="py-20" style={{ background: "linear-gradient(135deg, #0F1020 0%, #1B1F3B 100%)" }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #1D9E75 0%, #22b87f 100%)" }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #5B3DF5 0%, #7C5CFF 100%)" }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-white">For mentors</h2>
           </div>
 
-          <div className="rounded-2xl p-8 sm:p-12 border" style={{ background: "rgba(29,158,117,0.06)", borderColor: "rgba(29,158,117,0.25)" }}>
+          <div className="rounded-2xl p-8 sm:p-12 border" style={{ background: "rgba(91,61,245,0.07)", borderColor: "rgba(91,61,245,0.25)" }}>
             <div className="flex flex-col lg:flex-row lg:items-start gap-10">
               <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#1D9E75" }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-400">
                   Joining GrowVia as a mentor is free
                 </p>
                 <h3 className="text-3xl sm:text-4xl font-black text-white mb-4">
@@ -206,7 +206,7 @@ export default function PricingPage() {
                 <ul className="space-y-4">
                   {mentorPerks.map((perk) => (
                     <li key={perk} className="flex items-start gap-3 text-sm text-gray-300">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#1D9E75" }} />
+                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-purple-400" />
                       {perk}
                     </li>
                   ))}
@@ -215,8 +215,8 @@ export default function PricingPage() {
                 <div className="mt-8">
                   <Link
                     href="/auth/register?role=mentor"
-                    className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity text-sm"
-                    style={{ background: "linear-gradient(135deg, #1D9E75 0%, #22b87f 100%)", boxShadow: "0 8px 24px rgba(29,158,117,0.3)" }}
+                    className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity text-sm gradient-bg"
+                    style={{ boxShadow: "0 8px 24px rgba(91,61,245,0.35)" }}
                   >
                     Apply to become a mentor <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -225,15 +225,15 @@ export default function PricingPage() {
 
               {/* Right side commission callout */}
               <div className="lg:w-64 flex-shrink-0">
-                <div className="rounded-2xl p-6 text-center border" style={{ background: "rgba(29,158,117,0.1)", borderColor: "rgba(29,158,117,0.3)" }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#1D9E75" }}>
+                <div className="rounded-2xl p-6 text-center border" style={{ background: "rgba(91,61,245,0.1)", borderColor: "rgba(91,61,245,0.3)" }}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-400">
                     Commission
                   </p>
                   <p className="text-5xl font-black text-white mb-1">5–10%</p>
                   <p className="text-sm text-gray-400 leading-relaxed">
                     Per session, only when you earn. Zero charge otherwise.
                   </p>
-                  <div className="mt-5 pt-5 border-t space-y-2" style={{ borderColor: "rgba(29,158,117,0.2)" }}>
+                  <div className="mt-5 pt-5 space-y-2">
                     {["Lead generation", "Payment processing", "Scheduling tools", "Dashboard access"].map((item) => (
                       <p key={item} className="text-xs text-gray-500">{item}</p>
                     ))}
