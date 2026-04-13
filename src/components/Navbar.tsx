@@ -107,7 +107,7 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
                       {mentorLinks.map((l) => (
                         <Link key={l.href} href={l.href} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-purple-50 group transition-colors">
                           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(29,158,117,0.1)" }}>
-                            <l.icon className="w-4 h-4" style={{ color: "#1D9E75" }} />
+                            <l.icon className="w-4 h-4" style={{ color: "#7C5CFF" }} />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-800 group-hover:text-purple-700 transition-colors">{l.label}</p>
@@ -230,7 +230,7 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
             {mentorLinks.map((l) => (
               <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
-                <l.icon className="w-4 h-4 flex-shrink-0" style={{ color: "#1D9E75" }} />
+                <l.icon className="w-4 h-4 flex-shrink-0" style={{ color: "#7C5CFF" }} />
                 {l.label}
               </Link>
             ))}

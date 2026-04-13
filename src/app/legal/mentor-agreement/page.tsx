@@ -76,7 +76,7 @@ export default function MentorAgreementPage() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-gray-100 flex flex-wrap gap-4 text-sm text-purple-600">
+        <div className="mt-12 pt-8 flex flex-wrap gap-4 text-sm text-purple-600">
           <Link href="/legal/terms" className="hover:text-purple-800 transition-colors">Terms of Service</Link>
           <Link href="/legal/privacy" className="hover:text-purple-800 transition-colors">Privacy Policy</Link>
           <Link href="/legal/user-agreement" className="hover:text-purple-800 transition-colors">User Agreement</Link>

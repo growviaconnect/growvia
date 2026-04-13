@@ -153,7 +153,7 @@ export default function FAQPage() {
           <div className="space-y-12">
             {faqs.map((section) => (
               <div key={section.category}>
-                <h2 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">
                   {section.category}
                 </h2>
                 <div className="space-y-3">
