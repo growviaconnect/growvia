@@ -9,12 +9,16 @@ const supabaseAnonKey =
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export type CertStatut = "none" | "pending" | "certified" | "rejected";
+
 export type Mentor = {
   id: string;
   nom: string;
   email: string;
   specialite: string | null;
   statut: "pending" | "active" | "rejected";
+  certification_statut: CertStatut;
+  actif: boolean;
   created_at: string;
 };
 
@@ -24,6 +28,7 @@ export type Mentee = {
   email: string;
   objectif: string | null;
   statut: "pending" | "active" | "rejected";
+  actif: boolean;
   created_at: string;
 };
 
@@ -34,6 +39,17 @@ export type Connexion = {
   statut: "pending" | "active" | "completed" | "cancelled";
   date: string;
   created_at: string;
-  mentors?: Mentor;
-  mentees?: Mentee;
+  mentors?: Pick<Mentor, "nom" | "email">;
+  mentees?: Pick<Mentee, "nom" | "email">;
+};
+
+export type AIMatching = {
+  id: string;
+  mentor_id: string | null;
+  mentee_id: string | null;
+  score: number | null;
+  statut: "active" | "cancelled";
+  created_at: string;
+  mentors?: Pick<Mentor, "nom" | "email">;
+  mentees?: Pick<Mentee, "nom" | "email">;
 };
