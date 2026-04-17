@@ -21,7 +21,6 @@ const forYouLinks = [
   { href: "/auth/register", label: "Find Mentors", icon: Users, desc: "Browse expert mentors" },
   { href: "/for-schools", label: "For Schools", icon: GraduationCap, desc: "Institutional programs" },
   { href: "/dashboard", label: "Profile", icon: LayoutDashboard, desc: "View and edit your account" },
-  { href: "/pricing", label: "Pricing", icon: Star, desc: "Plans and pricing" },
 ];
 
 const mentorLinks = [
