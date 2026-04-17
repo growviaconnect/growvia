@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { setUserSession } from "@/lib/session";
 
 type Role = "mentee" | "mentor" | "school_admin";
 
@@ -82,6 +83,14 @@ export default function RegisterPage() {
         if (dbError) throw dbError;
       }
       // school_admin — no specific table for now
+      setUserSession({
+        nom,
+        email:     form.email.trim().toLowerCase(),
+        role,
+        specialite: role === "mentor" ? (form.specialite || null) : null,
+        objectif:   role === "mentee" ? (form.objectif  || null) : null,
+        plan:       "free",
+      });
       setStep(3);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

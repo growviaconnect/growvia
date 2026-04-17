@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Edit3, Save, ArrowLeft, Camera, Briefcase, BookOpen, TrendingUp, GraduationCap } from "lucide-react";
+import { Edit3, Save, ArrowLeft, Camera, Briefcase, BookOpen, TrendingUp, GraduationCap, Settings, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const categories = [
   { icon: Briefcase, label: "Career" },
@@ -12,7 +13,13 @@ const categories = [
 ];
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
+
+  function handleLogout() {
+    if (typeof window !== "undefined") localStorage.removeItem("gv_user");
+    router.push("/");
+  }
   const [selectedCategories, setSelectedCategories] = useState(["Career"]);
   const [form, setForm] = useState({
     firstName: "Luna",
@@ -32,10 +39,18 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center justify-between mb-8">
           <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-700 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/settings" className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-purple-700 bg-white px-3 py-2 rounded-xl card-shadow transition-colors">
+              <Settings className="w-4 h-4" /> Paramètres
+            </Link>
+            <button onClick={handleLogout} className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-700 bg-white px-3 py-2 rounded-xl card-shadow transition-colors">
+              <LogOut className="w-4 h-4" /> Déconnexion
+            </button>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl card-shadow overflow-hidden">

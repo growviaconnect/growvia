@@ -68,7 +68,10 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
           <p>&copy; {new Date().getFullYear()} GrowVia. All rights reserved.</p>
-          <p>Made with care by Luna Davin & Yasmine Tunon</p>
+          <div className="flex items-center gap-4">
+            <p>Made with care by Luna Davin & Yasmine Tunon</p>
+            <Link href="/admin" className="text-gray-700 hover:text-gray-500 text-xs transition-colors">·</Link>
+          </div>
         </div>
       </div>
     </footer>
