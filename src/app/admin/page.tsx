@@ -152,10 +152,11 @@ export default function AdminPage() {
       ]);
       if (r1.error) throw r1.error;
       if (r2.error) throw r2.error;
+      if (r3.error) throw r3.error;
       if (r4.error) throw r4.error;
       setMentors((r1.data as Mentor[]) ?? []);
       setMentees((r2.data as Mentee[]) ?? []);
-      setMatchings(r3.error ? [] : ((r3.data as AIMatching[]) ?? []));
+      setMatchings((r3.data as AIMatching[]) ?? []);
       setConnexions((r4.data as Connexion[]) ?? []);
     } catch (err: unknown) {
       setFetchErr(err instanceof Error ? err.message : "Erreur de chargement.");
@@ -209,7 +210,7 @@ export default function AdminPage() {
   }
 
   /* ── Dashboard ── */
-  const activeMembers = [...mentors, ...mentees].filter(m => m.actif !== false).length;
+  const activeMembers = [...mentors, ...mentees].filter(m => m.statut === "active").length;
   const filteredMentors = mentorFilter === "all" ? mentors : mentors.filter(m => m.statut === mentorFilter);
 
   return (
