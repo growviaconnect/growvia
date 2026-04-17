@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import { LangProvider } from "@/contexts/LangContext";
 
 export const metadata: Metadata = {
   title: "GrowVia – Find the mentor who's been exactly where you want to go",
@@ -32,10 +33,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-white text-gray-900">
-        <Navbar />
-        <ScrollReveal />
-        <main className="flex-1 pt-16">{children}</main>
-        <Footer />
+        <LangProvider>
+          <Navbar />
+          <ScrollReveal />
+          <main className="flex-1 pt-16">{children}</main>
+          <Footer />
+        </LangProvider>
       </body>
     </html>
   );

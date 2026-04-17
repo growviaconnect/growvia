@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Sparkles,
@@ -16,53 +18,63 @@ import {
   Settings,
   Award,
 } from "lucide-react";
-
-const categories = [
-  {
-    icon: GraduationCap,
-    label: "Students",
-    desc: "Helping students choose their future path, academic specialization, and university direction with guidance from experienced mentors.",
-    href: "/auth/register?category=students",
-  },
-  {
-    icon: Briefcase,
-    label: "Career",
-    desc: "Navigate career transitions, discover your path, and land your dream job with someone who's done it.",
-    href: "/auth/register?category=career",
-  },
-  {
-    icon: TrendingUp,
-    label: "Business",
-    desc: "Start, scale, and grow your professional or entrepreneurial journey with proven guidance.",
-    href: "/auth/register?category=business",
-  },
-  {
-    icon: Heart,
-    label: "Personal Growth",
-    desc: "Build confidence, clarity, and unlock your full potential with a mentor who understands the journey.",
-    href: "/auth/register?category=personal_growth",
-  },
-];
-
-const mentorBenefits = [
-  {
-    icon: Zap,
-    title: "Lead generation on autopilot",
-    desc: "Qualified mentees come to you — no cold outreach, no self-promotion. GrowVia brings the right people to your profile.",
-  },
-  {
-    icon: Settings,
-    title: "Zero admin",
-    desc: "GrowVia handles scheduling, payments, and session tracking. You focus entirely on the mentee in front of you.",
-  },
-  {
-    icon: Award,
-    title: "Your legacy, structured",
-    desc: "Track mentee progress over time and earn your Certified Mentor badge — a mark of trust visible to every mentee on the platform.",
-  },
-];
+import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
+  const { t } = useLang();
+
+  const categories = [
+    {
+      icon: GraduationCap,
+      label: t("cat_students"),
+      desc: t("cat_students_desc"),
+      href: "/auth/register?category=students",
+    },
+    {
+      icon: Briefcase,
+      label: t("cat_career"),
+      desc: t("cat_career_desc"),
+      href: "/auth/register?category=career",
+    },
+    {
+      icon: TrendingUp,
+      label: t("cat_business"),
+      desc: t("cat_business_desc"),
+      href: "/auth/register?category=business",
+    },
+    {
+      icon: Heart,
+      label: t("cat_growth"),
+      desc: t("cat_growth_desc"),
+      href: "/auth/register?category=personal_growth",
+    },
+  ];
+
+  const mentorBenefits = [
+    {
+      icon: Zap,
+      title: t("mentor_b1_title"),
+      desc: t("mentor_b1_desc"),
+    },
+    {
+      icon: Settings,
+      title: t("mentor_b2_title"),
+      desc: t("mentor_b2_desc"),
+    },
+    {
+      icon: Award,
+      title: t("mentor_b3_title"),
+      desc: t("mentor_b3_desc"),
+    },
+  ];
+
+  const communitySlots = [
+    t("community_slot_career"),
+    t("community_slot_entrepreneur"),
+    t("community_slot_personal"),
+    t("community_slot_student"),
+  ];
+
   return (
     <>
       {/* ─── HERO ─────────────────────────────────────────────── */}
@@ -82,18 +94,18 @@ export default function HomePage() {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm font-medium" style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.3)" }}>
                 <Rocket className="w-3.5 h-3.5" />
-                Now launching — early access open
+                {t("hero_badge")}
               </div>
 
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-6">
-                Find the mentor<br />
-                who&apos;s been{" "}
-                <span className="gradient-text">exactly</span><br />
-                where you want to go
+                {t("hero_title_1")}<br />
+                {t("hero_title_2")}{" "}
+                <span className="gradient-text">{t("hero_title_hl")}</span><br />
+                {t("hero_title_3")}
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-lg leading-relaxed" style={{ color: "#9B8FFF" }}>
-                GrowVia matches ambitious students and young professionals with experienced mentors through AI — in minutes, not months.
+                {t("hero_sub")}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
@@ -102,7 +114,7 @@ export default function HomePage() {
                   className="inline-flex items-center justify-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-xl transition-all hover:opacity-90 shadow-2xl text-base w-full sm:w-auto"
                   style={{ boxShadow: "0 12px 32px rgba(91,61,245,0.4)" }}
                 >
-                  Find my mentor <ArrowRight className="w-5 h-5" />
+                  {t("hero_find")} <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/auth/register?role=mentor"
@@ -110,19 +122,19 @@ export default function HomePage() {
                   style={{ background: "rgba(255,255,255,0.06)", color: "#E8E4FF", border: "1px solid rgba(255,255,255,0.12)" }}
                 >
                   <UserPlus className="w-4 h-4" />
-                  Become a mentor
+                  {t("hero_become")}
                 </Link>
               </div>
 
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 {[
-                  { icon: Users, text: "One-to-one mentoring" },
-                  { icon: UserCheck, text: "Verified mentors" },
-                  { icon: Sparkles, text: "AI Smart Matching" },
+                  { icon: Users, key: "trust_one2one" },
+                  { icon: UserCheck, key: "trust_verified" },
+                  { icon: Sparkles, key: "trust_ai" },
                 ].map((b) => (
-                  <div key={b.text} className="flex items-center gap-1.5 text-sm" style={{ color: "#6B6F80" }}>
+                  <div key={b.key} className="flex items-center gap-1.5 text-sm" style={{ color: "#6B6F80" }}>
                     <b.icon className="w-4 h-4 text-purple-500" />
-                    <span>{b.text}</span>
+                    <span>{t(b.key)}</span>
                   </div>
                 ))}
               </div>
@@ -147,8 +159,8 @@ export default function HomePage() {
                       <Star className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-gray-900">Discovery Session</p>
-                      <p className="text-xs" style={{ color: "#6B6F80" }}>9.99€ · 15–20 min</p>
+                      <p className="font-semibold text-sm text-gray-900">{t("hero_card_discovery")}</p>
+                      <p className="text-xs" style={{ color: "#6B6F80" }}>{t("hero_card_price")}</p>
                     </div>
                   </div>
                 </div>
@@ -160,8 +172,8 @@ export default function HomePage() {
                       <UserPlus className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-gray-900">Mentors welcome</p>
-                      <p className="text-xs" style={{ color: "#6B6F80" }}>Apply to join</p>
+                      <p className="font-semibold text-sm text-gray-900">{t("hero_card_mentors")}</p>
+                      <p className="text-xs" style={{ color: "#6B6F80" }}>{t("hero_card_join")}</p>
                     </div>
                   </div>
                 </div>
@@ -177,12 +189,12 @@ export default function HomePage() {
       <section className="py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 reveal">
-            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">What we cover</p>
+            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">{t("cat_label")}</p>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-5">
-              Explore mentoring categories
+              {t("cat_title")}
             </h2>
             <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#6B6F80" }}>
-              GrowVia supports people at every stage — from students choosing their path to professionals seeking a new direction.
+              {t("cat_sub")}
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -204,7 +216,7 @@ export default function HomePage() {
                 </h3>
                 <p className="text-sm mb-4 leading-relaxed" style={{ color: "#6B6F80" }}>{cat.desc}</p>
                 <p className="text-xs text-purple-600 font-medium inline-flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> Accepting mentors now
+                  <Clock className="w-3 h-3" /> {t("cat_accepting")}
                 </p>
               </Link>
             ))}
@@ -221,14 +233,14 @@ export default function HomePage() {
           <div className="text-center mb-16 reveal">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold" style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.3)" }}>
               <Award className="w-4 h-4" />
-              For mentors
+              {t("mentor_badge")}
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Turn your experience into{" "}
-              <span className="gradient-text">someone&apos;s breakthrough</span>
+              {t("mentor_title_1")}{" "}
+              <span className="gradient-text">{t("mentor_title_hl")}</span>
             </h2>
             <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#9B8FFF" }}>
-              Your career took years to build. GrowVia lets you turn that expertise into real impact — on your schedule, with zero overhead.
+              {t("mentor_sub")}
             </p>
           </div>
 
@@ -255,9 +267,9 @@ export default function HomePage() {
               style={{ boxShadow: "0 12px 32px rgba(91,61,245,0.35)" }}
             >
               <UserPlus className="w-5 h-5" />
-              Apply to become a mentor
+              {t("mentor_apply")}
             </Link>
-            <p className="text-sm mt-4" style={{ color: "#6B6F80" }}>Manual review · Earn your Certified Mentor badge</p>
+            <p className="text-sm mt-4" style={{ color: "#6B6F80" }}>{t("mentor_apply_sub")}</p>
           </div>
         </div>
       </section>
@@ -267,48 +279,43 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 reveal">
             <div>
-              <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">Our community</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Meet our mentors</h2>
+              <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">{t("community_label")}</p>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{t("community_title")}</h2>
               <p className="text-lg max-w-xl leading-relaxed" style={{ color: "#6B6F80" }}>
-                We are currently onboarding our first cohort of verified mentors.
+                {t("community_sub")}
               </p>
             </div>
             <Link
               href="/auth/register?role=mentor"
               className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold mt-4 md:mt-0 text-sm transition-colors"
             >
-              Apply as a mentor <ArrowRight className="w-4 h-4" />
+              {t("community_apply_link")} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { label: "Career & Leadership" },
-              { label: "Entrepreneurship" },
-              { label: "Personal Development" },
-              { label: "Student Guidance" },
-            ].map((slot, i) => (
+            {communitySlots.map((label, i) => (
               <div
-                key={slot.label}
+                key={label}
                 className={`reveal reveal-delay-${i + 1} bg-white rounded-2xl overflow-hidden`}
                 style={{ border: "2px dashed rgba(91,61,245,0.2)", boxShadow: "0 2px 16px rgba(91,61,245,0.04)" }}
               >
                 <div className="h-44 flex flex-col items-center justify-center gap-3" style={{ background: "rgba(91,61,245,0.04)" }}>
                   <UserCheck className="w-10 h-10 text-purple-300" />
-                  <span className="text-xs font-semibold text-purple-400 uppercase tracking-wide">{slot.label}</span>
+                  <span className="text-xs font-semibold text-purple-400 uppercase tracking-wide">{label}</span>
                 </div>
                 <div className="p-5 text-center">
-                  <p className="font-semibold text-sm mb-1" style={{ color: "#6B6F80" }}>Mentor profile coming soon</p>
-                  <p className="text-xs" style={{ color: "#9B8FFF" }}>We are reviewing applications</p>
+                  <p className="font-semibold text-sm mb-1" style={{ color: "#6B6F80" }}>{t("community_slot_coming")}</p>
+                  <p className="text-xs" style={{ color: "#9B8FFF" }}>{t("community_slot_reviewing")}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <p className="text-center text-sm mt-10" style={{ color: "#6B6F80" }}>
-            Are you an expert in your field?{" "}
+            {t("community_expert")}{" "}
             <Link href="/auth/register?role=mentor" className="text-purple-600 font-semibold hover:underline">
-              Apply to become a mentor →
+              {t("community_apply_text")}
             </Link>
           </p>
         </div>
@@ -322,11 +329,11 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm" style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.25)" }}>
             <Sparkles className="w-4 h-4" />
-            We are just getting started
+            {t("success_badge")}
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 reveal">Be our first success story</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 reveal">{t("success_title")}</h2>
           <p className="text-lg max-w-2xl mx-auto mb-10 reveal" style={{ color: "#9B8FFF" }}>
-            GrowVia is launching now. We are onboarding our first mentors and mentees. Sign up today and help shape the platform — your story could be the one that inspires thousands.
+            {t("success_sub")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center reveal">
             <Link
@@ -334,7 +341,7 @@ export default function HomePage() {
               className="inline-flex items-center justify-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-opacity text-base"
               style={{ boxShadow: "0 12px 32px rgba(91,61,245,0.35)" }}
             >
-              Find my mentor <ArrowRight className="w-5 h-5" />
+              {t("success_cta_find")} <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/auth/register?role=mentor"
@@ -342,7 +349,7 @@ export default function HomePage() {
               style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.85)" }}
             >
               <UserPlus className="w-5 h-5" />
-              Apply as a mentor
+              {t("success_cta_apply")}
             </Link>
           </div>
         </div>
@@ -360,13 +367,13 @@ export default function HomePage() {
             <div className="relative max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm font-medium" style={{ background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.9)", border: "1px solid rgba(255,255,255,0.2)" }}>
                 <Sparkles className="w-4 h-4" />
-                Where careers are built.
+                {t("final_badge")}
               </div>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-                Ready to accelerate your success?
+                {t("final_title")}
               </h2>
               <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
-                GrowVia is open for early access. Sign up now, get AI-matched with your first mentor, and start with a Discovery Session at just 9.99€.
+                {t("final_sub")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -374,18 +381,18 @@ export default function HomePage() {
                   className="inline-flex items-center justify-center gap-2 bg-white font-bold px-8 py-4 rounded-xl hover:bg-purple-50 transition-colors text-base"
                   style={{ color: "#5B3DF5", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}
                 >
-                  Find my mentor <ArrowRight className="w-5 h-5" />
+                  {t("final_cta_find")} <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/how-it-works"
                   className="inline-flex items-center justify-center gap-2 font-semibold px-8 py-4 rounded-xl transition-colors text-base"
                   style={{ border: "1px solid rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.9)" }}
                 >
-                  Learn more
+                  {t("final_cta_learn")}
                 </Link>
               </div>
               <p className="text-sm mt-8" style={{ color: "rgba(255,255,255,0.6)" }}>
-                No commitment required · Free to browse · Discovery Session from 9.99€
+                {t("final_footnote")}
               </p>
             </div>
           </div>
