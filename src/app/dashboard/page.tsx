@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CalendarCheck,
   Heart,
@@ -13,6 +14,8 @@ import {
   ChevronRight,
   TrendingUp,
   BookOpen,
+  Settings,
+  LogOut,
 } from "lucide-react";
 
 const upcomingSessions = [
@@ -57,7 +60,13 @@ const savedMentors = [
 type Tab = "overview" | "sessions" | "saved" | "matching";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("overview");
+
+  function handleLogout() {
+    if (typeof window !== "undefined") localStorage.removeItem("gv_user");
+    router.push("/");
+  }
 
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Overview", icon: TrendingUp },
@@ -102,8 +111,9 @@ export default function DashboardPage() {
             <div className="bg-white rounded-2xl p-5 card-shadow">
               <nav className="space-y-1">
                 {[
-                  { href: "/profile", label: "Profile", icon: User },
-                  { href: "/calendar", label: "Calendar", icon: CalendarCheck },
+                  { href: "/profile",   label: "Profile",    icon: User },
+                  { href: "/calendar",  label: "Calendar",   icon: CalendarCheck },
+                  { href: "/settings",  label: "Paramètres", icon: Settings },
                 ].map((item) => (
                   <Link
                     key={item.href}
@@ -114,6 +124,12 @@ export default function DashboardPage() {
                     {item.label}
                   </Link>
                 ))}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" /> Déconnexion
+                </button>
               </nav>
             </div>
           </aside>
