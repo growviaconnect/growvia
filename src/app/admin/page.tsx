@@ -165,7 +165,7 @@ export default function AdminPage() {
 
   useEffect(() => { if (authed) fetchData(); }, [authed, fetchData]);
 
-  async function act(call: Promise<{ error: unknown }>, msg: string) {
+  async function act(call: PromiseLike<{ error: unknown }>, msg: string) {
     const { error } = await call;
     if (error) showFlash("Erreur : " + String(error), false);
     else { showFlash(msg); fetchData(); }
