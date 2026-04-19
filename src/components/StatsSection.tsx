@@ -37,8 +37,8 @@ export default function StatsSection() {
     <section className="border-t border-white/5">
 
       {/* ── Title + Subtitle ── */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16">
-        <div className="max-w-3xl">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 text-center">
+        <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.05] mb-7">
             From early momentum to{" "}
             <span style={serifStyle}>global</span>
