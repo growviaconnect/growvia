@@ -40,7 +40,7 @@ type SocialLink = { label: string; href: string; Icon: React.ComponentType<{ cla
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Explore", href: "/explore" },
-  { label: "Founders", href: "/who-we-are" },
+  { label: "Founders", href: "/founders" },
   { label: "Stories", href: "/for-schools" },
   { label: "Pricing", href: "/pricing" },
 ];
