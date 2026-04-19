@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import ManifestoSection from "@/components/ManifestoSection";
+import StatsSection from "@/components/StatsSection";
 
 const categories = [
   {
@@ -84,6 +85,9 @@ export default function HomePage() {
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
+
+      {/* ── STATS ────────────────────────────────────────────────── */}
+      <StatsSection />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
