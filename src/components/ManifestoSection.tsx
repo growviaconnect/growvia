@@ -46,6 +46,15 @@ export default function ManifestoSection() {
         />
         <div className="absolute inset-0 bg-black/55" />
 
+        {/* Bottom fade into page background */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: "35%",
+            background: "linear-gradient(to bottom, transparent 0%, #0D0A1A 100%)",
+          }}
+        />
+
         {/* Label */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center px-6">
           <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
