@@ -2,26 +2,28 @@
 
 /* ── Brand colour system ─────────────────────────────────────── */
 @theme {
-  /* Primary purple: #5B3DF5 | Secondary: #7C5CFF | Light bg: #F3F1FF */
   --color-purple-50:  #F3F1FF;
   --color-purple-100: #E8E4FF;
   --color-purple-200: #D1C9FF;
   --color-purple-300: #BAB0FF;
   --color-purple-400: #9B8FFF;
-  --color-purple-500: #7C5CFF;
-  --color-purple-600: #5B3DF5;
-  --color-purple-700: #4A30CC;
-  --color-purple-800: #3921A3;
-  --color-purple-900: #28147A;
-  --color-purple-950: #170851;
+  --color-purple-500: #7C3AED;
+  --color-purple-600: #6D28D9;
+  --color-purple-700: #5B21B6;
+  --color-purple-800: #4C1D95;
+  --color-purple-900: #3B0764;
+  --color-purple-950: #2E1065;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #0F1020;
-  --color-navy:  #1B1F3B;
-  --color-rich-black: #0F1020;
-  --color-grey-text: #6B6F80;
+  --background: #0D0A1A;
+  --foreground: #ffffff;
+  --accent: #7C3AED;
+  --accent-dark: #4C1D95;
+  --muted: rgba(255,255,255,0.5);
+  --subtle: rgba(255,255,255,0.25);
+  --border: rgba(255,255,255,0.07);
+  --surface: rgba(255,255,255,0.04);
 }
 
 * {
@@ -44,54 +46,49 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading, 'Plus Jakarta Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* ── Gradient utilities ─────────────────────────────────────── */
+/* ── Dark card surface ───────────────────────────────────────── */
+.card-dark {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.card-dark:hover {
+  background: rgba(124,58,237,0.06);
+  border-color: rgba(124,58,237,0.2);
+}
+
+/* ── Legacy gradient utilities (kept for auth/admin pages) ────── */
 .gradient-text {
-  background: linear-gradient(135deg, #5B3DF5 0%, #7C5CFF 100%);
+  background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #5B3DF5 0%, #7C5CFF 100%);
-}
-
-.gradient-bg-soft {
-  background-color: #F3F1FF;
+  background: #7C3AED;
 }
 
 /* ── Card shadows ───────────────────────────────────────────── */
 .card-shadow {
-  box-shadow: 0 4px 24px rgba(91, 61, 245, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
 }
 
 .card-shadow-hover {
-  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .card-shadow-hover:hover {
-  box-shadow: 0 16px 48px rgba(91, 61, 245, 0.16), 0 4px 12px rgba(0, 0, 0, 0.06);
-  transform: translateY(-3px);
-}
-
-/* ── Section spacing ────────────────────────────────────────── */
-.section-padding {
-  padding: 6rem 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .section-padding {
-    padding: 4rem 1rem;
-  }
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
 }
 
 /* ── Scroll reveal animations ───────────────────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.in-view {
@@ -99,31 +96,23 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(0);
 }
 
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-1 { transition-delay: 0.08s; }
+.reveal-delay-2 { transition-delay: 0.16s; }
+.reveal-delay-3 { transition-delay: 0.24s; }
+.reveal-delay-4 { transition-delay: 0.32s; }
 
 /* ── Continuous animations ──────────────────────────────────── */
-@keyframes bounce-slow {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-10px); }
-}
-.animate-bounce-slow {
-  animation: bounce-slow 4s ease-in-out infinite;
-}
-
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
+  50%       { opacity: 0.4; }
 }
 .animate-pulse-soft {
   animation: pulse-soft 4s ease-in-out infinite;
 }
 
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50%       { transform: translateY(-8px) scale(1.02); }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
 }
 .animate-float {
   animation: float-slow 6s ease-in-out infinite;

@@ -1,77 +1,51 @@
 import Link from "next/link";
 
+const footerLinks = [
+  { href: "/how-it-works", label: "Explore" },
+  { href: "/who-we-are", label: "Founders" },
+  { href: "/for-schools", label: "Stories" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/contact", label: "Contact" },
+];
+
 export default function Footer() {
   return (
-    <footer className="bg-gray-950 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+    <footer className="bg-[#0D0A1A] border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-16">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">G</span>
-              </div>
-              <span className="font-bold text-xl text-white">
-                Grow<span className="gradient-text">Via</span>
-              </span>
+          <div className="max-w-xs">
+            <Link href="/" className="text-white font-extrabold text-lg tracking-tight">
+              GrowVia
             </Link>
-            <p className="text-sm font-medium text-purple-400 mb-2">Where careers are built.</p>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-xs">
-              GrowVia matches ambitious students and young professionals with experienced mentors through AI — in minutes, not months.
+            <p className="text-sm text-white/30 mt-3 leading-relaxed">
+              GrowVia turns decades of experience into the next generation&apos;s success.
             </p>
-            <div className="flex gap-3">
-              {["Instagram", "LinkedIn", "X"].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-purple-700 hover:text-white transition-colors text-xs font-bold"
-                  title={social}
-                >
-                  {social[0]}
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Platform */}
-          <div>
-            <h4 className="font-semibold text-white text-sm mb-4">Platform</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link href="/how-it-works" className="hover:text-purple-400 transition-colors">How It Works</Link></li>
-              <li><Link href="/pricing" className="hover:text-purple-400 transition-colors">Pricing</Link></li>
-              <li><Link href="/for-schools" className="hover:text-purple-400 transition-colors">For Schools</Link></li>
-              <li><Link href="/safety-trust" className="hover:text-purple-400 transition-colors">Safety & Trust</Link></li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-semibold text-white text-sm mb-4">Company</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link href="/who-we-are" className="hover:text-purple-400 transition-colors">Who We Are</Link></li>
-              <li><Link href="/contact" className="hover:text-purple-400 transition-colors">Contact</Link></li>
-              <li><Link href="/faq" className="hover:text-purple-400 transition-colors">FAQ</Link></li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="font-semibold text-white text-sm mb-4">Legal</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link href="/legal/terms" className="hover:text-purple-400 transition-colors">Terms of Service</Link></li>
-              <li><Link href="/legal/privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/legal/mentor-agreement" className="hover:text-purple-400 transition-colors">Mentor Agreement</Link></li>
-              <li><Link href="/legal/user-agreement" className="hover:text-purple-400 transition-colors">User Agreement</Link></li>
-            </ul>
-          </div>
+          {/* Links */}
+          <nav className="flex flex-wrap gap-x-10 gap-y-3">
+            {footerLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm text-white/40 hover:text-white transition-colors duration-200"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} GrowVia. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <p>Made with care by Luna Davin & Yasmine Tunon</p>
-            <Link href="/admin" className="text-gray-700 hover:text-gray-500 text-xs transition-colors">·</Link>
-          </div>
+        {/* Bottom row */}
+        <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-white/20">&copy; 2026 GrowVia. All rights reserved.</p>
+          <Link
+            href="/admin"
+            className="text-xs text-white/10 hover:text-white/25 transition-colors duration-200"
+          >
+            Admin
+          </Link>
         </div>
       </div>
     </footer>
