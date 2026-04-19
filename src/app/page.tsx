@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
+import CTASection from "@/components/CTASection";
 
 const categories = [
   {
@@ -179,56 +180,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
-        {/* CSS gradient fallback (always rendered beneath video) */}
-        <div className="absolute inset-0 animate-gradient-bg" />
-
-        {/* Background video */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "brightness(0.45) saturate(0.7)" }}
-        >
-          <source
-            src="https://videos.pexels.com/video-files/3252312/3252312-hd_1920_1080_25fps.mp4"
-            type="video/mp4"
-          />
-        </video>
-
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/60" />
-
-        {/* Content */}
-        <div className="relative max-w-4xl mx-auto px-6 lg:px-8 py-40">
-          <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">Get Started</p>
-          <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[0.95] tracking-tight">
-            Build the future,<br />starting today.
-          </h2>
-          <p className="text-xl text-white/35 mb-14 max-w-xl mx-auto leading-relaxed">
-            Early access is open. Join GrowVia and shape what mentorship becomes.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="inline-flex items-center justify-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
-            >
-              Find my mentor <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/auth/register?role=mentor"
-              className="inline-flex items-center justify-center gap-2.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
-            >
-              Apply as a mentor
-            </Link>
-          </div>
-          <p className="text-sm text-white/20 mt-10">
-            No commitment required · Discovery Session from 9.99€
-          </p>
-        </div>
-      </section>
+      <CTASection />
     </>
   );
 }
