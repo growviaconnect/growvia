@@ -9,15 +9,15 @@ export default function ScrollReveal() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("in-view");
+          } else {
+            entry.target.classList.remove("in-view");
           }
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -60px 0px" }
     );
 
-    const revealEls = document.querySelectorAll(".reveal");
-    revealEls.forEach((el) => observer.observe(el));
-
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 

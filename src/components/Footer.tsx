@@ -73,7 +73,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* ── Big headline ───────────────────────────────────── */}
-        <div className="mb-16 lg:mb-20">
+        <div className="reveal mb-16 lg:mb-20">
           <h2 className="font-extrabold text-white leading-[0.88] tracking-tight text-5xl md:text-7xl lg:text-[7.5rem]">
             Where{" "}
             <span
@@ -96,7 +96,7 @@ export default function Footer() {
         </div>
 
         {/* ── Links + cities row ─────────────────────────────── */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
+        <div className="reveal reveal-delay-1 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
 
           {/* Left: two nav columns */}
           <div className="flex gap-12 md:gap-20">
