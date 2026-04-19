@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
+import ManifestoSection from "@/components/ManifestoSection";
 
 const categories = [
   {
@@ -26,11 +27,6 @@ const categories = [
   },
 ];
 
-const manifesto = [
-  { num: "01", text: "Experience is only valuable when shared." },
-  { num: "02", text: "The right mentor changes everything." },
-  { num: "03", text: "Careers are built on real conversations." },
-];
 
 const mentorBenefits = [
   { title: "Lead generation on autopilot", desc: "Qualified mentees come to you — no cold outreach." },
@@ -87,24 +83,7 @@ export default function HomePage() {
       </section>
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
-      <section className="py-32 bg-[#0D0A1A]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="max-w-4xl mb-16 reveal">
-            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">Our Mission</p>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05] tracking-tight">
-              GrowVia turns decades of experience into the next generation&apos;s success.
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
-            {manifesto.map((item, i) => (
-              <div key={item.num} className={`reveal reveal-delay-${i + 1} py-10 md:py-0 md:px-10 first:pl-0 last:pr-0`}>
-                <p className="text-xs text-white/20 font-mono mb-5 tracking-widest">{item.num}</p>
-                <p className="text-lg text-white/60 leading-relaxed font-medium">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ManifestoSection />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
