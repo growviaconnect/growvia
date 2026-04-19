@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
@@ -10,28 +10,23 @@ const navLinks = [
   { href: "/for-schools", label: "Stories" },
 ];
 
+/* Text-shadow keeps white text legible over any page background */
+const shadow = "0 1px 4px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.5)";
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-[#0D0A1A]/95 backdrop-blur-md border-b border-white/5"
-          : "bg-transparent"
-      }`}
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
-          <Link href="/" className="text-white font-extrabold text-lg tracking-tight flex-shrink-0">
+          <Link
+            href="/"
+            className="text-white font-extrabold text-lg tracking-tight flex-shrink-0"
+            style={{ textShadow: shadow }}
+          >
             GrowVia
           </Link>
 
@@ -41,7 +36,8 @@ export default function Navbar() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-sm font-medium text-white/50 hover:text-white transition-colors duration-200"
+                className="text-sm font-medium text-white hover:text-white/70 transition-colors duration-200"
+                style={{ textShadow: shadow }}
               >
                 {l.label}
               </Link>
@@ -52,7 +48,8 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center">
             <Link
               href="/auth/register"
-              className="text-sm font-semibold bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-5 py-2.5 rounded-lg transition-colors duration-200"
+              className="text-sm font-semibold bg-white hover:bg-white/90 text-[#0D0A1A] px-5 py-2.5 rounded-lg transition-colors duration-200"
+              style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.35)" }}
             >
               Build the future
             </Link>
@@ -60,24 +57,25 @@ export default function Navbar() {
 
           {/* Hamburger — mobile */}
           <button
-            className="lg:hidden text-white/60 hover:text-white transition-colors"
+            className="lg:hidden text-white hover:text-white/70 transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
+            style={{ textShadow: shadow }}
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — solid dark panel for readability */}
       {menuOpen && (
-        <div className="lg:hidden bg-[#0D0A1A] border-t border-white/5 px-6 pt-4 pb-8 space-y-1">
+        <div className="lg:hidden bg-[#0D0A1A]/97 backdrop-blur-md border-t border-white/5 px-6 pt-4 pb-8 space-y-1">
           {navLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setMenuOpen(false)}
-              className="block py-3 text-base font-medium text-white/50 hover:text-white transition-colors"
+              className="block py-3 text-base font-medium text-white/60 hover:text-white transition-colors"
             >
               {l.label}
             </Link>
@@ -86,7 +84,7 @@ export default function Navbar() {
             <Link
               href="/auth/register"
               onClick={() => setMenuOpen(false)}
-              className="block text-center text-sm font-semibold bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-5 py-3.5 rounded-lg transition-colors"
+              className="block text-center text-sm font-semibold bg-white text-[#0D0A1A] px-5 py-3.5 rounded-lg"
             >
               Build the future
             </Link>
