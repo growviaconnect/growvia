@@ -51,14 +51,14 @@ export default function StatsSection() {
         </div>
       </div>
 
-      {/* ── Thin horizontal rule + Stats right-aligned ── */}
+      {/* ── Stats right-aligned ── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="w-full h-px bg-white/[0.07]" />
         <div className="flex justify-end">
-          {stats.map((stat) => (
+          {stats.map((stat, i) => (
             <div
               key={stat.badge}
               className="px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center"
+              style={{ borderLeft: "1px solid rgba(255,255,255,0.07)" }}
             >
               {/* Pill badge */}
               <span
