@@ -34,7 +34,7 @@ const logos = [
 
 export default function StatsSection() {
   return (
-    <section className="border-t border-white/5">
+    <section>
 
       {/* ── Title + Subtitle ── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 text-center">
