@@ -46,16 +46,16 @@ export default function CTASection() {
 
       {/* Content */}
       <div className="relative max-w-4xl mx-auto px-6 lg:px-8 py-40">
-        <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
+        <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
           Get Started
         </p>
-        <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[0.95] tracking-tight">
+        <h2 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[0.95] tracking-tight">
           Build the future,<br />starting today.
         </h2>
-        <p className="text-xl text-white/35 mb-14 max-w-xl mx-auto leading-relaxed">
+        <p className="reveal reveal-delay-2 text-xl text-white/35 mb-14 max-w-xl mx-auto leading-relaxed">
           Early access is open. Join GrowVia and shape what mentorship becomes.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="reveal reveal-delay-3 flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/auth/register"
             className="inline-flex items-center justify-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"

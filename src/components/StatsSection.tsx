@@ -39,12 +39,12 @@ export default function StatsSection() {
       {/* ── Title + Subtitle ── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.05] mb-7">
+          <h2 className="reveal text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.05] mb-7">
             From early momentum to{" "}
             <span style={serifStyle}>global</span>
             {" "}awareness.
           </h2>
-          <p className="text-lg text-white/40 leading-relaxed">
+          <p className="reveal reveal-delay-1 text-lg text-white/40 leading-relaxed">
             Our network of mentors spans world-class professionals, entrepreneurs, and experts —
             people who shape careers, shift perspectives, and open doors.
           </p>
@@ -57,7 +57,7 @@ export default function StatsSection() {
           {stats.map((stat, i) => (
             <div
               key={stat.badge}
-              className="px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center"
+              className={`reveal reveal-delay-${i + 1} px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center`}
               style={{ borderLeft: "1px solid rgba(255,255,255,0.07)" }}
             >
               {/* Pill badge */}
@@ -86,7 +86,7 @@ export default function StatsSection() {
       </div>
 
       {/* ── Logo ticker ── */}
-      <div className="py-10 overflow-hidden mt-4">
+      <div className="reveal py-10 overflow-hidden mt-4">
         <div className="animate-ticker flex items-center">
           {[...logos, ...logos].map((logo, i) => (
             <div key={i} className="flex-shrink-0 mx-12">

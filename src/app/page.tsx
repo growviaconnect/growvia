@@ -33,14 +33,11 @@ const categories = [
   },
 ];
 
-
-
 export default function HomePage() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-end pb-24 overflow-hidden">
-        {/* Background */}
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
@@ -54,18 +51,16 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-5xl">
-            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
+            <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
               Early Access · 2026
             </p>
-            <h1 className="text-7xl md:text-8xl lg:text-9xl font-extrabold text-white leading-[0.88] tracking-tight mb-10">
-              Where<br />
-              careers,<br />
-              made.
+            <h1 className="reveal reveal-delay-1 text-7xl md:text-8xl lg:text-9xl font-extrabold text-white leading-[0.88] tracking-tight mb-10">
+              Where<br />careers,<br />made.
             </h1>
-            <p className="text-lg text-white/45 mb-12 max-w-md leading-relaxed">
+            <p className="reveal reveal-delay-2 text-lg text-white/45 mb-12 max-w-md leading-relaxed">
               GrowVia connects ambitious professionals with mentors who have been exactly where you want to go.
             </p>
-            <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="reveal reveal-delay-3 flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href="/auth/register"
                 className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
@@ -86,14 +81,14 @@ export default function HomePage() {
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
 
-      {/* ── STATS ────────────────────────────────────────────────── */}      <StatsSection />
+      {/* ── STATS ────────────────────────────────────────────────── */}
+      <StatsSection />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-          {/* Header */}
-          <div className="flex items-end justify-between mb-12">
+          <div className="reveal flex items-end justify-between mb-12">
             <div>
               <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
                 Mentoring Areas
@@ -110,22 +105,16 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat, i) => (
               <Link
                 key={cat.label}
                 href={cat.href}
-                className="group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-300"
-                style={{
-                  background: "#1A1A2E",
-                  aspectRatio: "3 / 4",
-                  boxShadow: "0 0 0 transparent",
-                }}
+                className={`reveal reveal-delay-${i + 1} group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-300`}
+                style={{ background: "#1A1A2E", aspectRatio: "3 / 4" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(124,58,237,0.25)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 transparent"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
               >
-                {/* Ken Burns image */}
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="w-full h-full transition-transform duration-700 group-hover:scale-[1.03]">
                     <img
@@ -137,14 +126,10 @@ export default function HomePage() {
                     />
                   </div>
                 </div>
-
-                {/* Bottom gradient */}
                 <div
                   className="absolute inset-0"
                   style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)" }}
                 />
-
-                {/* Content */}
                 <div className="relative p-6">
                   <h3 className="text-white font-bold mb-2 leading-snug" style={{ fontSize: 20 }}>
                     {cat.label}
