@@ -179,8 +179,30 @@ export default function HomePage() {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <section className="py-40 border-t border-white/5 text-center">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 reveal">
+      <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
+        {/* CSS gradient fallback (always rendered beneath video) */}
+        <div className="absolute inset-0 animate-gradient-bg" />
+
+        {/* Background video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "brightness(0.45) saturate(0.7)" }}
+        >
+          <source
+            src="https://videos.pexels.com/video-files/3252312/3252312-hd_1920_1080_25fps.mp4"
+            type="video/mp4"
+          />
+        </video>
+
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/60" />
+
+        {/* Content */}
+        <div className="relative max-w-4xl mx-auto px-6 lg:px-8 py-40">
           <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">Get Started</p>
           <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[0.95] tracking-tight">
             Build the future,<br />starting today.

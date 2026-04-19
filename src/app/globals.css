@@ -143,3 +143,13 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0;
   animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+.animate-gradient-bg {
+  background: linear-gradient(135deg, #0D0A1A 0%, #1a0a2e 20%, #4c1d95 50%, #2d1b69 75%, #0D0A1A 100%);
+  background-size: 300% 300%;
+  animation: gradient-shift 8s ease infinite;
+}
