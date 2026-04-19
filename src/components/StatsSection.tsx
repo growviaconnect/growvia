@@ -55,15 +55,14 @@ export default function StatsSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="w-full h-px bg-white/[0.07]" />
         <div className="flex justify-end">
-          {stats.map((stat, i) => (
+          {stats.map((stat) => (
             <div
               key={stat.badge}
-              className="px-8 lg:px-12 pt-8 pb-14 flex flex-col"
-              style={{ borderLeft: "1px solid rgba(255,255,255,0.07)" }}
+              className="px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center"
             >
               {/* Pill badge */}
               <span
-                className="self-start text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
+                className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
                 style={{ border: "1px solid rgba(255,255,255,0.1)" }}
               >
                 {stat.badge}
@@ -86,8 +85,8 @@ export default function StatsSection() {
         </div>
       </div>
 
-      {/* ── Logo ticker — pure black, no borders ── */}
-      <div className="bg-black py-10 overflow-hidden mt-4">
+      {/* ── Logo ticker ── */}
+      <div className="py-10 overflow-hidden mt-4">
         <div className="animate-ticker flex items-center">
           {[...logos, ...logos].map((logo, i) => (
             <div key={i} className="flex-shrink-0 mx-12">
