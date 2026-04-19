@@ -1,3 +1,5 @@
+"use client";
+
 const serifStyle = {
   fontFamily: "'Playfair Display', Georgia, serif",
   fontStyle: "italic" as const,
@@ -11,25 +13,33 @@ const stats = [
   { badge: "Success",  number: "95%",     desc: "Satisfaction Rate" },
 ];
 
-const tickerItems = [
-  "Harvard University", "Stanford", "HEC Paris", "ESSEC",
-  "IE Business School", "London Business School", "McKinsey", "Google",
-  "Meta", "Salesforce", "BNP Paribas", "L'Oréal", "Spotify", "Airbnb",
-  "Y Combinator", "Station F", "Sciences Po", "Polytechnique", "MIT", "Oxford",
+const logos = [
+  { name: "Olympics",           url: "https://logo.clearbit.com/olympics.com" },
+  { name: "Oscars",             url: "https://logo.clearbit.com/oscars.org" },
+  { name: "Y Combinator",       url: "https://logo.clearbit.com/ycombinator.com" },
+  { name: "ATP Tour",           url: "https://logo.clearbit.com/atptour.com" },
+  { name: "BAFTA",              url: "https://logo.clearbit.com/bafta.org" },
+  { name: "UEFA",               url: "https://logo.clearbit.com/uefa.com" },
+  { name: "Premier League",     url: "https://logo.clearbit.com/premierleague.com" },
+  { name: "Formula 1",          url: "https://logo.clearbit.com/formula1.com" },
+  { name: "NBA",                url: "https://logo.clearbit.com/nba.com" },
+  { name: "NFL",                url: "https://logo.clearbit.com/nfl.com" },
+  { name: "Harvard",            url: "https://logo.clearbit.com/harvard.edu" },
+  { name: "Stanford",           url: "https://logo.clearbit.com/stanford.edu" },
+  { name: "HEC Paris",          url: "https://logo.clearbit.com/hec.edu" },
+  { name: "Google",             url: "https://logo.clearbit.com/google.com" },
+  { name: "McKinsey",           url: "https://logo.clearbit.com/mckinsey.com" },
+  { name: "Spotify",            url: "https://logo.clearbit.com/spotify.com" },
 ];
 
 export default function StatsSection() {
   return (
-    <section className="py-32 border-t border-white/5">
+    <section className="border-t border-white/5">
 
-      {/* ── Title + Stats ── */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-        {/* Title */}
-        <div className="max-w-3xl mb-20">
-          <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.05] mb-7"
-          >
+      {/* ── Title + Subtitle ── */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16">
+        <div className="max-w-3xl">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.05] mb-7">
             From early momentum to{" "}
             <span style={serifStyle}>global</span>
             {" "}awareness.
@@ -39,24 +49,21 @@ export default function StatsSection() {
             people who shape careers, shift perspectives, and open doors.
           </p>
         </div>
+      </div>
 
-        {/* Stats grid */}
-        <div
-          className="grid grid-cols-2 lg:grid-cols-4"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.07)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-        >
+      {/* ── Thin horizontal rule + Stats right-aligned ── */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="w-full h-px bg-white/[0.07]" />
+        <div className="flex justify-end">
           {stats.map((stat, i) => (
             <div
               key={stat.badge}
-              className="py-12 px-8 flex flex-col"
-              style={{
-                borderRight: i < stats.length - 1 ? "1px solid rgba(255,255,255,0.07)" : undefined,
-                borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.07)" : undefined,
-              }}
+              className="px-8 lg:px-12 pt-8 pb-14 flex flex-col"
+              style={{ borderLeft: "1px solid rgba(255,255,255,0.07)" }}
             >
               {/* Pill badge */}
               <span
-                className="self-start text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-8"
+                className="self-start text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
                 style={{ border: "1px solid rgba(255,255,255,0.1)" }}
               >
                 {stat.badge}
@@ -64,14 +71,14 @@ export default function StatsSection() {
 
               {/* Number */}
               <div
-                className="text-white leading-none tracking-tight mb-3"
-                style={{ fontSize: "clamp(56px, 8vw, 120px)", fontWeight: 200 }}
+                className="text-white leading-none tracking-tight mb-2.5"
+                style={{ fontSize: "clamp(36px, 4.5vw, 60px)", fontWeight: 200 }}
               >
                 {stat.number}
               </div>
 
               {/* Description */}
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mt-1">
+              <p className="text-[9px] uppercase tracking-[0.2em] text-white/30">
                 {stat.desc}
               </p>
             </div>
@@ -79,24 +86,18 @@ export default function StatsSection() {
         </div>
       </div>
 
-      {/* ── Ticker ── */}
-      <div
-        className="mt-20 overflow-hidden py-5"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-      >
-        <div className="animate-ticker flex items-center gap-0">
-          {[...tickerItems, ...tickerItems].map((name, i) => (
-            <div key={i} className="flex items-center gap-4 flex-shrink-0 px-8">
-              {/* Logo placeholder */}
-              <div
-                className="w-6 h-6 rounded flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+      {/* ── Logo ticker — pure black, no borders ── */}
+      <div className="bg-black py-10 overflow-hidden mt-4">
+        <div className="animate-ticker flex items-center">
+          {[...logos, ...logos].map((logo, i) => (
+            <div key={i} className="flex-shrink-0 mx-12">
+              <img
+                src={logo.url}
+                alt={logo.name}
+                className="h-7 w-auto"
+                style={{ filter: "brightness(0) invert(1)", opacity: 0.55 }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
-              <span className="text-sm text-white/40 whitespace-nowrap font-medium">
-                {name}
-              </span>
-              {/* Separator dot */}
-              <span className="text-white/15 ml-4 flex-shrink-0">·</span>
             </div>
           ))}
         </div>
