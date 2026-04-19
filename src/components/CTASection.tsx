@@ -63,7 +63,7 @@ export default function CTASection() {
             Find my mentor <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            href="/auth/register?role=mentor"
+            href="/become-a-mentor"
             className="inline-flex items-center justify-center gap-2.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
           >
             Apply as a mentor
