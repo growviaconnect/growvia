@@ -7,23 +7,20 @@ type Segment = { text: string; serif?: boolean };
 
 const PHRASES: Segment[][] = [
   [
-    { text: "GrowVia turns decades of experience into the next generation\u2019s " },
-    { text: "success", serif: true },
-    { text: "." },
+    { text: "Growing fast and learning every " },
+    { text: "day.", serif: true },
   ],
   [
-    { text: "People who believe " },
-    { text: "mentoring", serif: true },
-    { text: " is the fastest path to " },
-    { text: "clarity", serif: true },
-    { text: "." },
+    { text: "Real, honest human " },
+    { text: "connections.", serif: true },
   ],
   [
-    { text: "Choosing " },
-    { text: "growth", serif: true },
-    { text: " over " },
-    { text: "comfort", serif: true },
-    { text: "." },
+    { text: "Staying adaptable and always moving " },
+    { text: "forward.", serif: true },
+  ],
+  [
+    { text: "Creating real and meaningful " },
+    { text: "impact.", serif: true },
   ],
 ];
 
@@ -113,7 +110,7 @@ export default function ManifestoSection() {
   }, [typingPhrase]);
 
   return (
-    <div ref={containerRef} style={{ height: "400vh" }}>
+    <div ref={containerRef} style={{ height: "500vh" }}>
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* Background image */}
         <img
