@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Heart, Target, Globe, Lightbulb } from "lucide-react";
+import { ArrowRight, Heart, Target, Globe, Lightbulb, Play } from "lucide-react";
 
 /* ── Real founders data ───────────────────────────────────────── */
 const founders = [
@@ -99,6 +99,13 @@ const testimonials = [
     imageH: "h-60",
     quote: "I joined GrowVia to give back. I ended up learning as much as I taught.",
   },
+];
+
+/* ── Ticker names ─────────────────────────────────────────────── */
+const tickerNames = [
+  "Luna Davin", "Yasmine Tunon", "Sarah Chen", "Marcus Johnson",
+  "Aisha Patel", "Thomas Dubois", "Elena Rossi", "James Okonkwo",
+  "Priya Sharma", "Kwame Asante", "Isabel Ferreira", "Noah Blanc",
 ];
 
 export default function FoundersPage() {
@@ -210,7 +217,116 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 3: Founders ───────────────────────────────── */}
+      {/* ── SECTION 3: Ticker ────────────────────────────────── */}
+      <section className="border-t border-white/5 py-7 overflow-hidden">
+        <div className="animate-ticker flex">
+          {[...tickerNames, ...tickerNames].map((name, i) => (
+            <span key={i} className="flex items-center whitespace-nowrap">
+              <span className="text-sm font-medium text-white/35 px-7">{name}</span>
+              <span className="text-[#7C3AED] text-base leading-none">·</span>
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SECTION 4: Video placeholder ─────────────────────── */}
+      <section className="relative overflow-hidden" style={{ aspectRatio: "16 / 7" }}>
+        {/* Background image */}
+        <img
+          src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=1600&q=80"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ filter: "brightness(0.3) saturate(0.4)" }}
+        />
+        {/* Dark violet overlay */}
+        <div className="absolute inset-0" style={{ background: "rgba(76,29,149,0.18)" }} />
+        {/* Bottom fade into page */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, transparent 30%)" }} />
+
+        {/* Play button */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
+          <button
+            className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center hover:border-white/50 hover:bg-white/8 transition-all duration-300 group"
+            aria-label="Play video"
+          >
+            <Play className="w-7 h-7 text-white fill-white ml-1 group-hover:scale-110 transition-transform" />
+          </button>
+          <p className="text-xs text-white/30 uppercase tracking-[0.25em]">Watch our story</p>
+        </div>
+      </section>
+
+      {/* ── SECTION 5: Stats ─────────────────────────────────── */}
+      <section className="border-t border-white/5 py-28 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-3 items-center gap-16">
+
+            {/* Left tilted card */}
+            <div className="hidden lg:flex justify-end">
+              <div
+                className="w-52 rounded-2xl p-6 ring-1 ring-white/8 flex-shrink-0"
+                style={{ background: "#1A1A2E", transform: "rotate(-9deg)" }}
+              >
+                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest mb-4">MENTEE</p>
+                <p className="text-sm font-bold text-white leading-snug">
+                  &ldquo;Three sessions in, I had a clear five-year plan. Nothing else came close.&rdquo;
+                </p>
+                <p className="text-xs text-white/25 mt-5">Sarah Chen · Stripe</p>
+              </div>
+            </div>
+
+            {/* Center stats — vertical stack */}
+            <div className="text-center space-y-8">
+              <div>
+                <p className="text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-none">500+</p>
+                <p className="text-xs text-white/25 uppercase tracking-[0.3em] mt-3">Mentors</p>
+              </div>
+              <div className="w-10 h-px bg-[#4C1D95]/40 mx-auto" />
+              <div>
+                <p className="text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-none">95%</p>
+                <p className="text-xs text-white/25 uppercase tracking-[0.3em] mt-3">Satisfaction</p>
+              </div>
+              <div className="w-10 h-px bg-[#4C1D95]/40 mx-auto" />
+              <div>
+                <p className="text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-none">10K+</p>
+                <p className="text-xs text-white/25 uppercase tracking-[0.3em] mt-3">Sessions</p>
+              </div>
+            </div>
+
+            {/* Right tilted card */}
+            <div className="hidden lg:flex justify-start">
+              <div
+                className="w-52 rounded-2xl p-6 ring-1 ring-white/8 flex-shrink-0"
+                style={{ background: "#1A1A2E", transform: "rotate(9deg)" }}
+              >
+                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest mb-4">MENTOR</p>
+                <p className="text-sm font-bold text-white leading-snug">
+                  &ldquo;My mentee&apos;s progress amazes me every week. This platform just works.&rdquo;
+                </p>
+                <p className="text-xs text-white/25 mt-5">Marcus Johnson · VP Eng</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 6: Partner with us ───────────────────────── */}
+      <section className="border-t border-white/5 py-40 text-center">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8">
+          <h2 className="text-6xl md:text-7xl lg:text-[6rem] font-extrabold text-white tracking-tight leading-none mb-12">
+            Partner with us.
+          </h2>
+          <Link
+            href="/contact"
+            className="text-xs font-bold text-white uppercase tracking-[0.3em] underline underline-offset-8 decoration-white/20 hover:decoration-white transition-all duration-200"
+          >
+            Get in touch
+          </Link>
+        </div>
+      </section>
+
+      {/* ── SECTION 7: Founders ───────────────────────────────── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
