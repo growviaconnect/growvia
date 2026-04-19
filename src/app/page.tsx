@@ -1,401 +1,227 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Sparkles,
-  ArrowRight,
-  Users,
-  UserCheck,
-  GraduationCap,
-  Briefcase,
-  TrendingUp,
-  Heart,
-  Rocket,
-  UserPlus,
-  Clock,
-  Star,
-  Zap,
-  Settings,
-  Award,
-} from "lucide-react";
-import { useLang } from "@/contexts/LangContext";
+import { ArrowRight, Play } from "lucide-react";
+
+const categories = [
+  {
+    label: "Students",
+    desc: "Find your academic and career direction",
+    href: "/auth/register?category=students",
+  },
+  {
+    label: "Career",
+    desc: "Navigate transitions and land your dream role",
+    href: "/auth/register?category=career",
+  },
+  {
+    label: "Business",
+    desc: "Scale your venture with proven mentorship",
+    href: "/auth/register?category=business",
+  },
+  {
+    label: "Personal Growth",
+    desc: "Build confidence and unlock your potential",
+    href: "/auth/register?category=personal_growth",
+  },
+];
+
+const manifesto = [
+  { num: "01", text: "Experience is only valuable when shared." },
+  { num: "02", text: "The right mentor changes everything." },
+  { num: "03", text: "Careers are built on real conversations." },
+];
+
+const mentorBenefits = [
+  { title: "Lead generation on autopilot", desc: "Qualified mentees come to you — no cold outreach." },
+  { title: "Zero admin", desc: "We handle scheduling, payments, and session tracking." },
+  { title: "Your legacy, structured", desc: "Earn your Certified Mentor badge over time." },
+];
 
 export default function HomePage() {
-  const { t } = useLang();
-
-  const categories = [
-    {
-      icon: GraduationCap,
-      label: t("cat_students"),
-      desc: t("cat_students_desc"),
-      href: "/auth/register?category=students",
-    },
-    {
-      icon: Briefcase,
-      label: t("cat_career"),
-      desc: t("cat_career_desc"),
-      href: "/auth/register?category=career",
-    },
-    {
-      icon: TrendingUp,
-      label: t("cat_business"),
-      desc: t("cat_business_desc"),
-      href: "/auth/register?category=business",
-    },
-    {
-      icon: Heart,
-      label: t("cat_growth"),
-      desc: t("cat_growth_desc"),
-      href: "/auth/register?category=personal_growth",
-    },
-  ];
-
-  const mentorBenefits = [
-    {
-      icon: Zap,
-      title: t("mentor_b1_title"),
-      desc: t("mentor_b1_desc"),
-    },
-    {
-      icon: Settings,
-      title: t("mentor_b2_title"),
-      desc: t("mentor_b2_desc"),
-    },
-    {
-      icon: Award,
-      title: t("mentor_b3_title"),
-      desc: t("mentor_b3_desc"),
-    },
-  ];
-
-  const communitySlots = [
-    t("community_slot_career"),
-    t("community_slot_entrepreneur"),
-    t("community_slot_personal"),
-    t("community_slot_student"),
-  ];
-
   return (
     <>
-      {/* ─── HERO ─────────────────────────────────────────────── */}
-      <section
-        className="relative min-h-screen flex items-center overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #0F1020 0%, #1B1F3B 100%)" }}
-      >
-        {/* Glow orbs */}
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-20 animate-pulse-soft" style={{ background: "#5B3DF5" }} />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-10 animate-pulse-soft" style={{ background: "#7C5CFF", animationDelay: "2s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl opacity-5" style={{ background: "#5B3DF5" }} />
+      {/* ── HERO ─────────────────────────────────────────────────── */}
+      <section className="relative min-h-screen flex items-end pb-24 overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
+            alt=""
+            className="w-full h-full object-cover object-center"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-[#0D0A1A]/60" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, #0D0A1A 15%, transparent 60%)" }} />
+        </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-            {/* ── LEFT ── */}
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm font-medium" style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.3)" }}>
-                <Rocket className="w-3.5 h-3.5" />
-                {t("hero_badge")}
-              </div>
-
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-6">
-                {t("hero_title_1")}<br />
-                {t("hero_title_2")}{" "}
-                <span className="gradient-text">{t("hero_title_hl")}</span><br />
-                {t("hero_title_3")}
-              </h1>
-
-              <p className="text-lg md:text-xl mb-10 max-w-lg leading-relaxed" style={{ color: "#9B8FFF" }}>
-                {t("hero_sub")}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <Link
-                  href="/auth/register"
-                  className="inline-flex items-center justify-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-xl transition-all hover:opacity-90 shadow-2xl text-base w-full sm:w-auto"
-                  style={{ boxShadow: "0 12px 32px rgba(91,61,245,0.4)" }}
-                >
-                  {t("hero_find")} <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  href="/auth/register?role=mentor"
-                  className="inline-flex items-center justify-center gap-2 font-semibold px-8 py-4 rounded-xl transition-all text-base w-full sm:w-auto"
-                  style={{ background: "rgba(255,255,255,0.06)", color: "#E8E4FF", border: "1px solid rgba(255,255,255,0.12)" }}
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {t("hero_become")}
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap gap-x-6 gap-y-2">
-                {[
-                  { icon: Users, key: "trust_one2one" },
-                  { icon: UserCheck, key: "trust_verified" },
-                  { icon: Sparkles, key: "trust_ai" },
-                ].map((b) => (
-                  <div key={b.key} className="flex items-center gap-1.5 text-sm" style={{ color: "#6B6F80" }}>
-                    <b.icon className="w-4 h-4 text-purple-500" />
-                    <span>{t(b.key)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── RIGHT ── */}
-            <div className="relative hidden lg:block">
-              <div className="relative">
-                <div className="relative z-10 rounded-3xl overflow-hidden" style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(91,61,245,0.2)" }}>
-                  <img
-                    src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800"
-                    alt="Mentor and mentee in a one-to-one session"
-                    className="w-full h-[500px] object-cover"
-                  />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(15,16,32,0.5) 0%, transparent 60%)" }} />
-                </div>
-
-                {/* Floating card – discovery session */}
-                <div className="absolute -left-10 top-16 bg-white rounded-2xl p-4 z-20 animate-float" style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,61,245,0.1)" }}>
-                      <Star className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-gray-900">{t("hero_card_discovery")}</p>
-                      <p className="text-xs" style={{ color: "#6B6F80" }}>{t("hero_card_price")}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating card – mentors */}
-                <div className="absolute -right-8 bottom-28 bg-white rounded-2xl p-4 z-20 animate-float" style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.15)", animationDelay: "1.5s" }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,61,245,0.1)" }}>
-                      <UserPlus className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-gray-900">{t("hero_card_mentors")}</p>
-                      <p className="text-xs" style={{ color: "#6B6F80" }}>{t("hero_card_join")}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="absolute -z-10 -bottom-8 -right-8 w-72 h-72 rounded-3xl" style={{ background: "rgba(91,61,245,0.12)" }} />
-              </div>
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
+          <div className="max-w-5xl">
+            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
+              Early Access · 2026
+            </p>
+            <h1 className="text-7xl md:text-8xl lg:text-9xl font-extrabold text-white leading-[0.88] tracking-tight mb-10">
+              Where<br />
+              careers,<br />
+              made.
+            </h1>
+            <p className="text-lg text-white/45 mb-12 max-w-md leading-relaxed">
+              GrowVia connects ambitious professionals with mentors who have been exactly where you want to go.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
+              >
+                Build the future <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm">
+                <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center flex-shrink-0">
+                  <Play className="w-3 h-3 fill-current ml-0.5" />
+                </span>
+                Watch the film
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── CATEGORIES ─────────────────────────────────────────── */}
-      <section className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 reveal">
-            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">{t("cat_label")}</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-5">
-              {t("cat_title")}
+      {/* ── MANIFESTO ────────────────────────────────────────────── */}
+      <section className="py-32 bg-[#0D0A1A]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="max-w-4xl mb-16 reveal">
+            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">Our Mission</p>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05] tracking-tight">
+              GrowVia turns decades of experience into the next generation&apos;s success.
             </h2>
-            <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#6B6F80" }}>
-              {t("cat_sub")}
-            </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+            {manifesto.map((item, i) => (
+              <div key={item.num} className={`reveal reveal-delay-${i + 1} py-10 md:py-0 md:px-10 first:pl-0 last:pr-0`}>
+                <p className="text-xs text-white/20 font-mono mb-5 tracking-widest">{item.num}</p>
+                <p className="text-lg text-white/60 leading-relaxed font-medium">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CATEGORIES ───────────────────────────────────────────── */}
+      <section className="py-32 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 reveal">
+            <div>
+              <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">Mentoring Areas</p>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">What we cover.</h2>
+            </div>
+            <Link
+              href="/auth/register"
+              className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white transition-colors mt-6 md:mt-0"
+            >
+              Browse all <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5 border-t border-b border-white/5">
             {categories.map((cat, i) => (
               <Link
                 key={cat.label}
                 href={cat.href}
-                className={`reveal reveal-delay-${i + 1} group block p-7 rounded-2xl border border-gray-100 hover:border-purple-200 card-shadow-hover bg-white h-full transition-all duration-300`}
-                style={{ boxShadow: "0 2px 16px rgba(91,61,245,0.05)" }}
+                className={`reveal reveal-delay-${i + 1} group flex flex-col justify-between p-8 hover:bg-[#7C3AED]/5 transition-colors duration-300`}
               >
-                <div className="flex items-start justify-between mb-5">
-                  <div className="w-13 h-13 rounded-2xl flex items-center justify-center" style={{ background: "rgba(91,61,245,0.08)", width: "52px", height: "52px" }}>
-                    <cat.icon className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <ArrowRight className="w-4 h-4 mt-1 text-gray-300 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-3 group-hover:text-[#A78BFA] transition-colors">
+                    {cat.label}
+                  </h3>
+                  <p className="text-sm text-white/35 leading-relaxed">{cat.desc}</p>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
-                  {cat.label}
-                </h3>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: "#6B6F80" }}>{cat.desc}</p>
-                <p className="text-xs text-purple-600 font-medium inline-flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {t("cat_accepting")}
-                </p>
+                <ArrowRight className="w-4 h-4 text-white/15 group-hover:text-[#7C3AED] group-hover:translate-x-1 transition-all mt-8" />
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── MENTOR VALUE SECTION ───────────────────────────────── */}
-      <section className="py-28 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0F1020 0%, #1B1F3B 100%)" }}>
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-15 animate-pulse-soft" style={{ background: "#5B3DF5" }} />
-        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-10 animate-pulse-soft" style={{ background: "#7C5CFF", animationDelay: "2s" }} />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 reveal">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold" style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.3)" }}>
-              <Award className="w-4 h-4" />
-              {t("mentor_badge")}
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              {t("mentor_title_1")}{" "}
-              <span className="gradient-text">{t("mentor_title_hl")}</span>
-            </h2>
-            <p className="text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#9B8FFF" }}>
-              {t("mentor_sub")}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-14">
-            {mentorBenefits.map((b, i) => (
-              <div
-                key={b.title}
-                className={`reveal reveal-delay-${i + 1} rounded-2xl p-8`}
-                style={{ background: "rgba(91,61,245,0.07)", border: "1px solid rgba(91,61,245,0.18)" }}
-              >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(91,61,245,0.15)" }}>
-                  <b.icon className="w-6 h-6 text-purple-400" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-3">{b.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#9B8FFF" }}>{b.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center reveal">
-            <Link
-              href="/auth/register?role=mentor"
-              className="inline-flex items-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-xl transition-all hover:opacity-90 text-base"
-              style={{ boxShadow: "0 12px 32px rgba(91,61,245,0.35)" }}
-            >
-              <UserPlus className="w-5 h-5" />
-              {t("mentor_apply")}
-            </Link>
-            <p className="text-sm mt-4" style={{ color: "#6B6F80" }}>{t("mentor_apply_sub")}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── MENTOR PROFILES PLACEHOLDER ──────────────────────── */}
-      <section className="py-28 bg-purple-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 reveal">
-            <div>
-              <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">{t("community_label")}</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{t("community_title")}</h2>
-              <p className="text-lg max-w-xl leading-relaxed" style={{ color: "#6B6F80" }}>
-                {t("community_sub")}
+      {/* ── FOR MENTORS ──────────────────────────────────────────── */}
+      <section className="py-32 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            {/* Text side */}
+            <div className="reveal">
+              <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">For Mentors</p>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight">
+                Turn your experience into someone&apos;s breakthrough.
+              </h2>
+              <p className="text-lg text-white/45 leading-relaxed mb-12">
+                Your career took years to build. GrowVia lets you turn that expertise into real impact — on your schedule, with zero overhead.
               </p>
-            </div>
-            <Link
-              href="/auth/register?role=mentor"
-              className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold mt-4 md:mt-0 text-sm transition-colors"
-            >
-              {t("community_apply_link")} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {communitySlots.map((label, i) => (
-              <div
-                key={label}
-                className={`reveal reveal-delay-${i + 1} bg-white rounded-2xl overflow-hidden`}
-                style={{ border: "2px dashed rgba(91,61,245,0.2)", boxShadow: "0 2px 16px rgba(91,61,245,0.04)" }}
-              >
-                <div className="h-44 flex flex-col items-center justify-center gap-3" style={{ background: "rgba(91,61,245,0.04)" }}>
-                  <UserCheck className="w-10 h-10 text-purple-300" />
-                  <span className="text-xs font-semibold text-purple-400 uppercase tracking-wide">{label}</span>
-                </div>
-                <div className="p-5 text-center">
-                  <p className="font-semibold text-sm mb-1" style={{ color: "#6B6F80" }}>{t("community_slot_coming")}</p>
-                  <p className="text-xs" style={{ color: "#9B8FFF" }}>{t("community_slot_reviewing")}</p>
-                </div>
+              <div className="space-y-8 mb-12">
+                {mentorBenefits.map((b, i) => (
+                  <div key={b.title} className={`reveal reveal-delay-${i + 1} flex gap-5`}>
+                    <div className="w-px bg-[#7C3AED] flex-shrink-0 self-stretch" />
+                    <div>
+                      <p className="text-white font-semibold mb-1">{b.title}</p>
+                      <p className="text-sm text-white/40 leading-relaxed">{b.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              <Link
+                href="/auth/register?role=mentor"
+                className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
+              >
+                Apply as a mentor <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
 
-          <p className="text-center text-sm mt-10" style={{ color: "#6B6F80" }}>
-            {t("community_expert")}{" "}
-            <Link href="/auth/register?role=mentor" className="text-purple-600 font-semibold hover:underline">
-              {t("community_apply_text")}
-            </Link>
-          </p>
+            {/* Image side */}
+            <div className="relative reveal">
+              <img
+                src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=900&q=80"
+                alt="Mentor session"
+                className="w-full aspect-[4/5] object-cover rounded-xl"
+                style={{ filter: "brightness(0.6) saturate(0.8)" }}
+              />
+              <div
+                className="absolute inset-0 rounded-xl"
+                style={{ background: "linear-gradient(to top, #0D0A1A 0%, transparent 55%)" }}
+              />
+              <div className="absolute bottom-8 left-8 right-8">
+                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Manual review</p>
+                <p className="text-white font-semibold">Earn your Certified Mentor badge</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ─── FIRST SUCCESS STORY CTA ─────────────────────────── */}
-      <section className="py-28 relative overflow-hidden" style={{ background: "#0F1020" }}>
-        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: "#5B3DF5" }} />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: "#7C5CFF" }} />
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm" style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.25)" }}>
-            <Sparkles className="w-4 h-4" />
-            {t("success_badge")}
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 reveal">{t("success_title")}</h2>
-          <p className="text-lg max-w-2xl mx-auto mb-10 reveal" style={{ color: "#9B8FFF" }}>
-            {t("success_sub")}
+      {/* ── FINAL CTA ────────────────────────────────────────────── */}
+      <section className="py-40 border-t border-white/5 text-center">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 reveal">
+          <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">Get Started</p>
+          <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[0.95] tracking-tight">
+            Build the future,<br />starting today.
+          </h2>
+          <p className="text-xl text-white/35 mb-14 max-w-xl mx-auto leading-relaxed">
+            Early access is open. Join GrowVia and shape what mentorship becomes.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center reveal">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/auth/register"
-              className="inline-flex items-center justify-center gap-2 gradient-bg text-white font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-opacity text-base"
-              style={{ boxShadow: "0 12px 32px rgba(91,61,245,0.35)" }}
+              className="inline-flex items-center justify-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
             >
-              {t("success_cta_find")} <ArrowRight className="w-5 h-5" />
+              Find my mentor <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/auth/register?role=mentor"
-              className="inline-flex items-center justify-center gap-2 font-semibold px-8 py-4 rounded-xl transition-colors text-base"
-              style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.85)" }}
+              className="inline-flex items-center justify-center gap-2.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
             >
-              <UserPlus className="w-5 h-5" />
-              {t("success_cta_apply")}
+              Apply as a mentor
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ─── FINAL CTA ──────────────────────────────────────────── */}
-      <section className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div
-            className="relative rounded-3xl p-12 md:p-20 overflow-hidden text-center reveal"
-            style={{ background: "linear-gradient(135deg, #5B3DF5 0%, #7C5CFF 100%)" }}
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20" style={{ background: "#fff" }} />
-            <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: "#fff" }} />
-            <div className="relative max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-sm font-medium" style={{ background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.9)", border: "1px solid rgba(255,255,255,0.2)" }}>
-                <Sparkles className="w-4 h-4" />
-                {t("final_badge")}
-              </div>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-                {t("final_title")}
-              </h2>
-              <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.8)" }}>
-                {t("final_sub")}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/auth/register"
-                  className="inline-flex items-center justify-center gap-2 bg-white font-bold px-8 py-4 rounded-xl hover:bg-purple-50 transition-colors text-base"
-                  style={{ color: "#5B3DF5", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}
-                >
-                  {t("final_cta_find")} <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  href="/how-it-works"
-                  className="inline-flex items-center justify-center gap-2 font-semibold px-8 py-4 rounded-xl transition-colors text-base"
-                  style={{ border: "1px solid rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.9)" }}
-                >
-                  {t("final_cta_learn")}
-                </Link>
-              </div>
-              <p className="text-sm mt-8" style={{ color: "rgba(255,255,255,0.6)" }}>
-                {t("final_footnote")}
-              </p>
-            </div>
-          </div>
+          <p className="text-sm text-white/20 mt-10">
+            No commitment required · Discovery Session from 9.99€
+          </p>
         </div>
       </section>
     </>
