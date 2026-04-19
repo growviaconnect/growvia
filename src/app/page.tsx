@@ -34,11 +34,6 @@ const categories = [
 ];
 
 
-const mentorBenefits = [
-  { title: "Lead generation on autopilot", desc: "Qualified mentees come to you — no cold outreach." },
-  { title: "Zero admin", desc: "We handle scheduling, payments, and session tracking." },
-  { title: "Your legacy, structured", desc: "Earn your Certified Mentor badge over time." },
-];
 
 export default function HomePage() {
   return (
@@ -91,8 +86,7 @@ export default function HomePage() {
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
 
-      {/* ── STATS ────────────────────────────────────────────────── */}
-      <StatsSection />
+      {/* ── STATS ────────────────────────────────────────────────── */}      <StatsSection />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
@@ -162,59 +156,6 @@ export default function HomePage() {
             ))}
           </div>
 
-        </div>
-      </section>
-
-      {/* ── FOR MENTORS ──────────────────────────────────────────── */}
-      <section className="py-32 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            {/* Text side */}
-            <div className="reveal">
-              <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">For Mentors</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight">
-                Turn your experience into someone&apos;s breakthrough.
-              </h2>
-              <p className="text-lg text-white/45 leading-relaxed mb-12">
-                Your career took years to build. GrowVia lets you turn that expertise into real impact — on your schedule, with zero overhead.
-              </p>
-              <div className="space-y-8 mb-12">
-                {mentorBenefits.map((b, i) => (
-                  <div key={b.title} className={`reveal reveal-delay-${i + 1} flex gap-5`}>
-                    <div className="w-px bg-[#7C3AED] flex-shrink-0 self-stretch" />
-                    <div>
-                      <p className="text-white font-semibold mb-1">{b.title}</p>
-                      <p className="text-sm text-white/40 leading-relaxed">{b.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/auth/register?role=mentor"
-                className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
-              >
-                Apply as a mentor <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            {/* Image side */}
-            <div className="relative reveal">
-              <img
-                src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=900&q=80"
-                alt="Mentor session"
-                className="w-full aspect-[4/5] object-cover rounded-xl"
-                style={{ filter: "brightness(0.6) saturate(0.8)" }}
-              />
-              <div
-                className="absolute inset-0 rounded-xl"
-                style={{ background: "linear-gradient(to top, #0D0A1A 0%, transparent 55%)" }}
-              />
-              <div className="absolute bottom-8 left-8 right-8">
-                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Manual review</p>
-                <p className="text-white font-semibold">Earn your Certified Mentor badge</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
