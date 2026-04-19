@@ -11,21 +11,25 @@ const categories = [
     label: "Students",
     desc: "Find your academic and career direction",
     href: "/auth/register?category=students",
+    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
   },
   {
     label: "Career",
     desc: "Navigate transitions and land your dream role",
     href: "/auth/register?category=career",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
   },
   {
     label: "Business",
     desc: "Scale your venture with proven mentorship",
     href: "/auth/register?category=business",
+    image: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80",
   },
   {
     label: "Personal Growth",
     desc: "Build confidence and unlock your potential",
     href: "/auth/register?category=personal_growth",
+    image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80",
   },
 ];
 
@@ -93,36 +97,71 @@ export default function HomePage() {
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 reveal">
+
+          {/* Header */}
+          <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">Mentoring Areas</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">What we cover.</h2>
+              <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
+                Mentoring Areas
+              </p>
+              <h2 className="text-4xl md:text-[48px] font-extrabold text-white tracking-tight leading-tight">
+                What we cover.
+              </h2>
             </div>
             <Link
               href="/auth/register"
-              className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white transition-colors mt-6 md:mt-0"
+              className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white transition-colors mb-1"
             >
               Browse all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5 border-t border-b border-white/5">
+          {/* Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat, i) => (
               <Link
                 key={cat.label}
                 href={cat.href}
-                className={`reveal reveal-delay-${i + 1} group flex flex-col justify-between p-8 hover:bg-[#7C3AED]/5 transition-colors duration-300`}
+                className="group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-300"
+                style={{
+                  background: "#1A1A2E",
+                  aspectRatio: "3 / 4",
+                  boxShadow: "0 0 0 transparent",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(124,58,237,0.25)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 transparent"; }}
               >
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-3 group-hover:text-[#A78BFA] transition-colors">
+                {/* Ken Burns image */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="w-full h-full transition-transform duration-700 group-hover:scale-[1.03]">
+                    <img
+                      src={cat.image}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-full h-full object-cover ken-burns-img"
+                      style={{ animationDelay: `${i * 1.5}s` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom gradient */}
+                <div
+                  className="absolute inset-0"
+                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)" }}
+                />
+
+                {/* Content */}
+                <div className="relative p-6">
+                  <h3 className="text-white font-bold mb-2 leading-snug" style={{ fontSize: 20 }}>
                     {cat.label}
                   </h3>
-                  <p className="text-sm text-white/35 leading-relaxed">{cat.desc}</p>
+                  <p className="text-white/50 text-sm leading-relaxed mb-4">{cat.desc}</p>
+                  <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-white group-hover:translate-x-1 transition-all duration-200" />
                 </div>
-                <ArrowRight className="w-4 h-4 text-white/15 group-hover:text-[#7C3AED] group-hover:translate-x-1 transition-all mt-8" />
               </Link>
             ))}
           </div>
+
         </div>
       </section>
 
