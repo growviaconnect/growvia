@@ -3,12 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, Globe, Sparkles, Users, BookOpen, Shield, CircleHelp, Mail, GraduationCap, UserPlus, Star, LayoutDashboard, BadgeCheck } from "lucide-react";
-import { locales, localeNames, type Locale } from "@/lib/i18n";
-
-interface NavbarProps {
-  locale?: Locale;
-  onLocaleChange?: (locale: Locale) => void;
-}
+import { locales, localeNames } from "@/lib/i18n";
+import { useLang } from "@/contexts/LangContext";
 
 const platformLinks = [
   { href: "/who-we-are", label: "Who We Are", icon: BookOpen, desc: "Our story & founders" },
@@ -34,7 +30,8 @@ const supportLinks = [
   { href: "/contact", label: "Contact", icon: Mail, desc: "Get in touch with us" },
 ];
 
-export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
+export default function Navbar() {
+  const { lang, setLang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -160,7 +157,7 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
                 className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-purple-700 transition-colors px-2 py-1.5 rounded-lg hover:bg-purple-50"
               >
                 <Globe className="w-4 h-4" />
-                <span>{localeNames[locale]}</span>
+                <span>{localeNames[lang]}</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
               {langOpen && (
@@ -168,8 +165,8 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
                   {locales.map((l) => (
                     <button
                       key={l}
-                      onClick={() => { onLocaleChange?.(l); setLangOpen(false); }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-purple-50 transition-colors ${l === locale ? "text-purple-700 font-medium" : "text-gray-700"}`}
+                      onClick={() => { setLang(l); setLangOpen(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-purple-50 transition-colors ${l === lang ? "text-purple-700 font-medium" : "text-gray-700"}`}
                     >
                       {localeNames[l]}
                     </button>
@@ -250,8 +247,8 @@ export default function Navbar({ locale = "en", onLocaleChange }: NavbarProps) {
             <div className="border-t border-purple-50 pt-4 mt-4 space-y-3">
               <div className="flex gap-2">
                 {locales.map((l) => (
-                  <button key={l} onClick={() => { onLocaleChange?.(l); }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${l === locale ? "gradient-bg text-white" : "bg-purple-50 text-gray-600 hover:bg-purple-100"}`}>
+                  <button key={l} onClick={() => { setLang(l); }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${l === lang ? "gradient-bg text-white" : "bg-purple-50 text-gray-600 hover:bg-purple-100"}`}>
                     {l.toUpperCase()}
                   </button>
                 ))}
