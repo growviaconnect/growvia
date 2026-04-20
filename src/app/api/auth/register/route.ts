@@ -4,8 +4,11 @@ import { sendWelcomeEmail } from "@/lib/email";
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  if (!url || !key || key.includes("placeholder")) return null;
+  // Accept either naming convention used in different Supabase dashboard versions
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ?? process.env.SUPABASE_SECRET_KEY
+    ?? "";
+  if (!url || !key) return null;
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -23,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   if (!admin) {
     return NextResponse.json(
-      { error: "SUPABASE_SERVICE_ROLE_KEY is not configured." },
+      { error: "Server misconfiguration: set SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY) in your environment variables." },
       { status: 503 }
     );
   }
