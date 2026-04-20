@@ -328,11 +328,25 @@ export default function HowItWorksPage() {
       <Divider />
 
       {/* ── SECTION 5 — CTA ────────────────────────────────────── */}
-      <section
-        className="py-40 text-center"
-        style={{ background: "linear-gradient(135deg, #2d1b69 0%, #4C1D95 50%, #2d1b69 100%)" }}
-      >
-        <div className="max-w-2xl mx-auto px-6">
+      <section className="relative py-40 text-center overflow-hidden">
+        {/* Looping video background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source
+            src="https://videos.pexels.com/video-files/3252312/3252312-uhd_2560_1440_25fps.mp4"
+            type="video/mp4"
+          />
+        </video>
+
+        {/* Dark violet overlay */}
+        <div className="absolute inset-0" style={{ background: "rgba(60,20,100,0.75)" }} />
+
+        <div className="relative max-w-2xl mx-auto px-6">
           <p className="reveal text-xs font-semibold text-[#C4B5FD] uppercase tracking-[0.25em] mb-8">
             Get Started
           </p>
