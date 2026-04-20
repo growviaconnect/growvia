@@ -1,24 +1,54 @@
 import Link from "next/link";
-import { CheckCircle, ArrowRight, Sparkles, Zap, Clock, Users, TrendingUp } from "lucide-react";
+import { CheckCircle, ArrowRight, Zap, Clock, Sparkles, Users, TrendingUp } from "lucide-react";
 
-const basicFeatures = [
-  "Access to the platform",
-  "AI mentor matching",
-  "Mentor profiles browsing",
-  "Calendar & session booking",
-  "Secure integrated payment",
-  "Community access",
-];
+const serifStyle = {
+  fontFamily: "'Playfair Display', Georgia, serif",
+  fontStyle: "italic" as const,
+  fontWeight: 400,
+};
 
-const premiumFeatures = [
-  "Everything in Basic",
-  "Priority AI matching",
-  "Personalized mentor recommendations",
-  "Goals & progress tracking dashboard",
-  "Access to premium mentors",
-  "Priority session slots",
-  "Events & group sessions",
-  "Video courses & certifications",
+const plans = [
+  {
+    name: "Basic",
+    price: "4.99",
+    desc: "Everything you need to get started",
+    features: [
+      "Access to more mentors than free",
+      "2–3 AI matching/month",
+      "Ability to book standard sessions",
+      "Basic filters",
+    ],
+    cta: "Start Basic",
+    recommended: false,
+  },
+  {
+    name: "Standard",
+    price: "9.99",
+    desc: "The most popular plan for serious growth",
+    features: [
+      "Access to majority of mentors",
+      "Extended AI matching",
+      "Access to certified mentors",
+      "Advanced filters (experience, domain)",
+      "Personalized recommendations",
+    ],
+    cta: "Start Standard",
+    recommended: true,
+  },
+  {
+    name: "Premium",
+    price: "14.99",
+    desc: "Maximum access for maximum impact",
+    features: [
+      "Access to ALL mentors",
+      "Unlimited AI matching",
+      "Priority booking",
+      "Access to top mentors",
+      "Exclusive content (videos, tips)",
+    ],
+    cta: "Start Premium",
+    recommended: false,
+  },
 ];
 
 const mentorPerks = [
@@ -31,146 +61,186 @@ const mentorPerks = [
 export default function PricingPage() {
   return (
     <>
-      {/* ── Page header ─────────────────────────────────────────── */}
-      <section className="gradient-bg-soft pt-20 pb-16 text-center px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white text-purple-600 text-sm font-medium px-4 py-2 rounded-full mb-6 card-shadow">
+      {/* ── HERO ──────────────────────────────────────────────── */}
+      <section className="relative min-h-[75vh] flex items-center justify-center text-center overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&q=80"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "brightness(0.28) saturate(0.55)" }}
+        />
+        <div className="absolute inset-0 bg-[#0D0A1A]/65" />
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{ height: "35%", background: "linear-gradient(to bottom, transparent, #0D0A1A)" }}
+        />
+
+        <div className="relative px-6 max-w-3xl mx-auto">
+          <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
             Pricing
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-5">
-            Simple pricing, <span className="gradient-text">no surprises</span>
+          </p>
+          <h1 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-7">
+            Simple pricing,{" "}
+            <span style={{ ...serifStyle, color: "#A78BFA" }}>no surprises.</span>
           </h1>
-          <p className="text-xl text-gray-500 leading-relaxed">
+          <p className="reveal reveal-delay-2 text-lg text-white/50 leading-relaxed max-w-xl mx-auto">
             Clear plans for mentees. Free to join for mentors. No hidden fees.
           </p>
         </div>
       </section>
 
-      {/* ── SECTION 1 — For mentees ──────────────────────────────── */}
-      <section className="py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center flex-shrink-0">
-              <Users className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">For mentees</h2>
+      {/* ── SUBSCRIPTIONS ─────────────────────────────────────── */}
+      <section className="relative py-36 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&q=80"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "brightness(0.18) saturate(0.45)" }}
+        />
+        <div className="absolute inset-0 bg-[#0D0A1A]/55" />
+
+        {/* Top fade */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+          style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
+        />
+        {/* Bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
+          style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }}
+        />
+
+        <div className="relative z-20 max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
+              For Mentees
+            </p>
+            <h2 className="reveal reveal-delay-1 text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+              Choose your plan.
+            </h2>
+            <p className="reveal reveal-delay-2 text-white/40 mt-4 text-base">
+              All plans billed monthly. Cancel anytime.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Basic */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 flex flex-col card-shadow">
-              <div className="mb-6">
-                <p className="text-sm font-semibold text-purple-600 mb-2">Basic</p>
-                <div className="flex items-end gap-1.5 mb-1">
-                  <span className="text-5xl font-black text-gray-900">19.99€</span>
-                  <span className="text-gray-400 mb-2">/ month</span>
-                </div>
-                <p className="text-sm text-gray-400">Everything you need to get started</p>
-              </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {basicFeatures.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-gray-600">
-                    <CheckCircle className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/auth/register"
-                className="block text-center gradient-bg text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity text-sm"
+          <div className="grid md:grid-cols-3 gap-6">
+            {plans.map((plan, i) => (
+              <div
+                key={plan.name}
+                className={`reveal reveal-delay-${i + 1} relative rounded-2xl p-8 flex flex-col border transition-colors duration-300 ${
+                  plan.recommended
+                    ? "border-[#7C3AED]/60"
+                    : "border-white/[0.08] hover:border-[#7C3AED]/30"
+                }`}
+                style={{
+                  background: plan.recommended
+                    ? "rgba(124,58,237,0.18)"
+                    : "rgba(255,255,255,0.04)",
+                }}
               >
-                Start Basic
-              </Link>
-            </div>
+                {plan.recommended && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#7C3AED] text-white text-xs font-bold px-5 py-1.5 rounded-full whitespace-nowrap tracking-wide">
+                    Recommended
+                  </div>
+                )}
 
-            {/* Premium */}
-            <div className="relative rounded-2xl p-8 flex flex-col gradient-bg text-white shadow-2xl shadow-purple-300">
-              {/* Recommended badge */}
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-5 py-1.5 rounded-full whitespace-nowrap">
-                Recommended
-              </div>
-
-              <div className="mb-6">
-                <p className="text-sm font-semibold text-purple-200 mb-2">Premium</p>
-                <div className="flex items-end gap-1.5 mb-1">
-                  <span className="text-5xl font-black text-white">39.99€</span>
-                  <span className="text-purple-200 mb-2">/ month</span>
+                <div className="mb-8">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#A78BFA] mb-4">
+                    {plan.name}
+                  </p>
+                  <div className="flex items-end gap-1.5 mb-2">
+                    <span className="text-5xl font-extrabold text-white leading-none">{plan.price}€</span>
+                    <span className="text-white/35 mb-1.5 text-sm">/ month</span>
+                  </div>
+                  <p className="text-sm text-white/40">{plan.desc}</p>
                 </div>
-                <p className="text-sm text-purple-100">Maximum growth, maximum impact</p>
+
+                <ul className="space-y-4 mb-10 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-white/60">
+                      <CheckCircle className="w-4 h-4 text-[#7C3AED] flex-shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/auth/register"
+                  className={`block text-center font-semibold py-3.5 rounded-xl transition-colors text-sm ${
+                    plan.recommended
+                      ? "bg-[#7C3AED] text-white hover:bg-[#6D28D9]"
+                      : "border border-white/15 text-white/70 hover:border-[#7C3AED]/50 hover:text-white"
+                  }`}
+                >
+                  {plan.cta}
+                </Link>
               </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {premiumFeatures.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-white">
-                    <CheckCircle className="w-4 h-4 text-purple-200 flex-shrink-0 mt-0.5" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/auth/register"
-                className="block text-center bg-white text-purple-700 font-semibold py-3.5 rounded-xl hover:bg-purple-50 transition-colors text-sm"
-              >
-                Start Premium <ArrowRight className="inline w-4 h-4 ml-1" />
-              </Link>
-            </div>
+            ))}
           </div>
-
-          <p className="text-center text-sm text-gray-400 mt-6">
-            All plans billed monthly. Cancel anytime. Prices include VAT where applicable.
-          </p>
         </div>
       </section>
 
-      {/* ── SECTION 2 — Discovery Session callout ───────────────── */}
-      <section className="py-16 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl p-8 sm:p-10 border border-amber-100 shadow-lg shadow-amber-100/60">
+      {/* ── DISCOVERY SESSION ─────────────────────────────────── */}
+      <section className="py-24">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          <div
+            className="rounded-2xl p-10 border border-[#7C3AED]/20"
+            style={{ background: "rgba(124,58,237,0.06)" }}
+          >
             <div className="flex flex-col md:flex-row md:items-center gap-8">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)" }}>
-                <Zap className="w-7 h-7 text-white" />
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}
+              >
+                <Zap className="w-7 h-7 text-[#A78BFA]" />
               </div>
 
               <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">No commitment needed</p>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#A78BFA] mb-1">
+                  No commitment needed
+                </p>
+                <h3 className="text-2xl font-bold text-white mb-2">
                   Not sure yet? Start with a Discovery Session
                 </h3>
-                <p className="text-gray-500 text-sm leading-relaxed">
+                <p className="text-white/40 text-sm leading-relaxed">
                   A short, focused intro call with any mentor on the platform. No subscription required — just a one-time booking.
                 </p>
               </div>
 
               <div className="flex-shrink-0">
-                <div className="text-center bg-amber-50 border border-amber-200 rounded-2xl px-8 py-5">
-                  <p className="text-4xl font-black text-gray-900 mb-0.5">9.99€</p>
-                  <p className="text-xs text-gray-500 font-medium">flat price · one-time</p>
+                <div
+                  className="text-center rounded-2xl px-8 py-5 border border-[#7C3AED]/25"
+                  style={{ background: "rgba(124,58,237,0.1)" }}
+                >
+                  <p className="text-4xl font-extrabold text-white mb-0.5">9.99€</p>
+                  <p className="text-xs text-white/35 font-medium">flat price · one-time</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8">
+            <div
+              className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8"
+              style={{ borderTop: "1px solid rgba(124,58,237,0.15)" }}
+            >
               {[
                 { icon: Clock, label: "15 to 20 minutes" },
                 { icon: Sparkles, label: "AI matching included" },
                 { icon: ArrowRight, label: "No subscription needed" },
                 { icon: Users, label: "Available on every mentor profile" },
               ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600">
-                  <item.icon className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                <div key={item.label} className="flex items-center gap-2 text-sm text-white/50">
+                  <item.icon className="w-4 h-4 text-[#7C3AED] flex-shrink-0" />
                   {item.label}
                 </div>
               ))}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-7">
               <Link
                 href="/auth/register"
-                className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity text-sm"
-                style={{ background: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)" }}
+                className="inline-flex items-center gap-2 bg-[#7C3AED] text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-[#6D28D9] transition-colors text-sm"
               >
                 Book a Discovery Session <ArrowRight className="w-4 h-4" />
               </Link>
@@ -179,34 +249,40 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── SECTION 3 — For mentors ──────────────────────────────── */}
-      <section className="py-20" style={{ background: "linear-gradient(135deg, #0F1020 0%, #1B1F3B 100%)" }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ── FOR MENTORS ───────────────────────────────────────── */}
+      <section className="py-24 pb-32">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #5B3DF5 0%, #7C5CFF 100%)" }}>
-              <TrendingUp className="w-4 h-4 text-white" />
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}
+            >
+              <TrendingUp className="w-4 h-4 text-[#A78BFA]" />
             </div>
             <h2 className="text-2xl font-bold text-white">For mentors</h2>
           </div>
 
-          <div className="rounded-2xl p-8 sm:p-12 border" style={{ background: "rgba(91,61,245,0.07)", borderColor: "rgba(91,61,245,0.25)" }}>
+          <div
+            className="rounded-2xl p-10 border border-[#7C3AED]/20"
+            style={{ background: "rgba(124,58,237,0.06)" }}
+          >
             <div className="flex flex-col lg:flex-row lg:items-start gap-10">
               <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-400">
+                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
                   Joining GrowVia as a mentor is free
                 </p>
-                <h3 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
                   You only pay when you earn.
                 </h3>
-                <p className="text-gray-400 leading-relaxed mb-8">
+                <p className="text-white/40 leading-relaxed mb-8">
                   No setup fees. No monthly subscription. No risk. GrowVia takes a small commission only
                   when a mentee pays for a session — everything else is free.
                 </p>
 
                 <ul className="space-y-4">
                   {mentorPerks.map((perk) => (
-                    <li key={perk} className="flex items-start gap-3 text-sm text-gray-300">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-purple-400" />
+                    <li key={perk} className="flex items-start gap-3 text-sm text-white/60">
+                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#7C3AED]" />
                       {perk}
                     </li>
                   ))}
@@ -215,27 +291,31 @@ export default function PricingPage() {
                 <div className="mt-8">
                   <Link
                     href="/auth/register?role=mentor"
-                    className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition-opacity text-sm gradient-bg"
-                    style={{ boxShadow: "0 8px 24px rgba(91,61,245,0.35)" }}
+                    className="inline-flex items-center gap-2 bg-[#7C3AED] text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-[#6D28D9] transition-colors text-sm"
                   >
                     Apply to become a mentor <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </div>
 
-              {/* Right side commission callout */}
               <div className="lg:w-64 flex-shrink-0">
-                <div className="rounded-2xl p-6 text-center border" style={{ background: "rgba(91,61,245,0.1)", borderColor: "rgba(91,61,245,0.3)" }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-400">
+                <div
+                  className="rounded-2xl p-6 text-center border border-[#7C3AED]/25"
+                  style={{ background: "rgba(124,58,237,0.1)" }}
+                >
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
                     Commission
                   </p>
-                  <p className="text-5xl font-black text-white mb-1">5–10%</p>
-                  <p className="text-sm text-gray-400 leading-relaxed">
+                  <p className="text-5xl font-extrabold text-white mb-1">5–10%</p>
+                  <p className="text-sm text-white/40 leading-relaxed">
                     Per session, only when you earn. Zero charge otherwise.
                   </p>
-                  <div className="mt-5 pt-5 space-y-2">
+                  <div
+                    className="mt-5 pt-5 space-y-2"
+                    style={{ borderTop: "1px solid rgba(124,58,237,0.15)" }}
+                  >
                     {["Lead generation", "Payment processing", "Scheduling tools", "Dashboard access"].map((item) => (
-                      <p key={item} className="text-xs text-gray-500">{item}</p>
+                      <p key={item} className="text-xs text-white/30">{item}</p>
                     ))}
                   </div>
                 </div>
