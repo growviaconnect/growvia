@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2026-03-25.dahlia" as const,
-});
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY ?? "";
+  if (!key || key.includes("placeholder")) return null;
+  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" as const });
+}
 
 const PRICE_IDS: Record<string, string | undefined> = {
   basic:    process.env.STRIPE_PRICE_BASIC,
@@ -13,12 +15,20 @@ const PRICE_IDS: Record<string, string | undefined> = {
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe is not configured yet. Add STRIPE_SECRET_KEY to your environment variables." },
+        { status: 503 }
+      );
+    }
+
     const { plan, email } = (await req.json()) as { plan: string; email: string };
 
     const priceId = PRICE_IDS[plan];
     if (!priceId || priceId.includes("placeholder")) {
       return NextResponse.json(
-        { error: "Stripe is not configured yet. Add your price IDs to .env.local." },
+        { error: "Stripe price IDs are not configured yet. Add STRIPE_PRICE_* to your environment variables." },
         { status: 503 }
       );
     }
