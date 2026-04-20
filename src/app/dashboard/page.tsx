@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { clearUserSession } from "@/lib/session";
+import { clearAuthCookie } from "@/lib/auth";
 import {
   CalendarCheck,
   Heart,
@@ -73,8 +76,10 @@ export default function DashboardPage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("overview");
 
-  function handleLogout() {
-    if (typeof window !== "undefined") localStorage.removeItem("gv_user");
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    clearAuthCookie();
+    clearUserSession();
     router.push("/");
   }
 
