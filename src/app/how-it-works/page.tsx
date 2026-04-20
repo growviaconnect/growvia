@@ -8,13 +8,6 @@ const serif = {
   fontWeight: 400,
 };
 
-const Divider = () => (
-  <div
-    className="w-full h-px"
-    style={{ background: "linear-gradient(to right, transparent 0%, rgba(124,58,237,0.35) 50%, transparent 100%)" }}
-  />
-);
-
 /* ── Data ──────────────────────────────────────────────────── */
 const steps = [
   {
@@ -163,8 +156,6 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ── SECTION 2 — STEPS ──────────────────────────────────── */}
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -213,14 +204,14 @@ export default function HowItWorksPage() {
                   </div>
                 </div>
 
-                {i < steps.length - 1 && <Divider />}
+                {i < steps.length - 1 && (
+                  <div className="w-full h-px" style={{ background: "linear-gradient(to right, transparent 0%, rgba(124,58,237,0.12) 50%, transparent 100%)" }} />
+                )}
               </div>
             );
           })}
         </div>
       </section>
-
-      <Divider />
 
       {/* ── SECTION 3 — SESSIONS RUN SMOOTHLY ─────────────────── */}
       <section className="py-32">
@@ -257,8 +248,6 @@ export default function HowItWorksPage() {
           </div>
         </div>
       </section>
-
-      <Divider />
 
       {/* ── SECTION 4 — STAY INFORMED ──────────────────────────── */}
       <section className="py-32">
@@ -325,8 +314,6 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      <Divider />
-
       {/* ── SECTION 5 — CTA ────────────────────────────────────── */}
       <section className="relative py-40 text-center overflow-hidden">
         {/* Looping video background */}
@@ -335,7 +322,7 @@ export default function HowItWorksPage() {
           muted
           loop
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover z-0"
         >
           <source
             src="https://videos.pexels.com/video-files/3252312/3252312-uhd_2560_1440_25fps.mp4"
@@ -344,9 +331,21 @@ export default function HowItWorksPage() {
         </video>
 
         {/* Dark violet overlay */}
-        <div className="absolute inset-0" style={{ background: "rgba(60,20,100,0.75)" }} />
+        <div className="absolute inset-0 z-10" style={{ background: "rgba(60,20,100,0.75)" }} />
 
-        <div className="relative max-w-2xl mx-auto px-6">
+        {/* Top gradient — page bg fades into violet */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none z-20"
+          style={{ height: "220px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
+        />
+
+        {/* Bottom gradient — violet fades into footer bg */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-20"
+          style={{ height: "220px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }}
+        />
+
+        <div className="relative z-30 max-w-2xl mx-auto px-6">
           <p className="reveal text-xs font-semibold text-[#C4B5FD] uppercase tracking-[0.25em] mb-8">
             Get Started
           </p>
