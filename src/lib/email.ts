@@ -1,6 +1,11 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const key = process.env.RESEND_API_KEY ?? "";
+  if (!key) return null;
+  return new Resend(key);
+}
+
 const FROM = "GrowVia <contact@growviaconnect.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://growviaconnect.com";
 
@@ -106,7 +111,9 @@ export async function sendWelcomeEmail(to: string, nom: string, role: string) {
     ${p(`If you didn't create this account, you can ignore this email.`)}
   `;
 
-  return resend.emails.send({ from: FROM, to, subject: "Welcome to GrowVia 🚀", html: layout(body) });
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({ from: FROM, to, subject: "Welcome to GrowVia 🚀", html: layout(body) });
 }
 
 // ─── 2. Session booking confirmation ─────────────────────────────────────────
@@ -155,9 +162,11 @@ export async function sendBookingConfirmation(params: BookingParams) {
     ${btn("View my dashboard →", dashUrl)}
   `;
 
+  const r = getResend();
+  if (!r) return [{ data: null, error: new Error("RESEND_API_KEY not configured") }, { data: null, error: new Error("RESEND_API_KEY not configured") }];
   return Promise.all([
-    resend.emails.send({ from: FROM, to: mentorEmail, subject: `New session request from ${menteeNom}`, html: layout(mentorBody) }),
-    resend.emails.send({ from: FROM, to: menteeEmail, subject: "Your session request was sent ✓",      html: layout(menteeBody) }),
+    r.emails.send({ from: FROM, to: mentorEmail, subject: `New session request from ${menteeNom}`, html: layout(mentorBody) }),
+    r.emails.send({ from: FROM, to: menteeEmail, subject: "Your session request was sent ✓",      html: layout(menteeBody) }),
   ]);
 }
 
@@ -202,7 +211,9 @@ export async function sendSessionStatusNotification(params: StatusParams) {
     ? `✅ ${mentorNom} confirmed your session`
     : `Your session request with ${mentorNom} was declined`;
 
-  return resend.emails.send({ from: FROM, to: menteeEmail, subject, html: layout(body) });
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({ from: FROM, to: menteeEmail, subject, html: layout(body) });
 }
 
 // ─── 4 & 5. Session reminders (24h and 2h) ──────────────────────────────────
@@ -245,5 +256,7 @@ export async function sendSessionReminder(params: ReminderParams) {
     ? `⏰ Your session with ${otherNom} starts in 2 hours`
     : `📅 Reminder: session with ${otherNom} is tomorrow`;
 
-  return resend.emails.send({ from: FROM, to: email, subject, html: layout(body) });
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({ from: FROM, to: email, subject, html: layout(body) });
 }
