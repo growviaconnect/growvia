@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle, ArrowRight, Zap, Clock, Sparkles, Users, TrendingUp } from "lucide-react";
+import { CheckCircle, ArrowRight, TrendingUp } from "lucide-react";
 
 const serifStyle = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -54,8 +54,15 @@ const plans = [
 const mentorPerks = [
   "You set your own rates",
   "You choose your availability",
-  "GrowVia takes 5–10% commission per session only when you earn",
+  "GrowVia takes 20% commission per session only when you earn",
   "Commission covers: lead generation, payment processing, scheduling tools, dashboard access",
+];
+
+const freeFeatures = [
+  "Limited platform access",
+  "See some mentors (not all)",
+  "1 AI matching maximum",
+  "Ability to book 1 discovery session",
 ];
 
 export default function PricingPage() {
@@ -182,80 +189,87 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ── DISCOVERY SESSION ─────────────────────────────────── */}
+      {/* ── FREEMIUM ──────────────────────────────────────────── */}
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <div
-            className="rounded-2xl p-10 border border-[#7C3AED]/20"
-            style={{ background: "rgba(124,58,237,0.06)" }}
+            className="reveal rounded-2xl p-10 border border-white/[0.08]"
+            style={{ background: "rgba(255,255,255,0.03)" }}
           >
-            <div className="flex flex-col md:flex-row md:items-center gap-8">
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}
-              >
-                <Zap className="w-7 h-7 text-[#A78BFA]" />
-              </div>
-
+            <div className="flex flex-col md:flex-row md:items-start gap-10">
+              {/* Left */}
               <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#A78BFA] mb-1">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#F97316] mb-3">
                   No commitment needed
                 </p>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Not sure yet? Start with a Discovery Session
+                <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">
+                  Not sure yet?{" "}
+                  <span style={serifStyle}>Start for free.</span>
                 </h3>
-                <p className="text-white/40 text-sm leading-relaxed">
-                  A short, focused intro call with any mentor on the platform. No subscription required — just a one-time booking.
+                <p className="text-white/40 text-sm leading-relaxed mb-8">
+                  Try GrowVia at no cost. Get a taste of what mentorship can do for you before committing to any plan.
                 </p>
+                <ul className="space-y-4">
+                  {freeFeatures.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-white/60">
+                      <CheckCircle className="w-4 h-4 text-[#F97316] flex-shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8">
+                  <Link
+                    href="/auth/register"
+                    className="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA6C0A] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
+                  >
+                    Start for free <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
 
-              <div className="flex-shrink-0">
+              {/* Right — free badge */}
+              <div className="flex-shrink-0 md:pt-2">
                 <div
-                  className="text-center rounded-2xl px-8 py-5 border border-[#7C3AED]/25"
-                  style={{ background: "rgba(124,58,237,0.1)" }}
+                  className="text-center rounded-2xl px-10 py-8 border"
+                  style={{ background: "rgba(249,115,22,0.08)", borderColor: "rgba(249,115,22,0.2)" }}
                 >
-                  <p className="text-4xl font-extrabold text-white mb-0.5">9.99€</p>
-                  <p className="text-xs text-white/35 font-medium">flat price · one-time</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#F97316]">Free plan</p>
+                  <p className="text-5xl font-extrabold text-white mb-1">0€</p>
+                  <p className="text-xs text-white/35 font-medium">forever · no card needed</p>
                 </div>
               </div>
-            </div>
-
-            <div
-              className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-8"
-              style={{ borderTop: "1px solid rgba(124,58,237,0.15)" }}
-            >
-              {[
-                { icon: Clock, label: "15 to 20 minutes" },
-                { icon: Sparkles, label: "AI matching included" },
-                { icon: ArrowRight, label: "No subscription needed" },
-                { icon: Users, label: "Available on every mentor profile" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm text-white/50">
-                  <item.icon className="w-4 h-4 text-[#7C3AED] flex-shrink-0" />
-                  {item.label}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-7">
-              <Link
-                href="/auth/register"
-                className="inline-flex items-center gap-2 bg-[#7C3AED] text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-[#6D28D9] transition-colors text-sm"
-              >
-                Book a Discovery Session <ArrowRight className="w-4 h-4" />
-              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── FOR MENTORS ───────────────────────────────────────── */}
-      <section className="py-24 pb-32">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
+      <section className="relative py-36 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1600&q=80"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: "brightness(0.22) saturate(0.5)" }}
+        />
+        <div className="absolute inset-0 bg-[#0D0A1A]/60" />
+
+        {/* Top fade */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+          style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
+        />
+        {/* Bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
+          style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }}
+        />
+
+        <div className="relative z-20 max-w-5xl mx-auto px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-10">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}
+              style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}
             >
               <TrendingUp className="w-4 h-4 text-[#A78BFA]" />
             </div>
@@ -263,8 +277,8 @@ export default function PricingPage() {
           </div>
 
           <div
-            className="rounded-2xl p-10 border border-[#7C3AED]/20"
-            style={{ background: "rgba(124,58,237,0.06)" }}
+            className="reveal rounded-2xl p-10 border border-[#7C3AED]/20"
+            style={{ background: "rgba(13,10,26,0.75)" }}
           >
             <div className="flex flex-col lg:flex-row lg:items-start gap-10">
               <div className="flex-1">
@@ -275,7 +289,7 @@ export default function PricingPage() {
                   You only pay when you earn.
                 </h3>
                 <p className="text-white/40 leading-relaxed mb-8">
-                  No setup fees. No monthly subscription. No risk. GrowVia takes a small commission only
+                  No setup fees. No monthly subscription. No risk. GrowVia takes a commission only
                   when a mentee pays for a session — everything else is free.
                 </p>
 
@@ -301,12 +315,12 @@ export default function PricingPage() {
               <div className="lg:w-64 flex-shrink-0">
                 <div
                   className="rounded-2xl p-6 text-center border border-[#7C3AED]/25"
-                  style={{ background: "rgba(124,58,237,0.1)" }}
+                  style={{ background: "rgba(124,58,237,0.12)" }}
                 >
                   <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
                     Commission
                   </p>
-                  <p className="text-5xl font-extrabold text-white mb-1">5–10%</p>
+                  <p className="text-5xl font-extrabold text-white mb-1">20%</p>
                   <p className="text-sm text-white/40 leading-relaxed">
                     Per session, only when you earn. Zero charge otherwise.
                   </p>
