@@ -1,5 +1,10 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle, ArrowRight, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CheckCircle, ArrowRight, TrendingUp, Loader2 } from "lucide-react";
+import { getUserSession, type UserSession } from "@/lib/session";
 
 const serifStyle = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -66,6 +71,28 @@ const freeFeatures = [
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+  const [session, setSession] = useState<UserSession | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  useEffect(() => { setSession(getUserSession()); }, []);
+
+  async function handleCheckout(planKey: string) {
+    if (!session) { router.push("/auth/register"); return; }
+    setLoadingPlan(planKey);
+    try {
+      const res  = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey.toLowerCase(), email: session.email }),
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (data.url) { window.location.href = data.url; return; }
+      if (data.error) alert(data.error);
+    } catch { alert("Something went wrong. Please try again."); }
+    setLoadingPlan(null);
+  }
+
   return (
     <>
       {/* ── HERO ──────────────────────────────────────────────── */}
@@ -173,16 +200,19 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href="/auth/register"
-                  className={`block text-center font-semibold py-3.5 rounded-xl transition-colors text-sm ${
+                <button
+                  onClick={() => handleCheckout(plan.name)}
+                  disabled={loadingPlan === plan.name}
+                  className={`w-full flex items-center justify-center gap-2 font-semibold py-3.5 rounded-xl transition-colors text-sm disabled:opacity-60 ${
                     plan.recommended
                       ? "bg-[#7C3AED] text-white hover:bg-[#6D28D9]"
                       : "border border-white/15 text-white/70 hover:border-[#7C3AED]/50 hover:text-white"
                   }`}
                 >
-                  {plan.cta}
-                </Link>
+                  {loadingPlan === plan.name
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading...</>
+                    : plan.cta}
+                </button>
               </div>
             ))}
           </div>
