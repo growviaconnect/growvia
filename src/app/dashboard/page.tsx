@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { clearUserSession } from "@/lib/session";
+import { clearUserSession, getUserSession, setUserSession } from "@/lib/session";
 import { clearAuthCookie } from "@/lib/auth";
 import {
   CalendarCheck,
@@ -72,9 +72,26 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
   </div>
 );
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("overview");
+  const [planUpgraded, setPlanUpgraded] = useState<string | null>(null);
+
+  // Handle return from Stripe Checkout
+  useEffect(() => {
+    const plan = searchParams.get("plan");
+    if (!plan) return;
+    const session = getUserSession();
+    if (session) {
+      const updated = { ...session, plan: plan as "free" | "pro" | "school" };
+      setUserSession(updated);
+      supabase.auth.updateUser({ data: { plan } }).catch(() => {});
+      setPlanUpgraded(plan);
+    }
+    // Remove query params from URL without re-render
+    router.replace("/dashboard");
+  }, [searchParams, router]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -233,6 +250,17 @@ export default function DashboardPage() {
                       );
                     })()}
                   </Card>
+                )}
+
+                {/* Plan upgraded toast */}
+                {planUpgraded && (
+                  <div className="rounded-2xl p-4 border border-emerald-500/20 flex items-center gap-3"
+                    style={{ background: "rgba(16,185,129,0.1)" }}>
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                    <span className="text-emerald-300 text-sm font-medium">
+                      Your plan was upgraded to <span className="capitalize font-bold">{planUpgraded}</span>. Welcome to the next level!
+                    </span>
+                  </div>
                 )}
 
                 {/* Upgrade banner */}
@@ -416,5 +444,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0D0A1A]" />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

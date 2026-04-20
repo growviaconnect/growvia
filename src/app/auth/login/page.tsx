@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -10,13 +10,13 @@ import { setAuthCookie } from "@/lib/auth";
 import type { Role } from "@/lib/session";
 
 function LoginContent() {
-  const router = useRouter();
+  const router      = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/dashboard";
+  const next        = searchParams.get("next") || "/dashboard";
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState<string | null>(null);
   const [form, setForm] = useState({ email: "", password: "" });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -37,7 +37,7 @@ function LoginContent() {
       const role = (meta.role as Role) || "mentee";
       const nom  = (meta.nom  as string) || user.email || "";
 
-      setUserSession({ nom, email: user.email!, role, plan: "free" });
+      setUserSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
       setAuthCookie();
 
       router.push(next);
@@ -52,9 +52,9 @@ function LoginContent() {
     <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
 
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-8">
+        {/* Logo + heading */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-7">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
               style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
@@ -63,82 +63,81 @@ function LoginContent() {
             </div>
             <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
           </Link>
-          <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Welcome back</h1>
-          <p className="text-white/40">Sign in to continue your journey.</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Welcome back</h1>
+          <p className="text-white/40 text-sm">Sign in to continue your journey.</p>
         </div>
 
         {/* Card */}
-        <div
-          className="rounded-2xl p-8 border border-white/[0.08]"
-          style={{ background: "rgba(255,255,255,0.04)" }}
-        >
+        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: "0 8px 48px rgba(0,0,0,0.45)" }}>
           {error && (
-            <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-5">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
+            <div className="flex items-start gap-3 bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl mb-5">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
               <input
-                type="email"
-                required
+                type="email" required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-white/[0.1] bg-white/[0.05] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED]/60 focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm"
               />
             </div>
+
+            {/* Password */}
             <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-sm font-medium text-white/60">Password</label>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  required
+                  type={showPassword ? "text" : "password"} required
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Your password"
-                  className="w-full px-4 py-3 rounded-xl border border-white/[0.1] bg-white/[0.05] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED]/60 focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm pr-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
+              className="w-full text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2 disabled:opacity-60 text-sm"
+              style={{ background: "#7C3AED" }}
             >
               {loading
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
-                : <>Sign In <ArrowRight className="w-4 h-4" /></>
+                : <>Sign in <ArrowRight className="w-4 h-4" /></>
               }
             </button>
-          </form>
 
-          <div className="mt-6 pt-6 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-            <p className="text-sm text-white/35">
-              Don&apos;t have an account?{" "}
-              <Link href="/auth/register" className="text-[#A78BFA] font-medium hover:text-white transition-colors">
-                Create one for free
-              </Link>
+            <p className="text-xs text-gray-400 text-center pt-1">
+              By signing in you agree to our{" "}
+              <Link href="/legal/terms" className="text-purple-500 hover:text-purple-700">Terms</Link>
+              {" "}and{" "}
+              <Link href="/legal/privacy" className="text-purple-500 hover:text-purple-700">Privacy Policy</Link>
             </p>
-          </div>
+          </form>
         </div>
 
-        <p className="text-center text-xs text-white/20 mt-6">
-          By signing in, you agree to our{" "}
-          <Link href="/legal/terms" className="text-white/35 hover:text-white/60">Terms of Service</Link>
-          {" "}and{" "}
-          <Link href="/legal/privacy" className="text-white/35 hover:text-white/60">Privacy Policy</Link>
+        <p className="text-center text-sm text-white/40 mt-6">
+          Don&apos;t have an account?{" "}
+          <Link href="/auth/register" className="text-[#A78BFA] font-medium hover:text-white transition-colors">
+            Register
+          </Link>
         </p>
       </div>
     </div>
