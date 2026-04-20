@@ -103,9 +103,12 @@ function RegisterContent() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: "0 8px 48px rgba(0,0,0,0.45)" }}>
+        <div
+          className="rounded-2xl p-8 border border-white/[0.08]"
+          style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
+        >
           {error && (
-            <div className="flex items-start gap-3 bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl mb-5">
+            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-5">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               {error}
             </div>
@@ -115,41 +118,41 @@ function RegisterContent() {
 
             {/* Full name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">Full Name</label>
               <input
                 type="text" required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Luna Davin"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">Email Address</label>
               <input
                 type="email" required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"} required minLength={8}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="At least 8 characters"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm pr-11"
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -157,17 +160,17 @@ function RegisterContent() {
 
             {/* Confirm password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">Confirm Password</label>
               <div className="relative">
                 <input
                   type={showConfirm ? "text" : "password"} required
                   value={form.confirm}
                   onChange={(e) => setForm({ ...form, confirm: e.target.value })}
                   placeholder="Repeat your password"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm pr-11"
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
                 />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
                   {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -175,7 +178,7 @@ function RegisterContent() {
 
             {/* Role selector */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">I am joining as...</label>
+              <label className="block text-sm font-medium text-white/60 mb-2">I am joining as...</label>
               <div className="space-y-2">
                 {roles.map((r) => (
                   <button
@@ -184,13 +187,13 @@ function RegisterContent() {
                     onClick={() => setRole(r.value)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-colors text-left text-sm ${
                       role === r.value
-                        ? "border-purple-500 bg-purple-50 text-purple-900 font-medium"
-                        : "border-gray-100 text-gray-700 hover:border-gray-200"
+                        ? "border-[#7C3AED] bg-[#7C3AED]/10 text-white font-medium"
+                        : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
                     }`}
                   >
                     {r.label}
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3 ${
-                      role === r.value ? "border-purple-500 bg-purple-500" : "border-gray-300"
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-3 transition-colors ${
+                      role === r.value ? "border-[#7C3AED] bg-[#7C3AED]" : "border-white/20"
                     }`}>
                       {role === r.value && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                     </div>
@@ -212,11 +215,11 @@ function RegisterContent() {
               }
             </button>
 
-            <p className="text-xs text-gray-400 text-center pt-1">
+            <p className="text-xs text-white/25 text-center pt-1">
               By continuing you agree to our{" "}
-              <Link href="/legal/terms" className="text-purple-500 hover:text-purple-700">Terms</Link>
+              <Link href="/legal/terms" className="text-[#A78BFA] hover:text-white transition-colors">Terms</Link>
               {" "}and{" "}
-              <Link href="/legal/privacy" className="text-purple-500 hover:text-purple-700">Privacy Policy</Link>
+              <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">Privacy Policy</Link>
             </p>
           </form>
         </div>
