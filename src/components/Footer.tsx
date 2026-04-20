@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import React from "react";
+import { usePathname } from "next/navigation";
 
 /* ── Custom social SVG icons ──────────────────────────────────── */
 const InstagramIcon = ({ className }: { className?: string }) => (
@@ -68,12 +71,15 @@ const socials: SocialLink[] = [
 
 /* ── Footer component ─────────────────────────────────────────── */
 export default function Footer() {
+  const pathname = usePathname();
+  const hideHeadline = pathname === "/how-it-works";
+
   return (
     <footer className="bg-[#0D0A1A] pt-20 pb-0">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* ── Big headline ───────────────────────────────────── */}
-        <div className="reveal mb-16 lg:mb-20">
+        {!hideHeadline && <div className="reveal mb-16 lg:mb-20">
           <h2 className="font-extrabold text-white leading-[0.88] tracking-tight text-5xl md:text-7xl lg:text-[7.5rem]">
             Where{" "}
             <span
@@ -93,7 +99,7 @@ export default function Footer() {
             <br />
             made.
           </h2>
-        </div>
+        </div>}
 
         {/* ── Links + cities row ─────────────────────────────── */}
         <div className="reveal reveal-delay-1 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
