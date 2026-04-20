@@ -11,7 +11,7 @@ const CARDS = [
     title: "Our platform",
     image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
     links: [
-      { label: "Founders", href: "/who-we-are" },
+      { label: "Founders", href: "/founders" },
       { label: "How It Works", href: "/how-it-works" },
       { label: "Pricing", href: "/pricing" },
       { label: "Partnerships", href: "/for-schools" },
