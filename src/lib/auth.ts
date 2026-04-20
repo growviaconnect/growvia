@@ -2,7 +2,7 @@
 
 export function setAuthCookie() {
   if (typeof document === "undefined") return;
-  document.cookie = "gv_auth=1; path=/; max-age=3600; SameSite=Lax";
+  document.cookie = "gv_auth=1; path=/; max-age=2592000; SameSite=Lax"; // 30 days
 }
 
 export function clearAuthCookie() {
