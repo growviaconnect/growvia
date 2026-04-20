@@ -219,23 +219,24 @@ export async function sendSessionStatusNotification(params: StatusParams) {
 // ─── 4 & 5. Session reminders (24h and 2h) ──────────────────────────────────
 
 export type ReminderParams = {
-  email:    string;
-  nom:      string;
-  otherNom: string;
-  date:     string;
-  role:     "mentor" | "mentee";
+  email:      string;
+  nom:        string;
+  otherNom:   string;
+  date:       string;
+  role:       "mentor" | "mentee";
   hoursUntil: 24 | 2;
+  scheduledAt?: string; // ISO string — lets Resend deliver at the right time
 };
 
 export async function sendSessionReminder(params: ReminderParams) {
-  const { email, nom, otherNom, date, role, hoursUntil } = params;
+  const { email, nom, otherNom, date, role, hoursUntil, scheduledAt } = params;
   const formattedDate = formatDate(date);
   const dashUrl = `${BASE_URL}/dashboard`;
 
-  const isUrgent   = hoursUntil === 2;
-  const timeLabel  = isUrgent ? "in 2 hours" : "tomorrow";
-  const urgBadge   = isUrgent ? badge("#dc2626", "⏰ Starting in 2 hours") : badge("#7C3AED", "📅 Reminder — 24h");
-  const tipRole    = role === "mentor"
+  const isUrgent = hoursUntil === 2;
+  const timeLabel = isUrgent ? "in 2 hours" : "tomorrow";
+  const urgBadge  = isUrgent ? badge("#dc2626", "⏰ Starting in 2 hours") : badge("#7C3AED", "📅 Reminder — 24h");
+  const tipRole   = role === "mentor"
     ? "Think about your key advice and prepare actionable takeaways for your mentee."
     : "Come prepared with your questions to make the most of your session.";
 
@@ -258,5 +259,48 @@ export async function sendSessionReminder(params: ReminderParams) {
 
   const r = getResend();
   if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
-  return r.emails.send({ from: FROM, to: email, subject, html: layout(body) });
+  return r.emails.send({ from: FROM, to: email, subject, html: layout(body), ...(scheduledAt ? { scheduledAt } : {}) });
+}
+
+// ─── Schedule all reminders at booking time ───────────────────────────────────
+// Called once when a session is booked. Resend queues and delivers each email
+// at the calculated future timestamp — no cron job required.
+
+export type ScheduleRemindersParams = {
+  mentorEmail: string;
+  mentorNom:   string;
+  menteeEmail: string;
+  menteeNom:   string;
+  sessionDate: string; // ISO string of the session start time
+};
+
+export async function scheduleSessionReminders(params: ScheduleRemindersParams) {
+  const { mentorEmail, mentorNom, menteeEmail, menteeNom, sessionDate } = params;
+  const session = new Date(sessionDate);
+  const now     = Date.now();
+
+  const remind24 = new Date(session.getTime() - 24 * 3_600_000);
+  const remind2  = new Date(session.getTime() -  2 * 3_600_000);
+
+  const sends: Promise<unknown>[] = [];
+
+  // Queue 24h reminders only if there's still time to send them
+  if (remind24.getTime() > now + 60_000) {
+    const at24 = remind24.toISOString();
+    sends.push(
+      sendSessionReminder({ email: mentorEmail, nom: mentorNom, otherNom: menteeNom, date: sessionDate, role: "mentor", hoursUntil: 24, scheduledAt: at24 }),
+      sendSessionReminder({ email: menteeEmail, nom: menteeNom, otherNom: mentorNom, date: sessionDate, role: "mentee", hoursUntil: 24, scheduledAt: at24 }),
+    );
+  }
+
+  // Queue 2h reminders only if there's still time to send them
+  if (remind2.getTime() > now + 60_000) {
+    const at2 = remind2.toISOString();
+    sends.push(
+      sendSessionReminder({ email: mentorEmail, nom: mentorNom, otherNom: menteeNom, date: sessionDate, role: "mentor", hoursUntil: 2, scheduledAt: at2 }),
+      sendSessionReminder({ email: menteeEmail, nom: menteeNom, otherNom: mentorNom, date: sessionDate, role: "mentee", hoursUntil: 2, scheduledAt: at2 }),
+    );
+  }
+
+  return Promise.allSettled(sends);
 }
