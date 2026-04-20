@@ -68,9 +68,12 @@ function LoginContent() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl p-8" style={{ boxShadow: "0 8px 48px rgba(0,0,0,0.45)" }}>
+        <div
+          className="rounded-2xl p-8 border border-white/[0.08]"
+          style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
+        >
           {error && (
-            <div className="flex items-start gap-3 bg-red-50 border border-red-100 text-red-700 text-sm px-4 py-3 rounded-xl mb-5">
+            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-5">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               {error}
             </div>
@@ -80,31 +83,31 @@ function LoginContent() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">Email Address</label>
               <input
                 type="email" required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"} required
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Your password"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm pr-11"
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -124,11 +127,11 @@ function LoginContent() {
               }
             </button>
 
-            <p className="text-xs text-gray-400 text-center pt-1">
+            <p className="text-xs text-white/25 text-center pt-1">
               By signing in you agree to our{" "}
-              <Link href="/legal/terms" className="text-purple-500 hover:text-purple-700">Terms</Link>
+              <Link href="/legal/terms" className="text-[#A78BFA] hover:text-white transition-colors">Terms</Link>
               {" "}and{" "}
-              <Link href="/legal/privacy" className="text-purple-500 hover:text-purple-700">Privacy Policy</Link>
+              <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">Privacy Policy</Link>
             </p>
           </form>
         </div>
