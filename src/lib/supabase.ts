@@ -20,6 +20,22 @@ export type Mentor = {
   certification_statut: CertStatut;
   actif: boolean;
   created_at: string;
+  // onboarding fields
+  location?: string | null;
+  languages?: string[] | null;
+  industry?: string | null;
+  job_title?: string | null;
+  years_experience?: string | null;
+  seniority?: string | null;
+  expertise?: string[] | null;
+  mentoring_experience?: string | null;
+  motivation?: string | null;
+  availability?: string | null;
+  session_preferences?: string[] | null;
+  certification_willing?: boolean | null;
+  bio?: string | null;
+  mentor_score?: number | null;
+  recommended_price?: number | null;
 };
 
 export type Mentee = {
@@ -30,6 +46,14 @@ export type Mentee = {
   statut: "pending" | "active" | "rejected";
   actif: boolean;
   created_at: string;
+  // onboarding fields
+  age_range?: string | null;
+  situation?: string | null;
+  field?: string | null;
+  main_goal?: string | null;
+  interests?: string[] | null;
+  clarity_level?: number | null;
+  description?: string | null;
 };
 
 export type Connexion = {
