@@ -48,33 +48,40 @@ function RegisterContent() {
     const nom   = form.name.trim();
 
     try {
-      // 1. Create Supabase Auth account
-      const { error: authError } = await supabase.auth.signUp({
-        email,
-        password: form.password,
-        options: { data: { role, nom } },
+      // 1. Create account server-side with email_confirm:true (no verification email)
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: form.password, role, nom }),
       });
-
-      if (authError) {
-        const msg = authError.message.toLowerCase();
-        if (msg.includes("already registered") || msg.includes("already exists") || msg.includes("already been registered")) {
+      const json = await res.json();
+      if (!res.ok) {
+        const msg = (json.error ?? "").toLowerCase();
+        if (msg.includes("already") || msg.includes("duplicate") || msg.includes("unique")) {
           throw new Error("This email is already registered. Please sign in instead.");
         }
-        throw authError;
+        throw new Error(json.error ?? "Registration failed. Please try again.");
       }
 
-      // 2. Insert into domain table (best-effort)
+      // 2. Sign in immediately (email already confirmed)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: form.password,
+      });
+      if (signInError) throw signInError;
+
+      // 3. Insert into domain table (best-effort)
       if (role === "mentor") {
         await supabase.from("mentors").insert({ nom, email, statut: "pending" });
       } else if (role === "mentee") {
         await supabase.from("mentees").insert({ nom, email, statut: "pending" });
       }
 
-      // 3. Persist local session + 30-day auth cookie
+      // 4. Persist local session + 30-day auth cookie
       setUserSession({ nom, email, role, plan: "free" });
       setAuthCookie();
 
-      // 4. Go to dashboard
+      // 5. Go to dashboard
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
