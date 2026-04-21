@@ -34,8 +34,12 @@ type MatchResult = {
   industry: string | null;
   expertise: string[] | null;
   languages: string[] | null;
+  location: string | null;
+  bio: string | null;
   mentor_score: number | null;
+  match_score_override: number | null;
   score: number;
+  matchReason: string;
 };
 
 type MenteeMatchProfile = {
@@ -65,10 +69,33 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
+function generateMatchReason(
+  mentor: Pick<MatchResult, "nom" | "job_title" | "industry" | "expertise">,
+  profile: MenteeMatchProfile | null
+): string {
+  const first = mentor.nom.split(" ")[0];
+  const skills = mentor.expertise?.slice(0, 2).join(" and ") ?? "their domain";
+  const goal = profile?.main_goal?.toLowerCase() ?? "";
+  if (goal.includes("startup") || goal.includes("entrepreneur"))
+    return `${first} has a proven track record guiding founders — expertise in ${skills} maps directly onto your goals.`;
+  if (goal.includes("career change") || goal.includes("transition"))
+    return `${first}'s deep roots in ${mentor.industry ?? "their field"} make them an ideal guide for your career transition.`;
+  if (goal.includes("job search") || goal.includes("interview"))
+    return `With experience in ${mentor.industry ?? "their field"}, ${first} can help you stand out and land the right role.`;
+  if (goal.includes("growth"))
+    return `${first}'s expertise in ${skills} closely matches your growth ambitions — they've helped professionals at similar stages advance fast.`;
+  if (goal.includes("skill"))
+    return `${first} specialises in ${skills} — precisely the skills you're aiming to develop.`;
+  return `${first}'s background in ${skills} aligns strongly with your profile and career objectives.`;
+}
+
 function computeMatchScore(
   profile: MenteeMatchProfile | null,
-  mentor: Omit<MatchResult, "score">
+  mentor: Omit<MatchResult, "score" | "matchReason">
 ): number {
+  // Fixed demo scores take priority — ensures showcase mentors always display as intended
+  if (mentor.match_score_override != null) return mentor.match_score_override;
+
   let raw = 0;
 
   // Field / industry alignment (0–40)
@@ -104,9 +131,9 @@ function computeMatchScore(
   let display = Math.round(62 + (raw / 100) * 36) + jitter;
 
   // Language match bonus: +3 if mentor speaks a preferred language
-  if (profile?.languages?.length && (mentor as MatchResult).languages?.length) {
+  if (profile?.languages?.length && mentor.languages?.length) {
     const pref = new Set(profile.languages.map((l) => l.toLowerCase()));
-    const hit = (mentor as MatchResult).languages!.some((l) => pref.has(l.toLowerCase()));
+    const hit = mentor.languages.some((l) => pref.has(l.toLowerCase()));
     if (hit) display += 3;
   }
 
@@ -210,7 +237,8 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
 
   return (
     <Card className="p-5">
-      <div className="flex items-center gap-4">
+      {/* Header row */}
+      <div className="flex items-start gap-4">
         <div className="relative flex-shrink-0">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm"
@@ -224,6 +252,9 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-white text-sm">{match.nom}</div>
           <div className="text-xs text-white/40 mt-0.5 truncate">{subtitle}</div>
+          {match.location && (
+            <div className="text-[10px] text-white/25 mt-0.5">{match.location}</div>
+          )}
           {match.expertise?.length ? (
             <div className="flex flex-wrap gap-1 mt-2">
               {match.expertise.slice(0, 3).map((e) => (
@@ -247,18 +278,29 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
         </div>
       </div>
 
+      {/* AI-generated reason */}
+      {match.matchReason && (
+        <p
+          className="mt-3 text-xs leading-relaxed rounded-xl px-3 py-2.5"
+          style={{ background: "rgba(124,58,237,0.07)", color: "rgba(196,181,253,0.8)" }}
+        >
+          ✦ {match.matchReason}
+        </p>
+      )}
+
+      {/* Actions */}
       <div className="mt-4 flex gap-2">
         <Link
           href="/explore"
-          className="flex-1 text-center text-xs font-semibold py-2 rounded-lg border border-white/10 hover:border-[#7C3AED]/50 text-white/55 hover:text-white transition-colors"
+          className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl border border-white/10 hover:border-[#7C3AED]/50 text-white/55 hover:text-white transition-colors"
         >
-          View profile
+          View Profile
         </Link>
         <Link
           href="/explore"
-          className="flex-1 text-center text-xs font-semibold py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition-colors"
+          className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition-colors"
         >
-          Book session
+          Request Session
         </Link>
       </div>
     </Card>
@@ -351,6 +393,23 @@ function DashboardContent() {
             main_goal: profile.main_goal ?? null,
             languages: null,
           });
+
+          // Restore saved match results so returning users always see their top 3
+          if (profile.has_used_free_ai_match) {
+            const { data: authSession } = await supabase.auth.getUser();
+            if (authSession.user?.id) {
+              const { data: latestResponse } = await supabase
+                .from("ai_matching_responses")
+                .select("match_results")
+                .eq("user_id", authSession.user.id)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (latestResponse?.match_results) {
+                setMatches(latestResponse.match_results as MatchResult[]);
+              }
+            }
+          }
         }
 
         // Load their sessions using the DB row id
@@ -383,16 +442,23 @@ function DashboardContent() {
     try {
       const { data: mentors } = await supabase
         .from("mentors")
-        .select("id, nom, job_title, specialite, industry, expertise, languages, mentor_score")
+        .select("id, nom, job_title, specialite, industry, expertise, languages, location, bio, mentor_score, match_score_override")
         .eq("statut", "active")
         .limit(50);
 
-      const ranked = (mentors ?? [])
-        .map((m) => ({ ...m, score: computeMatchScore(profile, m as Omit<MatchResult, "score">) }))
+      const ranked: MatchResult[] = (mentors ?? [])
+        .map((m) => {
+          const base = m as Omit<MatchResult, "score" | "matchReason">;
+          return {
+            ...base,
+            score: computeMatchScore(profile, base),
+            matchReason: generateMatchReason(base, profile),
+          };
+        })
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
-      setMatches(ranked as MatchResult[]);
+      setMatches(ranked);
     } finally {
       setMatchLoading(false);
     }
@@ -418,6 +484,7 @@ function DashboardContent() {
     language: string;
     frequency: string;
     bio: string;
+    matchResults: MatchResult[];
   }) {
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -440,6 +507,7 @@ function DashboardContent() {
         meeting_frequency: params.frequency || null,
         free_text: params.bio.trim() || null,
         attempt_number: (count ?? 0) + 1,
+        match_results: params.matchResults,
       });
     } catch {
       // Never let analytics failures block the UX
@@ -478,21 +546,28 @@ function DashboardContent() {
       setHasUsedFreeMatch(true);
       setMenteeProfile(updatedProfile);
 
-      // Save questionnaire response — fire-and-forget, never blocks matching
-      saveMatchingResponse(snapshot).catch(() => {});
-
       const { data: mentors } = await supabase
         .from("mentors")
-        .select("id, nom, job_title, specialite, industry, expertise, languages, mentor_score")
+        .select("id, nom, job_title, specialite, industry, expertise, languages, location, bio, mentor_score, match_score_override")
         .eq("statut", "active")
         .limit(50);
 
-      const ranked = (mentors ?? [])
-        .map((m) => ({ ...m, score: computeMatchScore(updatedProfile, m as Omit<MatchResult, "score">) }))
+      const ranked: MatchResult[] = (mentors ?? [])
+        .map((m) => {
+          const base = m as Omit<MatchResult, "score" | "matchReason">;
+          return {
+            ...base,
+            score: computeMatchScore(updatedProfile, base),
+            matchReason: generateMatchReason(base, updatedProfile),
+          };
+        })
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
-      setMatches(ranked as MatchResult[]);
+      setMatches(ranked);
+
+      // Save questionnaire response + match results — fire-and-forget
+      saveMatchingResponse({ ...snapshot, matchResults: ranked }).catch(() => {});
     } finally {
       setMatchLoading(false);
     }
@@ -1096,28 +1171,6 @@ function DashboardContent() {
                   </>
                 )}
 
-                {/* ── Free trial used, no in-session results (returning visit) ── */}
-                {!matchLoading && user?.plan === "free" && hasUsedFreeMatch && matches.length === 0 && (
-                  <Card className="p-10 text-center">
-                    <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                      style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}
-                    >
-                      <Sparkles className="w-7 h-7 text-amber-400" />
-                    </div>
-                    <div
-                      className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4"
-                      style={{ background: "rgba(245,158,11,0.1)", color: "#fbbf24" }}
-                    >
-                      0 free matches remaining
-                    </div>
-                    <h2 className="text-xl font-bold text-white mb-2">Free trial used</h2>
-                    <p className="text-white/40 max-w-sm mx-auto text-sm leading-relaxed">
-                      Upgrade to run unlimited AI matches and always see your top mentor suggestions.
-                    </p>
-                  </Card>
-                )}
-
                 {/* ── Upgrade banner — shown to free users after trial is consumed ── */}
                 {!matchLoading && user?.plan === "free" && hasUsedFreeMatch && (
                   <div
@@ -1127,10 +1180,10 @@ function DashboardContent() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div>
                         <div className="font-bold text-white mb-1">
-                          Want to refresh or run new matches?
+                          Want to run new matches?
                         </div>
                         <div className="text-white/45 text-sm">
-                          Upgrade to a plan from 4.99€/month and get unlimited AI matches.
+                          Upgrade from 4.99€/month and get unlimited AI matches.
                         </div>
                       </div>
                       <Link
