@@ -33,6 +33,7 @@ type MatchResult = {
   specialite: string | null;
   industry: string | null;
   expertise: string[] | null;
+  languages: string[] | null;
   mentor_score: number | null;
   score: number;
 };
@@ -41,6 +42,7 @@ type MenteeMatchProfile = {
   field: string | null;
   interests: string[] | null;
   main_goal: string | null;
+  languages: string[] | null;
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -99,7 +101,16 @@ function computeMatchScore(
   const jitter = parseInt(mentor.id.replace(/-/g, "").slice(0, 6), 16) % 3;
 
   // Map raw (0–100) → display range 62–98
-  return Math.min(98, Math.round(62 + (raw / 100) * 36) + jitter);
+  let display = Math.round(62 + (raw / 100) * 36) + jitter;
+
+  // Language match bonus: +3 if mentor speaks a preferred language
+  if (profile?.languages?.length && (mentor as MatchResult).languages?.length) {
+    const pref = new Set(profile.languages.map((l) => l.toLowerCase()));
+    const hit = (mentor as MatchResult).languages!.some((l) => pref.has(l.toLowerCase()));
+    if (hit) display += 3;
+  }
+
+  return Math.min(98, display);
 }
 
 function scoreColor(s: number) {
@@ -273,9 +284,13 @@ function DashboardContent() {
   const [matches, setMatches]               = useState<MatchResult[]>([]);
   const [matchLoading, setMatchLoading]     = useState(false);
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
-  const [qGoal, setQGoal]                   = useState("");
+  const [qGoals, setQGoals]                 = useState<string[]>([]);
   const [qField, setQField]                 = useState("");
-  const [qPriority, setQPriority]           = useState("");
+  const [qLevel, setQLevel]                 = useState("");
+  const [qLanguage, setQLanguage]           = useState("");
+  const [qFrequency, setQFrequency]         = useState("");
+  const [qPriorities, setQPriorities]       = useState<string[]>([]);
+  const [qBio, setQBio]                     = useState("");
 
   useEffect(() => {
     if (initialized.current) return;
@@ -334,6 +349,7 @@ function DashboardContent() {
             field: profile.field ?? null,
             interests: profile.interests ?? null,
             main_goal: profile.main_goal ?? null,
+            languages: null,
           });
         }
 
@@ -367,44 +383,45 @@ function DashboardContent() {
     try {
       const { data: mentors } = await supabase
         .from("mentors")
-        .select("id, nom, job_title, specialite, industry, expertise, mentor_score")
+        .select("id, nom, job_title, specialite, industry, expertise, languages, mentor_score")
         .eq("statut", "active")
         .limit(50);
 
       const ranked = (mentors ?? [])
-        .map((m) => ({ ...m, score: computeMatchScore(profile, m) }))
+        .map((m) => ({ ...m, score: computeMatchScore(profile, m as Omit<MatchResult, "score">) }))
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
-      setMatches(ranked);
+      setMatches(ranked as MatchResult[]);
     } finally {
       setMatchLoading(false);
     }
   }
 
   function handleStartMatching() {
-    // Pre-fill field from profile if available
     setQField(menteeProfile?.field ?? "");
-    setQGoal("");
-    setQPriority("");
+    setQGoals([]);
+    setQLevel("");
+    setQLanguage("");
+    setQFrequency("");
+    setQPriorities([]);
+    setQBio("");
     setShowQuestionnaire(true);
     setTab("matching");
   }
 
   async function handleFindMatches() {
-    // Build updated profile from questionnaire answers + existing profile
     const updatedProfile: MenteeMatchProfile = {
       field: qField.trim() || menteeProfile?.field || null,
       interests: menteeProfile?.interests ?? null,
-      main_goal: qGoal || menteeProfile?.main_goal || null,
+      main_goal: qGoals.length ? qGoals.join(", ") : (menteeProfile?.main_goal ?? null),
+      languages: qLanguage ? [qLanguage] : (menteeProfile?.languages ?? null),
     };
 
-    // Transition to loading immediately — no flash between states
     setShowQuestionnaire(false);
     setMatchLoading(true);
 
     try {
-      // Mark trial as used ONLY now — after questionnaire is filled and submitted
       if (menteeDbId) {
         await supabase
           .from("mentees")
@@ -416,16 +433,16 @@ function DashboardContent() {
 
       const { data: mentors } = await supabase
         .from("mentors")
-        .select("id, nom, job_title, specialite, industry, expertise, mentor_score")
+        .select("id, nom, job_title, specialite, industry, expertise, languages, mentor_score")
         .eq("statut", "active")
         .limit(50);
 
       const ranked = (mentors ?? [])
-        .map((m) => ({ ...m, score: computeMatchScore(updatedProfile, m) }))
+        .map((m) => ({ ...m, score: computeMatchScore(updatedProfile, m as Omit<MatchResult, "score">) }))
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
-      setMatches(ranked);
+      setMatches(ranked as MatchResult[]);
     } finally {
       setMatchLoading(false);
     }
@@ -828,112 +845,159 @@ function DashboardContent() {
                 )}
 
                 {/* ── Questionnaire (shown after clicking "Use my free match") ── */}
-                {!matchLoading && showQuestionnaire && !hasUsedFreeMatch && (
-                  <Card className="p-7">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.25)" }}
-                      >
-                        <Sparkles className="w-5 h-5 text-[#A78BFA]" />
-                      </div>
-                      <div>
-                        <div className="font-bold text-white text-sm">Tell us what you need</div>
-                        <div className="text-white/35 text-xs mt-0.5">3 quick questions — your trial match runs when you click Find My Matches</div>
-                      </div>
-                    </div>
-
-                    {/* Q1 — goal */}
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                        What&apos;s your main goal right now? <span className="text-[#7C3AED]">*</span>
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          "Career growth",
-                          "Job search & interviews",
-                          "Startup & entrepreneurship",
-                          "Skill development",
-                          "Academic guidance",
-                          "Career change",
-                        ].map((g) => (
-                          <button
-                            key={g}
-                            type="button"
-                            onClick={() => setQGoal(g)}
-                            className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-150"
-                            style={
-                              qGoal === g
-                                ? { background: "#7C3AED", borderColor: "#7C3AED", color: "#fff" }
-                                : { background: "transparent", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
-                            }
-                          >
-                            {g}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Q2 — field */}
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                        Your field or industry
-                      </label>
-                      <input
-                        type="text"
-                        value={qField}
-                        onChange={(e) => setQField(e.target.value)}
-                        placeholder="e.g. Software engineering, Marketing, Finance…"
-                        className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 border border-white/10 focus:border-[#7C3AED] focus:outline-none transition-colors"
-                        style={{ background: "rgba(255,255,255,0.04)" }}
-                      />
-                    </div>
-
-                    {/* Q3 — priority */}
-                    <div className="mb-8">
-                      <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                        What matters most in a mentor?
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          "Deep domain expertise",
-                          "Practical advice & accountability",
-                          "Network & opportunities",
-                        ].map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            onClick={() => setQPriority(p)}
-                            className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-150"
-                            style={
-                              qPriority === p
-                                ? { background: "#7C3AED", borderColor: "#7C3AED", color: "#fff" }
-                                : { background: "transparent", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
-                            }
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
+                {!matchLoading && showQuestionnaire && !hasUsedFreeMatch && (() => {
+                  function pill(
+                    label: string,
+                    active: boolean,
+                    onClick: () => void
+                  ) {
+                    return (
                       <button
-                        onClick={() => setShowQuestionnaire(false)}
-                        className="px-5 py-2.5 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                        key={label}
+                        type="button"
+                        onClick={onClick}
+                        className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-150"
+                        style={
+                          active
+                            ? { background: "#7C3AED", borderColor: "#7C3AED", color: "#fff" }
+                            : { background: "transparent", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
+                        }
                       >
-                        Cancel
+                        {label}
                       </button>
-                      <button
-                        onClick={handleFindMatches}
-                        disabled={!qGoal}
-                        className="flex-1 flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                      >
-                        <Sparkles className="w-4 h-4" /> Find My Matches
-                      </button>
-                    </div>
-                  </Card>
-                )}
+                    );
+                  }
+
+                  return (
+                    <Card className="p-7">
+                      <div className="flex items-center gap-3 mb-7">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.25)" }}
+                        >
+                          <Sparkles className="w-5 h-5 text-[#A78BFA]" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-white text-sm">Tell us what you need</div>
+                          <div className="text-white/35 text-xs mt-0.5">A few quick questions — your match runs when you click Find My Matches</div>
+                        </div>
+                      </div>
+
+                      {/* Q1 — goals (multi-select) */}
+                      <div className="mb-6">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          What&apos;s your main goal? <span className="text-[#7C3AED]">*</span>
+                          <span className="normal-case font-normal ml-1 text-white/25">(select all that apply)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Career growth", "Job search & interviews", "Startup & entrepreneurship", "Skill development", "Academic guidance", "Career change"].map((g) =>
+                            pill(g, qGoals.includes(g), () =>
+                              setQGoals((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])
+                            )
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Q2 — field */}
+                      <div className="mb-6">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          Your field or industry
+                        </label>
+                        <input
+                          type="text"
+                          value={qField}
+                          onChange={(e) => setQField(e.target.value)}
+                          placeholder="e.g. Software engineering, Marketing, Finance…"
+                          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 border border-white/10 focus:border-[#7C3AED] focus:outline-none transition-colors"
+                          style={{ background: "rgba(255,255,255,0.04)" }}
+                        />
+                      </div>
+
+                      {/* Q3 — experience level */}
+                      <div className="mb-6">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          Your current experience level
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Student", "Junior", "Mid-level", "Senior", "Career changer"].map((l) =>
+                            pill(l, qLevel === l, () => setQLevel((prev) => prev === l ? "" : l))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Q4 — preferred language */}
+                      <div className="mb-6">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          Preferred language for sessions
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {["English", "French", "Spanish", "Other"].map((l) =>
+                            pill(l, qLanguage === l, () => setQLanguage((prev) => prev === l ? "" : l))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Q5 — meeting frequency */}
+                      <div className="mb-6">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          How often do you want to meet?
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Once a month", "Twice a month", "Weekly"].map((f) =>
+                            pill(f, qFrequency === f, () => setQFrequency((prev) => prev === f ? "" : f))
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Q6 — priorities (multi-select) */}
+                      <div className="mb-6">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          What matters most in a mentor?
+                          <span className="normal-case font-normal ml-1 text-white/25">(select all that apply)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Deep domain expertise", "Practical advice & accountability", "Network & opportunities"].map((p) =>
+                            pill(p, qPriorities.includes(p), () =>
+                              setQPriorities((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p])
+                            )
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Q7 — free text */}
+                      <div className="mb-8">
+                        <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                          Tell us more about yourself
+                          <span className="normal-case font-normal ml-1 text-white/25">(optional)</span>
+                        </label>
+                        <textarea
+                          value={qBio}
+                          onChange={(e) => setQBio(e.target.value)}
+                          rows={3}
+                          placeholder="Your background, what you're looking for, and any details that could help us find the best mentor for you…"
+                          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 border border-white/10 focus:border-[#7C3AED] focus:outline-none transition-colors resize-none"
+                          style={{ background: "rgba(255,255,255,0.04)" }}
+                        />
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setShowQuestionnaire(false)}
+                          className="px-5 py-2.5 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleFindMatches}
+                          disabled={qGoals.length === 0}
+                          className="flex-1 flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                        >
+                          <Sparkles className="w-4 h-4" /> Find My Matches
+                        </button>
+                      </div>
+                    </Card>
+                  );
+                })()}
 
                 {/* ── Paid plan — no results yet ── */}
                 {!matchLoading && user?.plan !== "free" && matches.length === 0 && (
