@@ -137,12 +137,14 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const initialized = useRef(false);
 
-  const [tab, setTab]                   = useState<Tab>("overview");
-  const [user, setUser]                 = useState<UserSession | null>(null);
-  const [connexions, setConnexions]     = useState<Connexion[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [planUpgraded, setPlanUpgraded] = useState<string | null>(null);
-  const [welcomeBack, setWelcomeBack]   = useState(false);
+  const [tab, setTab]                       = useState<Tab>("overview");
+  const [user, setUser]                     = useState<UserSession | null>(null);
+  const [connexions, setConnexions]         = useState<Connexion[]>([]);
+  const [loading, setLoading]               = useState(true);
+  const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
+  const [welcomeBack, setWelcomeBack]       = useState(false);
+  const [hasUsedFreeMatch, setHasUsedFreeMatch] = useState(false);
+  const [menteeDbId, setMenteeDbId]         = useState<string | null>(null);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -183,7 +185,7 @@ function DashboardContent() {
         const table = us.role === "mentor" ? "mentors" : "mentees";
         const { data: profile } = await supabase
           .from(table)
-          .select("id, statut")
+          .select("id, statut, has_used_free_ai_match")
           .eq("email", us.email)
           .single();
 
@@ -191,6 +193,12 @@ function DashboardContent() {
         if (!justOnboarded && profile?.statut === "pending") {
           router.push(`/onboarding/${us.role}`);
           return;
+        }
+
+        // Track freemium AI match state for mentees
+        if (us.role === "mentee" && profile) {
+          setMenteeDbId(profile.id);
+          setHasUsedFreeMatch(profile.has_used_free_ai_match ?? false);
         }
 
         // Load their sessions using the DB row id
@@ -215,6 +223,17 @@ function DashboardContent() {
     clearAuthCookie();
     clearUserSession();
     router.push("/");
+  }
+
+  async function handleTryFreeMatch() {
+    if (menteeDbId) {
+      await supabase
+        .from("mentees")
+        .update({ has_used_free_ai_match: true })
+        .eq("id", menteeDbId);
+    }
+    setHasUsedFreeMatch(true);
+    setTab("matching");
   }
 
   // Derived data
@@ -361,7 +380,7 @@ function DashboardContent() {
                     { label: "Sessions Booked", value: connexions.length,  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
                     { label: "Sessions Done",   value: past.length,         icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
                     { label: "Upcoming",        value: upcoming.length,     icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                    { label: "AI Matches",      value: user?.plan === "free" ? "0" : "∞", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                    { label: "AI Matches",      value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
                   ].map((stat) => (
                     <Card key={stat.label} className="p-5">
                       <div
@@ -435,26 +454,43 @@ function DashboardContent() {
                   />
                 )}
 
-                {/* Upgrade banner */}
-                {user?.plan === "free" && (
+                {/* Bottom banner — freemium AI match or upgrade */}
+                {user?.role === "mentee" && user?.plan === "free" && (
                   <div
                     className="rounded-2xl p-6 border border-[#7C3AED]/30"
                     style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}
                   >
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div>
-                        <div className="font-bold text-white mb-1">Unlock unlimited AI matching</div>
-                        <div className="text-white/45 text-sm">
-                          Subscribe from 4.99€/month and get full access + unlimited AI matches.
+                    {!hasUsedFreeMatch ? (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="font-bold text-white mb-1">Try AI Matching for free</div>
+                          <div className="text-white/45 text-sm">
+                            You have 1 free AI match — let our engine find your perfect mentor.
+                          </div>
                         </div>
+                        <button
+                          onClick={handleTryFreeMatch}
+                          className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                          Try now
+                        </button>
                       </div>
-                      <Link
-                        href="/pricing"
-                        className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-                      >
-                        Upgrade
-                      </Link>
-                    </div>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="font-bold text-white mb-1">Unlock unlimited AI matching</div>
+                          <div className="text-white/45 text-sm">
+                            Subscribe from 4.99€/month and get full access + unlimited AI matches.
+                          </div>
+                        </div>
+                        <Link
+                          href="/pricing"
+                          className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                          Upgrade
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -537,29 +573,7 @@ function DashboardContent() {
                   >
                     <Sparkles className="w-8 h-8 text-[#A78BFA]" />
                   </div>
-                  {user?.plan === "free" ? (
-                    <>
-                      <h2 className="text-xl font-bold text-white mb-2">Upgrade to unlock AI matching</h2>
-                      <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                        Get unlimited AI Smart Matching and find the best mentor for every stage of your journey.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link
-                          href="/pricing"
-                          className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
-                        >
-                          Upgrade for Unlimited Matching
-                        </Link>
-                        <Link
-                          href="/explore"
-                          className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
-                        >
-                          <BookOpen className="w-4 h-4" />
-                          Browse Mentors Manually
-                        </Link>
-                      </div>
-                    </>
-                  ) : (
+                  {user?.plan !== "free" ? (
                     <>
                       <h2 className="text-xl font-bold text-white mb-2">AI Matching is active</h2>
                       <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
@@ -571,6 +585,54 @@ function DashboardContent() {
                       >
                         <Sparkles className="w-4 h-4" /> Go to AI Matching
                       </Link>
+                    </>
+                  ) : !hasUsedFreeMatch ? (
+                    <>
+                      <h2 className="text-xl font-bold text-white mb-2">You have 1 free AI match</h2>
+                      <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+                        Let our engine analyse your profile and find the mentor who fits you best — no commitment needed.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button
+                          onClick={handleTryFreeMatch}
+                          className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
+                        >
+                          <Sparkles className="w-4 h-4" /> Use my free match
+                        </button>
+                        <Link
+                          href="/explore"
+                          className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
+                        >
+                          <BookOpen className="w-4 h-4" /> Browse manually
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-bold text-white mb-2">Free trial used</h2>
+                      <p className="text-white/40 mb-2 max-w-sm mx-auto text-sm leading-relaxed">
+                        You&apos;ve used your 1 free AI match. Upgrade to get unlimited matching and find the right mentor at every stage.
+                      </p>
+                      <div
+                        className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-8"
+                        style={{ background: "rgba(245,158,11,0.12)", color: "#fbbf24" }}
+                      >
+                        0 free matches remaining
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link
+                          href="/pricing"
+                          className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
+                        >
+                          Unlock unlimited — from 4.99€/month
+                        </Link>
+                        <Link
+                          href="/explore"
+                          className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
+                        >
+                          <BookOpen className="w-4 h-4" /> Browse manually
+                        </Link>
+                      </div>
                     </>
                   )}
                 </Card>
