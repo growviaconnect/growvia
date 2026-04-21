@@ -4,22 +4,21 @@ import { createClient } from "@supabase/supabase-js";
 import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  // connection() opts this handler into dynamic rendering so all
-  // process.env reads below happen at request time, never build time.
   await connection();
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  // Assign to a local variable first — Next.js docs confirm that
+  // `const env = process.env; env.VAR` is NOT statically inlined at build
+  // time, unlike direct `process.env.VAR` dot-notation access.
+  const env = process.env;
+  const supabaseUrl = env["NEXT_PUBLIC_SUPABASE_URL"] || "";
   const serviceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SECRET_KEY ||
+    env["SUPABASE_SERVICE_ROLE_KEY"] ||
+    env["SUPABASE_SECRET_KEY"] ||
     "";
 
-  if (!supabaseUrl || !serviceKey) {
+  if (!serviceKey) {
     return NextResponse.json(
-      {
-        error:
-          "Server misconfiguration: add SUPABASE_SERVICE_ROLE_KEY to your Vercel environment variables.",
-      },
+      { error: "SUPABASE_SERVICE_ROLE_KEY is not set in environment variables." },
       { status: 503 }
     );
   }
@@ -46,7 +45,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  // Best-effort — don't fail registration if email sending fails
   sendWelcomeEmail(email, nom, role).catch(() => {});
 
   return NextResponse.json({ userId: data.user.id });
