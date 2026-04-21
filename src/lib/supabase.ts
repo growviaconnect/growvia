@@ -54,6 +54,7 @@ export type Mentee = {
   interests?: string[] | null;
   clarity_level?: number | null;
   description?: string | null;
+  has_used_free_ai_match?: boolean | null;
 };
 
 export type Connexion = {
