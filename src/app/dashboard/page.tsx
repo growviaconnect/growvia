@@ -13,7 +13,7 @@ import {
 import { clearAuthCookie } from "@/lib/auth";
 import {
   CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
-  ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2,
+  ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
 } from "lucide-react";
 
 type Tab = "overview" | "sessions" | "saved" | "matching";
@@ -357,19 +357,9 @@ function DashboardContent() {
     router.push("/");
   }
 
-  async function handleTryFreeMatch() {
+  async function runMatching() {
     setMatchLoading(true);
-    setTab("matching");
     try {
-      // Persist trial consumption first
-      if (menteeDbId) {
-        await supabase
-          .from("mentees")
-          .update({ has_used_free_ai_match: true })
-          .eq("id", menteeDbId);
-      }
-
-      // Fetch active mentors with fields needed for scoring
       const { data: mentors } = await supabase
         .from("mentors")
         .select("id, nom, job_title, specialite, industry, expertise, mentor_score")
@@ -382,10 +372,21 @@ function DashboardContent() {
         .slice(0, 3);
 
       setMatches(ranked);
-      setHasUsedFreeMatch(true);
     } finally {
       setMatchLoading(false);
     }
+  }
+
+  async function handleTryFreeMatch() {
+    setTab("matching");
+    if (menteeDbId) {
+      await supabase
+        .from("mentees")
+        .update({ has_used_free_ai_match: true })
+        .eq("id", menteeDbId);
+    }
+    setHasUsedFreeMatch(true);
+    await runMatching();
   }
 
   // Derived data
@@ -714,9 +715,24 @@ function DashboardContent() {
             {/* AI MATCHING */}
             {tab === "matching" && (
               <div className="space-y-5">
-                <div>
-                  <h1 className="text-2xl font-extrabold text-white tracking-tight">AI Smart Matching</h1>
-                  <p className="text-white/35 text-sm mt-1">Our engine scores every mentor against your profile to surface the best fits.</p>
+                {/* Header — Premium badge only for subscribed users */}
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-2xl font-extrabold text-white tracking-tight">AI Smart Matching</h1>
+                      {user?.plan !== "free" && (
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                          style={{ background: "rgba(16,185,129,0.15)", color: "#34d399" }}
+                        >
+                          Premium
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-white/35 text-sm mt-1">
+                      Our engine scores every mentor against your profile to surface the best fits.
+                    </p>
+                  </div>
                 </div>
 
                 {/* ── Computing / loading ── */}
@@ -733,8 +749,8 @@ function DashboardContent() {
                   </Card>
                 )}
 
-                {/* ── Trial available ── */}
-                {!matchLoading && !hasUsedFreeMatch && (
+                {/* ── Free trial available ── */}
+                {!matchLoading && user?.plan === "free" && !hasUsedFreeMatch && (
                   <Card className="p-10 text-center">
                     <div
                       className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
@@ -769,19 +785,44 @@ function DashboardContent() {
                   </Card>
                 )}
 
-                {/* ── Results ── */}
-                {!matchLoading && hasUsedFreeMatch && matches.length > 0 && (
+                {/* ── Paid plan — no results yet ── */}
+                {!matchLoading && user?.plan !== "free" && matches.length === 0 && (
+                  <Card className="p-10 text-center">
+                    <div
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                      style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.2)" }}
+                    >
+                      <Sparkles className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h2 className="text-xl font-bold text-white mb-2">AI Matching is ready</h2>
+                    <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+                      Your plan includes unlimited AI matches. Run it anytime to see updated suggestions.
+                    </p>
+                    <button
+                      onClick={runMatching}
+                      className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
+                    >
+                      <Sparkles className="w-4 h-4" /> Run AI Matching
+                    </button>
+                  </Card>
+                )}
+
+                {/* ── Results (both free-after-trial and paid) ── */}
+                {!matchLoading && matches.length > 0 && (
                   <>
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30">
                         Top matches for you
                       </p>
-                      <span
-                        className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                        style={{ background: "rgba(124,58,237,0.15)", color: "#C4B5FD" }}
-                      >
-                        Sorted by compatibility
-                      </span>
+                      {/* Refresh only for subscribed users */}
+                      {user?.plan !== "free" && (
+                        <button
+                          onClick={runMatching}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-[#A78BFA] hover:text-white transition-colors"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                        </button>
+                      )}
                     </div>
                     <div className="space-y-3">
                       {matches.map((m, i) => (
@@ -791,8 +832,8 @@ function DashboardContent() {
                   </>
                 )}
 
-                {/* ── Trial used, no in-session results (returning visit) ── */}
-                {!matchLoading && hasUsedFreeMatch && matches.length === 0 && (
+                {/* ── Free trial used, no in-session results (returning visit) ── */}
+                {!matchLoading && user?.plan === "free" && hasUsedFreeMatch && matches.length === 0 && (
                   <Card className="p-10 text-center">
                     <div
                       className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -807,23 +848,25 @@ function DashboardContent() {
                       0 free matches remaining
                     </div>
                     <h2 className="text-xl font-bold text-white mb-2">Free trial used</h2>
-                    <p className="text-white/40 max-w-sm mx-auto text-sm leading-relaxed mb-8">
+                    <p className="text-white/40 max-w-sm mx-auto text-sm leading-relaxed">
                       Upgrade to run unlimited AI matches and always see your top mentor suggestions.
                     </p>
                   </Card>
                 )}
 
-                {/* ── Upgrade banner (shown after trial used) ── */}
-                {!matchLoading && hasUsedFreeMatch && (
+                {/* ── Upgrade banner — shown to free users after trial is consumed ── */}
+                {!matchLoading && user?.plan === "free" && hasUsedFreeMatch && (
                   <div
                     className="rounded-2xl p-6 border border-[#7C3AED]/30"
                     style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}
                   >
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div>
-                        <div className="font-bold text-white mb-1">Unlock more AI matches</div>
+                        <div className="font-bold text-white mb-1">
+                          Want to refresh or run new matches?
+                        </div>
                         <div className="text-white/45 text-sm">
-                          Subscribe from 4.99€/month — unlimited matches, always up to date.
+                          Upgrade to a plan from 4.99€/month and get unlimited AI matches.
                         </div>
                       </div>
                       <Link
@@ -834,28 +877,6 @@ function DashboardContent() {
                       </Link>
                     </div>
                   </div>
-                )}
-
-                {/* ── Paid plan ── */}
-                {!matchLoading && user?.plan !== "free" && !hasUsedFreeMatch && (
-                  <Card className="p-10 text-center">
-                    <div
-                      className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                      style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.2)" }}
-                    >
-                      <Sparkles className="w-8 h-8 text-emerald-400" />
-                    </div>
-                    <h2 className="text-xl font-bold text-white mb-2">AI Matching is active</h2>
-                    <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                      Your plan includes unlimited AI matches.
-                    </p>
-                    <button
-                      onClick={handleTryFreeMatch}
-                      className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
-                    >
-                      <Sparkles className="w-4 h-4" /> Run AI Matching
-                    </button>
-                  </Card>
                 )}
               </div>
             )}
