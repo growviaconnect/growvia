@@ -272,6 +272,10 @@ function DashboardContent() {
   const [menteeProfile, setMenteeProfile]   = useState<MenteeMatchProfile | null>(null);
   const [matches, setMatches]               = useState<MatchResult[]>([]);
   const [matchLoading, setMatchLoading]     = useState(false);
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [qGoal, setQGoal]                   = useState("");
+  const [qField, setQField]                 = useState("");
+  const [qPriority, setQPriority]           = useState("");
 
   useEffect(() => {
     if (initialized.current) return;
@@ -357,8 +361,9 @@ function DashboardContent() {
     router.push("/");
   }
 
-  async function runMatching() {
+  async function runMatching(profileOverride?: MenteeMatchProfile) {
     setMatchLoading(true);
+    const profile = profileOverride ?? menteeProfile;
     try {
       const { data: mentors } = await supabase
         .from("mentors")
@@ -367,7 +372,7 @@ function DashboardContent() {
         .limit(50);
 
       const ranked = (mentors ?? [])
-        .map((m) => ({ ...m, score: computeMatchScore(menteeProfile, m) }))
+        .map((m) => ({ ...m, score: computeMatchScore(profile, m) }))
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
@@ -377,16 +382,53 @@ function DashboardContent() {
     }
   }
 
-  async function handleTryFreeMatch() {
+  function handleStartMatching() {
+    // Pre-fill field from profile if available
+    setQField(menteeProfile?.field ?? "");
+    setQGoal("");
+    setQPriority("");
+    setShowQuestionnaire(true);
     setTab("matching");
-    if (menteeDbId) {
-      await supabase
-        .from("mentees")
-        .update({ has_used_free_ai_match: true })
-        .eq("id", menteeDbId);
+  }
+
+  async function handleFindMatches() {
+    // Build updated profile from questionnaire answers + existing profile
+    const updatedProfile: MenteeMatchProfile = {
+      field: qField.trim() || menteeProfile?.field || null,
+      interests: menteeProfile?.interests ?? null,
+      main_goal: qGoal || menteeProfile?.main_goal || null,
+    };
+
+    // Transition to loading immediately — no flash between states
+    setShowQuestionnaire(false);
+    setMatchLoading(true);
+
+    try {
+      // Mark trial as used ONLY now — after questionnaire is filled and submitted
+      if (menteeDbId) {
+        await supabase
+          .from("mentees")
+          .update({ has_used_free_ai_match: true })
+          .eq("id", menteeDbId);
+      }
+      setHasUsedFreeMatch(true);
+      setMenteeProfile(updatedProfile);
+
+      const { data: mentors } = await supabase
+        .from("mentors")
+        .select("id, nom, job_title, specialite, industry, expertise, mentor_score")
+        .eq("statut", "active")
+        .limit(50);
+
+      const ranked = (mentors ?? [])
+        .map((m) => ({ ...m, score: computeMatchScore(updatedProfile, m) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+
+      setMatches(ranked);
+    } finally {
+      setMatchLoading(false);
     }
-    setHasUsedFreeMatch(true);
-    await runMatching();
   }
 
   // Derived data
@@ -622,7 +664,7 @@ function DashboardContent() {
                           </div>
                         </div>
                         <button
-                          onClick={handleTryFreeMatch}
+                          onClick={handleStartMatching}
                           className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                         >
                           Try now
@@ -749,8 +791,8 @@ function DashboardContent() {
                   </Card>
                 )}
 
-                {/* ── Free trial available ── */}
-                {!matchLoading && user?.plan === "free" && !hasUsedFreeMatch && (
+                {/* ── Free trial available — entry CTA ── */}
+                {!matchLoading && !showQuestionnaire && user?.plan === "free" && !hasUsedFreeMatch && (
                   <Card className="p-10 text-center">
                     <div
                       className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
@@ -766,11 +808,11 @@ function DashboardContent() {
                     </div>
                     <h2 className="text-xl font-bold text-white mb-2">You have 1 free AI match</h2>
                     <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                      Let our engine analyse your profile and surface the top 3 mentors who fit you best — no commitment needed.
+                      Answer 3 quick questions so our engine can surface the top mentors who fit you best.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <button
-                        onClick={handleTryFreeMatch}
+                        onClick={handleStartMatching}
                         className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
                       >
                         <Sparkles className="w-4 h-4" /> Use my free match
@@ -781,6 +823,114 @@ function DashboardContent() {
                       >
                         <BookOpen className="w-4 h-4" /> Browse manually
                       </Link>
+                    </div>
+                  </Card>
+                )}
+
+                {/* ── Questionnaire (shown after clicking "Use my free match") ── */}
+                {!matchLoading && showQuestionnaire && !hasUsedFreeMatch && (
+                  <Card className="p-7">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.25)" }}
+                      >
+                        <Sparkles className="w-5 h-5 text-[#A78BFA]" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-white text-sm">Tell us what you need</div>
+                        <div className="text-white/35 text-xs mt-0.5">3 quick questions — your trial match runs when you click Find My Matches</div>
+                      </div>
+                    </div>
+
+                    {/* Q1 — goal */}
+                    <div className="mb-6">
+                      <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                        What&apos;s your main goal right now? <span className="text-[#7C3AED]">*</span>
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Career growth",
+                          "Job search & interviews",
+                          "Startup & entrepreneurship",
+                          "Skill development",
+                          "Academic guidance",
+                          "Career change",
+                        ].map((g) => (
+                          <button
+                            key={g}
+                            type="button"
+                            onClick={() => setQGoal(g)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-150"
+                            style={
+                              qGoal === g
+                                ? { background: "#7C3AED", borderColor: "#7C3AED", color: "#fff" }
+                                : { background: "transparent", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
+                            }
+                          >
+                            {g}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Q2 — field */}
+                    <div className="mb-6">
+                      <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                        Your field or industry
+                      </label>
+                      <input
+                        type="text"
+                        value={qField}
+                        onChange={(e) => setQField(e.target.value)}
+                        placeholder="e.g. Software engineering, Marketing, Finance…"
+                        className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 border border-white/10 focus:border-[#7C3AED] focus:outline-none transition-colors"
+                        style={{ background: "rgba(255,255,255,0.04)" }}
+                      />
+                    </div>
+
+                    {/* Q3 — priority */}
+                    <div className="mb-8">
+                      <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
+                        What matters most in a mentor?
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Deep domain expertise",
+                          "Practical advice & accountability",
+                          "Network & opportunities",
+                        ].map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setQPriority(p)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-150"
+                            style={
+                              qPriority === p
+                                ? { background: "#7C3AED", borderColor: "#7C3AED", color: "#fff" }
+                                : { background: "transparent", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
+                            }
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowQuestionnaire(false)}
+                        className="px-5 py-2.5 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleFindMatches}
+                        disabled={!qGoal}
+                        className="flex-1 flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                      >
+                        <Sparkles className="w-4 h-4" /> Find My Matches
+                      </button>
                     </div>
                   </Card>
                 )}
@@ -799,7 +949,7 @@ function DashboardContent() {
                       Your plan includes unlimited AI matches. Run it anytime to see updated suggestions.
                     </p>
                     <button
-                      onClick={runMatching}
+                      onClick={() => runMatching()}
                       className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
                     >
                       <Sparkles className="w-4 h-4" /> Run AI Matching
@@ -817,7 +967,7 @@ function DashboardContent() {
                       {/* Refresh only for subscribed users */}
                       {user?.plan !== "free" && (
                         <button
-                          onClick={runMatching}
+                          onClick={() => runMatching()}
                           className="flex items-center gap-1.5 text-xs font-semibold text-[#A78BFA] hover:text-white transition-colors"
                         >
                           <RefreshCw className="w-3.5 h-3.5" /> Refresh
