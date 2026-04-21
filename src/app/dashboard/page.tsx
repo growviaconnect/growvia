@@ -1,68 +1,53 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { clearUserSession, getUserSession, setUserSession } from "@/lib/session";
+import {
+  clearUserSession,
+  getUserSession,
+  setUserSession,
+  type UserSession,
+} from "@/lib/session";
 import { clearAuthCookie } from "@/lib/auth";
 import {
-  CalendarCheck,
-  Heart,
-  Sparkles,
-  User,
-  Clock,
-  Video,
-  Star,
-  ChevronRight,
-  TrendingUp,
-  BookOpen,
-  Settings,
-  LogOut,
+  CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
+  ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2,
 } from "lucide-react";
-
-const upcomingSessions = [
-  {
-    mentor: "Sophie Chen",
-    role: "Product Manager at Spotify",
-    date: "Tomorrow",
-    time: "10:00",
-    duration: "60 min",
-    status: "upcoming",
-    initials: "SC",
-  },
-  {
-    mentor: "Marcus Dubois",
-    role: "Founder at TechStart Paris",
-    date: "April 14",
-    time: "14:30",
-    duration: "30 min",
-    status: "upcoming",
-    initials: "MD",
-  },
-];
-
-const pastSessions = [
-  {
-    mentor: "Aisha Patel",
-    role: "HR Director at L'Oréal",
-    date: "April 5",
-    time: "11:00",
-    duration: "60 min",
-    status: "completed",
-    initials: "AP",
-    rating: 5,
-  },
-];
-
-const savedMentors = [
-  { name: "Sophie Chen", role: "Product Manager at Spotify", match: "98%", initials: "SC" },
-  { name: "Marcus Dubois", role: "Founder at TechStart Paris", match: "95%", initials: "MD" },
-];
 
 type Tab = "overview" | "sessions" | "saved" | "matching";
 
-/* ── Reusable dark card wrapper ──────────────────────────────── */
+type Connexion = {
+  id: string;
+  date: string;
+  statut: "pending" | "active" | "completed" | "cancelled";
+  mentors: { nom: string; email: string; specialite: string | null } | null;
+  mentees: { nom: string; email: string; objectif: string | null } | null;
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function initials(nom: string) {
+  return nom.split(" ").map((w) => w[0] ?? "").join("").toUpperCase().slice(0, 2);
+}
+
+function fmtDate(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const tom = new Date(now);
+  tom.setDate(tom.getDate() + 1);
+  if (d.toDateString() === now.toDateString()) return "Today";
+  if (d.toDateString() === tom.toDateString()) return "Tomorrow";
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div
     className={`rounded-2xl border border-white/[0.07] ${className}`}
@@ -72,26 +57,158 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
   </div>
 );
 
+function EmptyState({ icon: Icon, title, desc, action }: {
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <Card className="p-10 text-center">
+      <div
+        className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+        style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.2)" }}
+      >
+        <Icon className="w-7 h-7 text-[#A78BFA]" />
+      </div>
+      <h3 className="font-semibold text-white mb-1.5">{title}</h3>
+      <p className="text-white/35 text-sm mb-6 max-w-xs mx-auto leading-relaxed">{desc}</p>
+      {action}
+    </Card>
+  );
+}
+
+function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) {
+  const other = userRole === "mentor" ? conn.mentees : conn.mentors;
+  const otherNom = other?.nom ?? "—";
+  const otherInfo =
+    userRole === "mentor"
+      ? (conn.mentees?.objectif ?? "Mentee")
+      : (conn.mentors?.specialite ?? "Mentor");
+  const isPast = conn.statut === "completed" || new Date(conn.date) < new Date();
+
+  return (
+    <Card className="p-5 flex items-center gap-4">
+      <div
+        className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+        style={{
+          background: isPast
+            ? "rgba(255,255,255,0.08)"
+            : "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)",
+        }}
+      >
+        {initials(otherNom)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-white text-sm">{otherNom}</div>
+        <div className="text-xs text-white/35 mt-0.5 truncate">{otherInfo}</div>
+        <div className="flex items-center gap-3 mt-2">
+          <span className="inline-flex items-center gap-1 text-xs text-white/35">
+            <Clock className="w-3 h-3" />
+            {fmtDate(conn.date)} at {fmtTime(conn.date)}
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {!isPast && (
+          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+            <Video className="w-3.5 h-3.5" /> Join
+          </button>
+        )}
+        <span
+          className="text-xs font-medium px-2.5 py-1 rounded-full"
+          style={
+            isPast
+              ? { background: "rgba(16,185,129,0.12)", color: "#34d399" }
+              : { background: "rgba(124,58,237,0.18)", color: "#A78BFA" }
+          }
+        >
+          {conn.statut}
+        </span>
+      </div>
+    </Card>
+  );
+}
+
+// ── Main dashboard ─────────────────────────────────────────────────────────────
+
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<Tab>("overview");
-  const [planUpgraded, setPlanUpgraded] = useState<string | null>(null);
+  const initialized = useRef(false);
 
-  // Handle return from Stripe Checkout
+  const [tab, setTab]                   = useState<Tab>("overview");
+  const [user, setUser]                 = useState<UserSession | null>(null);
+  const [connexions, setConnexions]     = useState<Connexion[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [planUpgraded, setPlanUpgraded] = useState<string | null>(null);
+  const [welcomeBack, setWelcomeBack]   = useState(false);
+
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const us = getUserSession();
+    if (!us) {
+      router.push("/auth/login?next=/dashboard");
+      return;
+    }
+    setUser(us);
+
+    // Handle return from Stripe
     const plan = searchParams.get("plan");
-    if (!plan) return;
-    const session = getUserSession();
-    if (session) {
-      const updated = { ...session, plan: plan as "free" | "pro" | "school" };
+    if (plan) {
+      const updated = { ...us, plan: plan as "free" | "pro" | "school" };
       setUserSession(updated);
       supabase.auth.updateUser({ data: { plan } }).catch(() => {});
       setPlanUpgraded(plan);
+      router.replace("/dashboard");
     }
-    // Remove query params from URL without re-render
-    router.replace("/dashboard");
-  }, [searchParams, router]);
+
+    // Flag if just finished onboarding
+    const justOnboarded = searchParams.get("onboarded") === "1";
+    if (justOnboarded) {
+      setWelcomeBack(true);
+      router.replace("/dashboard");
+    }
+
+    loadData(us, justOnboarded);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function loadData(us: UserSession, justOnboarded: boolean) {
+    setLoading(true);
+    try {
+      // Only check onboarding for mentees and mentors, not school_admin
+      if (us.role !== "school_admin") {
+        const table = us.role === "mentor" ? "mentors" : "mentees";
+        const { data: profile } = await supabase
+          .from(table)
+          .select("id, statut")
+          .eq("email", us.email)
+          .single();
+
+        // New user who hasn't filled out their profile yet
+        if (!justOnboarded && profile?.statut === "pending") {
+          router.push(`/onboarding/${us.role}`);
+          return;
+        }
+
+        // Load their sessions using the DB row id
+        if (profile?.id) {
+          const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
+          const { data: rows } = await supabase
+            .from("connexions")
+            .select("id, date, statut, mentors(nom, email, specialite), mentees(nom, email, objectif)")
+            .eq(idField, profile.id)
+            .order("date", { ascending: true });
+
+          setConnexions((rows ?? []) as unknown as Connexion[]);
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -100,43 +217,60 @@ function DashboardContent() {
     router.push("/");
   }
 
+  // Derived data
+  const upcoming = connexions.filter(
+    (c) => ["pending", "active"].includes(c.statut) && new Date(c.date) >= new Date()
+  );
+  const past = connexions.filter(
+    (c) => c.statut === "completed" || (c.statut !== "cancelled" && new Date(c.date) < new Date())
+  );
+
+  const firstName = (user?.nom ?? "").split(" ")[0] || "there";
+  const userInitials = initials(user?.nom ?? "?");
+  const roleLabel = user?.role === "mentor" ? "Mentor" : user?.role === "school_admin" ? "School Admin" : "Mentee";
+
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview",  label: "Overview",       icon: TrendingUp },
-    { id: "sessions",  label: "My Sessions",    icon: CalendarCheck },
-    { id: "saved",     label: "Saved Mentors",  icon: Heart },
-    { id: "matching",  label: "AI Matching",    icon: Sparkles },
+    { id: "overview", label: "Overview",      icon: TrendingUp    },
+    { id: "sessions", label: "My Sessions",   icon: CalendarCheck },
+    { id: "saved",    label: "Saved Mentors", icon: Heart         },
+    { id: "matching", label: "AI Matching",   icon: Sparkles      },
+  ];
+  const secondaryNav = [
+    { href: "/profile",  label: "Profile",   icon: User         },
+    { href: "/calendar", label: "Calendar",  icon: CalendarCheck },
+    { href: "/settings", label: "Settings",  icon: Settings      },
   ];
 
-  const secondaryNav = [
-    { href: "/profile",  label: "Profile",    icon: User },
-    { href: "/calendar", label: "Calendar",   icon: CalendarCheck },
-    { href: "/settings", label: "Paramètres", icon: Settings },
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#7C3AED] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-6">
 
-          {/* ── Sidebar ─────────────────────────────────────────── */}
+          {/* ── Sidebar ───────────────────────────────────────────────── */}
           <aside className="lg:w-60 flex-shrink-0 space-y-3">
-
-            {/* Avatar + name */}
             <Card className="p-5">
               <div className="flex items-center gap-3 mb-6">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                   style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
                 >
-                  LK
+                  {userInitials}
                 </div>
-                <div>
-                  <div className="font-semibold text-white text-sm leading-tight">Luna K.</div>
-                  <div className="text-xs text-white/35 mt-0.5">Mentee</div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-white text-sm leading-tight truncate">
+                    {user?.nom ?? "—"}
+                  </div>
+                  <div className="text-xs text-white/35 mt-0.5">{roleLabel}</div>
                 </div>
               </div>
-
-              {/* Primary nav */}
               <nav className="space-y-1">
                 {navItems.map((item) => (
                   <button
@@ -155,7 +289,6 @@ function DashboardContent() {
               </nav>
             </Card>
 
-            {/* Secondary nav */}
             <Card className="p-5">
               <nav className="space-y-1">
                 {secondaryNav.map((item) => (
@@ -173,35 +306,67 @@ function DashboardContent() {
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.07] transition-colors duration-200"
                 >
                   <LogOut className="w-4 h-4 flex-shrink-0" />
-                  Déconnexion
+                  Sign out
                 </button>
               </nav>
             </Card>
           </aside>
 
-          {/* ── Main content ────────────────────────────────────── */}
+          {/* ── Main content ──────────────────────────────────────────── */}
           <main className="flex-1 min-w-0">
 
             {/* OVERVIEW */}
             {tab === "overview" && (
               <div className="space-y-5">
                 <div>
-                  <h1 className="text-2xl font-extrabold text-white tracking-tight">Good morning, Luna</h1>
-                  <p className="text-white/35 text-sm mt-1">Here is your mentoring overview.</p>
+                  <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                    {welcomeBack ? `Welcome to GrowVia, ${firstName}! 🎉` : `Welcome back, ${firstName}`}
+                  </h1>
+                  <p className="text-white/35 text-sm mt-1">
+                    {welcomeBack
+                      ? "Your profile is set up. Explore mentors and book your first session."
+                      : "Here is your mentoring overview."}
+                  </p>
                 </div>
+
+                {/* Onboarding complete toast */}
+                {welcomeBack && (
+                  <div
+                    className="rounded-2xl p-4 border border-[#7C3AED]/25 flex items-center gap-3"
+                    style={{ background: "rgba(124,58,237,0.1)" }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#A78BFA] flex-shrink-0" />
+                    <span className="text-[#C4B5FD] text-sm font-medium">
+                      Profile complete! Start by exploring mentors or let AI find your best match.
+                    </span>
+                  </div>
+                )}
+
+                {/* Plan upgraded toast */}
+                {planUpgraded && (
+                  <div
+                    className="rounded-2xl p-4 border border-emerald-500/20 flex items-center gap-3"
+                    style={{ background: "rgba(16,185,129,0.1)" }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                    <span className="text-emerald-300 text-sm font-medium">
+                      Plan upgraded to <span className="capitalize font-bold">{planUpgraded}</span>. Welcome to the next level!
+                    </span>
+                  </div>
+                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { label: "Sessions Booked", value: "3",  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
-                    { label: "Sessions Done",   value: "1",  icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
-                    { label: "Saved Mentors",   value: "2",  icon: Heart,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                    { label: "AI Matches Left", value: "0",  icon: Sparkles,      accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                    { label: "Sessions Booked", value: connexions.length,  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
+                    { label: "Sessions Done",   value: past.length,         icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
+                    { label: "Upcoming",        value: upcoming.length,     icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
+                    { label: "AI Matches",      value: user?.plan === "free" ? "0" : "∞", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
                   ].map((stat) => (
                     <Card key={stat.label} className="p-5">
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                        style={{ background: stat.accent, border: `1px solid ${stat.accent.replace("0.15", "0.3").replace("0.12", "0.25")}` }}
+                        style={{ background: stat.accent }}
                       >
                         <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
                       </div>
@@ -211,8 +376,8 @@ function DashboardContent() {
                   ))}
                 </div>
 
-                {/* Next session */}
-                {upcomingSessions.length > 0 && (
+                {/* Next session or empty state */}
+                {upcoming.length > 0 ? (
                   <Card className="p-6">
                     <div className="flex justify-between items-center mb-5">
                       <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">Next Session</h2>
@@ -224,63 +389,74 @@ function DashboardContent() {
                       </button>
                     </div>
                     {(() => {
-                      const s = upcomingSessions[0];
+                      const c = upcoming[0];
+                      const other = user?.role === "mentor" ? c.mentees : c.mentors;
+                      const otherNom = other?.nom ?? "—";
                       return (
                         <div className="flex items-center gap-4">
                           <div
                             className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                             style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
                           >
-                            {s.initials}
+                            {initials(otherNom)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-white text-sm">{s.mentor}</div>
-                            <div className="text-xs text-white/35 mt-0.5">{s.role}</div>
+                            <div className="font-semibold text-white text-sm">{otherNom}</div>
+                            <div className="text-xs text-white/35 mt-0.5">
+                              {user?.role === "mentor"
+                                ? c.mentees?.objectif ?? "Mentee"
+                                : c.mentors?.specialite ?? "Mentor"}
+                            </div>
                           </div>
                           <div className="text-right flex-shrink-0 hidden sm:block">
-                            <div className="text-sm font-semibold text-white">{s.date}</div>
-                            <div className="text-xs text-white/35 mt-0.5">{s.time} · {s.duration}</div>
+                            <div className="text-sm font-semibold text-white">{fmtDate(c.date)}</div>
+                            <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date)}</div>
                           </div>
-                          <button
-                            className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0"
-                          >
+                          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
                             <Video className="w-3.5 h-3.5" /> Join
                           </button>
                         </div>
                       );
                     })()}
                   </Card>
-                )}
-
-                {/* Plan upgraded toast */}
-                {planUpgraded && (
-                  <div className="rounded-2xl p-4 border border-emerald-500/20 flex items-center gap-3"
-                    style={{ background: "rgba(16,185,129,0.1)" }}>
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
-                    <span className="text-emerald-300 text-sm font-medium">
-                      Your plan was upgraded to <span className="capitalize font-bold">{planUpgraded}</span>. Welcome to the next level!
-                    </span>
-                  </div>
+                ) : (
+                  <EmptyState
+                    icon={CalendarCheck}
+                    title="No upcoming sessions"
+                    desc="Book a session with a mentor to get started on your journey."
+                    action={
+                      <Link
+                        href="/explore"
+                        className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                      >
+                        Explore mentors
+                      </Link>
+                    }
+                  />
                 )}
 
                 {/* Upgrade banner */}
-                <div
-                  className="rounded-2xl p-6 border border-[#7C3AED]/30"
-                  style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}
-                >
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                      <div className="font-bold text-white mb-1">Unlock unlimited AI matching</div>
-                      <div className="text-white/45 text-sm">Subscribe for 14.99€/month and get full access + unlimited AI matches.</div>
+                {user?.plan === "free" && (
+                  <div
+                    className="rounded-2xl p-6 border border-[#7C3AED]/30"
+                    style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}
+                  >
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="font-bold text-white mb-1">Unlock unlimited AI matching</div>
+                        <div className="text-white/45 text-sm">
+                          Subscribe from 4.99€/month and get full access + unlimited AI matches.
+                        </div>
+                      </div>
+                      <Link
+                        href="/pricing"
+                        className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                      >
+                        Upgrade
+                      </Link>
                     </div>
-                    <Link
-                      href="/pricing"
-                      className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-                    >
-                      Upgrade
-                    </Link>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -291,78 +467,39 @@ function DashboardContent() {
 
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Upcoming</p>
-                  <div className="space-y-3">
-                    {upcomingSessions.map((s) => (
-                      <Card key={s.mentor} className="p-5 flex items-center gap-4">
-                        <div
-                          className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                          style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+                  {upcoming.length > 0 ? (
+                    <div className="space-y-3">
+                      {upcoming.map((c) => (
+                        <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState
+                      icon={CalendarCheck}
+                      title="No upcoming sessions"
+                      desc="Find a mentor and book your first session."
+                      action={
+                        <Link
+                          href="/explore"
+                          className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
                         >
-                          {s.initials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-white text-sm">{s.mentor}</div>
-                          <div className="text-xs text-white/35 mt-0.5">{s.role}</div>
-                          <div className="flex items-center gap-3 mt-2">
-                            <span className="inline-flex items-center gap-1 text-xs text-white/35">
-                              <Clock className="w-3 h-3" /> {s.date} at {s.time}
-                            </span>
-                            <span className="text-xs text-white/25">{s.duration}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span
-                            className="text-xs font-medium px-2.5 py-1 rounded-full"
-                            style={{ background: "rgba(124,58,237,0.18)", color: "#A78BFA" }}
-                          >
-                            {s.status}
-                          </span>
-                          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-                            <Video className="w-3.5 h-3.5" /> Join
-                          </button>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
+                          <BookOpen className="w-4 h-4" /> Find a mentor
+                        </Link>
+                      }
+                    />
+                  )}
                 </div>
 
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Past Sessions</p>
-                  <div className="space-y-3">
-                    {pastSessions.map((s) => (
-                      <Card key={s.mentor} className="p-5 flex items-center gap-4">
-                        <div
-                          className="w-11 h-11 rounded-xl flex items-center justify-center text-white/60 font-bold text-sm flex-shrink-0"
-                          style={{ background: "rgba(255,255,255,0.06)" }}
-                        >
-                          {s.initials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-white text-sm">{s.mentor}</div>
-                          <div className="text-xs text-white/35 mt-0.5">{s.role}</div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="inline-flex items-center gap-1 text-xs text-white/35">
-                              <Clock className="w-3 h-3" /> {s.date}
-                            </span>
-                            {s.rating && (
-                              <span className="flex items-center gap-0.5">
-                                {Array.from({ length: s.rating }).map((_, i) => (
-                                  <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                ))}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <span
-                          className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0"
-                          style={{ background: "rgba(16,185,129,0.12)", color: "#34d399" }}
-                        >
-                          {s.status}
-                        </span>
-                      </Card>
-                    ))}
+                {past.length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Past Sessions</p>
+                    <div className="space-y-3">
+                      {past.map((c) => (
+                        <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -370,36 +507,19 @@ function DashboardContent() {
             {tab === "saved" && (
               <div className="space-y-6">
                 <h1 className="text-2xl font-extrabold text-white tracking-tight">Saved Mentors</h1>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {savedMentors.map((m) => (
-                    <Card key={m.name} className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div
-                          className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-                          style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-                        >
-                          {m.initials}
-                        </div>
-                        <button className="text-pink-400/60 hover:text-pink-400 transition-colors">
-                          <Heart className="w-5 h-5 fill-current" />
-                        </button>
-                      </div>
-                      <h3 className="font-bold text-white text-sm mb-0.5">{m.name}</h3>
-                      <p className="text-sm text-white/35 mb-5">{m.role}</p>
-                      <div className="flex items-center justify-between">
-                        <span
-                          className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                          style={{ background: "rgba(16,185,129,0.12)", color: "#34d399" }}
-                        >
-                          {m.match} match
-                        </span>
-                        <button className="text-sm font-semibold text-[#7C3AED] hover:text-[#A78BFA] transition-colors">
-                          Book session
-                        </button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                <EmptyState
+                  icon={Heart}
+                  title="No saved mentors yet"
+                  desc="Browse mentors and save the ones you'd like to work with."
+                  action={
+                    <Link
+                      href="/explore"
+                      className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                    >
+                      <BookOpen className="w-4 h-4" /> Browse mentors
+                    </Link>
+                  }
+                />
               </div>
             )}
 
@@ -417,25 +537,42 @@ function DashboardContent() {
                   >
                     <Sparkles className="w-8 h-8 text-[#A78BFA]" />
                   </div>
-                  <h2 className="text-xl font-bold text-white mb-2">You have used your free AI match</h2>
-                  <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                    Upgrade to a subscription to get unlimited AI Smart Matching and find the best mentor for every stage of your journey.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link
-                      href="/pricing"
-                      className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
-                    >
-                      Upgrade for Unlimited Matching
-                    </Link>
-                    <Link
-                      href="/explore"
-                      className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                      Browse Mentors Manually
-                    </Link>
-                  </div>
+                  {user?.plan === "free" ? (
+                    <>
+                      <h2 className="text-xl font-bold text-white mb-2">Upgrade to unlock AI matching</h2>
+                      <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+                        Get unlimited AI Smart Matching and find the best mentor for every stage of your journey.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link
+                          href="/pricing"
+                          className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
+                        >
+                          Upgrade for Unlimited Matching
+                        </Link>
+                        <Link
+                          href="/explore"
+                          className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          Browse Mentors Manually
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-bold text-white mb-2">AI Matching is active</h2>
+                      <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+                        Your plan includes unlimited AI matches. Head to the explore page to see your matches.
+                      </p>
+                      <Link
+                        href="/ai-smart-matching"
+                        className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
+                      >
+                        <Sparkles className="w-4 h-4" /> Go to AI Matching
+                      </Link>
+                    </>
+                  )}
                 </Card>
               </div>
             )}
@@ -449,7 +586,7 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0D0A1A]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center"><Loader2 className="w-8 h-8 text-[#7C3AED] animate-spin" /></div>}>
       <DashboardContent />
     </Suspense>
   );
