@@ -410,12 +410,59 @@ function DashboardContent() {
     setTab("matching");
   }
 
+  async function saveMatchingResponse(params: {
+    goals: string[];
+    industry: string;
+    priorities: string[];
+    level: string;
+    language: string;
+    frequency: string;
+    bio: string;
+  }) {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.id) return;
+
+      const { count } = await supabase
+        .from("ai_matching_responses")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", authUser.id);
+
+      await supabase.from("ai_matching_responses").insert({
+        user_id: authUser.id,
+        full_name: user?.nom ?? null,
+        role: user?.role ?? null,
+        main_goals: params.goals,
+        industry: params.industry.trim() || null,
+        mentor_priorities: params.priorities,
+        experience_level: params.level || null,
+        preferred_language: params.language || null,
+        meeting_frequency: params.frequency || null,
+        free_text: params.bio.trim() || null,
+        attempt_number: (count ?? 0) + 1,
+      });
+    } catch {
+      // Never let analytics failures block the UX
+    }
+  }
+
   async function handleFindMatches() {
     const updatedProfile: MenteeMatchProfile = {
       field: qField.trim() || menteeProfile?.field || null,
       interests: menteeProfile?.interests ?? null,
       main_goal: qGoals.length ? qGoals.join(", ") : (menteeProfile?.main_goal ?? null),
       languages: qLanguage ? [qLanguage] : (menteeProfile?.languages ?? null),
+    };
+
+    // Snapshot questionnaire values now — state will be cleared during async work
+    const snapshot = {
+      goals: qGoals,
+      industry: qField,
+      priorities: qPriorities,
+      level: qLevel,
+      language: qLanguage,
+      frequency: qFrequency,
+      bio: qBio,
     };
 
     setShowQuestionnaire(false);
@@ -430,6 +477,9 @@ function DashboardContent() {
       }
       setHasUsedFreeMatch(true);
       setMenteeProfile(updatedProfile);
+
+      // Save questionnaire response — fire-and-forget, never blocks matching
+      saveMatchingResponse(snapshot).catch(() => {});
 
       const { data: mentors } = await supabase
         .from("mentors")
