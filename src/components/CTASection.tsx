@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useLang } from "@/contexts/LangContext";
 
 const IMAGES = [
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&q=80",
@@ -13,6 +14,7 @@ const IMAGES = [
 ];
 
 export default function CTASection() {
+  const { t } = useLang();
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -47,30 +49,30 @@ export default function CTASection() {
       {/* Content */}
       <div className="relative max-w-4xl mx-auto px-6 lg:px-8 py-40">
         <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
-          Get Started
+          {t("cta_label")}
         </p>
         <h2 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[0.95] tracking-tight">
-          Build the future,<br />starting today.
+          {t("cta_title_1")}<br />{t("cta_title_2")}
         </h2>
         <p className="reveal reveal-delay-2 text-xl text-white/35 mb-14 max-w-xl mx-auto leading-relaxed">
-          Early access is open. Join GrowVia and shape what mentorship becomes.
+          {t("cta_sub")}
         </p>
         <div className="reveal reveal-delay-3 flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/auth/register"
             className="inline-flex items-center justify-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
           >
-            Find my mentor <ArrowRight className="w-4 h-4" />
+            {t("cta_find")} <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/become-a-mentor"
             className="inline-flex items-center justify-center gap-2.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white font-semibold px-8 py-4 rounded-lg transition-colors text-sm"
           >
-            Apply as a mentor
+            {t("cta_apply")}
           </Link>
         </div>
         <p className="text-sm text-white/20 mt-10">
-          No commitment required · Discovery Session from 9.99€
+          {t("cta_footnote")}
         </p>
       </div>
 

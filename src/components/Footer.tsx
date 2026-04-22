@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
+import { useLang } from "@/contexts/LangContext";
 
 /* ── Custom social SVG icons ──────────────────────────────────── */
 const InstagramIcon = ({ className }: { className?: string }) => (
@@ -37,29 +38,7 @@ const LinkedInIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/* ── Data ─────────────────────────────────────────────────────── */
 type SocialLink = { label: string; href: string; Icon: React.ComponentType<{ className?: string }> };
-
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Explore", href: "/explore" },
-  { label: "Founders", href: "/founders" },
-  { label: "Stories", href: "/for-schools" },
-  { label: "Pricing", href: "/pricing" },
-];
-
-const companyLinks = [
-  { label: "Manifesto", href: "/#manifesto" },
-  { label: "Careers", href: "/careers" },
-  { label: "Contact", href: "/contact" },
-  { label: "Privacy Policy", href: "/legal/privacy" },
-];
-
-const cities = [
-  { city: "Barcelona", country: "Spain" },
-  { city: "London", country: "United Kingdom" },
-  { city: "Miami", country: "United States" },
-];
 
 const socials: SocialLink[] = [
   { label: "Instagram", href: "#", Icon: InstagramIcon },
@@ -72,34 +51,58 @@ const socials: SocialLink[] = [
 /* ── Footer component ─────────────────────────────────────────── */
 export default function Footer() {
   const pathname = usePathname();
+  const { t } = useLang();
   const hideHeadline = pathname === "/how-it-works";
+
+  const navLinks = [
+    { label: t("footer_link_home"),     href: "/" },
+    { label: t("footer_link_explore"),  href: "/explore" },
+    { label: t("footer_link_founders"), href: "/founders" },
+    { label: t("footer_link_stories"),  href: "/for-schools" },
+    { label: t("footer_link_pricing"),  href: "/pricing" },
+  ];
+
+  const companyLinks = [
+    { label: t("footer_link_manifesto"), href: "/#manifesto" },
+    { label: t("footer_link_careers"),   href: "/careers" },
+    { label: t("footer_link_contact"),   href: "/contact" },
+    { label: t("footer_link_privacy"),   href: "/legal/privacy" },
+  ];
+
+  const cities = [
+    { city: "Barcelona", country: "Spain" },
+    { city: "London",    country: "United Kingdom" },
+    { city: "Miami",     country: "United States" },
+  ];
 
   return (
     <footer className="bg-[#0D0A1A] pt-20 pb-0">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* ── Big headline ───────────────────────────────────── */}
-        {!hideHeadline && <div className="reveal mb-16 lg:mb-20">
-          <h2 className="font-extrabold text-white leading-[0.88] tracking-tight text-5xl md:text-7xl lg:text-[7.5rem]">
-            Where{" "}
-            <span
-              style={{
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                textShadow: "0 0 80px rgba(124,58,237,0.35)",
-                textDecoration: "underline",
-                textDecorationColor: "rgba(76,29,149,0.55)",
-                textDecorationThickness: "2px",
-                textUnderlineOffset: "8px",
-              }}
-            >
-              careers,
-            </span>
-            <br />
-            made.
-          </h2>
-        </div>}
+        {!hideHeadline && (
+          <div className="reveal mb-16 lg:mb-20">
+            <h2 className="font-extrabold text-white leading-[0.88] tracking-tight text-5xl md:text-7xl lg:text-[7.5rem]">
+              {t("footer_headline_1")}{" "}
+              <span
+                style={{
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  textShadow: "0 0 80px rgba(124,58,237,0.35)",
+                  textDecoration: "underline",
+                  textDecorationColor: "rgba(76,29,149,0.55)",
+                  textDecorationThickness: "2px",
+                  textUnderlineOffset: "8px",
+                }}
+              >
+                {t("footer_headline_2")}
+              </span>
+              <br />
+              {t("footer_headline_3")}
+            </h2>
+          </div>
+        )}
 
         {/* ── Links + cities row ─────────────────────────────── */}
         <div className="reveal reveal-delay-1 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
@@ -109,7 +112,7 @@ export default function Footer() {
             {/* NAVIGATION */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                Navigation
+                {t("footer_nav_label")}
               </p>
               <ul className="space-y-3.5">
                 {navLinks.map((l) => (
@@ -128,7 +131,7 @@ export default function Footer() {
             {/* COMPANY */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                Company
+                {t("footer_company_label")}
               </p>
               <ul className="space-y-3.5">
                 {companyLinks.map((l) => (
@@ -174,7 +177,7 @@ export default function Footer() {
           {/* Copyright + admin — center */}
           <div className="flex items-center gap-3 order-1 md:order-2">
             <p className="text-xs text-white/20 uppercase tracking-widest">
-              ©2026 All Rights Reserved
+              {t("footer_copyright")}
             </p>
             <Link
               href="/admin"
