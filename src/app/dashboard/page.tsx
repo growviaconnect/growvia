@@ -4,13 +4,8 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import {
-  clearUserSession,
-  getUserSession,
-  setUserSession,
-  type UserSession,
-} from "@/lib/session";
-import { clearAuthCookie } from "@/lib/auth";
+import { getUserSession, type UserSession } from "@/lib/session";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
@@ -313,6 +308,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialized = useRef(false);
+  const { session: authSession, setSession: setAuthSession, clearSession } = useAuth();
 
   const [tab, setTab]                       = useState<Tab>("overview");
   const [user, setUser]                     = useState<UserSession | null>(null);
@@ -358,7 +354,8 @@ function DashboardContent() {
     if (initialized.current) return;
     initialized.current = true;
 
-    const us = getUserSession();
+    // Prefer session already in context (populated on prior page load); fall back to localStorage
+    const us = authSession ?? getUserSession();
     if (!us) {
       router.push("/auth/login?next=/dashboard");
       return;
@@ -369,7 +366,7 @@ function DashboardContent() {
     const plan = searchParams.get("plan");
     if (plan) {
       const updated = { ...us, plan: plan as "free" | "pro" | "school" };
-      setUserSession(updated);
+      setAuthSession(updated); // updates context + localStorage in one call
       supabase.auth.updateUser({ data: { plan } }).catch(() => {});
       setPlanUpgraded(plan);
       router.replace("/dashboard");
@@ -450,9 +447,8 @@ function DashboardContent() {
   }
 
   async function handleLogout() {
-    await supabase.auth.signOut();
-    clearAuthCookie();
-    clearUserSession();
+    await supabase.auth.signOut(); // triggers onAuthStateChange(SIGNED_OUT) in AuthProvider
+    clearSession();
     router.push("/");
   }
 
