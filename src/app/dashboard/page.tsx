@@ -334,6 +334,26 @@ function DashboardContent() {
   const [qPriorities, setQPriorities]       = useState<string[]>([]);
   const [qBio, setQBio]                     = useState("");
 
+  // Re-verify free-trial flag from DB each time the user opens the matching tab
+  useEffect(() => {
+    if (tab !== "matching" || !menteeDbId) return;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("mentees")
+          .select("has_used_free_ai_match")
+          .eq("id", menteeDbId)
+          .single();
+        if (data?.has_used_free_ai_match) {
+          setHasUsedFreeMatch(true);
+          setShowQuestionnaire(false);
+        }
+      } catch {
+        // non-critical — ignore
+      }
+    })();
+  }, [tab, menteeDbId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
@@ -465,6 +485,11 @@ function DashboardContent() {
   }
 
   function handleStartMatching() {
+    // Guard: free trial already used — never re-open questionnaire
+    if (hasUsedFreeMatch) {
+      setTab("matching");
+      return;
+    }
     setQField(menteeProfile?.field ?? "");
     setQGoals([]);
     setQLevel("");
@@ -537,11 +562,15 @@ function DashboardContent() {
     setMatchLoading(true);
 
     try {
+      // Persist the free-trial flag server-side (service role key bypasses RLS)
       if (menteeDbId) {
-        await supabase
-          .from("mentees")
-          .update({ has_used_free_ai_match: true })
-          .eq("id", menteeDbId);
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token ?? "";
+        await fetch("/api/mentee/mark-match-used", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ menteeId: menteeDbId }),
+        });
       }
       setHasUsedFreeMatch(true);
       setMenteeProfile(updatedProfile);
