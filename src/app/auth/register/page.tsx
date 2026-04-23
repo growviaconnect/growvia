@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { setUserSession } from "@/lib/session";
 import { setAuthCookie } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Role = "mentee" | "mentor" | "school_admin";
 
@@ -19,6 +19,7 @@ const roles: { value: Role; label: string }[] = [
 function RegisterContent() {
   const router      = useRouter();
   const searchParams = useSearchParams();
+  const { setSession } = useAuth();
   const paramRole   = searchParams.get("role") as Role | null;
   const validRoles: Role[] = ["mentee", "mentor", "school_admin"];
   const defaultRole: Role  = paramRole && validRoles.includes(paramRole) ? paramRole : "mentee";
@@ -78,7 +79,7 @@ function RegisterContent() {
       }
 
       // 4. Persist local session + 30-day auth cookie
-      setUserSession({ nom, email, role, plan: "free" });
+      setSession({ nom, email, role, plan: "free" });
       setAuthCookie();
 
       // 5. Go to dashboard

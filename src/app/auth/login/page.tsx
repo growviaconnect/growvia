@@ -5,14 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { setUserSession } from "@/lib/session";
 import { setAuthCookie } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Role } from "@/lib/session";
 
 function LoginContent() {
   const router      = useRouter();
   const searchParams = useSearchParams();
   const next        = searchParams.get("next") || "/dashboard";
+  const { setSession } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading]           = useState(false);
@@ -37,7 +38,7 @@ function LoginContent() {
       const role = (meta.role as Role) || "mentee";
       const nom  = (meta.nom  as string) || user.email || "";
 
-      setUserSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
+      setSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
       setAuthCookie();
 
       router.push(next);
