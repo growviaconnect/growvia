@@ -1,15 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const PHRASES = [
-  "Growing fast and learning every day.",
-  "Real, honest human connections.",
-  "Staying adaptable and always moving forward.",
-  "Creating real and meaningful impact.",
-];
+import { useLang } from "@/contexts/LangContext";
 
 export default function ManifestoSection() {
+  const { t } = useLang();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(-1);
 
@@ -22,7 +17,7 @@ export default function ManifestoSection() {
         setActiveStep(-1);
         return;
       }
-      const step = Math.min(PHRASES.length - 1, Math.floor(scrolledIn / window.innerHeight));
+      const step = Math.min(3, Math.floor(scrolledIn / window.innerHeight));
       setActiveStep(step);
     };
 
@@ -30,6 +25,13 @@ export default function ManifestoSection() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const phrases = [
+    t("manifesto_phrase_1"),
+    t("manifesto_phrase_2"),
+    t("manifesto_phrase_3"),
+    t("manifesto_phrase_4"),
+  ];
 
   return (
     /* 500vh = 4 scroll steps × 100vh + 1 initial viewport */
@@ -58,12 +60,12 @@ export default function ManifestoSection() {
         {/* Label */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center px-6">
           <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
-            We Believe In
+            {t("manifesto_label")}
           </p>
 
           {/* Phrases stacked — each absolutely positioned over each other */}
           <div className="relative w-full max-w-3xl" style={{ height: "8rem" }}>
-            {PHRASES.map((phrase, i) => (
+            {phrases.map((phrase, i) => (
               <p
                 key={i}
                 className="absolute inset-0 flex items-center justify-center text-center text-white leading-snug"
@@ -86,7 +88,7 @@ export default function ManifestoSection() {
 
         {/* Dot indicators — right side */}
         <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-          {PHRASES.map((_, i) => (
+          {phrases.map((_, i) => (
             <div
               key={i}
               className="rounded-full transition-all duration-400"

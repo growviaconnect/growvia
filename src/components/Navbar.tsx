@@ -6,18 +6,15 @@ import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-
-const navLinks = [
-  { href: "/explore",  label: "Explore" },
-  { href: "/founders", label: "Founders" },
-  { href: "/for-schools", label: "Stories" },
-];
+import { useLang } from "@/contexts/LangContext";
+import LangSwitcher from "@/components/LangSwitcher";
 
 const shadow = "0 1px 4px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.5)";
 
 export default function Navbar() {
   const router = useRouter();
   const { session, clearSession } = useAuth();
+  const { t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleLogout() {
@@ -26,6 +23,12 @@ export default function Navbar() {
     setMenuOpen(false);
     router.push("/");
   }
+
+  const navLinks = [
+    { href: "/explore",     label: t("nav_explore") },
+    { href: "/founders",    label: t("nav_founders") },
+    { href: "/for-schools", label: t("nav_stories") },
+  ];
 
   const initials = session?.nom
     ? session.nom.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
@@ -61,6 +64,7 @@ export default function Navbar() {
 
           {/* Right CTA — desktop */}
           <div className="hidden lg:flex items-center gap-3">
+            <LangSwitcher />
             {session ? (
               <>
                 <Link
@@ -68,21 +72,20 @@ export default function Navbar() {
                   className="flex items-center gap-2.5 text-sm font-medium text-white/70 hover:text-white transition-colors"
                   style={{ textShadow: shadow }}
                 >
-                  {/* Avatar */}
                   <div
                     className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0"
                     style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
                   >
                     {initials}
                   </div>
-                  Dashboard
+                  {t("nav_dashboard")}
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="text-sm font-medium text-white/35 hover:text-white/70 transition-colors"
                   style={{ textShadow: shadow }}
                 >
-                  Sign out
+                  {t("nav_signout")}
                 </button>
               </>
             ) : (
@@ -91,7 +94,7 @@ export default function Navbar() {
                 className="text-sm font-semibold bg-white hover:bg-white/90 text-[#0D0A1A] px-5 py-2.5 rounded-lg transition-colors duration-200"
                 style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.35)" }}
               >
-                Build the future
+                {t("nav_build")}
               </Link>
             )}
           </div>
@@ -121,7 +124,10 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <div className="pt-6 space-y-3">
+          <div className="pt-4">
+            <LangSwitcher />
+          </div>
+          <div className="pt-4 space-y-3">
             {session ? (
               <>
                 <Link
@@ -135,13 +141,13 @@ export default function Navbar() {
                   >
                     {initials}
                   </div>
-                  Dashboard
+                  {t("nav_dashboard")}
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left py-3 text-base font-medium text-red-400/70 hover:text-red-400 transition-colors"
                 >
-                  Sign out
+                  {t("nav_signout")}
                 </button>
               </>
             ) : (
@@ -150,7 +156,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="block text-center text-sm font-semibold bg-white text-[#0D0A1A] px-5 py-3.5 rounded-lg"
               >
-                Build the future
+                {t("nav_build")}
               </Link>
             )}
           </div>
