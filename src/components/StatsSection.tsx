@@ -1,17 +1,12 @@
 "use client";
 
+import { useLang } from "@/contexts/LangContext";
+
 const serifStyle = {
   fontFamily: "'Playfair Display', Georgia, serif",
   fontStyle: "italic" as const,
   fontWeight: 400,
 };
-
-const stats = [
-  { badge: "Mentors",  number: "500+",    desc: "Expert Mentors" },
-  { badge: "Mentees",  number: "2,000+",  desc: "Ambitious Learners" },
-  { badge: "Sessions", number: "10,000+", desc: "Sessions Completed" },
-  { badge: "Success",  number: "95%",     desc: "Satisfaction Rate" },
-];
 
 const logos = [
   { name: "Olympics",           url: "https://logo.clearbit.com/olympics.com" },
@@ -33,6 +28,15 @@ const logos = [
 ];
 
 export default function StatsSection() {
+  const { t } = useLang();
+
+  const stats = [
+    { badge: t("stats_badge_mentors"),  number: "500+",    desc: t("stats_desc_mentors") },
+    { badge: t("stats_badge_mentees"),  number: "2,000+",  desc: t("stats_desc_mentees") },
+    { badge: t("stats_badge_sessions"), number: "10,000+", desc: t("stats_desc_sessions") },
+    { badge: t("stats_badge_success"),  number: "95%",     desc: t("stats_desc_success") },
+  ];
+
   return (
     <section>
 
@@ -40,13 +44,12 @@ export default function StatsSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 text-center">
         <div className="max-w-3xl mx-auto">
           <h2 className="reveal text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.05] mb-7">
-            From early momentum to{" "}
-            <span style={serifStyle}>global</span>
-            {" "}awareness.
+            {t("stats_title_pre")}{" "}
+            <span style={serifStyle}>{t("stats_title_hl")}</span>
+            {" "}{t("stats_title_post")}
           </h2>
           <p className="reveal reveal-delay-1 text-lg text-white/40 leading-relaxed">
-            Our network of mentors spans world-class professionals, entrepreneurs, and experts —
-            people who shape careers, shift perspectives, and open doors.
+            {t("stats_sub")}
           </p>
         </div>
       </div>

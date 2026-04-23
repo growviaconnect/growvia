@@ -5,35 +5,38 @@ import { ArrowRight, Play } from "lucide-react";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
-
-const categories = [
-  {
-    label: "Students",
-    desc: "Find your academic and career direction",
-    href: "/auth/register?category=students",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
-  },
-  {
-    label: "Career",
-    desc: "Navigate transitions and land your dream role",
-    href: "/auth/register?category=career",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
-  },
-  {
-    label: "Business",
-    desc: "Scale your venture with proven mentorship",
-    href: "/auth/register?category=business",
-    image: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80",
-  },
-  {
-    label: "Personal Growth",
-    desc: "Build confidence and unlock your potential",
-    href: "/auth/register?category=personal_growth",
-    image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80",
-  },
-];
+import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
+  const { t } = useLang();
+
+  const categories = [
+    {
+      label: t("home_cat_students"),
+      desc: t("home_cat_students_desc"),
+      href: "/auth/register?category=students",
+      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
+    },
+    {
+      label: t("home_cat_career"),
+      desc: t("home_cat_career_desc"),
+      href: "/auth/register?category=career",
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
+    },
+    {
+      label: t("home_cat_business"),
+      desc: t("home_cat_business_desc"),
+      href: "/auth/register?category=business",
+      image: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80",
+    },
+    {
+      label: t("home_cat_growth"),
+      desc: t("home_cat_growth_desc"),
+      href: "/auth/register?category=personal_growth",
+      image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80",
+    },
+  ];
+
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────── */}
@@ -52,26 +55,26 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-5xl">
             <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
-              Early Access · 2026
+              {t("home_badge")}
             </p>
             <h1 className="reveal reveal-delay-1 text-7xl md:text-8xl lg:text-9xl font-extrabold text-white leading-[0.88] tracking-tight mb-10">
-              Where<br />careers,<br />made.
+              {t("home_hero_title1")}<br />{t("home_hero_title2")}<br />{t("home_hero_title3")}
             </h1>
             <p className="reveal reveal-delay-2 text-lg text-white/45 mb-12 max-w-md leading-relaxed">
-              GrowVia connects ambitious professionals with mentors who have been exactly where you want to go.
+              {t("home_hero_sub")}
             </p>
             <div className="reveal reveal-delay-3 flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href="/auth/register"
                 className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
               >
-                Build the future <ArrowRight className="w-4 h-4" />
+                {t("home_build_future")} <ArrowRight className="w-4 h-4" />
               </Link>
               <button className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm">
                 <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center flex-shrink-0">
                   <Play className="w-3 h-3 fill-current ml-0.5" />
                 </span>
-                Watch the film
+                {t("home_watch_film")}
               </button>
             </div>
           </div>
@@ -91,24 +94,24 @@ export default function HomePage() {
           <div className="reveal flex items-end justify-between mb-12">
             <div>
               <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
-                Mentoring Areas
+                {t("home_cat_label")}
               </p>
               <h2 className="text-4xl md:text-[48px] font-extrabold text-white tracking-tight leading-tight">
-                What we cover.
+                {t("home_cat_title")}
               </h2>
             </div>
             <Link
               href="/auth/register"
               className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white transition-colors mb-1"
             >
-              Browse all <ArrowRight className="w-4 h-4" />
+              {t("home_browse_all")} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat, i) => (
               <Link
-                key={cat.label}
+                key={cat.href}
                 href={cat.href}
                 className={`reveal reveal-delay-${i + 1} group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-300`}
                 style={{ background: "#1A1A2E", aspectRatio: "3 / 4" }}
