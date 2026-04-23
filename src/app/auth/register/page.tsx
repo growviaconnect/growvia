@@ -7,16 +7,12 @@ import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { setUserSession } from "@/lib/session";
 import { setAuthCookie } from "@/lib/auth";
+import { useLang } from "@/contexts/LangContext";
 
 type Role = "mentee" | "mentor" | "school_admin";
 
-const roles: { value: Role; label: string }[] = [
-  { value: "mentee",       label: "I want to find a mentor" },
-  { value: "mentor",       label: "I want to become a mentor" },
-  { value: "school_admin", label: "I represent a school" },
-];
-
 function RegisterContent() {
+  const { t } = useLang();
   const router      = useRouter();
   const searchParams = useSearchParams();
   const paramRole   = searchParams.get("role") as Role | null;
@@ -30,16 +26,22 @@ function RegisterContent() {
   const [error, setError]               = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
 
+  const roles: { value: Role; label: string }[] = [
+    { value: "mentee",       label: t("reg_role_mentee") },
+    { value: "mentor",       label: t("reg_role_mentor") },
+    { value: "school_admin", label: t("reg_role_school") },
+  ];
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
     if (form.password !== form.confirm) {
-      setError("Passwords do not match.");
+      setError(t("reg_error_mismatch"));
       return;
     }
     if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(t("reg_error_short"));
       return;
     }
 
@@ -58,9 +60,9 @@ function RegisterContent() {
       if (!res.ok) {
         const msg = (json.error ?? "").toLowerCase();
         if (msg.includes("already") || msg.includes("duplicate") || msg.includes("unique")) {
-          throw new Error("This email is already registered. Please sign in instead.");
+          throw new Error(t("reg_error_duplicate"));
         }
-        throw new Error(json.error ?? "Registration failed. Please try again.");
+        throw new Error(json.error ?? t("reg_error_generic"));
       }
 
       // 2. Sign in immediately (email already confirmed)
@@ -84,7 +86,7 @@ function RegisterContent() {
       // 5. Go to dashboard
       router.push("/dashboard");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : t("reg_error_generic"));
     } finally {
       setLoading(false);
     }
@@ -105,8 +107,8 @@ function RegisterContent() {
             </div>
             <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
           </Link>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Create your account</h1>
-          <p className="text-white/40 text-sm">Join GrowVia — no credit card required.</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">{t("reg_title")}</h1>
+          <p className="text-white/40 text-sm">{t("reg_sub")}</p>
         </div>
 
         {/* Card */}
@@ -125,7 +127,7 @@ function RegisterContent() {
 
             {/* Full name */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Full Name</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("reg_full_name")}</label>
               <input
                 type="text" required
                 value={form.name}
@@ -137,7 +139,7 @@ function RegisterContent() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Email Address</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("reg_email")}</label>
               <input
                 type="email" required
                 value={form.email}
@@ -149,7 +151,7 @@ function RegisterContent() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("reg_password")}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"} required minLength={8}
@@ -167,13 +169,13 @@ function RegisterContent() {
 
             {/* Confirm password */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("reg_confirm")}</label>
               <div className="relative">
                 <input
                   type={showConfirm ? "text" : "password"} required
                   value={form.confirm}
                   onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-                  placeholder="Repeat your password"
+                  placeholder={t("reg_confirm_placeholder")}
                   className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
                 />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)}
@@ -185,7 +187,7 @@ function RegisterContent() {
 
             {/* Role selector */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-2">I am joining as...</label>
+              <label className="block text-sm font-medium text-white/60 mb-2">{t("reg_role_label")}</label>
               <div className="space-y-2">
                 {roles.map((r) => (
                   <button
@@ -217,24 +219,24 @@ function RegisterContent() {
               style={{ background: "#7C3AED" }}
             >
               {loading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</>
-                : <>Create my account <ArrowRight className="w-4 h-4" /></>
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("reg_creating")}</>
+                : <>{t("reg_submit")} <ArrowRight className="w-4 h-4" /></>
               }
             </button>
 
             <p className="text-xs text-white/25 text-center pt-1">
-              By continuing you agree to our{" "}
-              <Link href="/legal/terms" className="text-[#A78BFA] hover:text-white transition-colors">Terms</Link>
-              {" "}and{" "}
-              <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">Privacy Policy</Link>
+              {t("reg_agree")}{" "}
+              <Link href="/legal/terms" className="text-[#A78BFA] hover:text-white transition-colors">{t("bam_terms")}</Link>
+              {" "}{t("bam_and")}{" "}
+              <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">{t("bam_privacy")}</Link>
             </p>
           </form>
         </div>
 
         <p className="text-center text-sm text-white/40 mt-6">
-          Already have an account?{" "}
+          {t("reg_have_account")}{" "}
           <Link href="/auth/login" className="text-[#A78BFA] font-medium hover:text-white transition-colors">
-            Sign in
+            {t("reg_signin")}
           </Link>
         </p>
       </div>

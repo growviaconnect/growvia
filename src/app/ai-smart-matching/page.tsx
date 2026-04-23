@@ -1,37 +1,33 @@
+"use client";
+
 import Link from "next/link";
 import { Sparkles, CheckCircle, ArrowRight, Zap, Target, Brain, BarChart3, Lock } from "lucide-react";
-
-const features = [
-  {
-    icon: Brain,
-    title: "Understands your goals",
-    desc: "The AI analyzes your career objectives, interests, and experience to find mentors who have walked the same path.",
-  },
-  {
-    icon: Target,
-    title: "Shows compatibility percentage",
-    desc: "Each mentor match displays a compatibility score so you can make an informed, confident choice.",
-  },
-  {
-    icon: BarChart3,
-    title: "Multi-dimensional matching",
-    desc: "We consider goals, personality type, industry background, availability, and communication style.",
-  },
-  {
-    icon: Lock,
-    title: "Private and secure",
-    desc: "Your profile data is only used for matching. It is never shared with third parties.",
-  },
-];
-
-const steps = [
-  { num: "01", label: "Complete your profile", desc: "Add your goals, background, and what kind of guidance you need." },
-  { num: "02", label: "AI analyzes your profile", desc: "Our algorithm processes your data against our mentor database in seconds." },
-  { num: "03", label: "Receive your top matches", desc: "You get a ranked list of compatible mentors with a percentage score for each." },
-  { num: "04", label: "Accept or browse", desc: "Accept the AI recommendation directly or browse mentors manually — your choice." },
-];
+import { useLang } from "@/contexts/LangContext";
 
 export default function AISmartMatchingPage() {
+  const { t } = useLang();
+
+  const features = [
+    { icon: Brain,    title: t("ai_feat1_title"), desc: t("ai_feat1_desc") },
+    { icon: Target,   title: t("ai_feat2_title"), desc: t("ai_feat2_desc") },
+    { icon: BarChart3, title: t("ai_feat3_title"), desc: t("ai_feat3_desc") },
+    { icon: Lock,     title: t("ai_feat4_title"), desc: t("ai_feat4_desc") },
+  ];
+
+  const steps = [
+    { num: "01", label: t("ai_s1_label"), desc: t("ai_s1_desc") },
+    { num: "02", label: t("ai_s2_label"), desc: t("ai_s2_desc") },
+    { num: "03", label: t("ai_s3_label"), desc: t("ai_s3_desc") },
+    { num: "04", label: t("ai_s4_label"), desc: t("ai_s4_desc") },
+  ];
+
+  const bullets = [
+    t("ai_f1"), t("ai_f2"), t("ai_f3"), t("ai_f4"),
+  ];
+
+  const discFeatures = [t("ai_disc_f1"), t("ai_disc_f2"), t("ai_disc_f3")];
+  const premFeatures = [t("ai_prem_f1"), t("ai_prem_f2"), t("ai_prem_f3"), t("ai_prem_f4")];
+
   return (
     <>
       {/* Header */}
@@ -39,14 +35,13 @@ export default function AISmartMatchingPage() {
         <div className="max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white text-purple-700 text-sm font-medium px-4 py-2 rounded-full mb-6 card-shadow">
             <Sparkles className="w-4 h-4" />
-            Premium Feature
+            {t("ai_badge")}
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-5">
-            AI <span className="gradient-text">Smart Matching</span>
+            {t("ai_title1")} <span className="gradient-text">{t("ai_title2")}</span>
           </h1>
           <p className="text-xl text-gray-500 leading-relaxed">
-            Stop guessing. Our AI analyzes your goals, personality, and experience to recommend the mentors most likely
-            to help you grow — with a compatibility score for each match.
+            {t("ai_sub")}
           </p>
         </div>
       </section>
@@ -57,23 +52,16 @@ export default function AISmartMatchingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-5">
-                Finding the right mentor is the hardest part
+                {t("ai_section_title")}
               </h2>
               <p className="text-gray-500 leading-relaxed mb-5">
-                Most people choose a mentor based on job title or number of years of experience. But the mentors who
-                truly help are those who understand your specific situation, goals, and personality.
+                {t("ai_section_p1")}
               </p>
               <p className="text-gray-500 leading-relaxed mb-6">
-                GrowVia's AI Smart Matching goes deeper. It considers what you want to achieve, how you learn, and what
-                kind of guidance style works best for you — then surfaces the mentors who match on all these dimensions.
+                {t("ai_section_p2")}
               </p>
               <ul className="space-y-3">
-                {[
-                  "One AI match included with Discovery Session (9.99€)",
-                  "Unlimited matches with Basic (19.99€/mo) or Premium (39.99€/mo)",
-                  "Compatibility score shown for each mentor",
-                  "Based on goals, personality, and experience",
-                ].map((item) => (
+                {bullets.map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-purple-500 flex-shrink-0" />
                     {item}
@@ -86,7 +74,7 @@ export default function AISmartMatchingPage() {
             <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-3xl p-8 border border-purple-100">
               <div className="mb-5 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-purple-600" />
-                <span className="font-semibold text-gray-900 text-sm">Your AI Matches</span>
+                <span className="font-semibold text-gray-900 text-sm">{t("ai_matches_title")}</span>
                 <span className="ml-auto text-xs text-purple-600 bg-white px-2.5 py-1 rounded-full font-medium card-shadow">
                   3 results
                 </span>
@@ -113,15 +101,12 @@ export default function AISmartMatchingPage() {
                     </div>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-1.5 mb-3">
-                    <div
-                      className="gradient-bg h-1.5 rounded-full"
-                      style={{ width: `${m.pct}%` }}
-                    />
+                    <div className="gradient-bg h-1.5 rounded-full" style={{ width: `${m.pct}%` }} />
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {m.tags.map((t) => (
-                      <span key={t} className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
-                        {t}
+                    {m.tags.map((tag) => (
+                      <span key={tag} className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                        {tag}
                       </span>
                     ))}
                   </div>
@@ -136,8 +121,8 @@ export default function AISmartMatchingPage() {
       <section className="section-padding gradient-bg-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">How the matching works</h2>
-            <p className="text-gray-500 text-lg">More than a filter — a genuine compatibility engine.</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t("ai_how_title")}</h2>
+            <p className="text-gray-500 text-lg">{t("ai_how_sub")}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((f) => (
@@ -157,7 +142,7 @@ export default function AISmartMatchingPage() {
       <section className="section-padding bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Get your match in 4 steps</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t("ai_steps_title")}</h2>
           </div>
           <div className="space-y-4">
             {steps.map((s) => (
@@ -178,11 +163,11 @@ export default function AISmartMatchingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="bg-white rounded-2xl p-7 card-shadow flex flex-col">
-              <div className="text-sm font-semibold text-purple-600 mb-2">Discovery Session</div>
+              <div className="text-sm font-semibold text-purple-600 mb-2">{t("ai_disc_label")}</div>
               <div className="text-3xl font-black text-gray-900 mb-1">9.99€</div>
-              <p className="text-sm text-gray-400 mb-5">1 AI match included · 15–20 min session</p>
+              <p className="text-sm text-gray-400 mb-5">{t("ai_disc_ai")}</p>
               <ul className="space-y-2.5 mb-7 flex-1">
-                {["One AI Smart Match included", "Compatibility score shown", "Accept or browse manually"].map((f) => (
+                {discFeatures.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-purple-500 flex-shrink-0" />
                     {f}
@@ -190,15 +175,15 @@ export default function AISmartMatchingPage() {
                 ))}
               </ul>
               <Link href="/auth/register" className="block text-center gradient-bg text-white font-semibold py-3 rounded-xl hover:opacity-90 transition-opacity text-sm">
-                Book Discovery Session
+                {t("ai_disc_btn")}
               </Link>
             </div>
             <div className="gradient-bg rounded-2xl p-7 flex flex-col text-white shadow-2xl shadow-purple-300">
-              <div className="text-sm font-semibold text-purple-200 mb-2">Premium Plan</div>
-              <div className="text-3xl font-black text-white mb-1">Unlimited</div>
-              <p className="text-sm text-purple-100 mb-5">Included with your 39.99€/month subscription</p>
+              <div className="text-sm font-semibold text-purple-200 mb-2">{t("ai_prem_label")}</div>
+              <div className="text-3xl font-black text-white mb-1">{t("ai_prem_value")}</div>
+              <p className="text-sm text-purple-100 mb-5">{t("ai_prem_sub")}</p>
               <ul className="space-y-2.5 mb-7 flex-1">
-                {["Unlimited AI matches", "4 sessions per month", "Priority booking", "Cancel anytime"].map((f) => (
+                {premFeatures.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-white">
                     <CheckCircle className="w-4 h-4 text-purple-200 flex-shrink-0" />
                     {f}
@@ -206,7 +191,7 @@ export default function AISmartMatchingPage() {
                 ))}
               </ul>
               <Link href="/pricing" className="block text-center bg-white text-purple-700 font-semibold py-3 rounded-xl hover:bg-purple-50 transition-colors text-sm">
-                Unlock AI Matching <ArrowRight className="inline w-4 h-4 ml-1" />
+                {t("ai_prem_btn")} <ArrowRight className="inline w-4 h-4 ml-1" />
               </Link>
             </div>
           </div>

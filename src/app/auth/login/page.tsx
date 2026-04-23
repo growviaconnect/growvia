@@ -7,9 +7,11 @@ import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { setUserSession } from "@/lib/session";
 import { setAuthCookie } from "@/lib/auth";
+import { useLang } from "@/contexts/LangContext";
 import type { Role } from "@/lib/session";
 
 function LoginContent() {
+  const { t } = useLang();
   const router      = useRouter();
   const searchParams = useSearchParams();
   const next        = searchParams.get("next") || "/dashboard";
@@ -42,7 +44,7 @@ function LoginContent() {
 
       router.push(next);
     } catch {
-      setError("Invalid email or password. Please try again.");
+      setError(t("login_error"));
     } finally {
       setLoading(false);
     }
@@ -63,8 +65,8 @@ function LoginContent() {
             </div>
             <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
           </Link>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Welcome back</h1>
-          <p className="text-white/40 text-sm">Sign in to continue your journey.</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">{t("login_welcome")}</h1>
+          <p className="text-white/40 text-sm">{t("login_sub")}</p>
         </div>
 
         {/* Card */}
@@ -83,7 +85,7 @@ function LoginContent() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Email Address</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("login_email")}</label>
               <input
                 type="email" required
                 value={form.email}
@@ -95,13 +97,13 @@ function LoginContent() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("login_password")}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"} required
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="Your password"
+                  placeholder={t("login_password_placeholder")}
                   className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
                 />
                 <button
@@ -122,24 +124,24 @@ function LoginContent() {
               style={{ background: "#7C3AED" }}
             >
               {loading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
-                : <>Sign in <ArrowRight className="w-4 h-4" /></>
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("login_signing")}</>
+                : <>{t("login_submit")} <ArrowRight className="w-4 h-4" /></>
               }
             </button>
 
             <p className="text-xs text-white/25 text-center pt-1">
-              By signing in you agree to our{" "}
-              <Link href="/legal/terms" className="text-[#A78BFA] hover:text-white transition-colors">Terms</Link>
-              {" "}and{" "}
-              <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">Privacy Policy</Link>
+              {t("login_agree")}{" "}
+              <Link href="/legal/terms" className="text-[#A78BFA] hover:text-white transition-colors">{t("bam_terms")}</Link>
+              {" "}{t("bam_and")}{" "}
+              <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">{t("bam_privacy")}</Link>
             </p>
           </form>
         </div>
 
         <p className="text-center text-sm text-white/40 mt-6">
-          Don&apos;t have an account?{" "}
+          {t("login_no_account")}{" "}
           <Link href="/auth/register" className="text-[#A78BFA] font-medium hover:text-white transition-colors">
-            Register
+            {t("login_register")}
           </Link>
         </p>
       </div>
