@@ -1,28 +1,33 @@
+"use client";
+
 import Link from "next/link";
 import { BadgeCheck, PlayCircle, ClipboardList, Award, ArrowRight, Users, TrendingUp } from "lucide-react";
-
-const steps = [
-  {
-    num: "01",
-    icon: PlayCircle,
-    title: "Watch 3 short training videos",
-    desc: "Learn proven techniques for effective mentoring — active listening, goal-setting frameworks, and how to give feedback that actually lands.",
-  },
-  {
-    num: "02",
-    icon: ClipboardList,
-    title: "Complete a brief assessment",
-    desc: "A short quiz to validate your understanding and confirm you're ready to guide mentees with confidence.",
-  },
-  {
-    num: "03",
-    icon: Award,
-    title: "Earn your certified badge",
-    desc: "Your public profile displays the \"GrowVia Certified Mentor\" badge — instantly visible to mentees browsing the platform.",
-  },
-];
+import { useLang } from "@/contexts/LangContext";
 
 export default function MentorCertificationPage() {
+  const { t } = useLang();
+
+  const steps = [
+    {
+      num: "01",
+      icon: PlayCircle,
+      title: t("cert_s1_title"),
+      desc:  t("cert_s1_desc"),
+    },
+    {
+      num: "02",
+      icon: ClipboardList,
+      title: t("cert_s2_title"),
+      desc:  t("cert_s2_desc"),
+    },
+    {
+      num: "03",
+      icon: Award,
+      title: t("cert_s3_title"),
+      desc:  t("cert_s3_desc"),
+    },
+  ];
+
   return (
     <>
       {/* Hero */}
@@ -36,14 +41,14 @@ export default function MentorCertificationPage() {
             style={{ background: "rgba(91,61,245,0.15)", color: "#9B8FFF", border: "1px solid rgba(91,61,245,0.3)" }}
           >
             <BadgeCheck className="w-4 h-4" />
-            Mentor Certification
+            {t("cert_badge")}
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-5 leading-tight">
-            Become a GrowVia{" "}
-            <span className="gradient-text">Certified Mentor</span>
+            {t("cert_title1")}{" "}
+            <span className="gradient-text">{t("cert_title2")}</span>
           </h1>
           <p className="text-xl leading-relaxed" style={{ color: "#9B8FFF" }}>
-            All mentors on GrowVia complete a short certification before going live. It takes less than an hour and it makes all the difference.
+            {t("cert_sub")}
           </p>
         </div>
       </section>
@@ -52,9 +57,9 @@ export default function MentorCertificationPage() {
       <section className="py-24 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 reveal">
-            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">The process</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Three steps to certification</h2>
-            <p className="text-lg" style={{ color: "#6B6F80" }}>Less than an hour. Done once. Valid permanently.</p>
+            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">{t("cert_process_label")}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{t("cert_process_title")}</h2>
+            <p className="text-lg" style={{ color: "#6B6F80" }}>{t("cert_process_sub")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 relative">
@@ -73,7 +78,7 @@ export default function MentorCertificationPage() {
                   <step.icon className="w-9 h-9 text-white" />
                 </div>
                 <div className="text-xs font-bold mb-2 text-purple-600 uppercase tracking-widest">
-                  Step {step.num}
+                  {t("cert_step")} {step.num}
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-3">{step.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: "#6B6F80" }}>{step.desc}</p>
@@ -87,9 +92,9 @@ export default function MentorCertificationPage() {
       <section className="py-24 bg-purple-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 reveal">
-            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">The impact</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Why it matters</h2>
-            <p className="text-lg" style={{ color: "#6B6F80" }}>Certification builds trust on both sides of the relationship.</p>
+            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">{t("cert_impact_label")}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{t("cert_impact_title")}</h2>
+            <p className="text-lg" style={{ color: "#6B6F80" }}>{t("cert_impact_sub")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -104,12 +109,12 @@ export default function MentorCertificationPage() {
               >
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">For mentees</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">{t("cert_mentees_label")}</p>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Every mentor has been vetted and trained.
+                {t("cert_mentees_title")}
               </h3>
               <p className="leading-relaxed text-sm" style={{ color: "#6B6F80" }}>
-                You know every mentor you meet has been vetted and trained. No guessing. When you book a session with a GrowVia Certified Mentor, you're working with someone who understands how to guide, listen, and help you move forward.
+                {t("cert_mentees_desc")}
               </p>
             </div>
 
@@ -124,12 +129,12 @@ export default function MentorCertificationPage() {
               >
                 <TrendingUp className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-400">For mentors</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-400">{t("cert_mentors_label")}</p>
               <h3 className="text-xl font-bold text-white mb-3">
-                Your badge signals credibility.
+                {t("cert_mentors_title")}
               </h3>
               <p className="leading-relaxed text-sm" style={{ color: "#9B8FFF" }}>
-                Your badge signals credibility and increases your visibility in matching results. Certified mentors appear higher in AI-powered recommendations and are more likely to be booked by serious mentees.
+                {t("cert_mentors_desc")}
               </p>
             </div>
           </div>
@@ -144,17 +149,17 @@ export default function MentorCertificationPage() {
         <div className="max-w-2xl mx-auto reveal">
           <BadgeCheck className="w-12 h-12 mx-auto mb-5" style={{ color: "rgba(255,255,255,0.7)" }} />
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to get certified?
+            {t("cert_cta_title")}
           </h2>
           <p className="mb-8 text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
-            Apply to join GrowVia as a mentor. Once approved, you'll complete the certification as part of your onboarding — before your first session goes live.
+            {t("cert_cta_sub")}
           </p>
           <Link
             href="/auth/register?role=mentor"
             className="inline-flex items-center gap-2 bg-white font-bold px-8 py-4 rounded-xl hover:bg-purple-50 transition-colors text-base"
             style={{ color: "#5B3DF5", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}
           >
-            Apply to become a mentor <ArrowRight className="w-4 h-4" />
+            {t("cert_cta_btn")} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>

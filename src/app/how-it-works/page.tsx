@@ -1,141 +1,111 @@
+"use client";
+
 import Link from "next/link";
 import { Video, Bell, Clock, CheckCircle, ArrowRight, Mail } from "lucide-react";
+import { useLang } from "@/contexts/LangContext";
 
-/* ── Shared style helpers ──────────────────────────────────── */
 const serif = {
   fontFamily: "'Playfair Display', Georgia, serif",
   fontStyle: "italic" as const,
   fontWeight: 400,
 };
 
-/* ── Data ──────────────────────────────────────────────────── */
-const steps = [
-  {
-    num: "01",
-    title: "Create your profile",
-    desc: "Tell us about yourself: your goals, background, career stage, and what kind of guidance you are looking for. This takes about 5 minutes.",
-    detail: [
-      "Choose your focus area (Career, Business, Personal Growth, Students)",
-      "Describe your current situation and where you want to go",
-      "Set your availability preferences",
-    ],
-    image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80",
-  },
-  {
-    num: "02",
-    title: "Get your AI match (free, 1 time)",
-    desc: "Our AI Smart Matching engine analyzes your profile and suggests the most compatible mentors. You get one free AI match on sign-up.",
-    detail: [
-      "Compatibility score based on goals, personality, and experience",
-      "Shows percentage match for transparency",
-      "Unlock unlimited matching with a subscription",
-    ],
-    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80",
-  },
-  {
-    num: "03",
-    title: "Book a Discovery Session",
-    desc: "Start with a 15–20 minute Discovery Session for 9.99€. Meet your mentor, explore the fit, and experience GrowVia before committing to a plan.",
-    detail: [
-      "15–20 minute intro session · 9.99€",
-      "Fully integrated Google Meet link generated automatically",
-      "Same link shared with mentor and mentee",
-    ],
-    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&q=80",
-  },
-  {
-    num: "04",
-    title: "Choose your mentor",
-    desc: "Browse our curated community of verified mentors or go with your AI suggestion. Filter by category, language, availability, and more.",
-    detail: [
-      "Save mentors to your favorites",
-      "Read detailed mentor profiles",
-      "See mentor availability in real time",
-    ],
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80",
-  },
-  {
-    num: "05",
-    title: "Book your session",
-    desc: "Pick a time that works for both of you. Confirm, pay, and you are all set. Sessions are booked directly through the platform.",
-    detail: [
-      "Discovery Session: 9.99€ · 15–20 min",
-      "Basic: 19.99€/month · 2 sessions",
-      "Premium: 39.99€/month · 4 sessions + unlimited AI",
-    ],
-    image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80",
-  },
-  {
-    num: "06",
-    title: "Join via Google Meet",
-    desc: "On session day, join your session through the integrated Google Meet link. No extra apps needed. One click and you are in.",
-    detail: [
-      "Automatic meeting link generated after booking",
-      "Email confirmation with join link",
-      "Reminder 24h and 1h before session",
-    ],
-    image: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80",
-  },
-  {
-    num: "07",
-    title: "Continue your growth",
-    desc: "After your Discovery Session, subscribe to Basic (19.99€/month) or Premium (39.99€/month) for regular sessions and ongoing guidance.",
-    detail: [
-      "Basic: 2 sessions/month · 19.99€",
-      "Premium: 4 sessions/month + unlimited AI · 39.99€",
-      "Cancel anytime, no hidden fees",
-    ],
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",
-  },
+const stepImages = [
+  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80",
+  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80",
+  "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&q=80",
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80",
+  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80",
+  "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80",
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",
 ];
 
-const sessionCards = [
-  {
-    Icon: Video,
-    title: "Google Meet Integrated",
-    desc: "After booking, a unique Google Meet link is automatically generated and shared with both mentor and mentee. One click to join.",
-  },
-  {
-    Icon: Bell,
-    title: "Automatic Reminders",
-    desc: "You receive an email confirmation right away, a reminder 24 hours before your session, and another 1 hour before.",
-  },
-  {
-    Icon: Clock,
-    title: "Cancellation Policy",
-    desc: "Cancel at least 1 hour before your session to avoid any issues. Late cancellations are noted on your profile.",
-  },
-];
-
-const notifications = [
-  { time: "Now",            msg: "Session confirmed with Sophie Chen",  dot: "#10b981" },
-  { time: "Tomorrow 09:00", msg: "Reminder: session in 24 hours",       dot: "#60a5fa" },
-  { time: "Tomorrow 09:59", msg: "Your session starts in 1 hour",       dot: "#f59e0b" },
-  { time: "Tomorrow 11:00", msg: "Join session via Google Meet",        dot: "#7C3AED" },
-];
-
-const notifItems = [
-  { Icon: Mail,         label: "Email confirmation after booking" },
-  { Icon: Bell,         label: "Reminder 24 hours before your session" },
-  { Icon: Bell,         label: "Reminder 1 hour before your session" },
-  { Icon: CheckCircle,  label: "Session summary and next steps" },
-];
-
-/* ── Page ──────────────────────────────────────────────────── */
 export default function HowItWorksPage() {
+  const { t } = useLang();
+
+  const steps = [
+    {
+      num: "01",
+      title: t("hiw_s1_title"),
+      desc:  t("hiw_s1_desc"),
+      detail: [t("hiw_s1_d1"), t("hiw_s1_d2"), t("hiw_s1_d3")],
+      image: stepImages[0],
+    },
+    {
+      num: "02",
+      title: t("hiw_s2_title"),
+      desc:  t("hiw_s2_desc"),
+      detail: [t("hiw_s2_d1"), t("hiw_s2_d2"), t("hiw_s2_d3")],
+      image: stepImages[1],
+    },
+    {
+      num: "03",
+      title: t("hiw_s3_title"),
+      desc:  t("hiw_s3_desc"),
+      detail: [t("hiw_s3_d1"), t("hiw_s3_d2"), t("hiw_s3_d3")],
+      image: stepImages[2],
+    },
+    {
+      num: "04",
+      title: t("hiw_s4_title"),
+      desc:  t("hiw_s4_desc"),
+      detail: [t("hiw_s4_d1"), t("hiw_s4_d2"), t("hiw_s4_d3")],
+      image: stepImages[3],
+    },
+    {
+      num: "05",
+      title: t("hiw_s5_title"),
+      desc:  t("hiw_s5_desc"),
+      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3")],
+      image: stepImages[4],
+    },
+    {
+      num: "06",
+      title: t("hiw_s6_title"),
+      desc:  t("hiw_s6_desc"),
+      detail: [t("hiw_s6_d1"), t("hiw_s6_d2"), t("hiw_s6_d3")],
+      image: stepImages[5],
+    },
+    {
+      num: "07",
+      title: t("hiw_s7_title"),
+      desc:  t("hiw_s7_desc"),
+      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3")],
+      image: stepImages[6],
+    },
+  ];
+
+  const sessionCards = [
+    { Icon: Video, title: t("hiw_c1_title"), desc: t("hiw_c1_desc") },
+    { Icon: Bell,  title: t("hiw_c2_title"), desc: t("hiw_c2_desc") },
+    { Icon: Clock, title: t("hiw_c3_title"), desc: t("hiw_c3_desc") },
+  ];
+
+  const notifications = [
+    { time: "Now",            msg: t("hiw_notif_confirmed"), dot: "#10b981" },
+    { time: "Tomorrow 09:00", msg: t("hiw_notif_reminder24"), dot: "#60a5fa" },
+    { time: "Tomorrow 09:59", msg: t("hiw_notif_reminder1"),  dot: "#f59e0b" },
+    { time: "Tomorrow 11:00", msg: t("hiw_notif_join"),       dot: "#7C3AED" },
+  ];
+
+  const notifItems = [
+    { Icon: Mail,        label: t("hiw_n1") },
+    { Icon: Bell,        label: t("hiw_n2") },
+    { Icon: Bell,        label: t("hiw_n3") },
+    { Icon: CheckCircle, label: t("hiw_n4") },
+  ];
+
   return (
     <>
-      {/* ── SECTION 1 — HERO ───────────────────────────────────── */}
+      {/* ── SECTION 1 — HERO ─────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1600&q=80"
-          alt=""
-          aria-hidden="true"
+          alt="" aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ filter: "brightness(0.35) saturate(0.6)" }}
         />
         <div className="absolute inset-0 bg-[#0D0A1A]/65" />
-        {/* Bottom fade */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none"
           style={{ height: "30%", background: "linear-gradient(to bottom, transparent, #0D0A1A)" }}
@@ -143,15 +113,14 @@ export default function HowItWorksPage() {
 
         <div className="relative px-6 max-w-4xl mx-auto">
           <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
-            The Process
+            {t("hiw_label")}
           </p>
           <h1 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-8">
-            From uncertainty to{" "}
-            <span style={{ ...serif, color: "#A78BFA" }}>clarity.</span>
+            {t("hiw_title1")}{" "}
+            <span style={{ ...serif, color: "#A78BFA" }}>{t("hiw_title2")}</span>
           </h1>
           <p className="reveal reveal-delay-2 text-lg md:text-xl text-white/50 leading-relaxed max-w-2xl mx-auto">
-            GrowVia is designed to make every step simple, structured, and actionable.
-            Here is exactly how it works.
+            {t("hiw_sub")}
           </p>
         </div>
       </section>
@@ -166,7 +135,6 @@ export default function HowItWorksPage() {
                 <div
                   className={`flex flex-col ${reversed ? "lg:flex-row-reverse" : "lg:flex-row"} gap-16 lg:gap-24 items-center py-28`}
                 >
-                  {/* Text side */}
                   <div className="reveal flex-1 min-w-0">
                     <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7C3AED] mb-5">
                       {step.num}
@@ -187,7 +155,6 @@ export default function HowItWorksPage() {
                     </ul>
                   </div>
 
-                  {/* Image side */}
                   <div className="reveal reveal-delay-2 flex-1 min-w-0 relative overflow-hidden rounded-2xl" style={{ aspectRatio: "4/3" }}>
                     <div className="w-full h-full overflow-hidden rounded-2xl">
                       <img
@@ -213,18 +180,18 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 3 — SESSIONS RUN SMOOTHLY ─────────────────── */}
+      {/* ── SECTION 3 — SESSIONS ───────────────────────────────── */}
       <section className="py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
-              Built In
+              {t("hiw_sessions_label")}
             </p>
             <h2 className="reveal reveal-delay-1 text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-              Sessions that run smoothly.
+              {t("hiw_sessions_title")}
             </h2>
             <p className="reveal reveal-delay-2 text-lg text-white/40 mt-5 max-w-xl mx-auto">
-              Everything you need is built right into the platform.
+              {t("hiw_sessions_sub")}
             </p>
           </div>
 
@@ -249,23 +216,21 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4 — STAY INFORMED ──────────────────────────── */}
+      {/* ── SECTION 4 — NOTIFICATIONS ──────────────────────────── */}
       <section className="py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
 
-            {/* Left — text */}
             <div>
               <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
-                Notifications
+                {t("hiw_notif_label")}
               </p>
               <h2 className="reveal reveal-delay-1 text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-7">
-                Stay informed at{" "}
-                <span style={serif}>every step.</span>
+                {t("hiw_notif_title1")}{" "}
+                <span style={serif}>{t("hiw_notif_title2")}</span>
               </h2>
               <p className="reveal reveal-delay-2 text-white/45 leading-relaxed mb-10 text-base">
-                We make sure you never miss a session or an important update.
-                From booking to follow-up, GrowVia keeps you in the loop.
+                {t("hiw_notif_sub")}
               </p>
               <div className="reveal reveal-delay-3 space-y-5">
                 {notifItems.map(({ Icon, label }) => (
@@ -282,7 +247,6 @@ export default function HowItWorksPage() {
               </div>
             </div>
 
-            {/* Right — notification mockup */}
             <div
               className="reveal reveal-delay-2 rounded-2xl p-8 border border-white/[0.07]"
               style={{ background: "rgba(255,255,255,0.03)" }}
@@ -314,55 +278,32 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 5 — CTA ────────────────────────────────────── */}
+      {/* ── SECTION 5 — CTA ─────────────────────────────────────── */}
       <section className="relative py-40 text-center overflow-hidden">
-        {/* Looping video background */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        >
-          <source
-            src="https://videos.pexels.com/video-files/3252312/3252312-uhd_2560_1440_25fps.mp4"
-            type="video/mp4"
-          />
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover z-0">
+          <source src="https://videos.pexels.com/video-files/3252312/3252312-uhd_2560_1440_25fps.mp4" type="video/mp4" />
         </video>
-
-        {/* Dark violet overlay */}
         <div className="absolute inset-0 z-10" style={{ background: "rgba(60,20,100,0.75)" }} />
-
-        {/* Top gradient — page bg fades into violet */}
-        <div
-          className="absolute top-0 left-0 right-0 pointer-events-none z-20"
-          style={{ height: "220px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
-        />
-
-        {/* Bottom gradient — violet fades into footer bg */}
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none z-20"
-          style={{ height: "220px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }}
-        />
+        <div className="absolute top-0 left-0 right-0 pointer-events-none z-20" style={{ height: "220px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }} />
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-20" style={{ height: "220px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }} />
 
         <div className="relative z-30 max-w-2xl mx-auto px-6">
           <p className="reveal text-xs font-semibold text-[#C4B5FD] uppercase tracking-[0.25em] mb-8">
-            Get Started
+            {t("hiw_cta_label")}
           </p>
           <h2 className="reveal reveal-delay-1 text-4xl md:text-6xl font-extrabold text-white leading-tight tracking-tight mb-7">
-            Ready to take the{" "}
-            <span style={serif}>first step?</span>
+            {t("hiw_cta_title1")}{" "}
+            <span style={serif}>{t("hiw_cta_title2")}</span>
           </h2>
           <p className="reveal reveal-delay-2 text-white/60 text-lg leading-relaxed mb-12">
-            Create your profile, get AI-matched, and book your first Discovery Session.
-            No long-term commitment.
+            {t("hiw_cta_sub")}
           </p>
           <div className="reveal reveal-delay-3">
             <Link
               href="/auth/register"
               className="inline-flex items-center gap-2.5 bg-white text-[#4C1D95] font-semibold px-8 py-4 rounded-full hover:bg-white/90 transition-colors text-sm"
             >
-              Find my mentor <ArrowRight className="w-4 h-4" />
+              {t("hiw_cta_btn")} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

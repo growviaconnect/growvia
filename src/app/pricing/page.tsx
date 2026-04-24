@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, ArrowRight, TrendingUp, Loader2 } from "lucide-react";
 import { getUserSession, type UserSession } from "@/lib/session";
+import { useLang } from "@/contexts/LangContext";
 
 const serifStyle = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -12,76 +13,87 @@ const serifStyle = {
   fontWeight: 400,
 };
 
-const plans = [
-  {
-    name: "Basic",
-    price: "4.99",
-    desc: "Everything you need to get started",
-    features: [
-      "Access to more mentors than free",
-      "2–3 AI matching/month",
-      "Ability to book standard sessions",
-      "Basic filters",
-    ],
-    cta: "Start Basic",
-    recommended: false,
-  },
-  {
-    name: "Standard",
-    price: "9.99",
-    desc: "The most popular plan for serious growth",
-    features: [
-      "Access to majority of mentors",
-      "Extended AI matching",
-      "Access to certified mentors",
-      "Advanced filters (experience, domain)",
-      "Personalized recommendations",
-    ],
-    cta: "Start Standard",
-    recommended: true,
-  },
-  {
-    name: "Premium",
-    price: "14.99",
-    desc: "Maximum access for maximum impact",
-    features: [
-      "Access to ALL mentors",
-      "Unlimited AI matching",
-      "Priority booking",
-      "Access to top mentors",
-      "Exclusive content (videos, tips)",
-    ],
-    cta: "Start Premium",
-    recommended: false,
-  },
-];
-
-const mentorPerks = [
-  "You set your own rates",
-  "You choose your availability",
-  "GrowVia takes 20% commission per session only when you earn",
-  "Commission covers: lead generation, payment processing, scheduling tools, dashboard access",
-];
-
-const freeFeatures = [
-  "Limited platform access",
-  "See some mentors (not all)",
-  "1 AI matching maximum",
-  "Ability to book 1 discovery session",
-];
-
 export default function PricingPage() {
+  const { t } = useLang();
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   useEffect(() => { setSession(getUserSession()); }, []);
 
+  const plans = [
+    {
+      name: t("pricing_plan_basic"),
+      key: "Basic",
+      price: "4.99",
+      desc: t("pricing_plan_basic_desc"),
+      features: [
+        t("pricing_plan_basic_f1"),
+        t("pricing_plan_basic_f2"),
+        t("pricing_plan_basic_f3"),
+        t("pricing_plan_basic_f4"),
+      ],
+      cta: t("pricing_plan_basic_cta"),
+      recommended: false,
+    },
+    {
+      name: t("pricing_plan_std"),
+      key: "Standard",
+      price: "9.99",
+      desc: t("pricing_plan_std_desc"),
+      features: [
+        t("pricing_plan_std_f1"),
+        t("pricing_plan_std_f2"),
+        t("pricing_plan_std_f3"),
+        t("pricing_plan_std_f4"),
+        t("pricing_plan_std_f5"),
+      ],
+      cta: t("pricing_plan_std_cta"),
+      recommended: true,
+    },
+    {
+      name: t("pricing_plan_prem"),
+      key: "Premium",
+      price: "14.99",
+      desc: t("pricing_plan_prem_desc"),
+      features: [
+        t("pricing_plan_prem_f1"),
+        t("pricing_plan_prem_f2"),
+        t("pricing_plan_prem_f3"),
+        t("pricing_plan_prem_f4"),
+        t("pricing_plan_prem_f5"),
+      ],
+      cta: t("pricing_plan_prem_cta"),
+      recommended: false,
+    },
+  ];
+
+  const mentorPerks = [
+    t("pricing_mentor_p1"),
+    t("pricing_mentor_p2"),
+    t("pricing_mentor_p3"),
+    t("pricing_mentor_p4"),
+  ];
+
+  const freeFeatures = [
+    t("pricing_free_f1"),
+    t("pricing_free_f2"),
+    t("pricing_free_f3"),
+    t("pricing_free_f4"),
+  ];
+
+  const commissionItems = [
+    t("pricing_plan_basic"),
+    t("pricing_plan_std"),
+    t("pricing_plan_prem"),
+    t("pricing_label"),
+  ];
+
   async function handleCheckout(planKey: string) {
     if (!session) { router.push("/auth/register"); return; }
     setLoadingPlan(planKey);
     try {
-      const res  = await fetch("/api/stripe/checkout", {
+      const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey.toLowerCase(), email: session.email }),
@@ -99,27 +111,23 @@ export default function PricingPage() {
       <section className="relative min-h-[75vh] flex items-center justify-center text-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&q=80"
-          alt=""
-          aria-hidden="true"
+          alt="" aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: "brightness(0.28) saturate(0.55)" }}
         />
         <div className="absolute inset-0 bg-[#0D0A1A]/65" />
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none"
-          style={{ height: "35%", background: "linear-gradient(to bottom, transparent, #0D0A1A)" }}
-        />
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: "35%", background: "linear-gradient(to bottom, transparent, #0D0A1A)" }} />
 
         <div className="relative px-6 max-w-3xl mx-auto">
           <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
-            Pricing
+            {t("pricing_label")}
           </p>
           <h1 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-7">
-            Simple pricing,{" "}
-            <span style={{ ...serifStyle, color: "#A78BFA" }}>no surprises.</span>
+            {t("pricing_title1")}{" "}
+            <span style={{ ...serifStyle, color: "#A78BFA" }}>{t("pricing_title2")}</span>
           </h1>
           <p className="reveal reveal-delay-2 text-lg text-white/50 leading-relaxed max-w-xl mx-auto">
-            Clear plans for mentees. Free to join for mentors. No hidden fees.
+            {t("pricing_sub")}
           </p>
         </div>
       </section>
@@ -128,65 +136,47 @@ export default function PricingPage() {
       <section className="relative py-36 overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&q=80"
-          alt=""
-          aria-hidden="true"
+          alt="" aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: "brightness(0.18) saturate(0.45)" }}
         />
         <div className="absolute inset-0 bg-[#0D0A1A]/55" />
-
-        {/* Top fade */}
-        <div
-          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
-        />
-        {/* Bottom fade */}
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }}
-        />
+        <div className="absolute top-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }} />
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }} />
 
         <div className="relative z-20 max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
-              For Mentees
+              {t("pricing_mentees_label")}
             </p>
             <h2 className="reveal reveal-delay-1 text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-              Choose your plan.
+              {t("pricing_choose")}
             </h2>
             <p className="reveal reveal-delay-2 text-white/40 mt-4 text-base">
-              All plans billed monthly. Cancel anytime.
+              {t("pricing_monthly")}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan, i) => (
               <div
-                key={plan.name}
+                key={plan.key}
                 className={`reveal reveal-delay-${i + 1} relative rounded-2xl p-8 flex flex-col border transition-colors duration-300 ${
-                  plan.recommended
-                    ? "border-[#7C3AED]/60"
-                    : "border-white/[0.08] hover:border-[#7C3AED]/30"
+                  plan.recommended ? "border-[#7C3AED]/60" : "border-white/[0.08] hover:border-[#7C3AED]/30"
                 }`}
-                style={{
-                  background: plan.recommended
-                    ? "rgba(124,58,237,0.18)"
-                    : "rgba(255,255,255,0.04)",
-                }}
+                style={{ background: plan.recommended ? "rgba(124,58,237,0.18)" : "rgba(255,255,255,0.04)" }}
               >
                 {plan.recommended && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#7C3AED] text-white text-xs font-bold px-5 py-1.5 rounded-full whitespace-nowrap tracking-wide">
-                    Recommended
+                    {t("pricing_recommended")}
                   </div>
                 )}
 
                 <div className="mb-8">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#A78BFA] mb-4">
-                    {plan.name}
-                  </p>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#A78BFA] mb-4">{plan.name}</p>
                   <div className="flex items-end gap-1.5 mb-2">
                     <span className="text-5xl font-extrabold text-white leading-none">{plan.price}€</span>
-                    <span className="text-white/35 mb-1.5 text-sm">/ month</span>
+                    <span className="text-white/35 mb-1.5 text-sm">{t("pricing_month")}</span>
                   </div>
                   <p className="text-sm text-white/40">{plan.desc}</p>
                 </div>
@@ -201,15 +191,15 @@ export default function PricingPage() {
                 </ul>
 
                 <button
-                  onClick={() => handleCheckout(plan.name)}
-                  disabled={loadingPlan === plan.name}
+                  onClick={() => handleCheckout(plan.key)}
+                  disabled={loadingPlan === plan.key}
                   className={`w-full flex items-center justify-center gap-2 font-semibold py-3.5 rounded-xl transition-colors text-sm disabled:opacity-60 ${
                     plan.recommended
                       ? "bg-[#7C3AED] text-white hover:bg-[#6D28D9]"
                       : "border border-white/15 text-white/70 hover:border-[#7C3AED]/50 hover:text-white"
                   }`}
                 >
-                  {loadingPlan === plan.name
+                  {loadingPlan === plan.key
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading...</>
                     : plan.cta}
                 </button>
@@ -222,22 +212,18 @@ export default function PricingPage() {
       {/* ── FREEMIUM ──────────────────────────────────────────── */}
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <div
-            className="reveal rounded-2xl p-10 border border-white/[0.08]"
-            style={{ background: "rgba(255,255,255,0.03)" }}
-          >
+          <div className="reveal rounded-2xl p-10 border border-white/[0.08]" style={{ background: "rgba(255,255,255,0.03)" }}>
             <div className="flex flex-col md:flex-row md:items-start gap-10">
-              {/* Left */}
               <div className="flex-1">
                 <p className="text-xs font-bold uppercase tracking-widest text-[#F97316] mb-3">
-                  No commitment needed
+                  {t("pricing_free_badge")}
                 </p>
                 <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">
-                  Not sure yet?{" "}
-                  <span style={serifStyle}>Start for free.</span>
+                  {t("pricing_free_title1")}{" "}
+                  <span style={serifStyle}>{t("pricing_free_title2")}</span>
                 </h3>
                 <p className="text-white/40 text-sm leading-relaxed mb-8">
-                  Try GrowVia at no cost. Get a taste of what mentorship can do for you before committing to any plan.
+                  {t("pricing_free_sub")}
                 </p>
                 <ul className="space-y-4">
                   {freeFeatures.map((f) => (
@@ -252,20 +238,21 @@ export default function PricingPage() {
                     href="/auth/register"
                     className="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA6C0A] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
                   >
-                    Start for free <ArrowRight className="w-4 h-4" />
+                    {t("pricing_free_cta")} <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </div>
 
-              {/* Right — free badge */}
               <div className="flex-shrink-0 md:pt-2">
                 <div
                   className="text-center rounded-2xl px-10 py-8 border"
                   style={{ background: "rgba(249,115,22,0.08)", borderColor: "rgba(249,115,22,0.2)" }}
                 >
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#F97316]">Free plan</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#F97316]">
+                    {t("pricing_free_plan")}
+                  </p>
                   <p className="text-5xl font-extrabold text-white mb-1">0€</p>
-                  <p className="text-xs text-white/35 font-medium">forever · no card needed</p>
+                  <p className="text-xs text-white/35 font-medium">{t("pricing_free_forever")}</p>
                 </div>
               </div>
             </div>
@@ -277,50 +264,33 @@ export default function PricingPage() {
       <section className="relative py-36 overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1600&q=80"
-          alt=""
-          aria-hidden="true"
+          alt="" aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: "brightness(0.22) saturate(0.5)" }}
         />
         <div className="absolute inset-0 bg-[#0D0A1A]/60" />
-
-        {/* Top fade */}
-        <div
-          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
-        />
-        {/* Bottom fade */}
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
-          style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }}
-        />
+        <div className="absolute top-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }} />
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }} />
 
         <div className="relative z-20 max-w-5xl mx-auto px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-10">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}
-            >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}>
               <TrendingUp className="w-4 h-4 text-[#A78BFA]" />
             </div>
-            <h2 className="text-2xl font-bold text-white">For mentors</h2>
+            <h2 className="text-2xl font-bold text-white">{t("pricing_mentor_label")}</h2>
           </div>
 
-          <div
-            className="reveal rounded-2xl p-10 border border-[#7C3AED]/20"
-            style={{ background: "rgba(13,10,26,0.75)" }}
-          >
+          <div className="reveal rounded-2xl p-10 border border-[#7C3AED]/20" style={{ background: "rgba(13,10,26,0.75)" }}>
             <div className="flex flex-col lg:flex-row lg:items-start gap-10">
               <div className="flex-1">
                 <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
-                  Joining GrowVia as a mentor is free
+                  {t("pricing_mentor_join")}
                 </p>
                 <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-                  You only pay when you earn.
+                  {t("pricing_mentor_title")}
                 </h3>
                 <p className="text-white/40 leading-relaxed mb-8">
-                  No setup fees. No monthly subscription. No risk. GrowVia takes a commission only
-                  when a mentee pays for a session — everything else is free.
+                  {t("pricing_mentor_sub")}
                 </p>
 
                 <ul className="space-y-4">
@@ -337,28 +307,22 @@ export default function PricingPage() {
                     href="/auth/register?role=mentor"
                     className="inline-flex items-center gap-2 bg-[#7C3AED] text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-[#6D28D9] transition-colors text-sm"
                   >
-                    Apply to become a mentor <ArrowRight className="w-4 h-4" />
+                    {t("pricing_mentor_cta")} <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </div>
 
               <div className="lg:w-64 flex-shrink-0">
-                <div
-                  className="rounded-2xl p-6 text-center border border-[#7C3AED]/25"
-                  style={{ background: "rgba(124,58,237,0.12)" }}
-                >
+                <div className="rounded-2xl p-6 text-center border border-[#7C3AED]/25" style={{ background: "rgba(124,58,237,0.12)" }}>
                   <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
-                    Commission
+                    {t("pricing_commission")}
                   </p>
                   <p className="text-5xl font-extrabold text-white mb-1">20%</p>
                   <p className="text-sm text-white/40 leading-relaxed">
-                    Per session, only when you earn. Zero charge otherwise.
+                    {t("pricing_commission_sub")}
                   </p>
-                  <div
-                    className="mt-5 pt-5 space-y-2"
-                    style={{ borderTop: "1px solid rgba(124,58,237,0.15)" }}
-                  >
-                    {["Lead generation", "Payment processing", "Scheduling tools", "Dashboard access"].map((item) => (
+                  <div className="mt-5 pt-5 space-y-2" style={{ borderTop: "1px solid rgba(124,58,237,0.15)" }}>
+                    {commissionItems.map((item) => (
                       <p key={item} className="text-xs text-white/30">{item}</p>
                     ))}
                   </div>
