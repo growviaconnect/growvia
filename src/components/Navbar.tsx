@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { getUserSession, clearUserSession, type UserSession } from "@/lib/session";
-import { clearAuthCookie } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useLang } from "@/contexts/LangContext";
 import LangSwitcher from "@/components/LangSwitcher";
@@ -14,21 +13,13 @@ const shadow = "0 1px 4px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.5)";
 
 export default function Navbar() {
   const router = useRouter();
+  const { session, clearSession } = useAuth();
   const { t } = useLang();
-  const [menuOpen, setMenuOpen]   = useState(false);
-  const [session, setSession]     = useState<UserSession | null>(null);
-  const [hydrated, setHydrated]   = useState(false);
-
-  useEffect(() => {
-    setSession(getUserSession());
-    setHydrated(true);
-  }, []);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleLogout() {
     await supabase.auth.signOut();
-    clearAuthCookie();
-    clearUserSession();
-    setSession(null);
+    clearSession();
     setMenuOpen(false);
     router.push("/");
   }
@@ -74,7 +65,7 @@ export default function Navbar() {
           {/* Right CTA — desktop */}
           <div className="hidden lg:flex items-center gap-3">
             <LangSwitcher />
-            {hydrated && session ? (
+            {session ? (
               <>
                 <Link
                   href="/dashboard"
@@ -137,7 +128,7 @@ export default function Navbar() {
             <LangSwitcher />
           </div>
           <div className="pt-4 space-y-3">
-            {hydrated && session ? (
+            {session ? (
               <>
                 <Link
                   href="/dashboard"

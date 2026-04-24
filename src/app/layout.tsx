@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import { LangProvider } from "@/contexts/LangContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "GrowVia – Find the mentor who's been exactly where you want to go",
@@ -34,10 +35,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#0D0A1A] text-white">
         <LangProvider>
-          <Navbar />
-          <ScrollReveal />
-          <main className="flex-1 pt-16">{children}</main>
-          <Footer />
+          <AuthProvider>
+            <Navbar />
+            <ScrollReveal />
+            <main className="flex-1 pt-16">{children}</main>
+            <Footer />
+          </AuthProvider>
         </LangProvider>
       </body>
     </html>
