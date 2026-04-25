@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { getUserSession, type UserSession } from "@/lib/session";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLang } from "@/contexts/LangContext";
 import {
   CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
@@ -50,18 +51,20 @@ function initials(nom: string) {
   return nom.split(" ").map((w) => w[0] ?? "").join("").toUpperCase().slice(0, 2);
 }
 
-function fmtDate(iso: string) {
+function fmtDate(iso: string, t: (k: string) => string, lang: string) {
   const d = new Date(iso);
   const now = new Date();
   const tom = new Date(now);
   tom.setDate(tom.getDate() + 1);
-  if (d.toDateString() === now.toDateString()) return "Today";
-  if (d.toDateString() === tom.toDateString()) return "Tomorrow";
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  if (d.toDateString() === now.toDateString()) return t("dash_today");
+  if (d.toDateString() === tom.toDateString()) return t("dash_tomorrow");
+  const locale = lang === "fr" ? "fr-FR" : lang === "es" ? "es-ES" : "en-GB";
+  return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }
 
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+function fmtTime(iso: string, lang: string) {
+  const locale = lang === "fr" ? "fr-FR" : lang === "es" ? "es-ES" : "en-GB";
+  return new Date(iso).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
 
 function generateMatchReason(
@@ -174,12 +177,13 @@ function EmptyState({ icon: Icon, title, desc, action }: {
 }
 
 function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) {
+  const { t, lang } = useLang();
   const other = userRole === "mentor" ? conn.mentees : conn.mentors;
   const otherNom = other?.nom ?? "—";
   const otherInfo =
     userRole === "mentor"
-      ? (conn.mentees?.objectif ?? "Mentee")
-      : (conn.mentors?.specialite ?? "Mentor");
+      ? (conn.mentees?.objectif ?? t("dash_role_mentee"))
+      : (conn.mentors?.specialite ?? t("dash_role_mentor"));
   const isPast = conn.statut === "completed" || new Date(conn.date) < new Date();
 
   return (
@@ -200,14 +204,14 @@ function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) 
         <div className="flex items-center gap-3 mt-2">
           <span className="inline-flex items-center gap-1 text-xs text-white/35">
             <Clock className="w-3 h-3" />
-            {fmtDate(conn.date)} at {fmtTime(conn.date)}
+            {fmtDate(conn.date, t, lang)} {t("dash_at")} {fmtTime(conn.date, lang)}
           </span>
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {!isPast && (
           <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-            <Video className="w-3.5 h-3.5" /> Join
+            <Video className="w-3.5 h-3.5" /> {t("dash_join")}
           </button>
         )}
         <span
@@ -226,8 +230,9 @@ function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) 
 }
 
 function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
+  const { t } = useLang();
   const rankLabel = ["🥇", "🥈", "🥉"][rank] ?? `#${rank + 1}`;
-  const subtitle = match.job_title ?? match.specialite ?? match.industry ?? "Mentor";
+  const subtitle = match.job_title ?? match.specialite ?? match.industry ?? t("dash_role_mentor");
   const color = scoreColor(match.score);
 
   return (
@@ -269,7 +274,7 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
           <div className="text-2xl font-extrabold tabular-nums" style={{ color }}>
             {match.score}%
           </div>
-          <div className="text-[10px] text-white/30 mt-0.5 uppercase tracking-wide">match</div>
+          <div className="text-[10px] text-white/30 mt-0.5 uppercase tracking-wide">{t("dash_ai_match_pct")}</div>
         </div>
       </div>
 
@@ -289,13 +294,13 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
           href="/explore"
           className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl border border-white/10 hover:border-[#7C3AED]/50 text-white/55 hover:text-white transition-colors"
         >
-          View Profile
+          {t("dash_ai_view_profile")}
         </Link>
         <Link
           href="/explore"
           className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition-colors"
         >
-          Request Session
+          {t("dash_ai_request")}
         </Link>
       </div>
     </Card>
@@ -309,6 +314,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const initialized = useRef(false);
   const { session: authSession, setSession: setAuthSession, clearSession } = useAuth();
+  const { t, lang } = useLang();
 
   const [tab, setTab]                       = useState<Tab>("overview");
   const [user, setUser]                     = useState<UserSession | null>(null);
@@ -329,6 +335,57 @@ function DashboardContent() {
   const [qFrequency, setQFrequency]         = useState("");
   const [qPriorities, setQPriorities]       = useState<string[]>([]);
   const [qBio, setQBio]                     = useState("");
+
+  // Nav items — defined inside component so they react to lang changes
+  const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
+    { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
+    { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
+    { id: "saved",    label: t("dash_nav_saved"),    icon: Heart         },
+    { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
+  ];
+  const secondaryNav = [
+    { href: "/profile",  label: t("dash_nav_profile"),   icon: User         },
+    { href: "/calendar", label: t("dash_nav_calendar"),  icon: CalendarCheck },
+    { href: "/settings", label: t("dash_nav_settings"),  icon: Settings      },
+  ];
+
+  const roleLabel =
+    user?.role === "mentor"       ? t("dash_role_mentor") :
+    user?.role === "school_admin" ? t("dash_role_school") :
+                                    t("dash_role_mentee");
+
+  // Questionnaire options — English values stored to DB; labels are translated
+  const goalOptions = [
+    { value: "Career growth",                label: t("dash_q_goal1") },
+    { value: "Job search & interviews",       label: t("dash_q_goal2") },
+    { value: "Startup & entrepreneurship",    label: t("dash_q_goal3") },
+    { value: "Skill development",             label: t("dash_q_goal4") },
+    { value: "Academic guidance",             label: t("dash_q_goal5") },
+    { value: "Career change",                 label: t("dash_q_goal6") },
+  ];
+  const levelOptions = [
+    { value: "Student",        label: t("dash_q_lvl1") },
+    { value: "Junior",         label: t("dash_q_lvl2") },
+    { value: "Mid-level",      label: t("dash_q_lvl3") },
+    { value: "Senior",         label: t("dash_q_lvl4") },
+    { value: "Career changer", label: t("dash_q_lvl5") },
+  ];
+  const langOptions = [
+    { value: "English", label: t("dash_q_lang_en") },
+    { value: "French",  label: t("dash_q_lang_fr") },
+    { value: "Spanish", label: t("dash_q_lang_es") },
+    { value: "Other",   label: t("dash_q_lang_other") },
+  ];
+  const freqOptions = [
+    { value: "Once a month",   label: t("dash_q_freq1") },
+    { value: "Twice a month",  label: t("dash_q_freq2") },
+    { value: "Weekly",         label: t("dash_q_freq3") },
+  ];
+  const priorityOptions = [
+    { value: "Deep domain expertise",             label: t("dash_q_pri1") },
+    { value: "Practical advice & accountability", label: t("dash_q_pri2") },
+    { value: "Network & opportunities",           label: t("dash_q_pri3") },
+  ];
 
   // Re-verify free-trial flag from DB each time the user opens the matching tab
   useEffect(() => {
@@ -608,19 +665,6 @@ function DashboardContent() {
 
   const firstName = (user?.nom ?? "").split(" ")[0] || "there";
   const userInitials = initials(user?.nom ?? "?");
-  const roleLabel = user?.role === "mentor" ? "Mentor" : user?.role === "school_admin" ? "School Admin" : "Mentee";
-
-  const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: "Overview",      icon: TrendingUp    },
-    { id: "sessions", label: "My Sessions",   icon: CalendarCheck },
-    { id: "saved",    label: "Saved Mentors", icon: Heart         },
-    { id: "matching", label: "AI Matching",   icon: Sparkles      },
-  ];
-  const secondaryNav = [
-    { href: "/profile",  label: "Profile",   icon: User         },
-    { href: "/calendar", label: "Calendar",  icon: CalendarCheck },
-    { href: "/settings", label: "Settings",  icon: Settings      },
-  ];
 
   if (loading) {
     return (
@@ -687,7 +731,7 @@ function DashboardContent() {
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.07] transition-colors duration-200"
                 >
                   <LogOut className="w-4 h-4 flex-shrink-0" />
-                  Sign out
+                  {t("dash_nav_signout")}
                 </button>
               </nav>
             </Card>
@@ -701,12 +745,12 @@ function DashboardContent() {
               <div className="space-y-5">
                 <div>
                   <h1 className="text-2xl font-extrabold text-white tracking-tight">
-                    {welcomeBack ? `Welcome to GrowVia, ${firstName}! 🎉` : `Welcome back, ${firstName}`}
+                    {welcomeBack
+                      ? `${t("dash_welcome_new")}${firstName}! 🎉`
+                      : `${t("dash_welcome_return")}${firstName}`}
                   </h1>
                   <p className="text-white/35 text-sm mt-1">
-                    {welcomeBack
-                      ? "Your profile is set up. Explore mentors and book your first session."
-                      : "Here is your mentoring overview."}
+                    {welcomeBack ? t("dash_welcome_sub") : t("dash_overview_sub")}
                   </p>
                 </div>
 
@@ -718,7 +762,7 @@ function DashboardContent() {
                   >
                     <div className="w-2 h-2 rounded-full bg-[#A78BFA] flex-shrink-0" />
                     <span className="text-[#C4B5FD] text-sm font-medium">
-                      Profile complete! Start by exploring mentors or let AI find your best match.
+                      {t("dash_profile_complete")}
                     </span>
                   </div>
                 )}
@@ -731,7 +775,7 @@ function DashboardContent() {
                   >
                     <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
                     <span className="text-emerald-300 text-sm font-medium">
-                      Plan upgraded to <span className="capitalize font-bold">{planUpgraded}</span>. Welcome to the next level!
+                      {t("dash_plan_upgraded")} <span className="capitalize font-bold">{planUpgraded}</span>. {t("dash_welcome_next")}
                     </span>
                   </div>
                 )}
@@ -739,10 +783,10 @@ function DashboardContent() {
                 {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { label: "Sessions Booked", value: connexions.length,  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
-                    { label: "Sessions Done",   value: past.length,         icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
-                    { label: "Upcoming",        value: upcoming.length,     icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                    { label: "AI Matches",      value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                    { label: t("dash_stat_booked"),   value: connexions.length,  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
+                    { label: t("dash_stat_done"),      value: past.length,         icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
+                    { label: t("dash_stat_upcoming"),  value: upcoming.length,     icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
+                    { label: t("dash_stat_ai"),        value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
                   ].map((stat) => (
                     <Card key={stat.label} className="p-5">
                       <div
@@ -761,12 +805,12 @@ function DashboardContent() {
                 {upcoming.length > 0 ? (
                   <Card className="p-6">
                     <div className="flex justify-between items-center mb-5">
-                      <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">Next Session</h2>
+                      <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
                       <button
                         onClick={() => setTab("sessions")}
                         className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors"
                       >
-                        View all <ChevronRight className="w-3 h-3" />
+                        {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
                       </button>
                     </div>
                     {(() => {
@@ -785,16 +829,16 @@ function DashboardContent() {
                             <div className="font-semibold text-white text-sm">{otherNom}</div>
                             <div className="text-xs text-white/35 mt-0.5">
                               {user?.role === "mentor"
-                                ? c.mentees?.objectif ?? "Mentee"
-                                : c.mentors?.specialite ?? "Mentor"}
+                                ? c.mentees?.objectif ?? t("dash_role_mentee")
+                                : c.mentors?.specialite ?? t("dash_role_mentor")}
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0 hidden sm:block">
-                            <div className="text-sm font-semibold text-white">{fmtDate(c.date)}</div>
-                            <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date)}</div>
+                            <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                            <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
                           </div>
                           <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
-                            <Video className="w-3.5 h-3.5" /> Join
+                            <Video className="w-3.5 h-3.5" /> {t("dash_join")}
                           </button>
                         </div>
                       );
@@ -803,14 +847,14 @@ function DashboardContent() {
                 ) : (
                   <EmptyState
                     icon={CalendarCheck}
-                    title="No upcoming sessions"
-                    desc="Book a session with a mentor to get started on your journey."
+                    title={t("dash_no_upcoming")}
+                    desc={t("dash_no_upcoming_desc")}
                     action={
                       <Link
                         href="/explore"
                         className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
                       >
-                        Explore mentors
+                        {t("dash_explore_mentors")}
                       </Link>
                     }
                   />
@@ -825,31 +869,27 @@ function DashboardContent() {
                     {!hasUsedFreeMatch ? (
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
-                          <div className="font-bold text-white mb-1">Try AI Matching for free</div>
-                          <div className="text-white/45 text-sm">
-                            You have 1 free AI match — let our engine find your perfect mentor.
-                          </div>
+                          <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
+                          <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
                         </div>
                         <button
                           onClick={handleStartMatching}
                           className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                         >
-                          Try now
+                          {t("dash_try_now")}
                         </button>
                       </div>
                     ) : (
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
-                          <div className="font-bold text-white mb-1">Unlock unlimited AI matching</div>
-                          <div className="text-white/45 text-sm">
-                            Subscribe from 4.99€/month and get full access + unlimited AI matches.
-                          </div>
+                          <div className="font-bold text-white mb-1">{t("dash_unlock_ai")}</div>
+                          <div className="text-white/45 text-sm">{t("dash_unlock_ai_desc")}</div>
                         </div>
                         <Link
                           href="/pricing"
                           className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                         >
-                          Upgrade
+                          {t("dash_upgrade")}
                         </Link>
                       </div>
                     )}
@@ -861,10 +901,10 @@ function DashboardContent() {
             {/* MY SESSIONS */}
             {tab === "sessions" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">My Sessions</h1>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_sessions_title")}</h1>
 
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Upcoming</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
                   {upcoming.length > 0 ? (
                     <div className="space-y-3">
                       {upcoming.map((c) => (
@@ -874,14 +914,14 @@ function DashboardContent() {
                   ) : (
                     <EmptyState
                       icon={CalendarCheck}
-                      title="No upcoming sessions"
-                      desc="Find a mentor and book your first session."
+                      title={t("dash_no_sessions")}
+                      desc={t("dash_no_sessions_desc")}
                       action={
                         <Link
                           href="/explore"
                           className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
                         >
-                          <BookOpen className="w-4 h-4" /> Find a mentor
+                          <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
                         </Link>
                       }
                     />
@@ -890,7 +930,7 @@ function DashboardContent() {
 
                 {past.length > 0 && (
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Past Sessions</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_past_label")}</p>
                     <div className="space-y-3">
                       {past.map((c) => (
                         <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
@@ -904,17 +944,17 @@ function DashboardContent() {
             {/* SAVED MENTORS */}
             {tab === "saved" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">Saved Mentors</h1>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_saved_title")}</h1>
                 <EmptyState
                   icon={Heart}
-                  title="No saved mentors yet"
-                  desc="Browse mentors and save the ones you'd like to work with."
+                  title={t("dash_no_saved")}
+                  desc={t("dash_no_saved_desc")}
                   action={
                     <Link
                       href="/explore"
                       className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
                     >
-                      <BookOpen className="w-4 h-4" /> Browse mentors
+                      <BookOpen className="w-4 h-4" /> {t("dash_browse_mentors")}
                     </Link>
                   }
                 />
@@ -928,19 +968,17 @@ function DashboardContent() {
                 <div className="flex items-center gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h1 className="text-2xl font-extrabold text-white tracking-tight">AI Smart Matching</h1>
+                      <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_ai_title")}</h1>
                       {user?.plan !== "free" && (
                         <span
                           className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
                           style={{ background: "rgba(16,185,129,0.15)", color: "#34d399" }}
                         >
-                          Premium
+                          {t("dash_ai_premium_badge")}
                         </span>
                       )}
                     </div>
-                    <p className="text-white/35 text-sm mt-1">
-                      Our engine scores every mentor against your profile to surface the best fits.
-                    </p>
+                    <p className="text-white/35 text-sm mt-1">{t("dash_ai_engine_desc")}</p>
                   </div>
                 </div>
 
@@ -954,7 +992,7 @@ function DashboardContent() {
                       <Sparkles className="w-8 h-8 text-[#A78BFA] animate-pulse" />
                     </div>
                     <Loader2 className="w-6 h-6 text-[#7C3AED] animate-spin" />
-                    <p className="text-white/50 text-sm">Analysing your profile and ranking mentors…</p>
+                    <p className="text-white/50 text-sm">{t("dash_ai_analysing")}</p>
                   </Card>
                 )}
 
@@ -971,24 +1009,24 @@ function DashboardContent() {
                       className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4"
                       style={{ background: "rgba(124,58,237,0.15)", color: "#C4B5FD" }}
                     >
-                      1 free match available
+                      {t("dash_ai_free_badge")}
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2">You have 1 free AI match</h2>
+                    <h2 className="text-xl font-bold text-white mb-2">{t("dash_ai_free_title")}</h2>
                     <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                      Answer 3 quick questions so our engine can surface the top mentors who fit you best.
+                      {t("dash_ai_free_desc")}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <button
                         onClick={handleStartMatching}
                         className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
                       >
-                        <Sparkles className="w-4 h-4" /> Use my free match
+                        <Sparkles className="w-4 h-4" /> {t("dash_ai_use_free")}
                       </button>
                       <Link
                         href="/explore"
                         className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
                       >
-                        <BookOpen className="w-4 h-4" /> Browse manually
+                        <BookOpen className="w-4 h-4" /> {t("dash_ai_browse")}
                       </Link>
                     </div>
                   </Card>
@@ -1028,21 +1066,21 @@ function DashboardContent() {
                           <Sparkles className="w-5 h-5 text-[#A78BFA]" />
                         </div>
                         <div>
-                          <div className="font-bold text-white text-sm">Tell us what you need</div>
-                          <div className="text-white/35 text-xs mt-0.5">A few quick questions — your match runs when you click Find My Matches</div>
+                          <div className="font-bold text-white text-sm">{t("dash_q_title")}</div>
+                          <div className="text-white/35 text-xs mt-0.5">{t("dash_q_subtitle")}</div>
                         </div>
                       </div>
 
                       {/* Q1 — goals (multi-select) */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          What&apos;s your main goal? <span className="text-[#7C3AED]">*</span>
-                          <span className="normal-case font-normal ml-1 text-white/25">(select all that apply)</span>
+                          {t("dash_q_goal_label")} <span className="text-[#7C3AED]">*</span>
+                          <span className="normal-case font-normal ml-1 text-white/25">{t("dash_q_select_all")}</span>
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {["Career growth", "Job search & interviews", "Startup & entrepreneurship", "Skill development", "Academic guidance", "Career change"].map((g) =>
-                            pill(g, qGoals.includes(g), () =>
-                              setQGoals((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])
+                          {goalOptions.map(({ value, label }) =>
+                            pill(label, qGoals.includes(value), () =>
+                              setQGoals((prev) => prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value])
                             )
                           )}
                         </div>
@@ -1051,13 +1089,13 @@ function DashboardContent() {
                       {/* Q2 — field */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          Your field or industry
+                          {t("dash_q_field_label")}
                         </label>
                         <input
                           type="text"
                           value={qField}
                           onChange={(e) => setQField(e.target.value)}
-                          placeholder="e.g. Software engineering, Marketing, Finance…"
+                          placeholder={t("dash_q_field_ph")}
                           className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 border border-white/10 focus:border-[#7C3AED] focus:outline-none transition-colors"
                           style={{ background: "rgba(255,255,255,0.04)" }}
                         />
@@ -1066,11 +1104,11 @@ function DashboardContent() {
                       {/* Q3 — experience level */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          Your current experience level
+                          {t("dash_q_level_label")}
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {["Student", "Junior", "Mid-level", "Senior", "Career changer"].map((l) =>
-                            pill(l, qLevel === l, () => setQLevel((prev) => prev === l ? "" : l))
+                          {levelOptions.map(({ value, label }) =>
+                            pill(label, qLevel === value, () => setQLevel((prev) => prev === value ? "" : value))
                           )}
                         </div>
                       </div>
@@ -1078,11 +1116,11 @@ function DashboardContent() {
                       {/* Q4 — preferred language */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          Preferred language for sessions
+                          {t("dash_q_lang_label")}
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {["English", "French", "Spanish", "Other"].map((l) =>
-                            pill(l, qLanguage === l, () => setQLanguage((prev) => prev === l ? "" : l))
+                          {langOptions.map(({ value, label }) =>
+                            pill(label, qLanguage === value, () => setQLanguage((prev) => prev === value ? "" : value))
                           )}
                         </div>
                       </div>
@@ -1090,11 +1128,11 @@ function DashboardContent() {
                       {/* Q5 — meeting frequency */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          How often do you want to meet?
+                          {t("dash_q_freq_label")}
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {["Once a month", "Twice a month", "Weekly"].map((f) =>
-                            pill(f, qFrequency === f, () => setQFrequency((prev) => prev === f ? "" : f))
+                          {freqOptions.map(({ value, label }) =>
+                            pill(label, qFrequency === value, () => setQFrequency((prev) => prev === value ? "" : value))
                           )}
                         </div>
                       </div>
@@ -1102,13 +1140,13 @@ function DashboardContent() {
                       {/* Q6 — priorities (multi-select) */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          What matters most in a mentor?
-                          <span className="normal-case font-normal ml-1 text-white/25">(select all that apply)</span>
+                          {t("dash_q_pri_label")}
+                          <span className="normal-case font-normal ml-1 text-white/25">{t("dash_q_select_all")}</span>
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {["Deep domain expertise", "Practical advice & accountability", "Network & opportunities"].map((p) =>
-                            pill(p, qPriorities.includes(p), () =>
-                              setQPriorities((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p])
+                          {priorityOptions.map(({ value, label }) =>
+                            pill(label, qPriorities.includes(value), () =>
+                              setQPriorities((prev) => prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value])
                             )
                           )}
                         </div>
@@ -1117,14 +1155,14 @@ function DashboardContent() {
                       {/* Q7 — free text */}
                       <div className="mb-8">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
-                          Tell us more about yourself
-                          <span className="normal-case font-normal ml-1 text-white/25">(optional)</span>
+                          {t("dash_q_bio_label")}
+                          <span className="normal-case font-normal ml-1 text-white/25">{t("dash_q_optional")}</span>
                         </label>
                         <textarea
                           value={qBio}
                           onChange={(e) => setQBio(e.target.value)}
                           rows={3}
-                          placeholder="Your background, what you're looking for, and any details that could help us find the best mentor for you…"
+                          placeholder={t("dash_q_bio_ph")}
                           className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 border border-white/10 focus:border-[#7C3AED] focus:outline-none transition-colors resize-none"
                           style={{ background: "rgba(255,255,255,0.04)" }}
                         />
@@ -1135,14 +1173,14 @@ function DashboardContent() {
                           onClick={() => setShowQuestionnaire(false)}
                           className="px-5 py-2.5 rounded-xl text-sm font-medium border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
                         >
-                          Cancel
+                          {t("dash_q_cancel")}
                         </button>
                         <button
                           onClick={handleFindMatches}
                           disabled={qGoals.length === 0}
                           className="flex-1 flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
                         >
-                          <Sparkles className="w-4 h-4" /> Find My Matches
+                          <Sparkles className="w-4 h-4" /> {t("dash_q_find")}
                         </button>
                       </div>
                     </Card>
@@ -1158,15 +1196,15 @@ function DashboardContent() {
                     >
                       <Sparkles className="w-8 h-8 text-emerald-400" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2">AI Matching is ready</h2>
+                    <h2 className="text-xl font-bold text-white mb-2">{t("dash_ai_ready_title")}</h2>
                     <p className="text-white/40 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                      Your plan includes unlimited AI matches. Run it anytime to see updated suggestions.
+                      {t("dash_ai_ready_desc")}
                     </p>
                     <button
                       onClick={() => runMatching()}
                       className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
                     >
-                      <Sparkles className="w-4 h-4" /> Run AI Matching
+                      <Sparkles className="w-4 h-4" /> {t("dash_ai_run")}
                     </button>
                   </Card>
                 )}
@@ -1176,7 +1214,7 @@ function DashboardContent() {
                   <>
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30">
-                        Top matches for you
+                        {t("dash_ai_top_matches")}
                       </p>
                       {/* Refresh only for subscribed users */}
                       {user?.plan !== "free" && (
@@ -1184,7 +1222,7 @@ function DashboardContent() {
                           onClick={() => runMatching()}
                           className="flex items-center gap-1.5 text-xs font-semibold text-[#A78BFA] hover:text-white transition-colors"
                         >
-                          <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                          <RefreshCw className="w-3.5 h-3.5" /> {t("dash_ai_refresh")}
                         </button>
                       )}
                     </div>
@@ -1204,18 +1242,14 @@ function DashboardContent() {
                   >
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div>
-                        <div className="font-bold text-white mb-1">
-                          Want to run new matches?
-                        </div>
-                        <div className="text-white/45 text-sm">
-                          Upgrade from 4.99€/month and get unlimited AI matches.
-                        </div>
+                        <div className="font-bold text-white mb-1">{t("dash_ai_want_new")}</div>
+                        <div className="text-white/45 text-sm">{t("dash_ai_upgrade_desc")}</div>
                       </div>
                       <Link
                         href="/pricing"
                         className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                       >
-                        Upgrade
+                        {t("dash_upgrade")}
                       </Link>
                     </div>
                   </div>

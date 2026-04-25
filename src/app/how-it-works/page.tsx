@@ -252,7 +252,7 @@ export default function HowItWorksPage() {
               style={{ background: "rgba(255,255,255,0.03)" }}
             >
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/25 mb-6">
-                Activity
+                {t("hiw_activity")}
               </p>
               <div className="space-y-3">
                 {notifications.map((n, i) => (

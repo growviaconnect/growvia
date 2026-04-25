@@ -103,7 +103,7 @@ export default function Navbar() {
           <button
             className="lg:hidden text-white hover:text-white/70 transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
+            aria-label={t("nav_toggle_menu")}
             style={{ textShadow: shadow }}
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

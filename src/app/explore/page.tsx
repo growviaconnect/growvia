@@ -160,7 +160,7 @@ export default function ExplorePage() {
         <div className="flex items-center gap-6">
           <button
             onClick={goPrev}
-            aria-label="Previous card"
+            aria-label={t("explore_prev_card")}
             className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/25 transition-all duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -171,7 +171,7 @@ export default function ExplorePage() {
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                aria-label={`Go to card ${i + 1}`}
+                aria-label={`${i + 1}`}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   i === current ? "w-6 bg-white" : "w-1.5 bg-white/20 hover:bg-white/35"
                 }`}
@@ -181,7 +181,7 @@ export default function ExplorePage() {
 
           <button
             onClick={goNext}
-            aria-label="Next card"
+            aria-label={t("explore_next_card")}
             className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/25 transition-all duration-200"
           >
             <ArrowRight className="w-4 h-4" />
