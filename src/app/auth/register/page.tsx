@@ -84,8 +84,8 @@ function RegisterContent() {
       setSession({ nom, email, role, plan: "free" });
       setAuthCookie();
 
-      // 5. Go to dashboard
-      router.push("/dashboard");
+      // 5. Mentors go directly to onboarding; everyone else goes to the dashboard
+      router.push(role === "mentor" ? "/onboarding/mentor" : "/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("reg_error_generic"));
     } finally {
