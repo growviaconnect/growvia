@@ -31,6 +31,7 @@ export type Mentor = {
   languages?: string[] | null;
   availability?: string | null;
   mentor_score?: number | null;
+  session_price?: number | null;
   // legacy fields
   location?: string | null;
   mentoring_experience?: string | null;
