@@ -125,7 +125,7 @@ export default function BecomeAMentorPage() {
             <div className="relative">
               <img
                 src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=900&q=80"
-                alt="Mentor session"
+                alt={t("bam_img_alt")}
                 className="w-full aspect-[4/5] object-cover rounded-xl"
                 style={{ filter: "brightness(0.6) saturate(0.8)" }}
               />
@@ -239,14 +239,14 @@ export default function BecomeAMentorPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">{t("bam_first_name")}</label>
                       <input type="text" required value={form.firstName}
                         onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                        placeholder="Luna"
+                        placeholder={t("bam_first_name_ph")}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">{t("bam_last_name")}</label>
                       <input type="text" required value={form.lastName}
                         onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                        placeholder="Davin"
+                        placeholder={t("bam_last_name_ph")}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm" />
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export default function BecomeAMentorPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">{t("bam_email")}</label>
                     <input type="email" required value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="you@example.com"
+                      placeholder={t("login_email_ph")}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm" />
                   </div>
                   <div>

@@ -755,6 +755,177 @@ export const translations: Record<Locale, Record<string, string>> = {
     final_cta_find: 'Find my mentor',
     final_cta_learn: 'Learn more',
     final_footnote: 'No commitment required · Free to browse · Discovery Session from 9.99€',
+
+    // Navbar aria-label
+    nav_toggle_menu: 'Toggle menu',
+
+    // Explore page aria-labels
+    explore_prev_card: 'Previous card',
+    explore_next_card: 'Next card',
+
+    // How It Works — activity panel heading
+    hiw_activity: 'Activity',
+
+    // For Schools — form placeholders
+    schools_form_name_ph: 'Jane Smith',
+    schools_form_inst_ph: 'University of Paris',
+    schools_form_email_ph: 'jane@university.edu',
+    schools_form_msg_ph: 'How many students, what are your goals...',
+
+    // Contact form — placeholders
+    contact_form_name_ph: 'Your name',
+    contact_form_email_ph: 'you@example.com',
+    contact_form_msg_ph: 'Tell us how we can help...',
+
+    // Auth — placeholders
+    reg_name_ph: 'Full name',
+    reg_email_ph: 'you@example.com',
+    reg_password_ph: 'At least 8 characters',
+    login_email_ph: 'you@example.com',
+
+    // Founders — hero title split (before / italic word / after)
+    founders_hero_before: "We accelerate the world's best ",
+    founders_hero_italic: 'careers',
+    founders_hero_after: ' with mentoring, network & expertise.',
+
+    // Founders — testimonial quotes
+    founders_t1_quote: "GrowVia didn't just connect me with a mentor. It changed how I see my potential entirely.",
+    founders_t2_quote: "Seeing my mentee land their dream role reminded me why experience is meant to be shared. GrowVia makes that genuinely effortless — no scheduling back-and-forth, no admin.",
+    founders_t3_quote: "The AI matching was uncanny. My mentor had faced the exact same crossroads I was standing at.",
+    founders_t4_quote: "I had the direction, not the confidence. GrowVia gave me both — in my very first session.",
+    founders_t5_quote: "My schedule is packed, but GrowVia makes giving back genuinely frictionless. Zero overhead, maximum impact on someone's life.",
+    founders_t6_quote: 'I joined GrowVia to give back. I ended up learning as much as I taught.',
+    founders_stat1_quote: 'Three sessions in, I had a clear five-year plan. Nothing else came close.',
+    founders_stat2_quote: "My mentee's progress amazes me every week. This platform just works.",
+
+    // Pricing — button loading state & error alert
+    pricing_loading: 'Loading...',
+    pricing_error: 'Something went wrong. Please try again.',
+
+    // Become a Mentor — placeholders & alt
+    bam_first_name_ph: 'Luna',
+    bam_last_name_ph: 'Davin',
+    bam_img_alt: 'Mentor session',
+
+    // Dashboard — date helpers
+    dash_today: 'Today',
+    dash_tomorrow: 'Tomorrow',
+    dash_at: 'at',
+
+    // Dashboard — role labels
+    dash_role_mentor: 'Mentor',
+    dash_role_school: 'School Admin',
+    dash_role_mentee: 'Mentee',
+
+    // Dashboard — sidebar nav
+    dash_nav_overview: 'Overview',
+    dash_nav_sessions: 'My Sessions',
+    dash_nav_saved: 'Saved Mentors',
+    dash_nav_matching: 'AI Matching',
+    dash_nav_profile: 'Profile',
+    dash_nav_calendar: 'Calendar',
+    dash_nav_settings: 'Settings',
+    dash_nav_signout: 'Sign out',
+
+    // Dashboard — stats
+    dash_stat_booked: 'Sessions Booked',
+    dash_stat_done: 'Sessions Done',
+    dash_stat_upcoming: 'Upcoming',
+    dash_stat_ai: 'AI Matches',
+
+    // Dashboard — overview tab
+    dash_welcome_new: 'Welcome to GrowVia, ',
+    dash_welcome_return: 'Welcome back, ',
+    dash_overview_sub: 'Here is your mentoring overview.',
+    dash_welcome_sub: 'Your profile is set up. Explore mentors and book your first session.',
+    dash_profile_complete: 'Profile complete! Start by exploring mentors or let AI find your best match.',
+    dash_plan_upgraded: 'Plan upgraded to',
+    dash_welcome_next: 'Welcome to the next level!',
+    dash_next_session: 'Next Session',
+    dash_view_all: 'View all',
+    dash_join: 'Join',
+    dash_explore_mentors: 'Explore mentors',
+    dash_no_upcoming: 'No upcoming sessions',
+    dash_no_upcoming_desc: 'Book a session with a mentor to get started on your journey.',
+    dash_free_ai_title: 'Try AI Matching for free',
+    dash_free_ai_desc: 'You have 1 free AI match — let our engine find your perfect mentor.',
+    dash_try_now: 'Try now',
+    dash_unlock_ai: 'Unlock unlimited AI matching',
+    dash_unlock_ai_desc: 'Subscribe from 4.99€/month and get full access + unlimited AI matches.',
+    dash_upgrade: 'Upgrade',
+
+    // Dashboard — sessions tab
+    dash_sessions_title: 'My Sessions',
+    dash_upcoming_label: 'Upcoming',
+    dash_past_label: 'Past Sessions',
+    dash_no_sessions: 'No upcoming sessions',
+    dash_no_sessions_desc: 'Find a mentor and book your first session.',
+    dash_find_mentor: 'Find a mentor',
+
+    // Dashboard — saved tab
+    dash_saved_title: 'Saved Mentors',
+    dash_no_saved: 'No saved mentors yet',
+    dash_no_saved_desc: "Browse mentors and save the ones you'd like to work with.",
+    dash_browse_mentors: 'Browse mentors',
+
+    // Dashboard — AI matching tab
+    dash_ai_title: 'AI Smart Matching',
+    dash_ai_premium_badge: 'Premium',
+    dash_ai_engine_desc: 'Our engine scores every mentor against your profile to surface the best fits.',
+    dash_ai_analysing: 'Analysing your profile and ranking mentors…',
+    dash_ai_free_badge: '1 free match available',
+    dash_ai_free_title: 'You have 1 free AI match',
+    dash_ai_free_desc: 'Answer 3 quick questions so our engine can surface the top mentors who fit you best.',
+    dash_ai_use_free: 'Use my free match',
+    dash_ai_browse: 'Browse manually',
+    dash_ai_ready_title: 'AI Matching is ready',
+    dash_ai_ready_desc: 'Your plan includes unlimited AI matches. Run it anytime to see updated suggestions.',
+    dash_ai_run: 'Run AI Matching',
+    dash_ai_top_matches: 'Top matches for you',
+    dash_ai_refresh: 'Refresh',
+    dash_ai_match_pct: 'match',
+    dash_ai_view_profile: 'View Profile',
+    dash_ai_request: 'Request Session',
+    dash_ai_want_new: 'Want to run new matches?',
+    dash_ai_upgrade_desc: 'Upgrade from 4.99€/month and get unlimited AI matches.',
+
+    // Dashboard — questionnaire
+    dash_q_title: 'Tell us what you need',
+    dash_q_subtitle: 'A few quick questions — your match runs when you click Find My Matches',
+    dash_q_goal_label: "What's your main goal?",
+    dash_q_select_all: '(select all that apply)',
+    dash_q_goal1: 'Career growth',
+    dash_q_goal2: 'Job search & interviews',
+    dash_q_goal3: 'Startup & entrepreneurship',
+    dash_q_goal4: 'Skill development',
+    dash_q_goal5: 'Academic guidance',
+    dash_q_goal6: 'Career change',
+    dash_q_field_label: 'Your field or industry',
+    dash_q_field_ph: 'e.g. Software engineering, Marketing, Finance…',
+    dash_q_level_label: 'Your current experience level',
+    dash_q_lvl1: 'Student',
+    dash_q_lvl2: 'Junior',
+    dash_q_lvl3: 'Mid-level',
+    dash_q_lvl4: 'Senior',
+    dash_q_lvl5: 'Career changer',
+    dash_q_lang_label: 'Preferred language for sessions',
+    dash_q_lang_en: 'English',
+    dash_q_lang_fr: 'French',
+    dash_q_lang_es: 'Spanish',
+    dash_q_lang_other: 'Other',
+    dash_q_freq_label: 'How often do you want to meet?',
+    dash_q_freq1: 'Once a month',
+    dash_q_freq2: 'Twice a month',
+    dash_q_freq3: 'Weekly',
+    dash_q_pri_label: 'What matters most in a mentor?',
+    dash_q_pri1: 'Deep domain expertise',
+    dash_q_pri2: 'Practical advice & accountability',
+    dash_q_pri3: 'Network & opportunities',
+    dash_q_bio_label: 'Tell us more about yourself',
+    dash_q_optional: '(optional)',
+    dash_q_bio_ph: "Your background, what you're looking for, and any details that could help us find the best mentor for you…",
+    dash_q_cancel: 'Cancel',
+    dash_q_find: 'Find My Matches',
   },
 
   fr: {
@@ -1503,6 +1674,177 @@ export const translations: Record<Locale, Record<string, string>> = {
     final_cta_find: 'Trouver mon mentor',
     final_cta_learn: 'En savoir plus',
     final_footnote: "Sans engagement · Gratuit pour naviguer · Session Découverte à partir de 9,99€",
+
+    // Navbar aria-label
+    nav_toggle_menu: 'Ouvrir le menu',
+
+    // Explore page aria-labels
+    explore_prev_card: 'Carte précédente',
+    explore_next_card: 'Carte suivante',
+
+    // How It Works — panneau activité
+    hiw_activity: 'Activité',
+
+    // For Schools — placeholders formulaire
+    schools_form_name_ph: 'Sophie Martin',
+    schools_form_inst_ph: 'Université de Paris',
+    schools_form_email_ph: 'sophie@universite.fr',
+    schools_form_msg_ph: "Combien d'étudiants, quels sont vos objectifs...",
+
+    // Contact — placeholders formulaire
+    contact_form_name_ph: 'Votre nom',
+    contact_form_email_ph: 'vous@exemple.com',
+    contact_form_msg_ph: 'Dites-nous comment nous pouvons vous aider...',
+
+    // Auth — placeholders
+    reg_name_ph: 'Votre nom complet',
+    reg_email_ph: 'vous@exemple.com',
+    reg_password_ph: 'Au moins 8 caractères',
+    login_email_ph: 'vous@exemple.com',
+
+    // Founders — découpe du titre héros
+    founders_hero_before: 'Nous accélérons les meilleures ',
+    founders_hero_italic: 'carrières',
+    founders_hero_after: "du monde grâce au mentorat, au réseau et à l'expertise.",
+
+    // Founders — citations des témoignages
+    founders_t1_quote: "GrowVia ne m'a pas seulement connectée à un mentor. Ça a changé ma façon de voir mon potentiel.",
+    founders_t2_quote: "Voir mon mentoré décrocher le poste de ses rêves m'a rappelé pourquoi l'expérience est faite pour être partagée. GrowVia rend ça vraiment sans effort.",
+    founders_t3_quote: "Le matching IA était étonnant. Mon mentor avait fait face exactement au même carrefour où je me trouvais.",
+    founders_t4_quote: "J'avais la direction, pas la confiance. GrowVia m'a donné les deux — dès ma toute première session.",
+    founders_t5_quote: "Mon emploi du temps est chargé, mais GrowVia rend le fait de donner en retour vraiment sans friction. Zéro surcharge, impact maximum.",
+    founders_t6_quote: "J'ai rejoint GrowVia pour donner en retour. J'ai fini par apprendre autant que j'ai enseigné.",
+    founders_stat1_quote: "Après trois sessions, j'avais un plan à cinq ans clair. Rien d'autre n'en approchait.",
+    founders_stat2_quote: "Les progrès de mon mentoré m'étonnent chaque semaine. Cette plateforme fonctionne tout simplement.",
+
+    // Pricing — état chargement & alerte erreur
+    pricing_loading: 'Chargement...',
+    pricing_error: "Une erreur s'est produite. Veuillez réessayer.",
+
+    // Become a Mentor — placeholders & alt
+    bam_first_name_ph: 'Sophie',
+    bam_last_name_ph: 'Martin',
+    bam_img_alt: 'Session de mentorat',
+
+    // Dashboard — date helpers
+    dash_today: "Aujourd'hui",
+    dash_tomorrow: 'Demain',
+    dash_at: 'à',
+
+    // Dashboard — libellés rôle
+    dash_role_mentor: 'Mentor',
+    dash_role_school: 'Admin École',
+    dash_role_mentee: 'Mentoré(e)',
+
+    // Dashboard — nav latérale
+    dash_nav_overview: "Vue d'ensemble",
+    dash_nav_sessions: 'Mes Sessions',
+    dash_nav_saved: 'Mentors Sauvegardés',
+    dash_nav_matching: 'Matching IA',
+    dash_nav_profile: 'Profil',
+    dash_nav_calendar: 'Calendrier',
+    dash_nav_settings: 'Paramètres',
+    dash_nav_signout: 'Déconnexion',
+
+    // Dashboard — statistiques
+    dash_stat_booked: 'Sessions Réservées',
+    dash_stat_done: 'Sessions Terminées',
+    dash_stat_upcoming: 'À venir',
+    dash_stat_ai: 'Matchs IA',
+
+    // Dashboard — onglet aperçu
+    dash_welcome_new: 'Bienvenue sur GrowVia, ',
+    dash_welcome_return: 'Bon retour, ',
+    dash_overview_sub: 'Voici votre aperçu de mentorat.',
+    dash_welcome_sub: 'Votre profil est configuré. Explorez les mentors et réservez votre première session.',
+    dash_profile_complete: "Profil complet ! Commencez par explorer les mentors ou laissez l'IA trouver votre meilleur match.",
+    dash_plan_upgraded: 'Plan mis à niveau vers',
+    dash_welcome_next: 'Bienvenue au niveau suivant !',
+    dash_next_session: 'Prochaine Session',
+    dash_view_all: 'Voir tout',
+    dash_join: 'Rejoindre',
+    dash_explore_mentors: 'Explorer les mentors',
+    dash_no_upcoming: 'Pas de sessions à venir',
+    dash_no_upcoming_desc: 'Réservez une session avec un mentor pour commencer votre parcours.',
+    dash_free_ai_title: 'Essayez le Matching IA gratuitement',
+    dash_free_ai_desc: "Vous avez 1 match IA gratuit — laissez notre moteur trouver votre mentor parfait.",
+    dash_try_now: 'Essayer maintenant',
+    dash_unlock_ai: 'Déverrouillez le matching IA illimité',
+    dash_unlock_ai_desc: "Abonnez-vous à partir de 4,99€/mois et obtenez un accès complet + des matchs IA illimités.",
+    dash_upgrade: 'Mettre à niveau',
+
+    // Dashboard — onglet sessions
+    dash_sessions_title: 'Mes Sessions',
+    dash_upcoming_label: 'À venir',
+    dash_past_label: 'Sessions Passées',
+    dash_no_sessions: 'Pas de sessions à venir',
+    dash_no_sessions_desc: 'Trouvez un mentor et réservez votre première session.',
+    dash_find_mentor: 'Trouver un mentor',
+
+    // Dashboard — onglet sauvegardés
+    dash_saved_title: 'Mentors Sauvegardés',
+    dash_no_saved: 'Aucun mentor sauvegardé',
+    dash_no_saved_desc: 'Parcourez les mentors et sauvegardez ceux avec qui vous souhaitez travailler.',
+    dash_browse_mentors: 'Parcourir les mentors',
+
+    // Dashboard — onglet matching IA
+    dash_ai_title: 'Matching IA Intelligent',
+    dash_ai_premium_badge: 'Premium',
+    dash_ai_engine_desc: 'Notre moteur évalue chaque mentor par rapport à votre profil pour trouver les meilleures correspondances.',
+    dash_ai_analysing: 'Analyse de votre profil et classement des mentors…',
+    dash_ai_free_badge: '1 match gratuit disponible',
+    dash_ai_free_title: 'Vous avez 1 match IA gratuit',
+    dash_ai_free_desc: 'Répondez à 3 questions rapides pour que notre moteur puisse trouver les meilleurs mentors qui vous correspondent.',
+    dash_ai_use_free: 'Utiliser mon match gratuit',
+    dash_ai_browse: 'Parcourir manuellement',
+    dash_ai_ready_title: 'Le Matching IA est prêt',
+    dash_ai_ready_desc: "Votre plan inclut des matchs IA illimités. Lancez-le n'importe quand pour voir des suggestions mises à jour.",
+    dash_ai_run: 'Lancer le Matching IA',
+    dash_ai_top_matches: 'Meilleures correspondances pour vous',
+    dash_ai_refresh: 'Actualiser',
+    dash_ai_match_pct: 'match',
+    dash_ai_view_profile: 'Voir le Profil',
+    dash_ai_request: 'Demander une Session',
+    dash_ai_want_new: 'Vous voulez lancer de nouveaux matchs ?',
+    dash_ai_upgrade_desc: "Mettez à niveau à partir de 4,99€/mois et obtenez des matchs IA illimités.",
+
+    // Dashboard — questionnaire
+    dash_q_title: 'Dites-nous ce dont vous avez besoin',
+    dash_q_subtitle: 'Quelques questions rapides — votre match se lance quand vous cliquez sur Trouver mes Matchs',
+    dash_q_goal_label: 'Quel est votre objectif principal ?',
+    dash_q_select_all: "(sélectionnez tout ce qui s'applique)",
+    dash_q_goal1: 'Développement de carrière',
+    dash_q_goal2: "Recherche d'emploi & entretiens",
+    dash_q_goal3: 'Startup & entrepreneuriat',
+    dash_q_goal4: 'Développement de compétences',
+    dash_q_goal5: 'Accompagnement académique',
+    dash_q_goal6: 'Reconversion professionnelle',
+    dash_q_field_label: 'Votre domaine ou secteur',
+    dash_q_field_ph: 'ex. Ingénierie logicielle, Marketing, Finance…',
+    dash_q_level_label: "Votre niveau d'expérience actuel",
+    dash_q_lvl1: 'Étudiant(e)',
+    dash_q_lvl2: 'Junior',
+    dash_q_lvl3: 'Confirmé(e)',
+    dash_q_lvl4: 'Senior',
+    dash_q_lvl5: 'En reconversion',
+    dash_q_lang_label: 'Langue préférée pour les sessions',
+    dash_q_lang_en: 'Anglais',
+    dash_q_lang_fr: 'Français',
+    dash_q_lang_es: 'Espagnol',
+    dash_q_lang_other: 'Autre',
+    dash_q_freq_label: 'À quelle fréquence souhaitez-vous vous rencontrer ?',
+    dash_q_freq1: 'Une fois par mois',
+    dash_q_freq2: 'Deux fois par mois',
+    dash_q_freq3: 'Hebdomadaire',
+    dash_q_pri_label: "Qu'est-ce qui compte le plus chez un mentor ?",
+    dash_q_pri1: 'Expertise approfondie',
+    dash_q_pri2: 'Conseils pratiques & responsabilité',
+    dash_q_pri3: 'Réseau & opportunités',
+    dash_q_bio_label: 'Parlez-nous davantage de vous',
+    dash_q_optional: '(optionnel)',
+    dash_q_bio_ph: 'Votre parcours, ce que vous cherchez, et tout détail qui pourrait nous aider à trouver le meilleur mentor pour vous…',
+    dash_q_cancel: 'Annuler',
+    dash_q_find: 'Trouver mes Matchs',
   },
 
   es: {
@@ -2251,5 +2593,176 @@ export const translations: Record<Locale, Record<string, string>> = {
     reg_error_short: 'La contraseña debe tener al menos 8 caracteres.',
     reg_error_duplicate: 'Este correo ya está registrado. Por favor inicia sesión.',
     reg_error_generic: 'Algo salió mal. Por favor inténtalo de nuevo.',
+
+    // Navbar aria-label
+    nav_toggle_menu: 'Abrir menú',
+
+    // Explore page aria-labels
+    explore_prev_card: 'Tarjeta anterior',
+    explore_next_card: 'Tarjeta siguiente',
+
+    // How It Works — panel actividad
+    hiw_activity: 'Actividad',
+
+    // For Schools — placeholders formulario
+    schools_form_name_ph: 'Ana García',
+    schools_form_inst_ph: 'Universidad de Madrid',
+    schools_form_email_ph: 'ana@universidad.es',
+    schools_form_msg_ph: 'Cuántos estudiantes, cuáles son sus objetivos...',
+
+    // Contact — placeholders formulario
+    contact_form_name_ph: 'Tu nombre',
+    contact_form_email_ph: 'tu@ejemplo.com',
+    contact_form_msg_ph: 'Cuéntanos cómo podemos ayudarte...',
+
+    // Auth — placeholders
+    reg_name_ph: 'Nombre completo',
+    reg_email_ph: 'tu@ejemplo.com',
+    reg_password_ph: 'Al menos 8 caracteres',
+    login_email_ph: 'tu@ejemplo.com',
+
+    // Founders — división del título héroe
+    founders_hero_before: 'Aceleramos las mejores ',
+    founders_hero_italic: 'carreras',
+    founders_hero_after: ' del mundo con mentoría, red y experiencia.',
+
+    // Founders — citas testimoniales
+    founders_t1_quote: 'GrowVia no solo me conectó con un mentor. Cambió completamente cómo veo mi potencial.',
+    founders_t2_quote: 'Ver a mi mentorado conseguir su trabajo soñado me recordó por qué la experiencia está hecha para compartirse. GrowVia lo hace genuinamente sin esfuerzo.',
+    founders_t3_quote: 'El matching de IA fue sorprendente. Mi mentor había enfrentado exactamente el mismo cruce donde yo estaba.',
+    founders_t4_quote: 'Tenía la dirección, no la confianza. GrowVia me dio ambas — en mi primera sesión.',
+    founders_t5_quote: 'Mi agenda está llena, pero GrowVia hace que dar de vuelta sea genuinamente sin fricción. Cero sobrecarga, máximo impacto.',
+    founders_t6_quote: 'Me uní a GrowVia para dar de vuelta. Terminé aprendiendo tanto como enseñé.',
+    founders_stat1_quote: 'Después de tres sesiones, tenía un plan claro a cinco años. Nada más se acercó.',
+    founders_stat2_quote: 'El progreso de mi mentorado me asombra cada semana. Esta plataforma simplemente funciona.',
+
+    // Pricing — estado cargando & alerta error
+    pricing_loading: 'Cargando...',
+    pricing_error: 'Algo salió mal. Por favor, inténtalo de nuevo.',
+
+    // Become a Mentor — placeholders & alt
+    bam_first_name_ph: 'Ana',
+    bam_last_name_ph: 'García',
+    bam_img_alt: 'Sesión de mentoría',
+
+    // Dashboard — fecha helpers
+    dash_today: 'Hoy',
+    dash_tomorrow: 'Mañana',
+    dash_at: 'a las',
+
+    // Dashboard — etiquetas de rol
+    dash_role_mentor: 'Mentor',
+    dash_role_school: 'Admin Escuela',
+    dash_role_mentee: 'Mentorado/a',
+
+    // Dashboard — nav lateral
+    dash_nav_overview: 'Resumen',
+    dash_nav_sessions: 'Mis Sesiones',
+    dash_nav_saved: 'Mentores Guardados',
+    dash_nav_matching: 'Matching IA',
+    dash_nav_profile: 'Perfil',
+    dash_nav_calendar: 'Calendario',
+    dash_nav_settings: 'Configuración',
+    dash_nav_signout: 'Cerrar sesión',
+
+    // Dashboard — estadísticas
+    dash_stat_booked: 'Sesiones Reservadas',
+    dash_stat_done: 'Sesiones Completadas',
+    dash_stat_upcoming: 'Próximas',
+    dash_stat_ai: 'Coincidencias IA',
+
+    // Dashboard — pestaña resumen
+    dash_welcome_new: 'Bienvenido/a a GrowVia, ',
+    dash_welcome_return: 'Bienvenido/a de nuevo, ',
+    dash_overview_sub: 'Aquí está tu resumen de mentoría.',
+    dash_welcome_sub: 'Tu perfil está configurado. Explora mentores y reserva tu primera sesión.',
+    dash_profile_complete: '¡Perfil completo! Comienza explorando mentores o deja que la IA encuentre tu mejor coincidencia.',
+    dash_plan_upgraded: 'Plan actualizado a',
+    dash_welcome_next: '¡Bienvenido al siguiente nivel!',
+    dash_next_session: 'Próxima Sesión',
+    dash_view_all: 'Ver todo',
+    dash_join: 'Unirse',
+    dash_explore_mentors: 'Explorar mentores',
+    dash_no_upcoming: 'Sin sesiones próximas',
+    dash_no_upcoming_desc: 'Reserva una sesión con un mentor para comenzar tu viaje.',
+    dash_free_ai_title: 'Prueba el Matching IA gratis',
+    dash_free_ai_desc: 'Tienes 1 match IA gratuito — deja que nuestro motor encuentre tu mentor perfecto.',
+    dash_try_now: 'Probar ahora',
+    dash_unlock_ai: 'Desbloquea el matching IA ilimitado',
+    dash_unlock_ai_desc: 'Suscríbete desde 4,99€/mes y obtén acceso completo + matchs IA ilimitados.',
+    dash_upgrade: 'Mejorar',
+
+    // Dashboard — pestaña sesiones
+    dash_sessions_title: 'Mis Sesiones',
+    dash_upcoming_label: 'Próximas',
+    dash_past_label: 'Sesiones Pasadas',
+    dash_no_sessions: 'Sin sesiones próximas',
+    dash_no_sessions_desc: 'Encuentra un mentor y reserva tu primera sesión.',
+    dash_find_mentor: 'Encontrar un mentor',
+
+    // Dashboard — pestaña guardados
+    dash_saved_title: 'Mentores Guardados',
+    dash_no_saved: 'Sin mentores guardados',
+    dash_no_saved_desc: 'Explora mentores y guarda los que te gustaría para trabajar.',
+    dash_browse_mentors: 'Explorar mentores',
+
+    // Dashboard — pestaña matching IA
+    dash_ai_title: 'Matching IA Inteligente',
+    dash_ai_premium_badge: 'Premium',
+    dash_ai_engine_desc: 'Nuestro motor evalúa cada mentor contra tu perfil para encontrar las mejores coincidencias.',
+    dash_ai_analysing: 'Analizando tu perfil y clasificando mentores…',
+    dash_ai_free_badge: '1 coincidencia gratuita disponible',
+    dash_ai_free_title: 'Tienes 1 match IA gratuito',
+    dash_ai_free_desc: 'Responde 3 preguntas rápidas para que nuestro motor encuentre los mejores mentores para ti.',
+    dash_ai_use_free: 'Usar mi match gratuito',
+    dash_ai_browse: 'Explorar manualmente',
+    dash_ai_ready_title: 'El Matching IA está listo',
+    dash_ai_ready_desc: 'Tu plan incluye matchs IA ilimitados. Ejecútalo en cualquier momento para ver sugerencias actualizadas.',
+    dash_ai_run: 'Ejecutar Matching IA',
+    dash_ai_top_matches: 'Mejores coincidencias para ti',
+    dash_ai_refresh: 'Actualizar',
+    dash_ai_match_pct: 'coincidencia',
+    dash_ai_view_profile: 'Ver Perfil',
+    dash_ai_request: 'Solicitar Sesión',
+    dash_ai_want_new: '¿Quieres nuevos matches?',
+    dash_ai_upgrade_desc: 'Mejora desde 4,99€/mes y obtén matchs IA ilimitados.',
+
+    // Dashboard — cuestionario
+    dash_q_title: 'Cuéntanos qué necesitas',
+    dash_q_subtitle: 'Algunas preguntas rápidas — tu match se ejecuta al hacer clic en Encontrar Mis Coincidencias',
+    dash_q_goal_label: '¿Cuál es tu objetivo principal?',
+    dash_q_select_all: '(selecciona todo lo que aplique)',
+    dash_q_goal1: 'Desarrollo de carrera',
+    dash_q_goal2: 'Búsqueda de empleo',
+    dash_q_goal3: 'Startup y emprendimiento',
+    dash_q_goal4: 'Desarrollo de habilidades',
+    dash_q_goal5: 'Orientación académica',
+    dash_q_goal6: 'Cambio de carrera',
+    dash_q_field_label: 'Tu campo o industria',
+    dash_q_field_ph: 'ej. Ingeniería de software, Marketing, Finanzas…',
+    dash_q_level_label: 'Tu nivel de experiencia actual',
+    dash_q_lvl1: 'Estudiante',
+    dash_q_lvl2: 'Junior',
+    dash_q_lvl3: 'Nivel medio',
+    dash_q_lvl4: 'Senior',
+    dash_q_lvl5: 'Cambio de carrera',
+    dash_q_lang_label: 'Idioma preferido para las sesiones',
+    dash_q_lang_en: 'Inglés',
+    dash_q_lang_fr: 'Francés',
+    dash_q_lang_es: 'Español',
+    dash_q_lang_other: 'Otro',
+    dash_q_freq_label: '¿Con qué frecuencia quieres reunirte?',
+    dash_q_freq1: 'Una vez al mes',
+    dash_q_freq2: 'Dos veces al mes',
+    dash_q_freq3: 'Semanalmente',
+    dash_q_pri_label: '¿Qué importa más en un mentor?',
+    dash_q_pri1: 'Experiencia profunda en el dominio',
+    dash_q_pri2: 'Consejos prácticos y responsabilidad',
+    dash_q_pri3: 'Red y oportunidades',
+    dash_q_bio_label: 'Cuéntanos más sobre ti',
+    dash_q_optional: '(opcional)',
+    dash_q_bio_ph: 'Tu trayectoria, lo que buscas y cualquier detalle que nos ayude a encontrar el mejor mentor para ti…',
+    dash_q_cancel: 'Cancelar',
+    dash_q_find: 'Encontrar Mis Coincidencias',
   },
 };

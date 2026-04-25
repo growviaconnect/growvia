@@ -44,7 +44,7 @@ export default function FoundersPage() {
       label: t("founders_testimonial_mentee"),
       image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80",
       imageH: "h-64",
-      quote: "GrowVia didn't just connect me with a mentor. It changed how I see my potential entirely.",
+      quote: t("founders_t1_quote"),
     },
     {
       type: "quote",
@@ -53,7 +53,7 @@ export default function FoundersPage() {
       label: t("founders_testimonial_mentor"),
       image: null,
       imageH: null,
-      quote: "Seeing my mentee land their dream role reminded me why experience is meant to be shared. GrowVia makes that genuinely effortless — no scheduling back-and-forth, no admin.",
+      quote: t("founders_t2_quote"),
     },
     {
       type: "photo",
@@ -62,7 +62,7 @@ export default function FoundersPage() {
       label: t("founders_testimonial_mentee"),
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&q=80",
       imageH: "h-72",
-      quote: "The AI matching was uncanny. My mentor had faced the exact same crossroads I was standing at.",
+      quote: t("founders_t3_quote"),
     },
     {
       type: "quote",
@@ -71,7 +71,7 @@ export default function FoundersPage() {
       label: t("founders_testimonial_mentee"),
       image: null,
       imageH: null,
-      quote: "I had the direction, not the confidence. GrowVia gave me both — in my very first session.",
+      quote: t("founders_t4_quote"),
     },
     {
       type: "quote",
@@ -80,7 +80,7 @@ export default function FoundersPage() {
       label: t("founders_testimonial_mentor"),
       image: null,
       imageH: null,
-      quote: "My schedule is packed, but GrowVia makes giving back genuinely frictionless. Zero overhead, maximum impact on someone's life.",
+      quote: t("founders_t5_quote"),
     },
     {
       type: "photo",
@@ -89,7 +89,7 @@ export default function FoundersPage() {
       label: t("founders_testimonial_mentor"),
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
       imageH: "h-60",
-      quote: "I joined GrowVia to give back. I ended up learning as much as I taught.",
+      quote: t("founders_t6_quote"),
     },
   ];
 
@@ -103,7 +103,7 @@ export default function FoundersPage() {
         </p>
 
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.0] tracking-tight max-w-5xl mb-8">
-          {t("founders_hero_title").split("careers")[0]}
+          {t("founders_hero_before")}
           <span
             style={{
               fontFamily: "Georgia, 'Times New Roman', serif",
@@ -116,9 +116,9 @@ export default function FoundersPage() {
               textUnderlineOffset: "6px",
             }}
           >
-            careers
+            {t("founders_hero_italic")}
           </span>
-          {t("founders_hero_title").split("careers")[1] || " with mentoring, network & expertise."}
+          {t("founders_hero_after")}
         </h1>
 
         <p className="text-lg text-white/45 max-w-2xl leading-relaxed mb-12">
@@ -242,7 +242,7 @@ export default function FoundersPage() {
                   {t("founders_testimonial_mentee")}
                 </p>
                 <p className="text-sm font-bold text-white leading-snug">
-                  &ldquo;Three sessions in, I had a clear five-year plan. Nothing else came close.&rdquo;
+                  &ldquo;{t("founders_stat1_quote")}&rdquo;
                 </p>
                 <p className="text-xs text-white/25 mt-5">Sarah Chen · Stripe</p>
               </div>
@@ -274,7 +274,7 @@ export default function FoundersPage() {
                   {t("founders_testimonial_mentor")}
                 </p>
                 <p className="text-sm font-bold text-white leading-snug">
-                  &ldquo;My mentee&apos;s progress amazes me every week. This platform just works.&rdquo;
+                  &ldquo;{t("founders_stat2_quote")}&rdquo;
                 </p>
                 <p className="text-xs text-white/25 mt-5">Marcus Johnson · VP Eng</p>
               </div>
