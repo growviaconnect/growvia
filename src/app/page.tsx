@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
+import ForYouSection from "@/components/ForYouSection";
 import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
@@ -83,6 +84,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── FOR YOU ──────────────────────────────────────────────── */}
+      <ForYouSection />
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
