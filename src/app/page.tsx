@@ -6,6 +6,7 @@ import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
 import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
@@ -153,6 +154,9 @@ export default function HomePage() {
 
         </div>
       </section>
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
+      <HowItWorksSection />
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <CTASection />
