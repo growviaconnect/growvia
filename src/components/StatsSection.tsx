@@ -8,33 +8,13 @@ const serifStyle = {
   fontWeight: 400,
 };
 
-const logos = [
-  { name: "Olympics",           url: "https://logo.clearbit.com/olympics.com" },
-  { name: "Oscars",             url: "https://logo.clearbit.com/oscars.org" },
-  { name: "Y Combinator",       url: "https://logo.clearbit.com/ycombinator.com" },
-  { name: "ATP Tour",           url: "https://logo.clearbit.com/atptour.com" },
-  { name: "BAFTA",              url: "https://logo.clearbit.com/bafta.org" },
-  { name: "UEFA",               url: "https://logo.clearbit.com/uefa.com" },
-  { name: "Premier League",     url: "https://logo.clearbit.com/premierleague.com" },
-  { name: "Formula 1",          url: "https://logo.clearbit.com/formula1.com" },
-  { name: "NBA",                url: "https://logo.clearbit.com/nba.com" },
-  { name: "NFL",                url: "https://logo.clearbit.com/nfl.com" },
-  { name: "Harvard",            url: "https://logo.clearbit.com/harvard.edu" },
-  { name: "Stanford",           url: "https://logo.clearbit.com/stanford.edu" },
-  { name: "HEC Paris",          url: "https://logo.clearbit.com/hec.edu" },
-  { name: "Google",             url: "https://logo.clearbit.com/google.com" },
-  { name: "McKinsey",           url: "https://logo.clearbit.com/mckinsey.com" },
-  { name: "Spotify",            url: "https://logo.clearbit.com/spotify.com" },
-];
-
 export default function StatsSection() {
   const { t } = useLang();
 
-  const stats = [
-    { badge: t("stats_badge_mentors"),  number: "500+",    desc: t("stats_desc_mentors") },
-    { badge: t("stats_badge_mentees"),  number: "2,000+",  desc: t("stats_desc_mentees") },
-    { badge: t("stats_badge_sessions"), number: "10,000+", desc: t("stats_desc_sessions") },
-    { badge: t("stats_badge_success"),  number: "95%",     desc: t("stats_desc_success") },
+  const proofs = [
+    { badge: t("stats_proof1_badge"), number: t("stats_proof1_num"), desc: t("stats_proof1_desc") },
+    { badge: t("stats_proof2_badge"), number: t("stats_proof2_num"), desc: t("stats_proof2_desc") },
+    { badge: t("stats_proof3_badge"), number: t("stats_proof3_num"), desc: t("stats_proof3_desc") },
   ];
 
   return (
@@ -54,12 +34,12 @@ export default function StatsSection() {
         </div>
       </div>
 
-      {/* ── Stats right-aligned ── */}
+      {/* ── Proof elements ── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-end">
-          {stats.map((stat, i) => (
+          {proofs.map((proof, i) => (
             <div
-              key={stat.badge}
+              key={proof.badge}
               className={`reveal reveal-delay-${i + 1} px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center`}
               style={{ borderLeft: "1px solid rgba(255,255,255,0.07)" }}
             >
@@ -68,38 +48,21 @@ export default function StatsSection() {
                 className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
                 style={{ border: "1px solid rgba(255,255,255,0.1)" }}
               >
-                {stat.badge}
+                {proof.badge}
               </span>
 
-              {/* Number */}
+              {/* Main value */}
               <div
                 className="text-white leading-none tracking-tight mb-2.5"
-                style={{ fontSize: "clamp(36px, 4.5vw, 60px)", fontWeight: 200 }}
+                style={{ fontSize: "clamp(28px, 3.5vw, 48px)", fontWeight: 200 }}
               >
-                {stat.number}
+                {proof.number}
               </div>
 
               {/* Description */}
               <p className="text-[9px] uppercase tracking-[0.2em] text-white/30">
-                {stat.desc}
+                {proof.desc}
               </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Logo ticker ── */}
-      <div className="reveal py-10 overflow-hidden mt-4">
-        <div className="animate-ticker flex items-center">
-          {[...logos, ...logos].map((logo, i) => (
-            <div key={i} className="flex-shrink-0 mx-12">
-              <img
-                src={logo.url}
-                alt={logo.name}
-                className="h-7 w-auto"
-                style={{ filter: "brightness(0) invert(1)", opacity: 0.55 }}
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-              />
             </div>
           ))}
         </div>

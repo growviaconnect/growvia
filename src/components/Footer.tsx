@@ -71,8 +71,7 @@ export default function Footer() {
 
   const cities = [
     { city: "Barcelona", country: "Spain" },
-    { city: "London",    country: "United Kingdom" },
-    { city: "Miami",     country: "United States" },
+    { city: t("footer_online"), country: t("footer_online_sub") },
   ];
 
   return (
