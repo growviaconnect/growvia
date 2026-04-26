@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
@@ -70,12 +70,15 @@ export default function HomePage() {
               >
                 {t("home_build_future")} <ArrowRight className="w-4 h-4" />
               </Link>
-              <button className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm">
+              <Link
+                href="/become-a-mentor"
+                className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm"
+              >
                 <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center flex-shrink-0">
-                  <Play className="w-3 h-3 fill-current ml-0.5" />
+                  <ArrowRight className="w-3 h-3" />
                 </span>
                 {t("home_watch_film")}
-              </button>
+              </Link>
             </div>
           </div>
         </div>
