@@ -67,6 +67,15 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_desc_sessions: 'Sessions Completed',
     stats_badge_success: 'Success',
     stats_desc_success: 'Satisfaction Rate',
+    stats_proof1_badge: 'Human',
+    stats_proof1_num: '100% Human',
+    stats_proof1_desc: 'Every mentor is manually verified',
+    stats_proof2_badge: 'AI Matching',
+    stats_proof2_num: '< 5 min',
+    stats_proof2_desc: 'Matched in under 5 minutes',
+    stats_proof3_badge: 'Pricing',
+    stats_proof3_num: 'from 9.99€',
+    stats_proof3_desc: 'Per session · No commitment',
 
     // CTA section
     cta_label: 'Get Started',
@@ -93,6 +102,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_link_contact: 'Contact',
     footer_link_privacy: 'Privacy Policy',
     footer_copyright: '©2026 All Rights Reserved',
+    footer_online: 'Online everywhere',
+    footer_online_sub: 'Remote · Worldwide',
     footer_tagline: 'Bringing clarity to your future.',
 
     // Explore page
@@ -986,6 +997,15 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_desc_sessions: 'Sessions Réalisées',
     stats_badge_success: 'Succès',
     stats_desc_success: 'Taux de Satisfaction',
+    stats_proof1_badge: 'Humain',
+    stats_proof1_num: '100% humain',
+    stats_proof1_desc: 'Chaque mentor est validé manuellement',
+    stats_proof2_badge: 'Matching IA',
+    stats_proof2_num: '< 5 min',
+    stats_proof2_desc: 'Mis en relation en moins de 5 minutes',
+    stats_proof3_badge: 'Tarif',
+    stats_proof3_num: 'dès 9,99€',
+    stats_proof3_desc: 'Par session · Sans engagement',
 
     // CTA section
     cta_label: 'Commencer',
@@ -1012,6 +1032,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_link_contact: 'Contact',
     footer_link_privacy: 'Politique de confidentialité',
     footer_copyright: '©2026 Tous droits réservés',
+    footer_online: 'En ligne partout',
+    footer_online_sub: 'À distance · Dans le monde entier',
     footer_tagline: 'Apporter de la clarté à votre avenir.',
 
     // Explore page
@@ -1905,6 +1927,15 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_desc_sessions: 'Sesiones Completadas',
     stats_badge_success: 'Éxito',
     stats_desc_success: 'Tasa de Satisfacción',
+    stats_proof1_badge: 'Humano',
+    stats_proof1_num: '100% humano',
+    stats_proof1_desc: 'Cada mentor es verificado manualmente',
+    stats_proof2_badge: 'Matching IA',
+    stats_proof2_num: '< 5 min',
+    stats_proof2_desc: 'Emparejado en menos de 5 minutos',
+    stats_proof3_badge: 'Precio',
+    stats_proof3_num: 'desde 9,99€',
+    stats_proof3_desc: 'Por sesión · Sin compromiso',
 
     // CTA section
     cta_label: 'Empezar',
@@ -1931,6 +1962,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_link_contact: 'Contacto',
     footer_link_privacy: 'Política de Privacidad',
     footer_copyright: '©2026 Todos los derechos reservados',
+    footer_online: 'En línea en todo el mundo',
+    footer_online_sub: 'Remoto · En todo el mundo',
     footer_tagline: 'Trayendo claridad a tu futuro.',
 
     // Hero (old keys)
