@@ -447,12 +447,18 @@ function DashboardContent() {
         const table = us.role === "mentor" ? "mentors" : "mentees";
         const { data: profile } = await supabase
           .from(table)
-          .select("id, statut, has_used_free_ai_match, field, interests, main_goal")
+          .select("id, statut, onboarding_completed, has_used_free_ai_match, field, interests, main_goal")
           .eq("email", us.email)
           .single();
 
-        // New user who hasn't filled out their profile yet
-        if (!justOnboarded && profile?.statut === "pending") {
+        // Mentors who haven't completed onboarding always go back to the questionnaire
+        if (us.role === "mentor" && !justOnboarded && !profile?.onboarding_completed) {
+          router.push("/onboarding/mentor");
+          return;
+        }
+
+        // Other roles: redirect pending profiles (first-time onboarding)
+        if (us.role !== "mentor" && !justOnboarded && profile?.statut === "pending") {
           router.push(`/onboarding/${us.role}`);
           return;
         }
