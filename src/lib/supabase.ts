@@ -32,6 +32,7 @@ export type Mentor = {
   availability?: string | null;
   mentor_score?: number | null;
   session_price?: number | null;
+  onboarding_completed?: boolean | null;
   // legacy fields
   location?: string | null;
   mentoring_experience?: string | null;
