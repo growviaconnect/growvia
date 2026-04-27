@@ -163,6 +163,31 @@ h1, h2, h3, h4, h5, h6 {
   will-change: transform;
 }
 
+/* ── Grid card hover effects (Pour qui + Testimonials) ──────── */
+/* Targets cards with gradient background + purple border inline style.
+   ExploreSection deck cards have only transform/zIndex inline — not matched. */
+[style*="linear-gradient"][style*="rgba(124,58,237"] {
+  transition: border-color 0.35s cubic-bezier(0.4,0,0.2,1),
+              box-shadow   0.35s cubic-bezier(0.4,0,0.2,1),
+              transform    0.35s cubic-bezier(0.4,0,0.2,1) !important;
+}
+[style*="linear-gradient"][style*="rgba(124,58,237"]:hover {
+  border-color: rgba(124,58,237,0.45) !important;
+  box-shadow: 0 0 40px rgba(124,58,237,0.1), 0 20px 60px rgba(0,0,0,0.4) !important;
+  transform: translateY(-5px) !important;
+}
+
+/* ── ExploreSection domain deck cards ───────────────────────── */
+/* JS controls transform for deck stacking — only shadow/outline applied here */
+.absolute.rounded-2xl.overflow-hidden.select-none {
+  transition: box-shadow 0.35s cubic-bezier(0.4,0,0.2,1),
+              outline     0.35s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.absolute.rounded-2xl.overflow-hidden.select-none:hover {
+  box-shadow: 0 0 40px rgba(124,58,237,0.1), 0 20px 60px rgba(0,0,0,0.4) !important;
+  outline: 1px solid rgba(124,58,237,0.45) !important;
+}
+
 /* ── CTA button hover effects ────────────────────────────────── */
 [style*="background: #7C3AED"],
 [style*="background:#7C3AED"],
