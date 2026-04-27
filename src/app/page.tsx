@@ -14,6 +14,18 @@ import TypewriterText from "@/components/TypewriterText";
 import ExploreSection from "@/components/ExploreSection";
 import { useLang } from "@/contexts/LangContext";
 
+const ACCENT = "#38BDF8";
+function hl(text: string, words: string[]) {
+  if (!words.length) return <>{text}</>;
+  const lower = words.map(w => w.toLowerCase());
+  const regex = new RegExp(`(${words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  return text.split(regex).map((part, i) =>
+    lower.includes(part.toLowerCase())
+      ? <span key={i} style={{ color: ACCENT }}>{part}</span>
+      : <span key={i}>{part}</span>
+  );
+}
+
 export default function HomePage() {
   const { t } = useLang();
 
@@ -66,10 +78,10 @@ export default function HomePage() {
               {t("home_badge")}
             </p>
             <h1 className="animate-fade-up text-6xl md:text-7xl lg:text-8xl font-extrabold text-white leading-[0.92] tracking-tight mb-10" style={{ animationDelay: "120ms" }}>
-              {t("home_hero_title1")}<br />{t("home_hero_title2")}<br />{t("home_hero_title3")}
+              {hl(t("home_hero_title1"), ["mentor"])}<br />{t("home_hero_title2")}<br />{hl(t("home_hero_title3"), ["you", "tu", "tú"])}
             </h1>
             <p className="animate-fade-up text-lg text-white/45 mb-12 max-w-md mx-auto leading-relaxed" style={{ animationDelay: "240ms" }}>
-              {t("home_hero_sub_pre")}{" "}
+              {hl(t("home_hero_sub_pre"), ["mentors", "matching"])}{" "}
               <TypewriterText
                 text={t("home_hero_sub_typed")}
                 delay={1400}
@@ -122,7 +134,7 @@ export default function HomePage() {
               <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
                 {t("home_cat_label")}
               </p>
-              <h2 className="text-4xl md:text-[48px] font-extrabold text-white tracking-tight leading-tight">
+              <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-tight">
                 {t("home_cat_title")}
               </h2>
             </div>

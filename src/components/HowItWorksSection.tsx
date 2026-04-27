@@ -9,6 +9,18 @@ const serifStyle = {
   fontWeight: 400,
 };
 
+const ACCENT = "#38BDF8";
+function hl(text: string, words: string[]) {
+  if (!words.length) return <>{text}</>;
+  const lower = words.map(w => w.toLowerCase());
+  const regex = new RegExp(`(${words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  return text.split(regex).map((part, i) =>
+    lower.includes(part.toLowerCase())
+      ? <span key={i} style={{ color: ACCENT }}>{part}</span>
+      : <span key={i}>{part}</span>
+  );
+}
+
 export default function HowItWorksSection() {
   const { t } = useLang();
 
@@ -42,12 +54,12 @@ export default function HowItWorksSection() {
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7C3AED] mb-5">
             {t("steps_label")}
           </p>
-          <h2 className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-white tracking-tight leading-[1.02] mb-5">
+          <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-[1.02] mb-5">
             {t("steps_title").replace(/\.$/, "")}
             <span style={serifStyle}>.</span>
           </h2>
           <p className="text-base text-white/40 leading-relaxed">
-            {t("steps_sub")}
+            {hl(t("steps_sub"), ["mentor"])}
           </p>
         </div>
 
