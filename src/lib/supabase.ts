@@ -21,20 +21,25 @@ export type Mentor = {
   actif: boolean;
   created_at: string;
   // onboarding fields
-  location?: string | null;
-  languages?: string[] | null;
-  industry?: string | null;
   job_title?: string | null;
+  company?: string | null;
+  industry?: string | null;
   years_experience?: string | null;
   seniority?: string | null;
   expertise?: string[] | null;
+  help_with?: string | null;
+  languages?: string[] | null;
+  availability?: string | null;
+  mentor_score?: number | null;
+  session_price?: number | null;
+  onboarding_completed?: boolean | null;
+  // legacy fields
+  location?: string | null;
   mentoring_experience?: string | null;
   motivation?: string | null;
-  availability?: string | null;
   session_preferences?: string[] | null;
   certification_willing?: boolean | null;
   bio?: string | null;
-  mentor_score?: number | null;
   recommended_price?: number | null;
 };
 
