@@ -7,12 +7,14 @@ export async function POST(req: NextRequest) {
   const anonKey     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   let email: string;
+  let userId: string | undefined;
   let data: Record<string, unknown>;
 
   try {
-    const body = await req.json() as { email: string; data: Record<string, unknown> };
-    email = (body.email ?? "").trim().toLowerCase();
-    data  = body.data;
+    const body = await req.json() as { email: string; userId?: string; data: Record<string, unknown> };
+    email  = (body.email ?? "").trim().toLowerCase();
+    userId = body.userId || undefined;
+    data   = body.data;
     if (!email || !data || typeof data !== "object") throw new Error("missing fields");
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
@@ -25,7 +27,10 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
 
-  const { error } = await client.from("mentors").update(data).eq("email", email);
+  // Upsert by id when available (stable PK); fall back to update by email
+  const { error } = userId
+    ? await client.from("mentors").upsert({ id: userId, email, ...data })
+    : await client.from("mentors").update(data).eq("email", email);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

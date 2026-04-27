@@ -111,10 +111,12 @@ function TagGrid({ options, selected, onToggle }: {
 
 export default function MenteeOnboarding() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
+  const [step, setStep]               = useState(1);
+  const [loading, setLoading]         = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [error, setError]             = useState<string | null>(null);
+  const [email, setEmail]             = useState("");
+  const [userId, setUserId]           = useState("");
 
   const [form, setForm] = useState<MenteeForm>({
     age_range: "",
@@ -127,9 +129,36 @@ export default function MenteeOnboarding() {
   });
 
   useEffect(() => {
-    const session = getUserSession();
-    if (!session) { router.push("/auth/login?next=/onboarding/mentee"); return; }
-    setEmail(session.email);
+    async function init() {
+      const session = getUserSession();
+      if (!session) { router.push("/auth/login?next=/onboarding/mentee"); return; }
+      setEmail(session.email);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push("/auth/login?next=/onboarding/mentee"); return; }
+      setUserId(user.id);
+
+      const { data: existing } = await supabase
+        .from("mentees")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (existing) {
+        setForm({
+          age_range:     existing.age_range     ?? "",
+          situation:     existing.situation     ?? "",
+          field:         existing.field         ?? "",
+          main_goal:     existing.main_goal     ?? "",
+          interests:     existing.interests     ?? [],
+          clarity_level: existing.clarity_level ?? 3,
+          description:   existing.description   ?? "",
+        });
+      }
+
+      setPageLoading(false);
+    }
+    init();
   }, [router]);
 
   function canProceed(): boolean {
@@ -148,17 +177,18 @@ export default function MenteeOnboarding() {
     try {
       const { error: dbError } = await supabase
         .from("mentees")
-        .update({
-          age_range: form.age_range,
-          situation: form.situation,
-          field: form.field.trim(),
-          main_goal: form.main_goal,
-          interests: form.interests,
+        .upsert({
+          id:            userId,
+          email,
+          age_range:     form.age_range,
+          situation:     form.situation,
+          field:         form.field.trim(),
+          main_goal:     form.main_goal,
+          interests:     form.interests,
           clarity_level: form.clarity_level,
-          description: form.description.trim(),
-          statut: "active",
-        })
-        .eq("email", email);
+          description:   form.description.trim(),
+          statut:        "active",
+        });
 
       if (dbError) throw dbError;
 
@@ -170,6 +200,34 @@ export default function MenteeOnboarding() {
       setError(err instanceof Error ? err.message : "Failed to save. Please try again.");
       setLoading(false);
     }
+  }
+
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-lg">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+              >G</div>
+              <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
+            </Link>
+          </div>
+          <div
+            className="rounded-2xl p-8 border border-white/[0.08] space-y-4 animate-pulse"
+            style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
+          >
+            <div className="h-1.5 rounded-full bg-white/5 mb-8" />
+            <div className="h-10 rounded-xl bg-white/5" />
+            <div className="h-10 rounded-xl bg-white/5" />
+            <div className="h-10 rounded-xl bg-white/5" />
+            <div className="h-12 rounded-xl bg-white/5 mt-4" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const stepTitles = [
