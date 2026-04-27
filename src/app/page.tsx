@@ -14,7 +14,7 @@ import TypewriterText from "@/components/TypewriterText";
 import ExploreSection from "@/components/ExploreSection";
 import { useLang } from "@/contexts/LangContext";
 
-const ACCENT = "#34D399";
+const ACCENT = "#38BDF8";
 function hl(text: string, words: string[]) {
   if (!words.length) return <>{text}</>;
   const lower = words.map(w => w.toLowerCase());
