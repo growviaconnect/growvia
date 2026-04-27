@@ -8,6 +8,7 @@ import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import LogoTicker from "@/components/LogoTicker";
 import HeroParticles from "@/components/HeroParticles";
 import TypewriterText from "@/components/TypewriterText";
 import { useLang } from "@/contexts/LangContext";
@@ -60,13 +61,13 @@ export default function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-4xl mx-auto text-center">
-            <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
+            <p className="animate-fade-up text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8" style={{ animationDelay: "0ms" }}>
               {t("home_badge")}
             </p>
-            <h1 className="reveal reveal-delay-1 text-6xl md:text-7xl lg:text-8xl font-extrabold text-white leading-[0.92] tracking-tight mb-10">
+            <h1 className="animate-fade-up text-6xl md:text-7xl lg:text-8xl font-extrabold text-white leading-[0.92] tracking-tight mb-10" style={{ animationDelay: "120ms" }}>
               {t("home_hero_title1")}<br />{t("home_hero_title2")}<br />{t("home_hero_title3")}
             </h1>
-            <p className="reveal reveal-delay-2 text-lg text-white/45 mb-12 max-w-md mx-auto leading-relaxed">
+            <p className="animate-fade-up text-lg text-white/45 mb-12 max-w-md mx-auto leading-relaxed" style={{ animationDelay: "240ms" }}>
               {t("home_hero_sub_pre")}{" "}
               <TypewriterText
                 text={t("home_hero_sub_typed")}
@@ -75,7 +76,7 @@ export default function HomePage() {
                 className="text-white/70"
               />
             </p>
-            <div className="reveal reveal-delay-3 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="animate-fade-up flex flex-col sm:flex-row items-center justify-center gap-4" style={{ animationDelay: "360ms" }}>
               <Link
                 href="/auth/register"
                 className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
@@ -104,6 +105,9 @@ export default function HomePage() {
 
       {/* ── STATS ────────────────────────────────────────────────── */}
       <StatsSection />
+
+      {/* ── LOGO TICKER ──────────────────────────────────────────── */}
+      <LogoTicker />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
