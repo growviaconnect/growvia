@@ -47,7 +47,7 @@ export default function ForYouSection() {
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7C3AED] mb-4">
             {t("for_you_label")}
           </p>
-          <h2 className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-white tracking-tight leading-[1.02]">
+          <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-[1.02]">
             {t("for_you_title").replace(/\s*\?$/, "")}
             <span style={serifStyle}> ?</span>
           </h2>
