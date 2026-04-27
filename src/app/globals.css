@@ -162,3 +162,24 @@ h1, h2, h3, h4, h5, h6 {
   animation: ken-burns 6s ease-in-out infinite alternate;
   will-change: transform;
 }
+
+/* ── CTA button hover effects ────────────────────────────────── */
+[style*="background: #7C3AED"],
+[style*="background:#7C3AED"],
+.bg-\[#7C3AED\] {
+  transition: box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+}
+[style*="background: #7C3AED"]:hover,
+[style*="background:#7C3AED"]:hover,
+.bg-\[#7C3AED\]:hover {
+  box-shadow: 0 0 40px rgba(124,58,237,0.55);
+  transform: translateY(-2px);
+}
+
+a[href="/become-a-mentor"] {
+  transition: background 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+}
+a[href="/become-a-mentor"]:hover {
+  background: rgba(124,58,237,0.1) !important;
+  border-color: rgba(124,58,237,0.7) !important;
+}
