@@ -7,6 +7,7 @@ import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import HeroParticles from "@/components/HeroParticles";
 import TypewriterText from "@/components/TypewriterText";
 import { useLang } from "@/contexts/LangContext";
@@ -177,6 +178,9 @@ export default function HomePage() {
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <HowItWorksSection />
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
+      <TestimonialsSection />
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <CTASection />
