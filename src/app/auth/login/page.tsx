@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { setAuthCookie } from "@/lib/auth";
 import { useLang } from "@/contexts/LangContext";
@@ -14,7 +14,8 @@ function LoginContent() {
   const { t } = useLang();
   const router      = useRouter();
   const searchParams = useSearchParams();
-  const next        = searchParams.get("next") || "/dashboard";
+  const next         = searchParams.get("next") || "/dashboard";
+  const resetSuccess = searchParams.get("reset") === "success";
   const { setSession } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -88,6 +89,13 @@ function LoginContent() {
           className="rounded-2xl p-8 border border-white/[0.08]"
           style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
         >
+          {resetSuccess && (
+            <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm px-4 py-3 rounded-xl mb-5">
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              {t("login_reset_success")}
+            </div>
+          )}
+
           {error && (
             <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-5">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -111,7 +119,12 @@ function LoginContent() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">{t("login_password")}</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-white/60">{t("login_password")}</label>
+                <Link href="/auth/forgot-password" className="text-xs text-[#A78BFA] hover:text-white transition-colors">
+                  {t("login_forgot")}
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"} required

@@ -27,6 +27,30 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <head>
+        <style dangerouslySetInnerHTML={{ __html: `
+          #cursor-glow {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 400px;
+            height: 400px;
+            margin-left: -200px;
+            margin-top: -200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+            transition: width 0.4s ease, height 0.4s ease, margin 0.4s ease;
+            z-index: 9999;
+            will-change: left, top;
+            opacity: 0;
+          }
+          #cursor-glow.is-hovering {
+            width: 600px;
+            height: 600px;
+            margin-left: -300px;
+            margin-top: -300px;
+          }
+        `}} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -35,6 +59,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#0D0A1A] text-white">
+        <div id="cursor-glow" />
         <LangProvider>
           <AuthProvider>
             <ScrollProgress />
@@ -44,6 +69,47 @@ export default function RootLayout({
             <Footer />
           </AuthProvider>
         </LangProvider>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function () {
+            var el = document.getElementById('cursor-glow');
+            if (!el) return;
+
+            var mouseX = window.innerWidth / 2;
+            var mouseY = window.innerHeight / 2;
+            var glowX  = mouseX;
+            var glowY  = mouseY;
+
+            function lerp(a, b, t) { return a + (b - a) * t; }
+
+            function tick() {
+              glowX = lerp(glowX, mouseX, 0.08);
+              glowY = lerp(glowY, mouseY, 0.08);
+              el.style.left = glowX + 'px';
+              el.style.top  = glowY + 'px';
+              requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+
+            document.addEventListener('mousemove', function (e) {
+              mouseX = e.clientX;
+              mouseY = e.clientY;
+              el.style.opacity = '1';
+              if (e.target.closest('a, button')) {
+                el.classList.add('is-hovering');
+              } else {
+                el.classList.remove('is-hovering');
+              }
+            });
+
+            document.addEventListener('mouseleave', function () {
+              el.style.opacity = '0';
+            });
+
+            document.addEventListener('mouseenter', function () {
+              el.style.opacity = '1';
+            });
+          })();
+        `}} />
       </body>
     </html>
   );

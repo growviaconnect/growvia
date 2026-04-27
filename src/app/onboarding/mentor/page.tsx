@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Check, Loader2, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
 
 type MentorForm = {
@@ -228,12 +229,14 @@ const GrowViaLogo = () => (
 
 export default function MentorOnboarding() {
   const router = useRouter();
-  const [phase, setPhase]           = useState<Phase>("form");
-  const [step, setStep]             = useState(1);
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState<string | null>(null);
-  const [email, setEmail]           = useState("");
-  const [finalScore, setFinalScore] = useState(0);
+  const [phase, setPhase]               = useState<Phase>("form");
+  const [step, setStep]                 = useState(1);
+  const [loading, setLoading]           = useState(false);
+  const [pageLoading, setPageLoading]   = useState(true);
+  const [error, setError]               = useState<string | null>(null);
+  const [email, setEmail]               = useState("");
+  const [userId, setUserId]             = useState("");
+  const [finalScore, setFinalScore]     = useState(0);
   const [sessionPrice, setSessionPrice] = useState(SLIDER_MIN);
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
 
@@ -244,10 +247,45 @@ export default function MentorOnboarding() {
   });
 
   useEffect(() => {
-    const session = getUserSession();
-    if (!session) { router.push("/auth/login?next=/onboarding/mentor"); return; }
-    setEmail(session.email);
-    setForm(f => ({ ...f, nom: session.nom }));
+    async function init() {
+      const session = getUserSession();
+      if (!session) { router.push("/auth/login?next=/onboarding/mentor"); return; }
+      setEmail(session.email);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push("/auth/login?next=/onboarding/mentor"); return; }
+      setUserId(user.id);
+
+      const { data: existing } = await supabase
+        .from("mentors")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (existing) {
+        setForm({
+          nom:              existing.nom              ?? session.nom,
+          job_title:        existing.job_title        ?? "",
+          company:          existing.company          ?? "",
+          industry:         existing.industry         ?? "",
+          years_experience: existing.years_experience ?? "",
+          seniority:        existing.seniority        ?? "",
+          expertise:        existing.expertise        ?? [],
+          help_with:        existing.help_with        ?? "",
+          languages:        existing.languages        ?? [],
+        });
+        if (existing.session_price) setSessionPrice(existing.session_price);
+        if (existing.mentor_score)  setFinalScore(existing.mentor_score);
+        if (existing.availability) {
+          try { setAvailability(JSON.parse(existing.availability)); } catch { /* ignore malformed */ }
+        }
+      } else {
+        setForm(f => ({ ...f, nom: session.nom }));
+      }
+
+      setPageLoading(false);
+    }
+    init();
   }, [router]);
 
   function toggle(field: "expertise" | "languages", val: string) {
@@ -280,11 +318,12 @@ export default function MentorOnboarding() {
     return fallback;
   }
 
+  // Uses service-role API route to bypass RLS; upserts by id when userId is known
   async function saveMentor(data: Record<string, unknown>) {
     const res = await fetch("/api/mentor/save-onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, data }),
+      body: JSON.stringify({ email, userId, data }),
     });
     const json = await res.json() as { error?: string };
     if (!res.ok) throw new Error(json.error ?? "Server error");
@@ -554,6 +593,29 @@ export default function MentorOnboarding() {
             >
               Go to my dashboard <ArrowRight className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Page loading skeleton ───────────────────────────────────────────────────
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-lg">
+          <div className="text-center mb-8">
+            <GrowViaLogo />
+          </div>
+          <div
+            className="rounded-2xl p-8 border border-white/[0.08] space-y-4 animate-pulse"
+            style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
+          >
+            <div className="h-1.5 rounded-full bg-white/5 mb-8" />
+            <div className="h-10 rounded-xl bg-white/5" />
+            <div className="h-10 rounded-xl bg-white/5" />
+            <div className="h-10 rounded-xl bg-white/5" />
+            <div className="h-12 rounded-xl bg-white/5 mt-4" />
           </div>
         </div>
       </div>

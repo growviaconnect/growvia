@@ -715,6 +715,33 @@ export const translations: Record<Locale, Record<string, string>> = {
     login_agree: 'By signing in you agree to our',
     login_no_account: "Don't have an account?",
     login_register: 'Register',
+    login_forgot: 'Forgot password?',
+
+    // Forgot password page
+    forgot_title: 'Reset your password',
+    forgot_sub: 'Enter your email and we\'ll send you a reset link.',
+    forgot_email: 'Email Address',
+    forgot_submit: 'Send reset link',
+    forgot_sending: 'Sending...',
+    forgot_success_title: 'Check your inbox',
+    forgot_success_sub: 'If an account exists for this email, you\'ll receive a reset link shortly.',
+    forgot_back: 'Back to login',
+    forgot_error: 'Something went wrong. Please try again.',
+
+    // Reset password page
+    reset_title: 'Choose a new password',
+    reset_sub: 'Enter and confirm your new password below.',
+    reset_new_password: 'New Password',
+    reset_confirm_password: 'Confirm Password',
+    reset_submit: 'Update password',
+    reset_updating: 'Updating...',
+    reset_error_mismatch: 'Passwords do not match.',
+    reset_error_short: 'Password must be at least 8 characters.',
+    reset_error_generic: 'Something went wrong. Please try again.',
+    reset_invalid_title: 'Invalid or expired link',
+    reset_invalid_sub: 'This reset link has expired or already been used. Request a new one.',
+    reset_request_new: 'Request a new link',
+    login_reset_success: 'Your password has been updated. Sign in to continue.',
 
     // Register page
     reg_title: 'Create your account',
@@ -1690,6 +1717,33 @@ export const translations: Record<Locale, Record<string, string>> = {
     login_agree: 'En vous connectant vous acceptez nos',
     login_no_account: "Vous n'avez pas de compte ?",
     login_register: "S'inscrire",
+    login_forgot: 'Mot de passe oublié ?',
+
+    // Forgot password page
+    forgot_title: 'Réinitialisez votre mot de passe',
+    forgot_sub: 'Entrez votre email et nous vous enverrons un lien de réinitialisation.',
+    forgot_email: 'Adresse Email',
+    forgot_submit: 'Envoyer le lien',
+    forgot_sending: 'Envoi en cours...',
+    forgot_success_title: 'Vérifiez votre boîte mail',
+    forgot_success_sub: 'Si un compte existe pour cet email, vous recevrez un lien de réinitialisation.',
+    forgot_back: 'Retour à la connexion',
+    forgot_error: 'Une erreur est survenue. Veuillez réessayer.',
+
+    // Reset password page
+    reset_title: 'Choisissez un nouveau mot de passe',
+    reset_sub: 'Entrez et confirmez votre nouveau mot de passe ci-dessous.',
+    reset_new_password: 'Nouveau mot de passe',
+    reset_confirm_password: 'Confirmer le mot de passe',
+    reset_submit: 'Mettre à jour',
+    reset_updating: 'Mise à jour...',
+    reset_error_mismatch: 'Les mots de passe ne correspondent pas.',
+    reset_error_short: 'Le mot de passe doit comporter au moins 8 caractères.',
+    reset_error_generic: 'Une erreur est survenue. Veuillez réessayer.',
+    reset_invalid_title: 'Lien invalide ou expiré',
+    reset_invalid_sub: 'Ce lien de réinitialisation a expiré ou a déjà été utilisé. Demandez-en un nouveau.',
+    reset_request_new: 'Demander un nouveau lien',
+    login_reset_success: 'Votre mot de passe a été mis à jour. Connectez-vous pour continuer.',
 
     // Register page
     reg_title: 'Créez votre compte',
@@ -2739,6 +2793,33 @@ export const translations: Record<Locale, Record<string, string>> = {
     login_agree: 'Al iniciar sesión aceptas nuestros',
     login_no_account: '¿No tienes una cuenta?',
     login_register: 'Registrarse',
+    login_forgot: '¿Olvidaste tu contraseña?',
+
+    // Forgot password page
+    forgot_title: 'Restablece tu contraseña',
+    forgot_sub: 'Ingresa tu email y te enviaremos un enlace de restablecimiento.',
+    forgot_email: 'Dirección de Correo',
+    forgot_submit: 'Enviar enlace',
+    forgot_sending: 'Enviando...',
+    forgot_success_title: 'Revisa tu bandeja de entrada',
+    forgot_success_sub: 'Si existe una cuenta para este email, recibirás un enlace de restablecimiento en breve.',
+    forgot_back: 'Volver al inicio de sesión',
+    forgot_error: 'Algo salió mal. Por favor inténtalo de nuevo.',
+
+    // Reset password page
+    reset_title: 'Elige una nueva contraseña',
+    reset_sub: 'Ingresa y confirma tu nueva contraseña a continuación.',
+    reset_new_password: 'Nueva contraseña',
+    reset_confirm_password: 'Confirmar contraseña',
+    reset_submit: 'Actualizar contraseña',
+    reset_updating: 'Actualizando...',
+    reset_error_mismatch: 'Las contraseñas no coinciden.',
+    reset_error_short: 'La contraseña debe tener al menos 8 caracteres.',
+    reset_error_generic: 'Algo salió mal. Por favor inténtalo de nuevo.',
+    reset_invalid_title: 'Enlace inválido o expirado',
+    reset_invalid_sub: 'Este enlace de restablecimiento ha expirado o ya fue usado. Solicita uno nuevo.',
+    reset_request_new: 'Solicitar un nuevo enlace',
+    login_reset_success: 'Tu contraseña ha sido actualizada. Inicia sesión para continuar.',
 
     // Register page
     reg_title: 'Crea tu cuenta',
