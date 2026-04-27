@@ -56,7 +56,6 @@ export default function Footer() {
 
   const navLinks = [
     { label: t("footer_link_home"),     href: "/" },
-    { label: t("footer_link_explore"),  href: "/explore" },
     { label: t("footer_link_founders"), href: "/founders" },
     { label: t("footer_link_stories"),  href: "/for-schools" },
     { label: t("footer_link_pricing"),  href: "/pricing" },
