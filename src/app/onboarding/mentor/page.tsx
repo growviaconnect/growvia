@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Check, Loader2, AlertCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
 
 type MentorForm = {
@@ -273,6 +272,24 @@ export default function MentorOnboarding() {
     return Object.keys(availability).some(d => (availability[d] ?? []).length > 0);
   }
 
+  function extractError(err: unknown, fallback: string): string {
+    if (err instanceof Error) return err.message;
+    if (typeof err === "object" && err !== null && "message" in err) {
+      return String((err as { message: unknown }).message);
+    }
+    return fallback;
+  }
+
+  async function saveMentor(data: Record<string, unknown>) {
+    const res = await fetch("/api/mentor/save-onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, data }),
+    });
+    const json = await res.json() as { error?: string };
+    if (!res.ok) throw new Error(json.error ?? "Server error");
+  }
+
   // Step 3 submit: save all questionnaire answers + mentor_score → price screen
   async function handleFinish() {
     setLoading(true);
@@ -280,31 +297,26 @@ export default function MentorOnboarding() {
     try {
       const mentor_score = calcMentorScore(form);
 
-      const { error: dbError } = await supabase
-        .from("mentors")
-        .update({
-          nom:              form.nom.trim(),
-          job_title:        form.job_title.trim(),
-          company:          form.company.trim() || null,
-          industry:         form.industry,
-          years_experience: form.years_experience,
-          seniority:        form.seniority,
-          expertise:        form.expertise,
-          help_with:        form.help_with.trim(),
-          languages:        form.languages,
-          mentor_score,
-          statut:           "active",
-        })
-        .eq("email", email);
-
-      if (dbError) throw dbError;
+      await saveMentor({
+        nom:              form.nom.trim(),
+        job_title:        form.job_title.trim(),
+        company:          form.company.trim() || null,
+        industry:         form.industry,
+        years_experience: form.years_experience,
+        seniority:        form.seniority,
+        expertise:        form.expertise,
+        help_with:        form.help_with.trim(),
+        languages:        form.languages,
+        mentor_score,
+        statut:           "active",
+      });
 
       const { suggested } = calcPriceBand(mentor_score);
       setFinalScore(mentor_score);
       setSessionPrice(suggested);
       setPhase("price");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save. Please try again.");
+      setError(extractError(err, "Failed to save. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -315,15 +327,10 @@ export default function MentorOnboarding() {
     setLoading(true);
     setError(null);
     try {
-      const { error: dbError } = await supabase
-        .from("mentors")
-        .update({ session_price: sessionPrice })
-        .eq("email", email);
-
-      if (dbError) throw dbError;
+      await saveMentor({ session_price: sessionPrice });
       setPhase("availability");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save price. Please try again.");
+      setError(extractError(err, "Failed to save price. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -334,18 +341,13 @@ export default function MentorOnboarding() {
     setLoading(true);
     setError(null);
     try {
-      const { error: dbError } = await supabase
-        .from("mentors")
-        .update({
-          availability:         JSON.stringify(availability),
-          onboarding_completed: true,
-        })
-        .eq("email", email);
-
-      if (dbError) throw dbError;
+      await saveMentor({
+        availability:         JSON.stringify(availability),
+        onboarding_completed: true,
+      });
       setPhase("success");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save availability. Please try again.");
+      setError(extractError(err, "Failed to save availability. Please try again."));
     } finally {
       setLoading(false);
     }
