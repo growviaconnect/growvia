@@ -38,9 +38,9 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { href: "/#how-it-works", label: t("nav_how_it_works") },
-    { href: "/for-schools",   label: t("nav_for_schools") },
-    { href: "/pricing",       label: t("nav_pricing") },
+    { href: "/explore",   label: t("nav_explore") },
+    { href: "/founders",  label: t("nav_founders") },
+    { href: "/stories",   label: t("nav_stories") },
   ];
 
   const initials = session?.nom
