@@ -6,12 +6,10 @@ import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
-import HowItWorksSection from "@/components/HowItWorksSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import LogoTicker from "@/components/LogoTicker";
 import HeroParticles from "@/components/HeroParticles";
 import TypewriterText from "@/components/TypewriterText";
-import ExploreSection from "@/components/ExploreSection";
 import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
@@ -98,9 +96,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── EXPLORE ──────────────────────────────────────────────── */}
-      <ExploreSection />
-
       {/* ── FOR YOU ──────────────────────────────────────────────── */}
       <ForYouSection />
 
@@ -183,9 +178,6 @@ export default function HomePage() {
 
         </div>
       </section>
-
-      {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
-      <HowItWorksSection />
 
       {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
       <TestimonialsSection />
