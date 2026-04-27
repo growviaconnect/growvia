@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import ScrollRevealEnhanced from "@/components/ScrollRevealEnhanced";
 import ScrollProgress from "@/components/ScrollProgress";
 import { LangProvider } from "@/contexts/LangContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -65,6 +66,7 @@ export default function RootLayout({
             <ScrollProgress />
             <Navbar />
             <ScrollReveal />
+            <ScrollRevealEnhanced />
             <main className="flex-1 pt-16">{children}</main>
             <Footer />
           </AuthProvider>
