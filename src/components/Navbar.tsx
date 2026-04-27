@@ -137,7 +137,7 @@ export default function Navbar() {
 
                 {/* Filled CTA */}
                 <Link
-                  href="/auth/register"
+                  href="/explore/find-a-mentor"
                   className="text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors duration-200"
                   style={{ background: "#7C3AED" }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
@@ -227,7 +227,7 @@ export default function Navbar() {
               </Link>
               {/* Filled */}
               <Link
-                href="/auth/register"
+                href="/explore/find-a-mentor"
                 onClick={() => setMenuOpen(false)}
                 className="block text-center text-sm font-semibold text-white py-3.5 rounded-lg"
                 style={{ background: "#7C3AED" }}

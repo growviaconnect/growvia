@@ -17,10 +17,9 @@ type MentorForm = {
   expertise: string[];
   help_with: string;
   languages: string[];
-  availability: Record<string, string[]>;
 };
 
-type Phase = "form" | "price" | "success";
+type Phase = "form" | "price" | "availability" | "success";
 
 const INDUSTRIES = [
   "Technology", "Finance & Banking", "Marketing & Advertising",
@@ -67,12 +66,12 @@ function calcMentorScore(form: MentorForm): number {
 }
 
 function calcPriceBand(score: number): { min: number; max: number; suggested: number } {
-  // Linear mapping: score 0 → 20€, score 100 → 100€, snapped to 5€ steps
-  const raw = Math.round((SLIDER_MIN + score * 0.8) / 5) * 5;
-  const suggested = Math.min(Math.max(raw, SLIDER_MIN), SLIDER_MAX);
-  const min = Math.max(SLIDER_MIN, suggested - 15);
-  const max = Math.min(SLIDER_MAX, suggested + 15);
-  return { min, max, suggested };
+  if (score <= 20) return { min: 20, max: 30,  suggested: 25  };
+  if (score <= 40) return { min: 30, max: 45,  suggested: 35  };
+  if (score <= 60) return { min: 45, max: 65,  suggested: 55  };
+  if (score <= 75) return { min: 65, max: 80,  suggested: 75  };
+  if (score <= 90) return { min: 80, max: 95,  suggested: 90  };
+  return              { min: 95, max: 100, suggested: 100 };
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -169,7 +168,6 @@ function AvailabilityPicker({
 
   return (
     <div className="space-y-3">
-      {/* Day row */}
       <div className="flex gap-2 flex-wrap">
         {DAYS.map(day => (
           <button
@@ -185,7 +183,6 @@ function AvailabilityPicker({
         ))}
       </div>
 
-      {/* Per-day slot rows — only for selected days, in order */}
       {DAYS.filter(d => d in value).map(day => (
         <div key={day} className="rounded-xl p-4 border border-white/[0.06]" style={{ background: "#0D0A1A" }}>
           <p className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wide">{day}</p>
@@ -218,22 +215,33 @@ function AvailabilityPicker({
   );
 }
 
+const GrowViaLogo = () => (
+  <Link href="/" className="inline-flex items-center gap-2.5 mb-6 justify-center">
+    <div
+      className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+    >G</div>
+    <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
+  </Link>
+);
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function MentorOnboarding() {
   const router = useRouter();
-  const [phase, setPhase]       = useState<Phase>("form");
-  const [step, setStep]         = useState(1);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState<string | null>(null);
-  const [email, setEmail]       = useState("");
+  const [phase, setPhase]           = useState<Phase>("form");
+  const [step, setStep]             = useState(1);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState<string | null>(null);
+  const [email, setEmail]           = useState("");
   const [finalScore, setFinalScore] = useState(0);
   const [sessionPrice, setSessionPrice] = useState(SLIDER_MIN);
+  const [availability, setAvailability] = useState<Record<string, string[]>>({});
 
   const [form, setForm] = useState<MentorForm>({
     nom: "", job_title: "", company: "", industry: "",
     years_experience: "", seniority: "", expertise: [],
-    help_with: "", languages: [], availability: {},
+    help_with: "", languages: [],
   });
 
   useEffect(() => {
@@ -256,16 +264,16 @@ export default function MentorOnboarding() {
     switch (step) {
       case 1: return !!form.nom.trim() && !!form.job_title.trim() && !!form.industry;
       case 2: return !!form.years_experience && !!form.seniority && form.expertise.length > 0;
-      case 3: return (
-        form.help_with.trim().length >= 10 &&
-        form.languages.length > 0 &&
-        Object.keys(form.availability).some(d => (form.availability[d] ?? []).length > 0)
-      );
+      case 3: return form.help_with.trim().length >= 10 && form.languages.length > 0;
       default: return true;
     }
   }
 
-  // Step 3 submit: save profile → move to price screen
+  function canSaveAvailability(): boolean {
+    return Object.keys(availability).some(d => (availability[d] ?? []).length > 0);
+  }
+
+  // Step 3 submit: save all questionnaire answers + mentor_score → price screen
   async function handleFinish() {
     setLoading(true);
     setError(null);
@@ -284,7 +292,6 @@ export default function MentorOnboarding() {
           expertise:        form.expertise,
           help_with:        form.help_with.trim(),
           languages:        form.languages,
-          availability:     JSON.stringify(form.availability),
           mentor_score,
           statut:           "active",
         })
@@ -303,20 +310,42 @@ export default function MentorOnboarding() {
     }
   }
 
-  // Price screen submit: save session_price → move to success
+  // Price screen: save session_price → availability screen
   async function handleConfirmPrice() {
     setLoading(true);
     setError(null);
     try {
       const { error: dbError } = await supabase
         .from("mentors")
-        .update({ session_price: sessionPrice, onboarding_completed: true })
+        .update({ session_price: sessionPrice })
+        .eq("email", email);
+
+      if (dbError) throw dbError;
+      setPhase("availability");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save price. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Availability screen: save availability JSON + set onboarding_completed = true → success
+  async function handleSaveAvailability() {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error: dbError } = await supabase
+        .from("mentors")
+        .update({
+          availability:         JSON.stringify(availability),
+          onboarding_completed: true,
+        })
         .eq("email", email);
 
       if (dbError) throw dbError;
       setPhase("success");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save price. Please try again.");
+      setError(err instanceof Error ? err.message : "Failed to save availability. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -332,13 +361,7 @@ export default function MentorOnboarding() {
       <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2.5 mb-6 justify-center">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-              >G</div>
-              <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
-            </Link>
+            <GrowViaLogo />
             <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">Set your session price</h1>
             <p className="text-white/40 text-sm">Based on your profile score and experience.</p>
           </div>
@@ -347,7 +370,7 @@ export default function MentorOnboarding() {
             className="rounded-2xl p-8 border border-white/[0.08]"
             style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
           >
-            {/* Score + range row */}
+            {/* Score + recommended range */}
             <div className="grid grid-cols-2 gap-3 mb-8">
               <div className="rounded-xl p-4 border border-white/[0.06]" style={{ background: "#0D0A1A" }}>
                 <p className="text-xs text-white/40 mb-1.5 uppercase tracking-wide font-medium">Your score</p>
@@ -377,11 +400,14 @@ export default function MentorOnboarding() {
               <p className="text-2xl font-extrabold text-[#A78BFA]">{suggested}€</p>
             </div>
 
-            {/* Slider */}
+            {/* Slider — full 20€–100€ range */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium text-white/60">Your price</p>
-                <p className="text-xl font-extrabold text-white">{sessionPrice}€<span className="text-sm text-white/40 font-normal"> / session</span></p>
+                <p className="text-xl font-extrabold text-white">
+                  {sessionPrice}€
+                  <span className="text-sm text-white/40 font-normal"> / session</span>
+                </p>
               </div>
               <input
                 type="range"
@@ -417,12 +443,57 @@ export default function MentorOnboarding() {
             >
               {loading
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
-                : <>Confirm price & continue <ArrowRight className="w-4 h-4" /></>
+                : <>Confirm & Continue <ArrowRight className="w-4 h-4" /></>
               }
             </button>
 
             <p className="text-center text-xs text-white/30 mt-4">
               You can change this anytime from your dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Availability screen ─────────────────────────────────────────────────────
+  if (phase === "availability") {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <GrowViaLogo />
+            <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">Set your availability</h1>
+            <p className="text-white/40 text-sm">Choose the days and time slots that work for you.</p>
+          </div>
+
+          <div
+            className="rounded-2xl p-8 border border-white/[0.08]"
+            style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
+          >
+            <AvailabilityPicker value={availability} onChange={setAvailability} />
+
+            {error && (
+              <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mt-6">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={handleSaveAvailability}
+              disabled={loading || !canSaveAvailability()}
+              className="w-full text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm disabled:opacity-40 mt-8"
+              style={{ background: "#7C3AED" }}
+            >
+              {loading
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                : <>Save & go to dashboard <ArrowRight className="w-4 h-4" /></>
+              }
+            </button>
+
+            <p className="text-center text-xs text-white/30 mt-4">
+              You can update this anytime from your settings.
             </p>
           </div>
         </div>
@@ -437,13 +508,7 @@ export default function MentorOnboarding() {
     return (
       <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md text-center">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-8 justify-center">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-              style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-            >G</div>
-            <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
-          </Link>
+          <GrowViaLogo />
 
           <div
             className="rounded-2xl p-8 border border-white/[0.08]"
@@ -501,13 +566,7 @@ export default function MentorOnboarding() {
       <div className="w-full max-w-lg">
 
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-              style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-            >G</div>
-            <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
-          </Link>
+          <GrowViaLogo />
           <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">{stepTitles[step - 1]}</h1>
           <p className="text-white/40 text-sm">Help mentees find and trust you.</p>
         </div>
@@ -621,15 +680,6 @@ export default function MentorOnboarding() {
                   Preferred languages <span className="text-white/30">(select all that apply)</span>
                 </label>
                 <TagGrid options={LANGUAGE_OPTIONS} selected={form.languages} onToggle={v => toggle("languages", v)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-2.5">
-                  Availability <span className="text-white/30">(select days & time slots)</span>
-                </label>
-                <AvailabilityPicker
-                  value={form.availability}
-                  onChange={v => setForm({ ...form, availability: v })}
-                />
               </div>
             </div>
           )}
