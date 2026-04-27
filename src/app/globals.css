@@ -101,6 +101,49 @@ h1, h2, h3, h4, h5, h6 {
 .reveal-delay-4 { transition-delay: 0.4s; }
 .reveal-delay-5 { transition-delay: 0.5s; }
 
+/* ── Hero section decorative layers ─────────────────────────── */
+/* Isolate stacking context so internal z-indexes don't bleed to the page */
+section.relative.min-h-screen.flex.items-end {
+  isolation: isolate;
+}
+
+/* Pulsing violet orb — top center, above photo overlays, below text content */
+section.relative.min-h-screen.flex.items-end::before {
+  content: '';
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(76,29,149,0.4) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 1;
+  animation: hero-orb-pulse 8s ease-in-out infinite;
+}
+
+/* Subtle grid with radial mask — fades at edges */
+section.relative.min-h-screen.flex.items-end::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 85% 85% at 50% 40%, black 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 40%, black 0%, transparent 100%);
+}
+
+@keyframes hero-orb-pulse {
+  0%, 100% { opacity: 1;    transform: translateX(-50%) scale(1); }
+  50%       { opacity: 0.6; transform: translateX(-50%) scale(1.1); }
+}
+
 /* ── Continuous animations ──────────────────────────────────── */
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
