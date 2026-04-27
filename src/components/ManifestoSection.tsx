@@ -3,8 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "@/contexts/LangContext";
 
+function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return mobile;
+}
+
 export default function ManifestoSection() {
   const { t } = useLang();
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(-1);
 
@@ -32,6 +44,42 @@ export default function ManifestoSection() {
     t("manifesto_phrase_3"),
     t("manifesto_phrase_4"),
   ];
+
+  /* On mobile: no sticky trap — show phrases stacked in normal flow */
+  if (isMobile) {
+    return (
+      <div className="relative overflow-hidden py-20">
+        <img
+          src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1600&q=80"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ filter: "brightness(0.35) saturate(0.5)" }}
+        />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="relative px-6 flex flex-col items-center gap-12">
+          <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em]">
+            {t("manifesto_label")}
+          </p>
+          {phrases.map((phrase, i) => (
+            <p
+              key={i}
+              className="text-center text-white leading-snug max-w-xs"
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontStyle: "italic",
+                fontWeight: 400,
+                fontSize: "clamp(1.4rem, 5vw, 1.75rem)",
+                opacity: 0.85,
+              }}
+            >
+              {phrase}
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     /* 500vh = 4 scroll steps × 100vh + 1 initial viewport */

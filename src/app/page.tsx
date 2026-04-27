@@ -7,6 +7,8 @@ import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import HeroParticles from "@/components/HeroParticles";
+import TypewriterText from "@/components/TypewriterText";
 import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
@@ -52,6 +54,7 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-[#0D0A1A]/60" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, #0D0A1A 15%, transparent 60%)" }} />
+          <HeroParticles />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
@@ -63,7 +66,13 @@ export default function HomePage() {
               {t("home_hero_title1")}<br />{t("home_hero_title2")}<br />{t("home_hero_title3")}
             </h1>
             <p className="reveal reveal-delay-2 text-lg text-white/45 mb-12 max-w-md leading-relaxed">
-              {t("home_hero_sub")}
+              {t("home_hero_sub_pre")}{" "}
+              <TypewriterText
+                text={t("home_hero_sub_typed")}
+                delay={1400}
+                speed={50}
+                className="text-white/70"
+              />
             </p>
             <div className="reveal reveal-delay-3 flex flex-col sm:flex-row items-start gap-4">
               <Link
@@ -121,10 +130,16 @@ export default function HomePage() {
               <Link
                 key={cat.href}
                 href={cat.href}
-                className={`reveal reveal-delay-${i + 1} group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-300`}
+                className={`reveal reveal-delay-${i + 1} group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-500`}
                 style={{ background: "#1A1A2E", aspectRatio: "3 / 4" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(124,58,237,0.25)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "0 0 0 1px rgba(124,58,237,0.35), 0 8px 40px rgba(124,58,237,0.3)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "";
+                }}
               >
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="w-full h-full transition-transform duration-700 group-hover:scale-[1.03]">
@@ -140,6 +155,11 @@ export default function HomePage() {
                 <div
                   className="absolute inset-0"
                   style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)" }}
+                />
+                {/* Violet tint — fades in on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: "linear-gradient(to top, rgba(76,29,149,0.45) 0%, transparent 60%)" }}
                 />
                 <div className="relative p-6">
                   <h3 className="text-white font-bold mb-2 leading-snug" style={{ fontSize: 20 }}>
