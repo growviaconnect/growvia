@@ -17,7 +17,7 @@ type MentorForm = {
   expertise: string[];
   help_with: string;
   languages: string[];
-  availability: string;
+  availability: Record<string, string[]>;
 };
 
 type Phase = "form" | "price" | "success";
@@ -40,7 +40,12 @@ const EXPERTISE_OPTIONS = [
   "Entrepreneurship", "Design", "HR", "Strategy", "Other",
 ];
 const LANGUAGE_OPTIONS = ["French", "English", "Spanish", "Other"];
-const AVAILABILITY_OPTIONS = ["Once a month", "Twice a month", "Weekly"];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const SLOTS = [
+  { key: "morning",   label: "Morning",   time: "7–12h"  },
+  { key: "afternoon", label: "Afternoon", time: "12–18h" },
+  { key: "evening",   label: "Evening",   time: "18–22h" },
+];
 
 const TOTAL_STEPS = 3;
 const SLIDER_MIN = 20;
@@ -141,6 +146,78 @@ function TagGrid({ options, selected, onToggle }: {
   );
 }
 
+function AvailabilityPicker({
+  value,
+  onChange,
+}: {
+  value: Record<string, string[]>;
+  onChange: (v: Record<string, string[]>) => void;
+}) {
+  function toggleDay(day: string) {
+    const next = { ...value };
+    if (day in next) { delete next[day]; } else { next[day] = []; }
+    onChange(next);
+  }
+
+  function toggleSlot(day: string, slot: string) {
+    const slots = value[day] ?? [];
+    onChange({
+      ...value,
+      [day]: slots.includes(slot) ? slots.filter(s => s !== slot) : [...slots, slot],
+    });
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Day row */}
+      <div className="flex gap-2 flex-wrap">
+        {DAYS.map(day => (
+          <button
+            key={day} type="button" onClick={() => toggleDay(day)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+              day in value
+                ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white"
+                : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
+            }`}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+
+      {/* Per-day slot rows — only for selected days, in order */}
+      {DAYS.filter(d => d in value).map(day => (
+        <div key={day} className="rounded-xl p-4 border border-white/[0.06]" style={{ background: "#0D0A1A" }}>
+          <p className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wide">{day}</p>
+          <div className="flex gap-2">
+            {SLOTS.map(slot => {
+              const active = (value[day] ?? []).includes(slot.key);
+              return (
+                <button
+                  key={slot.key} type="button"
+                  onClick={() => toggleSlot(day, slot.key)}
+                  className={`flex-1 flex flex-col items-center py-2.5 rounded-lg border text-xs transition-colors ${
+                    active
+                      ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white font-medium"
+                      : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
+                  }`}
+                >
+                  <span>{slot.label}</span>
+                  <span className="text-[10px] opacity-50 mt-0.5">{slot.time}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {Object.keys(value).length === 0 && (
+        <p className="text-xs text-white/25 text-center py-1">Select at least one day to set your slots.</p>
+      )}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function MentorOnboarding() {
@@ -156,7 +233,7 @@ export default function MentorOnboarding() {
   const [form, setForm] = useState<MentorForm>({
     nom: "", job_title: "", company: "", industry: "",
     years_experience: "", seniority: "", expertise: [],
-    help_with: "", languages: [], availability: "",
+    help_with: "", languages: [], availability: {},
   });
 
   useEffect(() => {
@@ -179,7 +256,11 @@ export default function MentorOnboarding() {
     switch (step) {
       case 1: return !!form.nom.trim() && !!form.job_title.trim() && !!form.industry;
       case 2: return !!form.years_experience && !!form.seniority && form.expertise.length > 0;
-      case 3: return form.help_with.trim().length >= 10 && form.languages.length > 0 && !!form.availability;
+      case 3: return (
+        form.help_with.trim().length >= 10 &&
+        form.languages.length > 0 &&
+        Object.keys(form.availability).some(d => (form.availability[d] ?? []).length > 0)
+      );
       default: return true;
     }
   }
@@ -203,7 +284,7 @@ export default function MentorOnboarding() {
           expertise:        form.expertise,
           help_with:        form.help_with.trim(),
           languages:        form.languages,
-          availability:     form.availability,
+          availability:     JSON.stringify(form.availability),
           mentor_score,
           statut:           "active",
         })
@@ -229,7 +310,7 @@ export default function MentorOnboarding() {
     try {
       const { error: dbError } = await supabase
         .from("mentors")
-        .update({ session_price: sessionPrice })
+        .update({ session_price: sessionPrice, onboarding_completed: true })
         .eq("email", email);
 
       if (dbError) throw dbError;
@@ -400,7 +481,7 @@ export default function MentorOnboarding() {
             </div>
 
             <button
-              onClick={() => router.push("/dashboard?onboarded=1")}
+              onClick={() => router.push("/dashboard")}
               className="w-full text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm"
               style={{ background: "#7C3AED" }}
             >
@@ -542,8 +623,13 @@ export default function MentorOnboarding() {
                 <TagGrid options={LANGUAGE_OPTIONS} selected={form.languages} onToggle={v => toggle("languages", v)} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white/60 mb-3">Availability</label>
-                <RadioList options={AVAILABILITY_OPTIONS} value={form.availability} onChange={v => setForm({ ...form, availability: v })} />
+                <label className="block text-sm font-medium text-white/60 mb-2.5">
+                  Availability <span className="text-white/30">(select days & time slots)</span>
+                </label>
+                <AvailabilityPicker
+                  value={form.availability}
+                  onChange={v => setForm({ ...form, availability: v })}
+                />
               </div>
             </div>
           )}
