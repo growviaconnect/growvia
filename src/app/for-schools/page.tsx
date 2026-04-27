@@ -237,7 +237,7 @@ export default function ForSchoolsPage() {
                     type="text" required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Jane Smith"
+                    placeholder={t("schools_form_name_ph")}
                     className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
                   />
                 </div>
@@ -249,7 +249,7 @@ export default function ForSchoolsPage() {
                     type="text" required
                     value={form.institution}
                     onChange={(e) => setForm({ ...form, institution: e.target.value })}
-                    placeholder="University of Paris"
+                    placeholder={t("schools_form_inst_ph")}
                     className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
                   />
                 </div>
@@ -262,7 +262,7 @@ export default function ForSchoolsPage() {
                   type="email" required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="jane@university.edu"
+                  placeholder={t("schools_form_email_ph")}
                   className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
                 />
               </div>
@@ -274,7 +274,7 @@ export default function ForSchoolsPage() {
                   rows={4}
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder="How many students, what are your goals..."
+                  placeholder={t("schools_form_msg_ph")}
                   className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors resize-none"
                 />
               </div>

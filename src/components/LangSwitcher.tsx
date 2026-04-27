@@ -5,12 +5,6 @@ import { useLang } from "@/contexts/LangContext";
 import { locales, localeNames, type Locale } from "@/lib/i18n";
 import { ChevronDown } from "lucide-react";
 
-const flags: Record<Locale, string> = {
-  fr: "🇫🇷",
-  en: "🇬🇧",
-  es: "🇪🇸",
-};
-
 export default function LangSwitcher() {
   const { lang, setLang } = useLang();
   const [open, setOpen] = useState(false);
@@ -33,7 +27,7 @@ export default function LangSwitcher() {
         className="flex items-center gap-1.5 text-sm font-medium text-white/50 hover:text-white transition-colors duration-200 px-2 py-1 rounded-md hover:bg-white/5"
         aria-label="Change language"
       >
-        <span className="text-base leading-none">{flags[lang]}</span>
+        <span className="text-base leading-none">🌐</span>
         <span className="text-xs uppercase tracking-wide">{lang}</span>
         <ChevronDown
           className="w-3 h-3 transition-transform duration-200"
@@ -66,7 +60,6 @@ export default function LangSwitcher() {
                 if (locale !== lang) (e.currentTarget as HTMLElement).style.background = "transparent";
               }}
             >
-              <span className="text-base">{flags[locale]}</span>
               <span>{localeNames[locale]}</span>
             </button>
           ))}

@@ -133,7 +133,7 @@ function RegisterContent() {
                 type="text" required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Luna Davin"
+                placeholder={t("reg_name_ph")}
                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
               />
             </div>
@@ -145,7 +145,7 @@ function RegisterContent() {
                 type="email" required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
+                placeholder={t("reg_email_ph")}
                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm transition-colors"
               />
             </div>
@@ -158,7 +158,7 @@ function RegisterContent() {
                   type={showPassword ? "text" : "password"} required minLength={8}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="At least 8 characters"
+                  placeholder={t("reg_password_ph")}
                   className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 text-sm pr-11 transition-colors"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}

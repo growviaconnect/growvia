@@ -95,7 +95,7 @@ export default function ContactPage() {
                         required
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        placeholder="Your name"
+                        placeholder={t("contact_form_name_ph")}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm"
                       />
                     </div>
@@ -108,7 +108,7 @@ export default function ContactPage() {
                         required
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        placeholder="you@example.com"
+                        placeholder={t("contact_form_email_ph")}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm"
                       />
                     </div>
@@ -141,7 +141,7 @@ export default function ContactPage() {
                       rows={5}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      placeholder="Tell us how we can help..."
+                      placeholder={t("contact_form_msg_ph")}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-sm resize-none"
                     />
                   </div>

@@ -101,7 +101,7 @@ export default function PricingPage() {
       const data = await res.json() as { url?: string; error?: string };
       if (data.url) { window.location.href = data.url; return; }
       if (data.error) alert(data.error);
-    } catch { alert("Something went wrong. Please try again."); }
+    } catch { alert(t("pricing_error")); }
     setLoadingPlan(null);
   }
 
@@ -200,7 +200,7 @@ export default function PricingPage() {
                   }`}
                 >
                   {loadingPlan === plan.key
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading...</>
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("pricing_loading")}</>
                     : plan.cta}
                 </button>
               </div>

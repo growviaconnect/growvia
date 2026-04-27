@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
+import ForYouSection from "@/components/ForYouSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import LogoTicker from "@/components/LogoTicker";
+import HeroParticles from "@/components/HeroParticles";
+import TypewriterText from "@/components/TypewriterText";
 import { useLang } from "@/contexts/LangContext";
 
 export default function HomePage() {
@@ -49,43 +55,59 @@ export default function HomePage() {
             aria-hidden="true"
           />
           <div className="absolute inset-0 bg-[#0D0A1A]/60" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, #0D0A1A 15%, transparent 60%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, #0D0A1A 8%, rgba(13,10,26,0.7) 40%, rgba(13,10,26,0.2) 75%, transparent 100%)" }} />
+          <HeroParticles />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
-          <div className="max-w-5xl">
-            <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="animate-fade-up text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8" style={{ animationDelay: "0ms" }}>
               {t("home_badge")}
             </p>
-            <h1 className="reveal reveal-delay-1 text-7xl md:text-8xl lg:text-9xl font-extrabold text-white leading-[0.88] tracking-tight mb-10">
+            <h1 className="animate-fade-up text-6xl md:text-7xl lg:text-8xl font-extrabold text-white leading-[0.92] tracking-tight mb-10" style={{ animationDelay: "120ms" }}>
               {t("home_hero_title1")}<br />{t("home_hero_title2")}<br />{t("home_hero_title3")}
             </h1>
-            <p className="reveal reveal-delay-2 text-lg text-white/45 mb-12 max-w-md leading-relaxed">
-              {t("home_hero_sub")}
+            <p className="animate-fade-up text-lg text-white/45 mb-12 max-w-md mx-auto leading-relaxed" style={{ animationDelay: "240ms" }}>
+              {t("home_hero_sub_pre")}{" "}
+              <TypewriterText
+                text={t("home_hero_sub_typed")}
+                delay={1400}
+                speed={50}
+                className="text-white/70"
+              />
             </p>
-            <div className="reveal reveal-delay-3 flex flex-col sm:flex-row items-start gap-4">
+            <div className="animate-fade-up flex flex-col sm:flex-row items-center justify-center gap-4" style={{ animationDelay: "360ms" }}>
               <Link
                 href="/auth/register"
                 className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
               >
                 {t("home_build_future")} <ArrowRight className="w-4 h-4" />
               </Link>
-              <button className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm">
+              <Link
+                href="/become-a-mentor"
+                className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm"
+              >
                 <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center flex-shrink-0">
-                  <Play className="w-3 h-3 fill-current ml-0.5" />
+                  <ArrowRight className="w-3 h-3" />
                 </span>
                 {t("home_watch_film")}
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
+
+      {/* ── FOR YOU ──────────────────────────────────────────────── */}
+      <ForYouSection />
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
 
       {/* ── STATS ────────────────────────────────────────────────── */}
       <StatsSection />
+
+      {/* ── LOGO TICKER ──────────────────────────────────────────── */}
+      <LogoTicker />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
@@ -113,10 +135,16 @@ export default function HomePage() {
               <Link
                 key={cat.href}
                 href={cat.href}
-                className={`reveal reveal-delay-${i + 1} group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-300`}
+                className={`reveal reveal-delay-${i + 1} group relative overflow-hidden rounded-xl flex flex-col justify-end border border-white/[0.08] hover:border-[#7C3AED]/60 transition-all duration-500`}
                 style={{ background: "#1A1A2E", aspectRatio: "3 / 4" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(124,58,237,0.25)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "0 0 0 1px rgba(124,58,237,0.35), 0 8px 40px rgba(124,58,237,0.3)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.boxShadow = "";
+                }}
               >
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="w-full h-full transition-transform duration-700 group-hover:scale-[1.03]">
@@ -133,6 +161,11 @@ export default function HomePage() {
                   className="absolute inset-0"
                   style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)" }}
                 />
+                {/* Violet tint — fades in on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: "linear-gradient(to top, rgba(76,29,149,0.45) 0%, transparent 60%)" }}
+                />
                 <div className="relative p-6">
                   <h3 className="text-white font-bold mb-2 leading-snug" style={{ fontSize: 20 }}>
                     {cat.label}
@@ -146,6 +179,12 @@ export default function HomePage() {
 
         </div>
       </section>
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
+      <HowItWorksSection />
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
+      <TestimonialsSection />
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <CTASection />
