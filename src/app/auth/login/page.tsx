@@ -43,6 +43,19 @@ function LoginContent() {
       setSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
       setAuthCookie();
 
+      // Mentors who haven't completed onboarding go directly to the questionnaire
+      if (role === "mentor") {
+        const { data: mentorRow } = await supabase
+          .from("mentors")
+          .select("onboarding_completed")
+          .eq("email", user.email!)
+          .single();
+        if (!mentorRow?.onboarding_completed) {
+          router.push("/onboarding/mentor");
+          return;
+        }
+      }
+
       router.push(next);
     } catch {
       setError(t("login_error"));
