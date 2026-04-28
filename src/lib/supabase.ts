@@ -20,6 +20,7 @@ export type Mentor = {
   certification_statut: CertStatut;
   actif: boolean;
   created_at: string;
+  updated_at?: string | null;
   // onboarding fields
   job_title?: string | null;
   company?: string | null;
@@ -33,14 +34,32 @@ export type Mentor = {
   mentor_score?: number | null;
   session_price?: number | null;
   onboarding_completed?: boolean | null;
+  // profile + survey fields
+  photo_url?: string | null;
+  bio?: string | null;
+  localisation?: string | null;
+  poste_actuel?: string | null;
+  entreprise?: string | null;
+  annees_experience?: number | null;
+  secteurs?: string[] | null;
+  competences?: Record<string, unknown> | null;
+  type_profils_aides?: string[] | null;
+  style_mentorat?: string | null;
+  disponibilite_heures?: number | null;
+  max_mentees?: number | null;
+  langues?: string[] | null;
+  cv_url?: string | null;
+  linkedin_url?: string | null;
+  motivation?: string | null;
+  format_prefere?: string | null;
+  survey_completed?: boolean | null;
   // legacy fields
   location?: string | null;
   mentoring_experience?: string | null;
-  motivation?: string | null;
   session_preferences?: string[] | null;
   certification_willing?: boolean | null;
-  bio?: string | null;
   recommended_price?: number | null;
+  match_score_override?: number | null;
 };
 
 export type Mentee = {
@@ -51,6 +70,7 @@ export type Mentee = {
   statut: "pending" | "active" | "rejected";
   actif: boolean;
   created_at: string;
+  updated_at?: string | null;
   // onboarding fields
   age_range?: string | null;
   situation?: string | null;
@@ -60,6 +80,26 @@ export type Mentee = {
   clarity_level?: number | null;
   description?: string | null;
   has_used_free_ai_match?: boolean | null;
+  // profile + survey fields
+  photo_url?: string | null;
+  bio?: string | null;
+  localisation?: string | null;
+  objectif_principal?: string | null;
+  secteurs_vises?: string[] | null;
+  poste_cible?: string | null;
+  horizon_temporel?: string | null;
+  niveau_etudes?: string | null;
+  ecole?: string | null;
+  experiences?: string | null;
+  style_apprentissage?: string | null;
+  frequence_souhaitee?: string | null;
+  format_prefere?: string | null;
+  langues?: string[] | null;
+  competences?: Record<string, unknown> | null;
+  cv_url?: string | null;
+  linkedin_url?: string | null;
+  motivation?: string | null;
+  survey_completed?: boolean | null;
 };
 
 export type Connexion = {
