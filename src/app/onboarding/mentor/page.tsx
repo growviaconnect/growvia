@@ -336,6 +336,23 @@ export default function MentorOnboarding() {
     try {
       const mentor_score = calcMentorScore(form);
 
+      // Validate fields that feed the AI prompt before saving anything.
+      // This catches "messages: text content blocks must be non-empty" at source
+      // rather than letting the Anthropic call fail with a cryptic 400.
+      const aiRequired: [string, string][] = [
+        ["Full name",           form.nom.trim()],
+        ["Job title",           form.job_title.trim()],
+        ["Industry",            form.industry],
+        ["Years of experience", form.years_experience],
+        ["Seniority",           form.seniority],
+        ["Help with (step 3)",  form.help_with.trim()],
+      ];
+      for (const [label, val] of aiRequired) {
+        if (!val) throw new Error(`'${label}' is empty — please fill it in before continuing.`);
+      }
+      if (!form.expertise.length) throw new Error("Select at least one area of expertise.");
+      if (!form.languages.length) throw new Error("Select at least one preferred language.");
+
       await saveMentor({
         nom:              form.nom.trim(),
         job_title:        form.job_title.trim(),
@@ -349,6 +366,30 @@ export default function MentorOnboarding() {
         mentor_score,
         statut:           "active",
       });
+
+      // Fire AI score request — filter out any empty content blocks before sending
+      const aiRes = await fetch("/api/mentor/ai-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom:              form.nom.trim(),
+          job_title:        form.job_title.trim(),
+          company:          form.company.trim(),
+          industry:         form.industry,
+          years_experience: form.years_experience,
+          seniority:        form.seniority,
+          expertise:        form.expertise,
+          help_with:        form.help_with.trim(),
+          languages:        form.languages,
+        }),
+      });
+      if (aiRes.ok) {
+        const aiJson = await aiRes.json() as { summary?: string; value_prop?: string };
+        if (aiJson.summary) {
+          // Persist AI-generated summary alongside the profile (best-effort)
+          await saveMentor({ bio: aiJson.summary }).catch(() => {});
+        }
+      }
 
       const { suggested } = calcPriceBand(mentor_score);
       setFinalScore(mentor_score);
