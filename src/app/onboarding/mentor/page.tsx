@@ -331,13 +331,53 @@ export default function MentorOnboarding() {
         }).throwOnError();
 
       } else {
-        // Step 4 — final: save CV + mark complete
+        // Step 4 — final: save CV + mark complete.
+        // Validate fields that feed the AI prompt before any API call.
+        // Guards against "messages: text content blocks must be non-empty" (Anthropic 400).
+        const aiRequired: [string, string][] = [
+          ["Full name",   s1.nom.trim()],
+          ["Job title",   s1.poste_actuel.trim()],
+          ["Motivation",  s3.motivation.trim()],
+        ];
+        for (const [label, val] of aiRequired) {
+          if (!val) throw new Error(`'${label}' is empty — please fill it in before continuing.`);
+        }
+        if (!s3.langues.length) throw new Error("Select at least one language in step 3.");
+
         await supabase.from("mentors").upsert({
           ...base,
           cv_url:           s4.cv_url || null,
           survey_completed: true,
           statut:           "active",
         }).throwOnError();
+
+        // Fire AI score request — filter out any empty content blocks before sending
+        const aiRes = await fetch("/api/mentor/ai-score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nom:        s1.nom.trim(),
+            job_title:  s1.poste_actuel.trim(),
+            company:    s1.entreprise.trim(),
+            bio:        s1.bio.trim(),
+            sectors:    s2.secteurs,
+            skills:     s2.competences.map(c => c.name),
+            motivation: s3.motivation.trim(),
+            languages:  s3.langues,
+          }),
+        });
+        if (aiRes.ok) {
+          const aiJson = await aiRes.json() as { summary?: string };
+          if (aiJson.summary) {
+            // Persist AI-generated summary only if bio was blank (never overwrite user text)
+            if (!s1.bio.trim()) {
+              await supabase.from("mentors").upsert({ ...base, bio: aiJson.summary }).then(
+                () => {}, () => {}
+              );
+            }
+          }
+        }
+
         setDone(true);
         return;
       }
