@@ -148,10 +148,11 @@ export default function MentorOnboarding() {
   const [photoPreview, setPhotoPreview] = useState("");
   const [photoUploading, setPhotoUploading] = useState(false);
 
-  // CV upload
+  // CV upload — separate error state so a failed upload doesn't block form completion
   const cvInputRef                  = useRef<HTMLInputElement>(null);
   const [cvFileName, setCvFileName] = useState("");
   const [cvUploading, setCvUploading] = useState(false);
+  const [cvError, setCvError]       = useState<string | null>(null);
 
   // Step data
   const [s1, setS1] = useState<S1>({
@@ -225,6 +226,18 @@ export default function MentorOnboarding() {
     init();
   }, [router]);
 
+  // ── Shared upload helper (server-side, uses service-role key) ────────────────
+  async function uploadViaApi(file: File, bucket: string, path: string): Promise<string> {
+    const body = new FormData();
+    body.append("file",   file);
+    body.append("bucket", bucket);
+    body.append("path",   path);
+    const res  = await fetch("/api/mentor/upload-file", { method: "POST", body });
+    const json = await res.json() as { url?: string; error?: string };
+    if (!res.ok) throw new Error(json.error ?? "Upload failed");
+    return json.url!;
+  }
+
   // ── Photo upload ─────────────────────────────────────────────────────────────
   async function handlePhotoSelect(file: File) {
     if (!userId) return;
@@ -233,27 +246,27 @@ export default function MentorOnboarding() {
     setError(null);
     try {
       const ext = file.name.split(".").pop() ?? "jpg";
-      const url = await uploadToStorage("avatars", `${userId}/avatar.${ext}`, file);
+      const url = await uploadViaApi(file, "avatars", `${userId}/avatar.${ext}`);
       setS1(prev => ({ ...prev, photo_url: url }));
-    } catch {
-      setError("Photo upload failed — please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Photo upload failed — please try again.");
       setPhotoPreview(s1.photo_url);
     } finally {
       setPhotoUploading(false);
     }
   }
 
-  // ── CV upload ────────────────────────────────────────────────────────────────
+  // ── CV upload — failure is non-blocking (CV is optional) ─────────────────────
   async function handleCVSelect(file: File) {
     if (!userId) return;
     setCvUploading(true);
-    setError(null);
+    setCvError(null);
     try {
-      const url = await uploadToStorage("cvs", `${userId}/cv.pdf`, file);
-      setS4({ cv_url: url });
+      const path = await uploadViaApi(file, "cvs", `${userId}/cv.pdf`);
+      setS4({ cv_url: path });
       setCvFileName(file.name);
-    } catch {
-      setError("CV upload failed — please try again.");
+    } catch (err) {
+      setCvError(err instanceof Error ? err.message : "CV upload failed — please try again.");
     } finally {
       setCvUploading(false);
     }
@@ -831,6 +844,14 @@ export default function MentorOnboarding() {
 
               <input ref={cvInputRef} type="file" accept="application/pdf" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleCVSelect(f); e.target.value = ""; }} />
+
+              {/* CV upload error — shown inline, does NOT block completion */}
+              {cvError && (
+                <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs px-4 py-3 rounded-xl">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{cvError} You can still complete your profile without a CV.</span>
+                </div>
+              )}
 
               <p className="text-xs text-white/25 text-center">
                 Your CV is private and only shared with matched mentees.
