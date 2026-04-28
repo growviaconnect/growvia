@@ -485,9 +485,9 @@ export default function MentorOnboarding() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (authUser) {
-          // Stored in session_price column (tarif_horaire / hourly rate)
+          // session_price = tarif_horaire; onboarding_completed unblocks the dashboard guard
           await supabase.from("mentors")
-            .update({ session_price: price })
+            .update({ session_price: price, onboarding_completed: true })
             .eq("id", authUser.id);
         }
         router.push("/dashboard");
@@ -503,6 +503,15 @@ export default function MentorOnboarding() {
     return (
       <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
+          {/* Back to step 4 */}
+          <button
+            type="button"
+            onClick={() => { setPhase("form"); setStep(4); setShowPriceSlider(false); }}
+            className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" /> Retour à l'étape 4
+          </button>
+
           <div className="text-center mb-8">
             <GrowViaLogo />
             <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">
@@ -1023,7 +1032,7 @@ export default function MentorOnboarding() {
           {/* Navigation */}
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/[0.06]">
             {step > 1
-              ? <button type="button" onClick={() => { setError(null); setStep(s => s - 1); }}
+              ? <button type="button" onClick={() => { setError(null); setCvError(null); setStep(s => s - 1); }}
                   className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
                   <ArrowLeft className="w-4 h-4" /> Back
                 </button>
