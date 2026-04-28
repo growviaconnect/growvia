@@ -141,6 +141,7 @@ export default function MentorOnboarding() {
   const [done, setDone]             = useState(false);
   const [userId, setUserId]         = useState("");
   const [email, setEmail]           = useState("");
+  const [authNom, setAuthNom]       = useState(""); // fallback name from auth metadata
 
   // Photo upload
   const photoInputRef               = useRef<HTMLInputElement>(null);
@@ -177,12 +178,20 @@ export default function MentorOnboarding() {
       if (!user) { router.push("/auth/login?next=/onboarding/mentor"); return; }
       setUserId(user.id);
 
+      // Best-effort name from auth metadata — used as NOT NULL fallback at every upsert
+      const metaName = (user.user_metadata?.full_name as string | undefined)
+        ?? (user.user_metadata?.nom as string | undefined)
+        ?? (session as { nom?: string }).nom
+        ?? user.email
+        ?? "";
+      setAuthNom(metaName);
+
       const { data: existing } = await supabase
         .from("mentors").select("*").eq("id", user.id).single();
 
       if (existing) {
         setS1({
-          nom:               existing.nom               ?? (session as { nom?: string }).nom ?? "",
+          nom:               existing.nom               ?? metaName,
           photo_url:         existing.photo_url         ?? "",
           poste_actuel:      existing.poste_actuel      ?? "",
           entreprise:        existing.entreprise        ?? "",
@@ -209,7 +218,7 @@ export default function MentorOnboarding() {
         setS4({ cv_url: existing.cv_url ?? "" });
         if (existing.cv_url) setCvFileName("CV uploaded");
       } else {
-        setS1(prev => ({ ...prev, nom: (session as { nom?: string }).nom ?? "" }));
+        setS1(prev => ({ ...prev, nom: metaName }));
       }
       setPageLoading(false);
     }
@@ -286,7 +295,7 @@ export default function MentorOnboarding() {
   // ── Can proceed ──────────────────────────────────────────────────────────────
   function canProceed(): boolean {
     if (step === 1) return !!s1.nom.trim() && !!s1.poste_actuel.trim();
-    if (step === 2) return s2.secteurs.length > 0;
+    if (step === 2) return !!s1.nom.trim() && s2.secteurs.length > 0;
     if (step === 3) return !!s3.style_mentorat && !!s3.format_prefere && s3.langues.length > 0;
     return true;
   }
@@ -312,16 +321,27 @@ export default function MentorOnboarding() {
         }).throwOnError();
 
       } else if (step === 2) {
+        // Guard: step 1 must have been saved first — nom cannot be null in DB
+        const nomValue = s1.nom.trim() || authNom;
+        if (!nomValue) {
+          throw new Error("Please complete step 1 first — your name is required.");
+        }
         await supabase.from("mentors").upsert({
           ...base,
+          nom:                nomValue,
           secteurs:           s2.secteurs,
           competences:        s2.competences,
           type_profils_aides: s2.type_profils_aides,
         }).throwOnError();
 
       } else if (step === 3) {
+        const nomValue = s1.nom.trim() || authNom;
+        if (!nomValue) {
+          throw new Error("Please complete step 1 first — your name is required.");
+        }
         await supabase.from("mentors").upsert({
           ...base,
+          nom:                  nomValue,
           style_mentorat:      s3.style_mentorat || null,
           disponibilite_heures: s3.disponibilite_heures,
           max_mentees:         s3.max_mentees,
@@ -346,6 +366,7 @@ export default function MentorOnboarding() {
 
         await supabase.from("mentors").upsert({
           ...base,
+          nom:              s1.nom.trim() || authNom,
           cv_url:           s4.cv_url || null,
           survey_completed: true,
           statut:           "active",
