@@ -12,7 +12,7 @@ import HeroParticles from "@/components/HeroParticles";
 import TypewriterText from "@/components/TypewriterText";
 import { useLang } from "@/contexts/LangContext";
 
-const ACCENT = "#38BDF8";
+const ACCENT = "#A78BFA";
 function hl(text: string, words: string[]) {
   if (!words.length) return <>{text}</>;
   const lower = words.map(w => w.toLowerCase());
