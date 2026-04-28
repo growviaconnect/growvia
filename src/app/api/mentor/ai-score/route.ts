@@ -7,30 +7,27 @@ function buildPrompt(fields: {
   nom: string;
   job_title: string;
   company: string;
-  industry: string;
-  years_experience: string;
-  seniority: string;
-  expertise: string[];
-  help_with: string;
+  bio: string;
+  sectors: string[];
+  skills: string[];
+  motivation: string;
   languages: string[];
 }): string {
   const parts = [
     `Name: ${fields.nom}`,
     `Job title: ${fields.job_title}`,
     fields.company ? `Company: ${fields.company}` : null,
-    `Industry: ${fields.industry}`,
-    `Years of experience: ${fields.years_experience}`,
-    `Seniority: ${fields.seniority}`,
-    `Areas of expertise: ${fields.expertise.join(", ")}`,
-    `What they can help mentees with: ${fields.help_with}`,
+    fields.bio ? `Bio: ${fields.bio}` : null,
+    fields.sectors.length ? `Sectors: ${fields.sectors.join(", ")}` : null,
+    fields.skills.length ? `Skills: ${fields.skills.join(", ")}` : null,
+    `Why they mentor: ${fields.motivation}`,
     `Languages: ${fields.languages.join(", ")}`,
   ].filter(Boolean);
 
   return [
     "You are evaluating a mentor application for GrowVia, a professional mentoring platform.",
-    "Based on the profile below, write a one-sentence public summary (max 20 words) that would appear on their mentor card.",
-    "Then explain in one sentence why this mentor is valuable to mentees.",
-    "Respond in this exact JSON format: { \"summary\": \"...\", \"value_prop\": \"...\" }",
+    "Based on the profile below, write a one-sentence public summary (max 20 words) shown on their mentor card.",
+    "Respond in this exact JSON format: { \"summary\": \"...\" }",
     "",
     parts.join("\n"),
   ].join("\n");
@@ -41,11 +38,10 @@ export async function POST(req: NextRequest) {
     nom?: string;
     job_title?: string;
     company?: string;
-    industry?: string;
-    years_experience?: string;
-    seniority?: string;
-    expertise?: string[];
-    help_with?: string;
+    bio?: string;
+    sectors?: string[];
+    skills?: string[];
+    motivation?: string;
     languages?: string[];
   };
 
@@ -55,14 +51,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  // Validate required fields before touching the API — identifies the culprit clearly
+  // Validate required fields before touching the API — names the empty variable clearly
+  // so "messages: text content blocks must be non-empty" is never the error the caller sees.
   const required: [string, unknown][] = [
-    ["nom", body.nom],
-    ["job_title", body.job_title],
-    ["industry", body.industry],
-    ["years_experience", body.years_experience],
-    ["seniority", body.seniority],
-    ["help_with", body.help_with],
+    ["nom",        body.nom],
+    ["job_title",  body.job_title],
+    ["motivation", body.motivation],
   ];
   for (const [name, val] of required) {
     if (!val || (typeof val === "string" && !val.trim())) {
@@ -73,13 +67,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (!body.expertise?.length) {
-    return NextResponse.json(
-      { error: "Validation error: prompt variable 'expertise' has no items selected" },
-      { status: 422 },
-    );
-  }
-
   if (!body.languages?.length) {
     return NextResponse.json(
       { error: "Validation error: prompt variable 'languages' has no items selected" },
@@ -88,15 +75,14 @@ export async function POST(req: NextRequest) {
   }
 
   const prompt = buildPrompt({
-    nom:              body.nom!.trim(),
-    job_title:        body.job_title!.trim(),
-    company:          (body.company ?? "").trim(),
-    industry:         body.industry!,
-    years_experience: body.years_experience!,
-    seniority:        body.seniority!,
-    expertise:        body.expertise,
-    help_with:        body.help_with!.trim(),
-    languages:        body.languages,
+    nom:        body.nom!.trim(),
+    job_title:  body.job_title!.trim(),
+    company:    (body.company ?? "").trim(),
+    bio:        (body.bio ?? "").trim(),
+    sectors:    body.sectors ?? [],
+    skills:     body.skills ?? [],
+    motivation: body.motivation!.trim(),
+    languages:  body.languages,
   });
 
   // Guard: filter out any message where content is empty or undefined
@@ -117,7 +103,7 @@ export async function POST(req: NextRequest) {
   try {
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 256,
+      max_tokens: 128,
       messages,
     });
 
@@ -126,16 +112,18 @@ export async function POST(req: NextRequest) {
       .map((b) => b.text)
       .join("");
 
-    let parsed: { summary?: string; value_prop?: string } = {};
+    let summary: string | null = null;
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]) as typeof parsed;
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]) as { summary?: string };
+        summary = parsed.summary ?? null;
+      }
     } catch {
-      // Non-JSON response — return raw text as summary
-      parsed = { summary: text.slice(0, 120) };
+      summary = text.slice(0, 120) || null;
     }
 
-    return NextResponse.json({ summary: parsed.summary ?? null, value_prop: parsed.value_prop ?? null });
+    return NextResponse.json({ summary });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown AI error";
     return NextResponse.json({ error: `AI API error: ${msg}` }, { status: 500 });

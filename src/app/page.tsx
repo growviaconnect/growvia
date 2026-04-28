@@ -8,6 +8,7 @@ import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import LogoTicker from "@/components/LogoTicker";
+import MentorsSection from "@/components/MentorsSection";
 import HeroParticles from "@/components/HeroParticles";
 import TypewriterText from "@/components/TypewriterText";
 import { useLang } from "@/contexts/LangContext";
@@ -119,6 +120,9 @@ export default function HomePage() {
 
       {/* ── LOGO TICKER ──────────────────────────────────────────── */}
       <LogoTicker />
+
+      {/* ── MENTORS ──────────────────────────────────────────────── */}
+      <MentorsSection />
 
       {/* ── CATEGORIES ───────────────────────────────────────────── */}
       <section className="py-32 border-t border-white/5">
