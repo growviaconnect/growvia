@@ -352,17 +352,15 @@ export default function MentorOnboarding() {
 
       } else {
         // Step 4 — final: save CV + mark complete.
-        // Validate fields that feed the AI prompt before any API call.
-        // Guards against "messages: text content blocks must be non-empty" (Anthropic 400).
+        // Validate only the fields that are required AND visible before this step.
+        // motivation lives in step 3 and is optional — do not block here.
         const aiRequired: [string, string][] = [
-          ["Full name",   s1.nom.trim()],
-          ["Job title",   s1.poste_actuel.trim()],
-          ["Motivation",  s3.motivation.trim()],
+          ["Full name",  s1.nom.trim()],
+          ["Job title",  s1.poste_actuel.trim()],
         ];
         for (const [label, val] of aiRequired) {
-          if (!val) throw new Error(`'${label}' is empty — please fill it in before continuing.`);
+          if (!val) throw new Error(`'${label}' is empty — please go back to step 1.`);
         }
-        if (!s3.langues.length) throw new Error("Select at least one language in step 3.");
 
         await supabase.from("mentors").upsert({
           ...base,
