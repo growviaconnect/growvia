@@ -17,11 +17,11 @@ const NIVEAU_ETUDES_OPTIONS = [
   "High school", "Bachelor", "Master", "MBA", "PhD", "Self-taught", "Other",
 ];
 const OBJECTIF_OPTIONS = [
-  { key: "first_job",       label: "First job",             desc: "Land your first professional role" },
-  { key: "career_change",   label: "Career change",         desc: "Switch to a new industry or function" },
-  { key: "get_promoted",    label: "Get promoted",          desc: "Move up within your current field" },
-  { key: "start_business",  label: "Start a business",      desc: "Build and launch your own venture" },
-  { key: "learn_skills",    label: "Learn specific skills", desc: "Deepen expertise in a focused area" },
+  { key: "first_job",      label: "First job",             desc: "Land your first professional role" },
+  { key: "career_change",  label: "Career change",         desc: "Switch to a new industry or function" },
+  { key: "get_promoted",   label: "Get promoted",          desc: "Move up within your current field" },
+  { key: "start_business", label: "Start a business",      desc: "Build and launch your own venture" },
+  { key: "learn_skills",   label: "Learn specific skills", desc: "Deepen expertise in a focused area" },
 ];
 const SECTEURS_OPTIONS = [
   "Tech", "Finance", "Marketing", "Consulting", "Startup",
@@ -33,9 +33,9 @@ const COMPETENCES_OPTIONS = [
   "Sales", "Product", "Data", "Creative", "Operations",
 ];
 const STYLE_APPRENTISSAGE_OPTIONS = [
-  { key: "structured",     label: "Structured & framed",           desc: "Clear agenda, goals, and action items" },
-  { key: "conversational", label: "Flexible & conversational",     desc: "Open discussions and organic flow" },
-  { key: "practice",       label: "Practice-based exercises",      desc: "Learn by doing with real tasks" },
+  { key: "structured",     label: "Structured & framed",       desc: "Clear agenda, goals, and action items" },
+  { key: "conversational", label: "Flexible & conversational", desc: "Open discussions and organic flow" },
+  { key: "practice",       label: "Practice-based exercises",  desc: "Learn by doing with real tasks" },
 ];
 const FREQUENCE_OPTIONS = ["1x/week", "2x/month", "1x/month"];
 const FORMAT_OPTIONS    = ["Video calls", "Messages", "Both"];
@@ -93,8 +93,10 @@ const selectCls =
 
 const GrowViaLogo = () => (
   <Link href="/" className="inline-flex items-center gap-2.5 mb-6 justify-center">
-    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>G</div>
+    <div
+      className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+    >G</div>
     <span className="font-extrabold text-xl text-white tracking-tight">GrowVia</span>
   </Link>
 );
@@ -150,23 +152,23 @@ function StarRating({ value, onChange }: { value: number; onChange: (n: number) 
 export default function MenteeOnboarding() {
   const router = useRouter();
 
-  const [step, setStep]               = useState(1);
-  const [loading, setLoading]         = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [error, setError]             = useState<string | null>(null);
-  const [done, setDone]               = useState(false);
-  const [userId, setUserId]           = useState("");
-  const [email, setEmail]             = useState("");
+  const [step, setStep]                 = useState(1);
+  const [loading, setLoading]           = useState(false);
+  const [pageLoading, setPageLoading]   = useState(true);
+  const [error, setError]               = useState<string | null>(null);
+  const [done, setDone]                 = useState(false);
+  const [userId, setUserId]             = useState("");
+  const [email, setEmail]               = useState("");
 
   // Photo upload
-  const photoInputRef                     = useRef<HTMLInputElement>(null);
-  const [photoPreview, setPhotoPreview]   = useState("");
+  const photoInputRef                       = useRef<HTMLInputElement>(null);
+  const [photoPreview, setPhotoPreview]     = useState("");
   const [photoUploading, setPhotoUploading] = useState(false);
 
   // CV upload
-  const cvInputRef                        = useRef<HTMLInputElement>(null);
-  const [cvFileName, setCvFileName]       = useState("");
-  const [cvUploading, setCvUploading]     = useState(false);
+  const cvInputRef                      = useRef<HTMLInputElement>(null);
+  const [cvFileName, setCvFileName]     = useState("");
+  const [cvUploading, setCvUploading]   = useState(false);
 
   // Step data
   const [s1, setS1] = useState<S1>({
@@ -218,7 +220,7 @@ export default function MenteeOnboarding() {
           experiences:        existing.experiences        ?? "",
         });
         setS3({
-          competences:        existing.competences        ?? [],
+          competences:         existing.competences         ?? [],
           style_apprentissage: existing.style_apprentissage ?? "",
           frequence_souhaitee: existing.frequence_souhaitee ?? "",
           format_prefere:      existing.format_prefere      ?? "",
@@ -288,7 +290,7 @@ export default function MenteeOnboarding() {
     }));
   }
 
-  // ── Array toggles ────────────────────────────────────────────────────────────
+  // ── Array toggles ─────────────────────────────────────────────────────────────
   function toggleSecteur(val: string) {
     setS2(prev => ({
       ...prev,
@@ -300,7 +302,9 @@ export default function MenteeOnboarding() {
   function toggleLang(val: string) {
     setS3(prev => ({
       ...prev,
-      langues: prev.langues.includes(val) ? prev.langues.filter(v => v !== val) : [...prev.langues, val],
+      langues: prev.langues.includes(val)
+        ? prev.langues.filter(v => v !== val)
+        : [...prev.langues, val],
     }));
   }
 
@@ -323,22 +327,22 @@ export default function MenteeOnboarding() {
         await supabase.from("mentees").upsert({
           ...base,
           nom:           s1.nom.trim(),
-          photo_url:     s1.photo_url      || null,
-          niveau_etudes: s1.niveau_etudes  || null,
-          ecole:         s1.ecole.trim()   || null,
+          photo_url:     s1.photo_url          || null,
+          niveau_etudes: s1.niveau_etudes       || null,
+          ecole:         s1.ecole.trim()        || null,
           localisation:  s1.localisation.trim() || null,
           linkedin_url:  s1.linkedin_url.trim() || null,
-          bio:           s1.bio.trim()     || null,
+          bio:           s1.bio.trim()          || null,
         }).throwOnError();
 
       } else if (step === 2) {
         await supabase.from("mentees").upsert({
           ...base,
-          objectif_principal: s2.objectif_principal || null,
+          objectif_principal: s2.objectif_principal  || null,
           secteurs_vises:     s2.secteurs_vises,
-          poste_cible:        s2.poste_cible.trim()  || null,
-          horizon_temporel:   s2.horizon_temporel    || null,
-          experiences:        s2.experiences.trim()  || null,
+          poste_cible:        s2.poste_cible.trim()   || null,
+          horizon_temporel:   s2.horizon_temporel     || null,
+          experiences:        s2.experiences.trim()   || null,
         }).throwOnError();
 
       } else if (step === 3) {
@@ -390,9 +394,10 @@ export default function MenteeOnboarding() {
               <span className="text-[#A78BFA] font-semibold">{completion}%</span> filled.
             </p>
             <p className="text-white/30 text-xs mb-8">
-              We're now finding the best mentors for you.
+              We&apos;re now finding the best mentors for you.
             </p>
-            <button onClick={() => router.push("/dashboard")}
+            <button
+              onClick={() => router.push("/dashboard")}
               className="w-full text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm"
               style={{ background: "#7C3AED" }}>
               Go to my dashboard <ArrowRight className="w-4 h-4" />
@@ -422,10 +427,10 @@ export default function MenteeOnboarding() {
 
   // ─── Step metadata ───────────────────────────────────────────────────────────
   const stepMeta = [
-    { title: "Basic Profile",    sub: "Tell mentors who you are" },
-    { title: "Goals & Career",   sub: "Where you want to go" },
-    { title: "Learning Style",   sub: "How you like to grow" },
-    { title: "Upload your CV",   sub: "Optional — helps mentors understand your background" },
+    { title: "Basic Profile",  sub: "Tell mentors who you are" },
+    { title: "Goals & Career", sub: "Where you want to go" },
+    { title: "Learning Style", sub: "How you like to grow" },
+    { title: "Upload your CV", sub: "Optional — helps mentors understand your background" },
   ];
 
   const badgeColor = completion >= 75 ? "#10B981" : completion >= 40 ? "#F59E0B" : "#A78BFA";
@@ -438,7 +443,8 @@ export default function MenteeOnboarding() {
         <div className="text-center mb-6">
           <GrowViaLogo />
           {/* Completion badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold mb-4"
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold mb-4"
             style={{ background: "rgba(255,255,255,0.04)", color: badgeColor }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: badgeColor }} />
             Profile {completion}% complete
@@ -479,7 +485,8 @@ export default function MenteeOnboarding() {
               <div>
                 <FieldLabel optional>Profile photo</FieldLabel>
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden border-2 border-white/10 flex items-center justify-center"
+                  <div
+                    className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden border-2 border-white/10 flex items-center justify-center"
                     style={{ background: "rgba(124,58,237,0.1)" }}>
                     {photoPreview
                       ? <img src={photoPreview} alt="avatar" className="w-full h-full object-cover" />
@@ -487,7 +494,9 @@ export default function MenteeOnboarding() {
                     }
                   </div>
                   <div className="flex-1">
-                    <button type="button" disabled={photoUploading}
+                    <button
+                      type="button"
+                      disabled={photoUploading}
                       onClick={() => photoInputRef.current?.click()}
                       className="w-full px-4 py-2.5 rounded-xl border border-dashed border-white/20 text-sm text-white/50 hover:border-[#7C3AED]/50 hover:text-white/70 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                       {photoUploading
@@ -498,7 +507,8 @@ export default function MenteeOnboarding() {
                     <p className="text-xs text-white/25 mt-1.5 text-center">JPG, PNG or WebP · max 5 MB</p>
                   </div>
                 </div>
-                <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+                <input
+                  ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoSelect(f); e.target.value = ""; }} />
               </div>
@@ -556,7 +566,10 @@ export default function MenteeOnboarding() {
                   }>
                   Bio
                 </FieldLabel>
-                <textarea rows={3} maxLength={300} className={`${inputCls} resize-none`} value={s1.bio}
+                <textarea
+                  rows={3} maxLength={300}
+                  className={`${inputCls} resize-none`}
+                  value={s1.bio}
                   onChange={e => setS1({ ...s1, bio: e.target.value })}
                   placeholder="A few sentences about yourself and what you're working toward…" />
               </div>
@@ -570,11 +583,11 @@ export default function MenteeOnboarding() {
               {/* Main objective */}
               <div>
                 <FieldLabel>Main objective</FieldLabel>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="space-y-2">
                   {OBJECTIF_OPTIONS.map(opt => (
                     <button key={opt.key} type="button"
                       onClick={() => setS2(prev => ({ ...prev, objectif_principal: opt.key }))}
-                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 text-left transition-all ${
                         s2.objectif_principal === opt.key
                           ? "border-[#7C3AED] bg-[#7C3AED]/10"
                           : "border-white/10 hover:border-white/20"
@@ -632,7 +645,7 @@ export default function MenteeOnboarding() {
                 </div>
               </div>
 
-              {/* Experiences */}
+              {/* Past experiences */}
               <div>
                 <FieldLabel optional>Past experiences</FieldLabel>
                 <textarea rows={3} className={`${inputCls} resize-none`} value={s2.experiences}
@@ -686,11 +699,11 @@ export default function MenteeOnboarding() {
               {/* Learning style cards */}
               <div>
                 <FieldLabel>Preferred learning style</FieldLabel>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="space-y-2">
                   {STYLE_APPRENTISSAGE_OPTIONS.map(opt => (
                     <button key={opt.key} type="button"
                       onClick={() => setS3(prev => ({ ...prev, style_apprentissage: opt.key }))}
-                      className={`p-4 rounded-xl border-2 text-left transition-all ${
+                      className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
                         s3.style_apprentissage === opt.key
                           ? "border-[#7C3AED] bg-[#7C3AED]/10"
                           : "border-white/10 hover:border-white/20"
@@ -745,7 +758,9 @@ export default function MenteeOnboarding() {
                 <FieldLabel>Languages</FieldLabel>
                 <div className="flex flex-wrap gap-2">
                   {LANGUES_OPTIONS.map(l => (
-                    <Chip key={l} label={l} selected={s3.langues.includes(l)} onClick={() => toggleLang(l)} />
+                    <Chip key={l} label={l}
+                      selected={s3.langues.includes(l)}
+                      onClick={() => toggleLang(l)} />
                   ))}
                 </div>
               </div>
@@ -765,7 +780,7 @@ export default function MenteeOnboarding() {
             <div className="space-y-4">
               <p className="text-sm text-white/40 leading-relaxed">
                 Uploading your CV helps mentors understand your background before your first session.
-                It's optional but recommended.
+                It&apos;s optional but recommended.
               </p>
 
               {/* Drop zone */}
@@ -812,7 +827,7 @@ export default function MenteeOnboarding() {
                     </div>
                     <div>
                       <p className="text-sm text-white/60">
-                        <span className="text-[#A78BFA] font-medium">Click to upload</span> or drag & drop
+                        <span className="text-[#A78BFA] font-medium">Click to upload</span> or drag &amp; drop
                       </p>
                       <p className="text-xs text-white/30 mt-1">PDF only · max 10 MB</p>
                     </div>
@@ -838,7 +853,9 @@ export default function MenteeOnboarding() {
                 </button>
               : <div />
             }
-            <button type="button" onClick={handleNext}
+            <button
+              type="button"
+              onClick={handleNext}
               disabled={!canProceed() || loading || photoUploading || cvUploading}
               className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-opacity disabled:opacity-40 hover:opacity-90"
               style={{ background: "#7C3AED" }}>
