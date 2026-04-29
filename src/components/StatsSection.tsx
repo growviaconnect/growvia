@@ -94,7 +94,10 @@ export default function StatsSection() {
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
                 border: "1px solid rgba(167,139,250,0.12)",
+                transition: "box-shadow 300ms ease",
               }}
+              onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 32px rgba(124,58,237,0.25)")}
+              onMouseLeave={e => (e.currentTarget.style.boxShadow = "")}
             >
               {/* Lucide icon */}
               <Icon style={{ color: "#A78BFA", width: 20, height: 20, marginBottom: 16 }} />
