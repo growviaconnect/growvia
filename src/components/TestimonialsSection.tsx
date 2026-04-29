@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
 const serifStyle = {
@@ -32,14 +33,36 @@ function StarRow() {
 export default function TestimonialsSection() {
   const { t } = useLang();
   const [active, setActive]     = useState(0);
-  const pausedRef               = useRef(false);   // ref so interval sees latest value without recreation
+  const pausedRef               = useRef(false);
   const timerRef                = useRef<ReturnType<typeof setInterval> | null>(null);
+  const swipeStartX             = useRef<number | null>(null);
 
   const testimonials = [
     { initials: t("testimonials_t1_initials"), name: t("testimonials_t1_name"), role: t("testimonials_t1_role"), quote: t("testimonials_t1_quote"), color: AVATAR_COLORS[0] },
     { initials: t("testimonials_t2_initials"), name: t("testimonials_t2_name"), role: t("testimonials_t2_role"), quote: t("testimonials_t2_quote"), color: AVATAR_COLORS[1] },
     { initials: t("testimonials_t3_initials"), name: t("testimonials_t3_name"), role: t("testimonials_t3_role"), quote: t("testimonials_t3_quote"), color: AVATAR_COLORS[2] },
   ];
+
+  const prev = () => setActive((p) => (p - 1 + testimonials.length) % testimonials.length);
+  const next = () => setActive((p) => (p + 1) % testimonials.length);
+
+  // Touch events — mobile
+  function onTouchStart(e: React.TouchEvent) { swipeStartX.current = e.touches[0].clientX; }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (swipeStartX.current === null) return;
+    const delta = swipeStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(delta) > 50) delta > 0 ? next() : prev();
+    swipeStartX.current = null;
+  }
+
+  // Pointer events — trackpad (pointerType !== 'touch' avoids duplicates with above)
+  function onPointerDown(e: React.PointerEvent) { if (e.pointerType !== "touch") swipeStartX.current = e.clientX; }
+  function onPointerUp(e: React.PointerEvent) {
+    if (e.pointerType === "touch" || swipeStartX.current === null) return;
+    const delta = swipeStartX.current - e.clientX;
+    if (Math.abs(delta) > 50) delta > 0 ? next() : prev();
+    swipeStartX.current = null;
+  }
 
   // Auto-play — reads pausedRef so the interval doesn't need to be torn down on hover
   useEffect(() => {
@@ -68,11 +91,27 @@ export default function TestimonialsSection() {
 
         {/* ── Carousel ─────────────────────────────────────────────── */}
         <div
-          className="overflow-hidden"
+          className="flex items-center gap-4"
           onMouseEnter={() => { pausedRef.current = true; }}
           onMouseLeave={() => { pausedRef.current = false; }}
         >
+          {/* Left arrow */}
+          <button
+            onClick={prev}
+            aria-label="Témoignage précédent"
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border border-white/15 hover:border-white/30 transition-all duration-200"
+          >
+            <ChevronLeft className="text-white/40 hover:text-white" style={{ width: 20, height: 20 }} />
+          </button>
+
           {/* Sliding track */}
+          <div
+            className="overflow-hidden flex-1"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+          >
           <div
             style={{
               display: "flex",
@@ -142,6 +181,16 @@ export default function TestimonialsSection() {
               </div>
             ))}
           </div>
+          </div>{/* end overflow-hidden flex-1 */}
+
+          {/* Right arrow */}
+          <button
+            onClick={next}
+            aria-label="Témoignage suivant"
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border border-white/15 hover:border-white/30 transition-all duration-200"
+          >
+            <ChevronRight className="text-white/40 hover:text-white" style={{ width: 20, height: 20 }} />
+          </button>
         </div>
 
         {/* ── Pagination dots ───────────────────────────────────────── */}
