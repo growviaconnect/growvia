@@ -1121,10 +1121,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     manifesto_phrase_4: 'Créer un impact réel et significatif.',
 
     // Stats
-    stats_title_pre: "De l'élan initial à la",
-    stats_title_hl: 'mondiale',
-    stats_title_post: 'reconnaissance.',
-    stats_sub: "Notre réseau de mentors regroupe des professionnels de haut niveau, des entrepreneurs et des experts — des personnes qui façonnent des carrières, changent les perspectives et ouvrent des portes.",
+    stats_title_pre: "Derrière chaque grande carrière, il y a quelqu'un qui a",
+    stats_title_hl: 'tendu la main.',
+    stats_title_post: '',
+    stats_sub: "Notre réseau de mentors regroupe des professionnels de haut niveau qui ont choisi de tendre la leur — parce qu'ils n'ont pas oublié la main qui leur a été tendue.",
     stats_badge_mentors: 'Mentors',
     stats_desc_mentors: 'Mentors Experts',
     stats_badge_mentees: 'Mentorés',
