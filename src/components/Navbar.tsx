@@ -100,6 +100,23 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-3">
             <LangSwitcher />
 
+            {/* Dynamic account button */}
+            {session ? (
+              <Link
+                href="/profile"
+                className="text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg border border-white/15 transition-all duration-200"
+              >
+                {t("nav_my_profile")}
+              </Link>
+            ) : (
+              <Link
+                href="/auth/register"
+                className="text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg border border-white/15 transition-all duration-200"
+              >
+                {t("nav_create_account")}
+              </Link>
+            )}
+
             {session ? (
               <>
                 <Link

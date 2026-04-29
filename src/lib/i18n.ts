@@ -846,6 +846,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Navbar aria-label
     nav_home: 'Home',
+    nav_my_profile: 'My profile',
+    nav_create_account: 'Create my account',
     nav_toggle_menu: 'Toggle menu',
 
     // Explore page aria-labels
@@ -1854,6 +1856,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Navbar aria-label
     nav_home: 'Accueil',
+    nav_my_profile: 'Mon profil',
+    nav_create_account: 'Créer mon compte',
     nav_toggle_menu: 'Ouvrir le menu',
 
     // Explore page aria-labels
@@ -2862,6 +2866,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Navbar aria-label
     nav_home: 'Inicio',
+    nav_my_profile: 'Mi perfil',
+    nav_create_account: 'Crear mi cuenta',
     nav_toggle_menu: 'Abrir menú',
 
     // Explore page aria-labels
