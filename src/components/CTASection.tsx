@@ -32,7 +32,7 @@ export default function CTASection() {
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
 
-      {/* Slideshow wrapper — parallax applied here so all images move together */}
+      {/* Slideshow wrapper, parallax applied here so all images move together */}
       <div ref={bgRef} className="absolute inset-0">
         {IMAGES.map((src, i) => (
           <img

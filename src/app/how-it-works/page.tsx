@@ -97,7 +97,7 @@ export default function HowItWorksPage() {
 
   return (
     <>
-      {/* ── SECTION 1 — HERO ─────────────────────────────────── */}
+      {/* ── SECTION 1, HERO ─────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1600&q=80"
@@ -125,7 +125,7 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 2 — STEPS ──────────────────────────────────── */}
+      {/* ── SECTION 2, STEPS ──────────────────────────────────── */}
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           {steps.map((step, i) => {
@@ -180,7 +180,7 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 3 — SESSIONS ───────────────────────────────── */}
+      {/* ── SECTION 3, SESSIONS ───────────────────────────────── */}
       <section className="py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -216,7 +216,7 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4 — NOTIFICATIONS ──────────────────────────── */}
+      {/* ── SECTION 4, NOTIFICATIONS ──────────────────────────── */}
       <section className="py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -278,7 +278,7 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 5 — CTA ─────────────────────────────────────── */}
+      {/* ── SECTION 5, CTA ─────────────────────────────────────── */}
       <section className="relative py-40 text-center overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover z-0">
           <source src="https://videos.pexels.com/video-files/3252312/3252312-uhd_2560_1440_25fps.mp4" type="video/mp4" />

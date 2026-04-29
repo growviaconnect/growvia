@@ -11,11 +11,11 @@ import { AuthProvider } from "@/contexts/AuthContext";
 export const metadata: Metadata = {
   title: "GrowVia – Find the mentor who's been exactly where you want to go",
   description:
-    "GrowVia matches ambitious students and young professionals with experienced mentors through AI — in minutes, not months.",
+    "GrowVia matches ambitious students and young professionals with experienced mentors through AI, in minutes, not months.",
   keywords: "mentorship, career guidance, mentoring platform, AI matching, career coaching",
   openGraph: {
     title: "GrowVia – Find the mentor who's been exactly where you want to go",
-    description: "GrowVia matches ambitious students and young professionals with experienced mentors through AI — in minutes, not months.",
+    description: "GrowVia matches ambitious students and young professionals with experienced mentors through AI, in minutes, not months.",
     type: "website",
   },
 };

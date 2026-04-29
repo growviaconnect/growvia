@@ -163,7 +163,7 @@ export default function Footer() {
           className="flex flex-col md:flex-row items-center justify-between gap-5 py-6"
           style={{ borderTop: "1px solid rgba(76,29,149,0.3)" }}
         >
-          {/* Email — left */}
+          {/* Email, left */}
           <a
             href="mailto:contact@growviaconnect.com"
             className="text-sm text-[#7C3AED] hover:text-[#A78BFA] transition-colors duration-200 order-2 md:order-1"
@@ -171,7 +171,7 @@ export default function Footer() {
             contact@growviaconnect.com
           </a>
 
-          {/* Copyright + admin — center */}
+          {/* Copyright + admin, center */}
           <div className="flex items-center gap-3 order-1 md:order-2">
             <p className="text-xs text-white/20 uppercase tracking-widest">
               {t("footer_copyright")}
@@ -184,7 +184,7 @@ export default function Footer() {
             </Link>
           </div>
 
-          {/* Social icons — right */}
+          {/* Social icons, right */}
           <div className="flex items-center gap-4 order-3">
             {socials.map(({ label, href, Icon }) => (
               <a

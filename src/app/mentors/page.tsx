@@ -209,7 +209,7 @@ export default function MentorsPage() {
             <span style={{ color: "#A78BFA" }}>mentor</span>
           </h1>
           <p className="text-white/50 text-lg leading-relaxed">
-            Experienced professionals ready to guide you — matched in minutes.
+            Experienced professionals ready to guide you, matched in minutes.
           </p>
         </div>
       </section>
@@ -224,7 +224,7 @@ export default function MentorsPage() {
           <>
             {showPlaceholders && (
               <p className="text-center text-white/25 text-sm mb-8">
-                No mentors yet — here's a preview of what your network will look like.
+                No mentors yet, here's a preview of what your network will look like.
               </p>
             )}
             {!showPlaceholders && (

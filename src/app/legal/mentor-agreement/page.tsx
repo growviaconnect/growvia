@@ -17,7 +17,7 @@ export default function MentorAgreementPage() {
           {[
             {
               title: "1. Independent Contractor Status",
-              content: "By becoming a mentor on GrowVia, you acknowledge that you are acting as an independent contractor and not as an employee, agent, or partner of GrowVia. GrowVia operates as a two-sided marketplace platform — similar to Airbnb or Malt — and does not direct or control the content of your mentoring sessions. You are solely responsible for your conduct during sessions and for the guidance you provide.",
+              content: "By becoming a mentor on GrowVia, you acknowledge that you are acting as an independent contractor and not as an employee, agent, or partner of GrowVia. GrowVia operates as a two-sided marketplace platform, similar to Airbnb or Malt, and does not direct or control the content of your mentoring sessions. You are solely responsible for your conduct during sessions and for the guidance you provide.",
             },
             {
               title: "2. Payments & Commission",

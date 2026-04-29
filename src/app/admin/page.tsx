@@ -407,7 +407,7 @@ export default function AdminPage() {
                         <tr key={m.id} className="hover:bg-purple-50/30 transition-colors">
                           <td className="px-6 py-3 font-medium text-gray-900 whitespace-nowrap">{m.nom}</td>
                           <td className="px-6 py-3 text-gray-500 text-xs">{m.email}</td>
-                          <td className="px-6 py-3 text-gray-500 text-xs">{m.specialite ?? "—"}</td>
+                          <td className="px-6 py-3 text-gray-500 text-xs">{m.specialite ?? ", "}</td>
                           <td className="px-6 py-3"><Badge s={m.statut} /></td>
                           <td className="px-6 py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(m.created_at)}</td>
                           <td className="px-6 py-3">

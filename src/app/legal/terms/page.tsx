@@ -12,14 +12,14 @@ These Terms of Service govern your use of the GrowVia platform, including the we
   },
   {
     num: "2",
-    title: "Nature of the Platform — Marketplace Model",
+    title: "Nature of the Platform, Marketplace Model",
     content: `GrowVia operates as a two-sided marketplace, similar to platforms such as Airbnb or Malt. GrowVia does not itself provide mentoring services. Instead, GrowVia provides the technology infrastructure that allows mentees to discover, book, and pay independent mentor professionals.
 
 The following clarifications apply:`,
     bullets: [
       "Mentors are independent service providers, not employees, agents, or contractors of GrowVia",
       "GrowVia does not control the content of mentoring sessions and is not responsible for the advice given by mentors",
-      "Sessions are informational mentoring only — they do not constitute professional legal, medical, financial, or psychological advice",
+      "Sessions are informational mentoring only, they do not constitute professional legal, medical, financial, or psychological advice",
       "GrowVia makes no guarantees regarding specific career outcomes or results from mentoring",
       "The contractual relationship for the delivery of mentoring services exists directly between the mentee and the mentor",
     ],
@@ -30,8 +30,8 @@ The following clarifications apply:`,
     content: `All payments on GrowVia pass through GrowVia as the marketplace operator. GrowVia collects payment from mentees on behalf of mentors and remits the mentor's share after deducting a platform commission.`,
     bullets: [
       "Discovery Session: 9.99€ (one-time, 15–20 minutes)",
-      "Basic plan: 19.99€/month — 2 sessions per month",
-      "Premium plan: 39.99€/month — 4 sessions per month + unlimited AI matching",
+      "Basic plan: 19.99€/month, 2 sessions per month",
+      "Premium plan: 39.99€/month, 4 sessions per month + unlimited AI matching",
       "GrowVia charges mentors a commission of 5–10% per completed session. This covers lead generation, payment processing, scheduling infrastructure, and dashboard access",
       "Mentor payouts are processed through Stripe after each completed session, minus the applicable commission",
       "All prices displayed to mentees include applicable VAT where required by Spanish or EU law",
@@ -71,7 +71,7 @@ No refund is issued for cancelled sessions, regardless of the reason for cancell
   {
     num: "7",
     title: "Intellectual Property",
-    content: `All content on the GrowVia platform — including the brand, design, software, and written materials — is the property of GrowVia and is protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without prior written permission from GrowVia.`,
+    content: `All content on the GrowVia platform, including the brand, design, software, and written materials, is the property of GrowVia and is protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without prior written permission from GrowVia.`,
   },
   {
     num: "8",

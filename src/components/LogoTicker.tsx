@@ -1,6 +1,6 @@
 "use client";
 
-/* Seamless logo ticker — logos rendered as inverted SVG text/wordmarks */
+/* Seamless logo ticker, logos rendered as inverted SVG text/wordmarks */
 
 const logos = [
   "Olympics",

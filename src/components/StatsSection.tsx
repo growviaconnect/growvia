@@ -54,15 +54,15 @@ export default function StatsSection() {
   const [plusPulse,   setPlusPulse]   = useState(false);
   const rafCounterRef = useRef<number | null>(null);
 
-  // ── i=2: 100% vérifié — progress bar ──────────────────────────
+  // ── i=2: 100% vérifié, progress bar ──────────────────────────
   const [fillProgress, setFillProgress] = useState(0);
   const [checkVisible, setCheckVisible] = useState(false);
   const rafFillRef = useRef<number | null>(null);
 
-  // ── i=0: 4.9★ — center star hover ────────────────────────────
+  // ── i=0: 4.9★, center star hover ────────────────────────────
   const [starHovered, setStarHovered] = useState(false);
 
-  // ── i=4: Dès 9,99€ — price pulse + shimmer ────────────────────
+  // ── i=4: Dès 9,99€, price pulse + shimmer ────────────────────
   const [shimmerKey,    setShimmerKey]    = useState(0);
   const [shimmerActive, setShimmerActive] = useState(false);
 
@@ -257,7 +257,7 @@ export default function StatsSection() {
                 {/* Lucide icon */}
                 <block.Icon style={{ color: "#A78BFA", width: 20, height: 20, marginBottom: 16 }} />
 
-                {/* Pill badge — pulses on i=3 once scroll fires */}
+                {/* Pill badge, pulses on i=3 once scroll fires */}
                 <span
                   className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
                   style={{
@@ -289,13 +289,13 @@ export default function StatsSection() {
                     </>
                   )}
 
-                  {/* i=2: plain readable text — progress bar handles the reveal */}
+                  {/* i=2: plain readable text, progress bar handles the reveal */}
                   {isFill && block.number}
 
                   {/* i=0: static number, star row handles the animation */}
                   {isStarBlock && "4.9"}
 
-                  {/* i=4: pulse + golden shimmer on hover — inner span gets key to restart */}
+                  {/* i=4: pulse + golden shimmer on hover, inner span gets key to restart */}
                   {isShimmer && (
                     <span
                       key={shimmerKey}
@@ -346,7 +346,7 @@ export default function StatsSection() {
                   }} />
                 )}
 
-                {/* i=0: ★★★★★ — all 5 stars turn golden on hover with 80ms stagger */}
+                {/* i=0: ★★★★★, all 5 stars turn golden on hover with 80ms stagger */}
                 {isStarBlock && (
                   <div style={{ display: "flex", gap: 5, marginBottom: 10 }}>
                     {[0, 1, 2, 3, 4].map((si) => (

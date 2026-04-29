@@ -88,14 +88,14 @@ export default function TypewriterText({
       alive.current = false;
       if (timer.current) clearTimeout(timer.current);
     };
-  // texts identity changes only when the language switches — restart the loop
+  // texts identity changes only when the language switches, restart the loop
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [texts.join("|"), speed, deleteSpeed, pauseMs, gapMs, delay]);
 
   return (
     <span className={className}>
       {displayed}
-      {/* Cursor — always visible while cycling */}
+      {/* Cursor, always visible while cycling */}
       <span
         aria-hidden="true"
         className="inline-block w-[2px] h-[1em] ml-[1px] bg-[#A78BFA] animate-blink"

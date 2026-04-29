@@ -76,7 +76,7 @@ export default function Navbar() {
               GrowVia
             </Link>
 
-            {/* Nav links — desktop only */}
+            {/* Nav links, desktop only */}
             <div className="hidden lg:flex items-center gap-6">
               {pathname !== "/" && (
                 <Link
@@ -98,7 +98,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right area — desktop */}
+          {/* Right area, desktop */}
           <div className="hidden lg:flex items-center gap-3 mr-2">
 
             {/* Dynamic account button */}
@@ -176,7 +176,7 @@ export default function Navbar() {
             <LangSwitcher />
           </div>
 
-          {/* Hamburger — mobile */}
+          {/* Hamburger, mobile */}
           <button
             className="lg:hidden text-white hover:text-white/70 transition-colors p-1"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -227,7 +227,7 @@ export default function Navbar() {
             <LangSwitcher />
           </div>
 
-          {/* CTA buttons — always at bottom */}
+          {/* CTA buttons, always at bottom */}
           {session ? (
             <div className="space-y-3">
               <Link
