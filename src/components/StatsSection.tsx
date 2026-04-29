@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ShieldCheck, Zap, Gem } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
 const serifStyle = {
@@ -22,6 +23,8 @@ function numFontSize(text: string): string {
 
 export default function StatsSection() {
   const { t } = useLang();
+
+  const PROOF_ICONS = [ShieldCheck, Zap, Gem];
 
   const proofs = [
     { badge: t("stats_proof1_badge"), number: t("stats_proof1_num"), desc: t("stats_proof1_desc") },
@@ -79,13 +82,23 @@ export default function StatsSection() {
 
       {/* ── Proof blocks ─────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div ref={wrapperRef} className="flex justify-end">
-          {proofs.map((proof, i) => (
+        <div ref={wrapperRef} className="flex justify-end gap-3">
+          {proofs.map((proof, i) => {
+            const Icon = PROOF_ICONS[i];
+            return (
             <div
               key={proof.badge}
-              className="px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center"
-              style={{ borderLeft: "1px solid rgba(255,255,255,0.07)" }}
+              className="px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center rounded-2xl"
+              style={{
+                background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(167,139,250,0.12)",
+              }}
             >
+              {/* Lucide icon */}
+              <Icon style={{ color: "#A78BFA", width: 20, height: 20, marginBottom: 16 }} />
+
               {/* Pill badge */}
               <span
                 className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
@@ -112,7 +125,8 @@ export default function StatsSection() {
                 {proof.desc}
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
