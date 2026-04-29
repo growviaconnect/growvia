@@ -82,7 +82,12 @@ export default function HomePage() {
             <p className="animate-fade-up text-lg text-white/45 mb-12 max-w-md mx-auto leading-relaxed" style={{ animationDelay: "240ms" }}>
               {hl(t("home_hero_sub_pre"), ["mentors", "matching"])}{" "}
               <TypewriterText
-                text={t("home_hero_sub_typed")}
+                texts={[
+                  t("home_hero_sub_typed"),
+                  t("home_hero_sub_typed_2"),
+                  t("home_hero_sub_typed_3"),
+                  t("home_hero_sub_typed_4"),
+                ]}
                 delay={1400}
                 speed={50}
                 className="text-white/70"
