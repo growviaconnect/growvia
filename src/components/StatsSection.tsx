@@ -210,12 +210,12 @@ export default function StatsSection() {
       {/* ── Title + Subtitle ─────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="reveal text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-[1.05] mb-7">
+          <h2 className="reveal text-3xl md:text-[48px] lg:text-[64px] font-extrabold text-white tracking-tight leading-[1.05] mb-7">
             {t("stats_title_pre")}{" "}
             <span style={serifStyle}>{t("stats_title_hl")}</span>
             {" "}{t("stats_title_post")}
           </h2>
-          <p className="reveal reveal-delay-1 text-lg text-white/40 leading-relaxed">
+          <p className="reveal reveal-delay-1 text-xl md:text-2xl text-white/55 leading-relaxed">
             {t("stats_sub")}
           </p>
         </div>
