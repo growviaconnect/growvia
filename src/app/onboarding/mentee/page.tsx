@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight, ArrowLeft, Check, Loader2, AlertCircle,
-  Upload, FileText, User,
+  Upload, FileText, User, Plus, X, Search,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
@@ -25,21 +25,43 @@ const OBJECTIF_OPTIONS = [
 ];
 const SECTEURS_OPTIONS = [
   "Tech", "Finance", "Marketing", "Consulting", "Startup",
-  "Healthcare", "Education", "Law", "Design", "HR", "Other",
+  "Healthcare", "Education", "Law", "Design", "HR",
 ];
-const HORIZON_OPTIONS = ["3 months", "6 months", "1 year", "2 years+"];
+const HORIZON_OPTIONS = [
+  "1 month", "2 months", "3 months", "6 months", "9 months",
+  "1 year", "18 months", "2 years", "3 years+", "Ongoing/No deadline",
+];
 const COMPETENCES_OPTIONS = [
   "Leadership", "Communication", "Strategy", "Technical skills",
-  "Sales", "Product", "Data", "Creative", "Operations",
+  "Sales", "Product management", "Data analysis", "Creative",
+  "Operations", "Coaching", "Project management", "Public speaking",
+  "Negotiation", "Financial analysis", "Marketing", "UX/Design",
 ];
 const STYLE_APPRENTISSAGE_OPTIONS = [
   { key: "structured",     label: "Structured & framed",       desc: "Clear agenda, goals, and action items" },
   { key: "conversational", label: "Flexible & conversational", desc: "Open discussions and organic flow" },
   { key: "practice",       label: "Practice-based exercises",  desc: "Learn by doing with real tasks" },
 ];
-const FREQUENCE_OPTIONS = ["1x/week", "2x/month", "1x/month"];
-const FORMAT_OPTIONS    = ["Video calls", "Messages", "Both"];
-const LANGUES_OPTIONS   = ["French", "English", "Spanish", "Portuguese", "Other"];
+const FORMAT_OPTIONS = ["Video calls", "Messages", "Both"];
+
+const QUICK_LANGUES = [
+  "French", "English", "Spanish", "Portuguese", "Arabic",
+  "German", "Italian", "Japanese", "Korean", "Mandarin", "Russian",
+];
+const OTHER_LANGUES = [
+  "Afrikaans", "Albanian", "Amharic", "Armenian", "Azerbaijani",
+  "Basque", "Bengali", "Bosnian", "Bulgarian", "Burmese",
+  "Catalan", "Croatian", "Czech", "Danish", "Dutch",
+  "Estonian", "Finnish", "Georgian", "Greek", "Gujarati",
+  "Hebrew", "Hindi", "Hungarian", "Indonesian", "Irish",
+  "Kannada", "Kazakh", "Khmer", "Lao", "Latvian",
+  "Lithuanian", "Macedonian", "Malay", "Malayalam", "Maltese",
+  "Marathi", "Mongolian", "Nepali", "Norwegian", "Persian",
+  "Polish", "Punjabi", "Romanian", "Serbian", "Sinhala",
+  "Slovak", "Slovenian", "Swahili", "Swedish", "Tagalog",
+  "Tamil", "Telugu", "Thai", "Turkish", "Turkmen",
+  "Ukrainian", "Urdu", "Uzbek", "Vietnamese", "Welsh",
+].sort();
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type CompetenceEntry = { name: string; rating: number };
@@ -152,13 +174,13 @@ function StarRating({ value, onChange }: { value: number; onChange: (n: number) 
 export default function MenteeOnboarding() {
   const router = useRouter();
 
-  const [step, setStep]                 = useState(1);
-  const [loading, setLoading]           = useState(false);
-  const [pageLoading, setPageLoading]   = useState(true);
-  const [error, setError]               = useState<string | null>(null);
-  const [done, setDone]                 = useState(false);
-  const [userId, setUserId]             = useState("");
-  const [email, setEmail]               = useState("");
+  const [step, setStep]               = useState(1);
+  const [loading, setLoading]         = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [error, setError]             = useState<string | null>(null);
+  const [done, setDone]               = useState(false);
+  const [userId, setUserId]           = useState("");
+  const [email, setEmail]             = useState("");
 
   // Photo upload
   const photoInputRef                       = useRef<HTMLInputElement>(null);
@@ -166,9 +188,28 @@ export default function MenteeOnboarding() {
   const [photoUploading, setPhotoUploading] = useState(false);
 
   // CV upload
-  const cvInputRef                      = useRef<HTMLInputElement>(null);
-  const [cvFileName, setCvFileName]     = useState("");
-  const [cvUploading, setCvUploading]   = useState(false);
+  const cvInputRef                    = useRef<HTMLInputElement>(null);
+  const [cvFileName, setCvFileName]   = useState("");
+  const [cvUploading, setCvUploading] = useState(false);
+
+  // Frequency
+  const [freqCount, setFreqCount] = useState(1);
+  const [freqUnit, setFreqUnit]   = useState<"week" | "month">("week");
+
+  // Language other dropdown
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [langSearch, setLangSearch]             = useState("");
+  const langDropdownRef                          = useRef<HTMLDivElement>(null);
+
+  // Sector "Other" inline input
+  const [showSectorInput, setShowSectorInput]   = useState(false);
+  const [customSectorText, setCustomSectorText] = useState("");
+  const sectorInputRef                           = useRef<HTMLInputElement>(null);
+
+  // Custom skill
+  const [showCustomSkillInput, setShowCustomSkillInput] = useState(false);
+  const [customSkillName, setCustomSkillName]           = useState("");
+  const [customSkillRating, setCustomSkillRating]       = useState(3);
 
   // Step data
   const [s1, setS1] = useState<S1>({
@@ -186,6 +227,24 @@ export default function MenteeOnboarding() {
   const [s4, setS4] = useState<S4>({ cv_url: "" });
 
   const completion = computeCompletion(s1, s2, s3, s4);
+
+  // Close lang dropdown on outside click
+  useEffect(() => {
+    if (!showLangDropdown) return;
+    function handleClick(e: MouseEvent) {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
+        setShowLangDropdown(false);
+        setLangSearch("");
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showLangDropdown]);
+
+  // Focus sector input when shown
+  useEffect(() => {
+    if (showSectorInput) sectorInputRef.current?.focus();
+  }, [showSectorInput]);
 
   // ── Init: load existing data ─────────────────────────────────────────────────
   useEffect(() => {
@@ -219,6 +278,12 @@ export default function MenteeOnboarding() {
           horizon_temporel:   existing.horizon_temporel   ?? "",
           experiences:        existing.experiences        ?? "",
         });
+        const freqStr = existing.frequence_souhaitee ?? "";
+        const freqMatch = freqStr.match(/^(\d+)x\/(week|month)$/);
+        if (freqMatch) {
+          setFreqCount(parseInt(freqMatch[1]));
+          setFreqUnit(freqMatch[2] as "week" | "month");
+        }
         setS3({
           competences:         existing.competences         ?? [],
           style_apprentissage: existing.style_apprentissage ?? "",
@@ -271,6 +336,13 @@ export default function MenteeOnboarding() {
     }
   }
 
+  // ── Frequency ────────────────────────────────────────────────────────────────
+  function updateFreq(count: number, unit: "week" | "month") {
+    setFreqCount(count);
+    setFreqUnit(unit);
+    setS3(prev => ({ ...prev, frequence_souhaitee: `${count}x/${unit}` }));
+  }
+
   // ── Competences ──────────────────────────────────────────────────────────────
   function toggleCompetence(name: string) {
     setS3(prev => {
@@ -289,8 +361,19 @@ export default function MenteeOnboarding() {
       competences: prev.competences.map(c => c.name === name ? { ...c, rating } : c),
     }));
   }
+  function removeCompetence(name: string) {
+    setS3(prev => ({ ...prev, competences: prev.competences.filter(c => c.name !== name) }));
+  }
+  function addCustomSkill() {
+    const name = customSkillName.trim();
+    if (!name || s3.competences.find(c => c.name === name)) return;
+    setS3(prev => ({ ...prev, competences: [...prev.competences, { name, rating: customSkillRating }] }));
+    setCustomSkillName("");
+    setCustomSkillRating(3);
+    setShowCustomSkillInput(false);
+  }
 
-  // ── Array toggles ─────────────────────────────────────────────────────────────
+  // ── Sectors ──────────────────────────────────────────────────────────────────
   function toggleSecteur(val: string) {
     setS2(prev => ({
       ...prev,
@@ -299,6 +382,16 @@ export default function MenteeOnboarding() {
         : [...prev.secteurs_vises, val],
     }));
   }
+  function addCustomSector() {
+    const text = customSectorText.trim();
+    if (!text) return;
+    if (!s2.secteurs_vises.includes(text)) {
+      setS2(prev => ({ ...prev, secteurs_vises: [...prev.secteurs_vises, text] }));
+    }
+    setCustomSectorText("");
+  }
+
+  // ── Languages ────────────────────────────────────────────────────────────────
   function toggleLang(val: string) {
     setS3(prev => ({
       ...prev,
@@ -316,58 +409,47 @@ export default function MenteeOnboarding() {
     return true;
   }
 
-  // ── Upsert on each Next ──────────────────────────────────────────────────────
+  // ── Upsert all fields on each step ───────────────────────────────────────────
   async function handleNext() {
     setLoading(true);
     setError(null);
     try {
-      const base = { id: userId, email, updated_at: new Date().toISOString() };
+      const allData = {
+        id:            userId,
+        email,
+        updated_at:    new Date().toISOString(),
+        nom:           s1.nom.trim()          || null,
+        photo_url:     s1.photo_url           || null,
+        niveau_etudes: s1.niveau_etudes       || null,
+        ecole:         s1.ecole.trim()        || null,
+        localisation:  s1.localisation.trim() || null,
+        linkedin_url:  s1.linkedin_url.trim() || null,
+        bio:           s1.bio.trim()          || null,
+        objectif_principal:  s2.objectif_principal  || null,
+        secteurs_vises:      s2.secteurs_vises,
+        poste_cible:         s2.poste_cible.trim()  || null,
+        horizon_temporel:    s2.horizon_temporel    || null,
+        experiences:         s2.experiences.trim()  || null,
+        competences:         s3.competences,
+        style_apprentissage: s3.style_apprentissage || null,
+        frequence_souhaitee: s3.frequence_souhaitee || null,
+        format_prefere:      s3.format_prefere      || null,
+        langues:             s3.langues,
+        motivation:          s3.motivation.trim()   || null,
+        cv_url:              s4.cv_url              || null,
+      };
 
-      if (step === 1) {
+      if (step === TOTAL_STEPS) {
         await supabase.from("mentees").upsert({
-          ...base,
-          nom:           s1.nom.trim(),
-          photo_url:     s1.photo_url          || null,
-          niveau_etudes: s1.niveau_etudes       || null,
-          ecole:         s1.ecole.trim()        || null,
-          localisation:  s1.localisation.trim() || null,
-          linkedin_url:  s1.linkedin_url.trim() || null,
-          bio:           s1.bio.trim()          || null,
-        }).throwOnError();
-
-      } else if (step === 2) {
-        await supabase.from("mentees").upsert({
-          ...base,
-          objectif_principal: s2.objectif_principal  || null,
-          secteurs_vises:     s2.secteurs_vises,
-          poste_cible:        s2.poste_cible.trim()   || null,
-          horizon_temporel:   s2.horizon_temporel     || null,
-          experiences:        s2.experiences.trim()   || null,
-        }).throwOnError();
-
-      } else if (step === 3) {
-        await supabase.from("mentees").upsert({
-          ...base,
-          competences:         s3.competences,
-          style_apprentissage: s3.style_apprentissage || null,
-          frequence_souhaitee: s3.frequence_souhaitee || null,
-          format_prefere:      s3.format_prefere      || null,
-          langues:             s3.langues,
-          motivation:          s3.motivation.trim()   || null,
-        }).throwOnError();
-
-      } else {
-        // Step 4 — final
-        await supabase.from("mentees").upsert({
-          ...base,
-          cv_url:           s4.cv_url || null,
+          ...allData,
           survey_completed: true,
-          statut:           "active",
+          statut: "active",
         }).throwOnError();
         setDone(true);
         return;
       }
 
+      await supabase.from("mentees").upsert(allData).throwOnError();
       setStep(s => s + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save — please try again.");
@@ -435,6 +517,14 @@ export default function MenteeOnboarding() {
 
   const badgeColor = completion >= 75 ? "#10B981" : completion >= 40 ? "#F59E0B" : "#A78BFA";
 
+  // Helpers for rendering
+  const customSectors = s2.secteurs_vises.filter(s => !SECTEURS_OPTIONS.includes(s));
+  const customSkills  = s3.competences.filter(c => !COMPETENCES_OPTIONS.includes(c.name));
+  const otherLangsSelected = s3.langues.filter(l => !QUICK_LANGUES.includes(l));
+  const filteredOtherLangs = OTHER_LANGUES.filter(l =>
+    l.toLowerCase().includes(langSearch.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-lg">
@@ -442,7 +532,6 @@ export default function MenteeOnboarding() {
         {/* Header */}
         <div className="text-center mb-6">
           <GrowViaLogo />
-          {/* Completion badge */}
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold mb-4"
             style={{ background: "rgba(255,255,255,0.04)", color: badgeColor }}>
@@ -617,7 +706,47 @@ export default function MenteeOnboarding() {
                       selected={s2.secteurs_vises.includes(s)}
                       onClick={() => toggleSecteur(s)} />
                   ))}
+                  {/* Custom sectors */}
+                  {customSectors.map(s => (
+                    <button key={s} type="button"
+                      onClick={() => toggleSecteur(s)}
+                      className="px-3 py-2 rounded-lg border border-[#7C3AED] bg-[#7C3AED]/15 text-white text-sm font-medium flex items-center gap-1.5">
+                      <span className="text-[#A78BFA]">✓</span>
+                      {s}
+                      <X className="w-3 h-3 text-[#A78BFA] ml-0.5" />
+                    </button>
+                  ))}
+                  {/* Other button */}
+                  <button type="button"
+                    onClick={() => setShowSectorInput(v => !v)}
+                    className={`px-3 py-2 rounded-lg border text-sm transition-all flex items-center gap-1.5 ${
+                      showSectorInput
+                        ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white font-medium"
+                        : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
+                    }`}>
+                    <Plus className="w-3.5 h-3.5" />
+                    Other
+                  </button>
                 </div>
+                {showSectorInput && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      ref={sectorInputRef}
+                      type="text"
+                      value={customSectorText}
+                      onChange={e => setCustomSectorText(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addCustomSector(); } }}
+                      placeholder="Type a sector and press Enter…"
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-white/10 bg-[#0D0A1A] text-white placeholder:text-white/25 focus:outline-none focus:border-[#7C3AED] text-sm transition-colors"
+                    />
+                    <button type="button"
+                      onClick={addCustomSector}
+                      disabled={!customSectorText.trim()}
+                      className="px-3 py-2.5 rounded-xl bg-[#7C3AED] text-white text-sm font-medium disabled:opacity-40 flex-shrink-0">
+                      Add
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Target role */}
@@ -628,20 +757,21 @@ export default function MenteeOnboarding() {
                   placeholder="e.g. Product Manager, Data Analyst, Consultant" />
               </div>
 
-              {/* Time horizon */}
+              {/* Time horizon — scrollable chip selector */}
               <div>
                 <FieldLabel>Time horizon</FieldLabel>
-                <div className="relative">
-                  <select className={selectCls} value={s2.horizon_temporel}
-                    onChange={e => setS2(prev => ({ ...prev, horizon_temporel: e.target.value }))}>
-                    <option value="" disabled>Select a timeframe…</option>
-                    {HORIZON_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/30">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                <div className="flex flex-wrap gap-2">
+                  {HORIZON_OPTIONS.map(o => (
+                    <button key={o} type="button"
+                      onClick={() => setS2(prev => ({ ...prev, horizon_temporel: o }))}
+                      className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                        s2.horizon_temporel === o
+                          ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white font-medium"
+                          : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
+                      }`}>
+                      {o}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -666,6 +796,7 @@ export default function MenteeOnboarding() {
                   <span className="ml-1.5 text-white/30 font-normal text-xs">rate each 1–5</span>
                 </FieldLabel>
                 <div className="space-y-2 mt-1">
+                  {/* Predefined skills */}
                   {COMPETENCES_OPTIONS.map(name => {
                     const entry  = s3.competences.find(c => c.name === name);
                     const active = !!entry;
@@ -693,7 +824,61 @@ export default function MenteeOnboarding() {
                       </div>
                     );
                   })}
+                  {/* Custom skills */}
+                  {customSkills.map(c => (
+                    <div key={c.name}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-[#7C3AED]/40"
+                      style={{ background: "rgba(124,58,237,0.08)" }}>
+                      <div className="flex items-center gap-2.5 flex-1">
+                        <div className="w-4 h-4 rounded border-2 border-[#7C3AED] bg-[#7C3AED] flex-shrink-0 flex items-center justify-center">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                        <span className="text-sm text-white font-medium">{c.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StarRating value={c.rating} onChange={r => rateCompetence(c.name, r)} />
+                        <button type="button"
+                          onClick={() => removeCompetence(c.name)}
+                          className="text-white/30 hover:text-white/60 ml-1 p-0.5">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+
+                {/* Add custom skill */}
+                {showCustomSkillInput ? (
+                  <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl border border-white/10"
+                    style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <input
+                      type="text"
+                      value={customSkillName}
+                      onChange={e => setCustomSkillName(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addCustomSkill(); } }}
+                      placeholder="Skill name…"
+                      className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 focus:outline-none min-w-0"
+                      autoFocus
+                    />
+                    <StarRating value={customSkillRating} onChange={setCustomSkillRating} />
+                    <button type="button" onClick={addCustomSkill}
+                      disabled={!customSkillName.trim()}
+                      className="px-2.5 py-1.5 rounded-lg bg-[#7C3AED] text-white text-xs font-medium disabled:opacity-40 flex-shrink-0">
+                      Add
+                    </button>
+                    <button type="button"
+                      onClick={() => { setShowCustomSkillInput(false); setCustomSkillName(""); }}
+                      className="text-white/30 hover:text-white/60 flex-shrink-0">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button"
+                    onClick={() => setShowCustomSkillInput(true)}
+                    className="mt-2 flex items-center gap-2 text-sm text-white/40 hover:text-white/60 transition-colors">
+                    <Plus className="w-4 h-4" /> Add custom skill
+                  </button>
+                )}
               </div>
 
               {/* Learning style cards */}
@@ -717,21 +902,41 @@ export default function MenteeOnboarding() {
                 </div>
               </div>
 
-              {/* Frequency */}
+              {/* Frequency — toggle + number */}
               <div>
                 <FieldLabel>Desired mentoring frequency</FieldLabel>
-                <div className="flex gap-2 flex-wrap">
-                  {FREQUENCE_OPTIONS.map(f => (
-                    <button key={f} type="button"
-                      onClick={() => setS3(prev => ({ ...prev, frequence_souhaitee: f }))}
-                      className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-colors ${
-                        s3.frequence_souhaitee === f
-                          ? "border-[#7C3AED] bg-[#7C3AED]/10 text-white"
-                          : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
-                      }`}>
-                      {f}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Number select */}
+                  <div className="relative">
+                    <select
+                      value={freqCount}
+                      onChange={e => updateFreq(parseInt(e.target.value), freqUnit)}
+                      className="pl-3 pr-8 py-2.5 rounded-xl border border-white/10 bg-[#0D0A1A] text-white text-sm focus:outline-none focus:border-[#7C3AED] appearance-none cursor-pointer">
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map(n => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-white/30">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                  {/* Per week / Per month toggle */}
+                  <div className="flex rounded-xl border border-white/10 overflow-hidden">
+                    {(["week", "month"] as const).map(unit => (
+                      <button key={unit} type="button"
+                        onClick={() => updateFreq(freqCount, unit)}
+                        className={`px-4 py-2.5 text-sm font-medium transition-colors ${
+                          freqUnit === unit
+                            ? "bg-[#7C3AED] text-white"
+                            : "text-white/50 hover:text-white/70"
+                        }`}>
+                        Per {unit}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-white/25 text-xs">→ {freqCount}x/{freqUnit}</span>
                 </div>
               </div>
 
@@ -757,11 +962,68 @@ export default function MenteeOnboarding() {
               <div>
                 <FieldLabel>Languages</FieldLabel>
                 <div className="flex flex-wrap gap-2">
-                  {LANGUES_OPTIONS.map(l => (
+                  {QUICK_LANGUES.map(l => (
                     <Chip key={l} label={l}
                       selected={s3.langues.includes(l)}
                       onClick={() => toggleLang(l)} />
                   ))}
+                  {/* Already-selected "other" languages */}
+                  {otherLangsSelected.map(l => (
+                    <button key={l} type="button"
+                      onClick={() => toggleLang(l)}
+                      className="px-3 py-2 rounded-lg border border-[#7C3AED] bg-[#7C3AED]/15 text-white text-sm font-medium flex items-center gap-1.5">
+                      <span className="text-[#A78BFA]">✓</span>
+                      {l}
+                      <X className="w-3 h-3 text-[#A78BFA] ml-0.5" />
+                    </button>
+                  ))}
+                  {/* Other chip + dropdown */}
+                  <div className="relative" ref={langDropdownRef}>
+                    <button type="button"
+                      onClick={() => { setShowLangDropdown(v => !v); setLangSearch(""); }}
+                      className={`px-3 py-2 rounded-lg border text-sm transition-all flex items-center gap-1.5 ${
+                        showLangDropdown || otherLangsSelected.length > 0
+                          ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white font-medium"
+                          : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
+                      }`}>
+                      <Search className="w-3.5 h-3.5" />
+                      Other
+                    </button>
+                    {showLangDropdown && (
+                      <div className="absolute top-full left-0 mt-1.5 w-56 rounded-xl border border-white/10 shadow-2xl z-20"
+                        style={{ background: "#1A1630" }}>
+                        <div className="p-2 border-b border-white/[0.06]">
+                          <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/5">
+                            <Search className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
+                            <input
+                              type="text"
+                              className="bg-transparent text-sm text-white placeholder:text-white/30 focus:outline-none w-full"
+                              placeholder="Search language…"
+                              value={langSearch}
+                              onChange={e => setLangSearch(e.target.value)}
+                              autoFocus
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-52 overflow-y-auto py-1">
+                          {filteredOtherLangs.length === 0 ? (
+                            <p className="text-xs text-white/30 px-3 py-3 text-center">No match</p>
+                          ) : filteredOtherLangs.map(l => (
+                            <button key={l} type="button"
+                              onClick={() => toggleLang(l)}
+                              className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between ${
+                                s3.langues.includes(l)
+                                  ? "text-white bg-[#7C3AED]/10"
+                                  : "text-white/60 hover:text-white hover:bg-white/5"
+                              }`}>
+                              {l}
+                              {s3.langues.includes(l) && <Check className="w-3.5 h-3.5 text-[#A78BFA]" />}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -783,7 +1045,6 @@ export default function MenteeOnboarding() {
                 It&apos;s optional but recommended.
               </p>
 
-              {/* Drop zone */}
               <div
                 onClick={() => !cvUploading && cvInputRef.current?.click()}
                 onDragOver={e => e.preventDefault()}
