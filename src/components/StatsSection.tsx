@@ -133,14 +133,21 @@ export default function StatsSection() {
               key={proof.badge}
               className="px-8 lg:px-12 pt-8 pb-14 flex flex-col items-center text-center rounded-2xl"
               style={{
-                background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(255,255,255,0.03) 100%)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid rgba(167,139,250,0.12)",
-                transition: "box-shadow 300ms ease",
+                background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 50%, rgba(255,255,255,0.04) 100%)",
+                backdropFilter: "blur(40px) saturate(180%)",
+                WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                border: "1px solid rgba(167,139,250,0.25)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)",
+                transition: "box-shadow 300ms ease, border-color 300ms ease",
               }}
-              onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 32px rgba(124,58,237,0.25)")}
-              onMouseLeave={e => (e.currentTarget.style.boxShadow = "")}
+              onMouseEnter={e => {
+                e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 40px rgba(124,58,237,0.35)";
+                e.currentTarget.style.borderColor = "rgba(167,139,250,0.45)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)";
+                e.currentTarget.style.borderColor = "rgba(167,139,250,0.25)";
+              }}
             >
               {/* Lucide icon */}
               <Icon style={{ color: "#A78BFA", width: 20, height: 20, marginBottom: 16 }} />
