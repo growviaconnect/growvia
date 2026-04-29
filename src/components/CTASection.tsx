@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
+import { useParallax } from "@/hooks/useParallax";
 
 const IMAGES = [
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&q=80",
@@ -17,6 +18,10 @@ export default function CTASection() {
   const { t } = useLang();
   const [active, setActive] = useState(0);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const bgRef      = useRef<HTMLDivElement>(null);
+  useParallax(bgRef, sectionRef);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setActive((prev) => (prev + 1) % IMAGES.length);
@@ -25,23 +30,25 @@ export default function CTASection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
 
-      {/* Slideshow images — all stacked, only active one visible */}
-      {IMAGES.map((src, i) => (
-        <img
-          key={i}
-          src={src}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            opacity: i === active ? 1 : 0,
-            transition: "opacity 1.2s ease",
-            filter: "brightness(0.5) saturate(0.75)",
-          }}
-        />
-      ))}
+      {/* Slideshow wrapper — parallax applied here so all images move together */}
+      <div ref={bgRef} className="absolute inset-0">
+        {IMAGES.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              opacity: i === active ? 1 : 0,
+              transition: "opacity 1.2s ease",
+              filter: "brightness(0.5) saturate(0.75)",
+            }}
+          />
+        ))}
+      </div>
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/65" />
