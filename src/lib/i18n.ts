@@ -137,9 +137,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     cta_footnote: 'No commitment required · Discovery Session from 9.99€',
 
     // Footer
-    footer_headline_1: 'Where',
-    footer_headline_2: 'careers,',
-    footer_headline_3: 'made.',
+    footer_headline_1: 'Where your future already has a',
+    footer_headline_2: 'guide',
+    footer_headline_3: '.',
     footer_nav_label: 'Navigation',
     footer_company_label: 'Company',
     footer_link_home: 'Home',
@@ -1144,9 +1144,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     cta_footnote: "Sans engagement · Session Découverte à partir de 9,99€",
 
     // Footer
-    footer_headline_1: 'Là où',
-    footer_headline_2: 'les carrières',
-    footer_headline_3: 'se font.',
+    footer_headline_1: 'Là où ton futur a déjà un',
+    footer_headline_2: 'guide',
+    footer_headline_3: '.',
     footer_nav_label: 'Navigation',
     footer_company_label: 'Entreprise',
     footer_link_home: 'Accueil',
@@ -2151,9 +2151,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     cta_footnote: 'Sin compromiso · Sesión de Descubrimiento desde 9,99€',
 
     // Footer
-    footer_headline_1: 'Donde las',
-    footer_headline_2: 'carreras,',
-    footer_headline_3: 'se hacen.',
+    footer_headline_1: 'Donde tu futuro ya tiene un',
+    footer_headline_2: 'guía',
+    footer_headline_3: '.',
     footer_nav_label: 'Navegación',
     footer_company_label: 'Empresa',
     footer_link_home: 'Inicio',
