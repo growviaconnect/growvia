@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ShieldCheck, Zap, Gem } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
@@ -32,17 +32,21 @@ export default function StatsSection() {
     { badge: t("stats_proof3_badge"), number: t("stats_proof3_num"), desc: t("stats_proof3_desc") },
   ];
 
-  /* ── Stagger reveal on scroll ──────────────────────────────────── */
+  const [animated, setAnimated]   = useState(false);
+  const [timerVal, setTimerVal]   = useState(60);
+
+  /* ── Stagger reveal + scroll animations ────────────────────────── */
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const numRefs    = useRef<(HTMLDivElement | null)[]>([]);
+  const rafRef     = useRef<number | null>(null);
 
   useEffect(() => {
     const nums = numRefs.current.filter(Boolean) as HTMLDivElement[];
 
     // Set initial hidden state
     nums.forEach((el, i) => {
-      el.style.opacity   = "0";
-      el.style.transform = "translateY(18px)";
+      el.style.opacity    = "0";
+      el.style.transform  = "translateY(18px)";
       el.style.transition = `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms,
                               transform 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms`;
     });
@@ -50,21 +54,57 @@ export default function StatsSection() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) return;
+
+        // Stagger reveal
         nums.forEach((el) => {
           el.style.opacity   = "1";
           el.style.transform = "translateY(0)";
         });
+
+        // Trigger CSS animations (pulse + shimmer)
+        setAnimated(true);
+
+        // Counter 60 → 5 in 1 500 ms ease-out cubic
+        const start    = performance.now();
+        const duration = 1500;
+        const FROM = 60, TO = 5;
+        function tick(now: number) {
+          const elapsed = Math.min(now - start, duration);
+          const t       = elapsed / duration;
+          const eased   = 1 - Math.pow(1 - t, 3);
+          setTimerVal(Math.round(FROM + (TO - FROM) * eased));
+          if (elapsed < duration) {
+            rafRef.current = requestAnimationFrame(tick);
+          } else {
+            setTimerVal(TO);
+          }
+        }
+        rafRef.current = requestAnimationFrame(tick);
+
         observer.disconnect();
       },
       { threshold: 0.25 }
     );
 
     if (wrapperRef.current) observer.observe(wrapperRef.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, [proofs.length]);
 
   return (
     <section>
+      <style>{`
+        @keyframes statPulse {
+          0%, 100% { transform: scale(1);    box-shadow: none; }
+          50%       { transform: scale(1.05); box-shadow: 0 0 12px rgba(124,58,237,0.6); }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
+        }
+      `}</style>
 
       {/* ── Title + Subtitle ─────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 text-center">
@@ -84,7 +124,10 @@ export default function StatsSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div ref={wrapperRef} className="flex justify-end gap-3">
           {proofs.map((proof, i) => {
-            const Icon = PROOF_ICONS[i];
+            const Icon      = PROOF_ICONS[i];
+            const isTimer   = i === 1; // "< 5 min" — counter + badge pulse
+            const isShimmer = i === 2; // pricing — shimmer text
+
             return (
             <div
               key={proof.badge}
@@ -102,25 +145,42 @@ export default function StatsSection() {
               {/* Lucide icon */}
               <Icon style={{ color: "#A78BFA", width: 20, height: 20, marginBottom: 16 }} />
 
-              {/* Pill badge */}
+              {/* Pill badge — pulse loop on proof2 once animated */}
               <span
                 className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/40 rounded-full px-3 py-1 mb-6"
-                style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+                style={{
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  display: "inline-block",
+                  ...(isTimer && animated
+                    ? { animation: "statPulse 2s ease-in-out infinite" }
+                    : {}),
+                }}
               >
                 {proof.badge}
               </span>
 
-              {/* Main value — animated */}
+              {/* Main value — counter on proof2, shimmer on proof3 */}
               <div
                 ref={(el) => { numRefs.current[i] = el; }}
-                className="text-white leading-none tracking-tight mb-2.5"
+                className="leading-none tracking-tight mb-2.5"
                 style={{
                   fontSize: numFontSize(proof.number),
                   fontWeight: 200,
-                  /* initial state set imperatively in useEffect */
+                  color: "white",
+                  ...(isShimmer && animated
+                    ? {
+                        backgroundImage:
+                          "linear-gradient(90deg, #A78BFA 0%, #ffffff 40%, #A78BFA 60%, #ffffff 100%)",
+                        backgroundSize: "200% auto",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        animation: "shimmer 2.5s linear infinite",
+                      }
+                    : {}),
                 }}
               >
-                {proof.number}
+                {isTimer ? `< ${timerVal} min` : proof.number}
               </div>
 
               {/* Description */}
