@@ -84,7 +84,7 @@ export default function Footer() {
               {t("footer_headline_1")}{" "}
               <span
                 style={{
-                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontFamily: "'Playfair Display', Georgia, serif",
                   fontStyle: "italic",
                   fontWeight: 400,
                   textShadow: "0 0 80px rgba(124,58,237,0.35)",
@@ -96,7 +96,6 @@ export default function Footer() {
               >
                 {t("footer_headline_2")}
               </span>
-              <br />
               {t("footer_headline_3")}
             </h2>
           </div>
