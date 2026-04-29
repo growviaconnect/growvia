@@ -14,29 +14,47 @@ function useIsMobile() {
   return mobile;
 }
 
+const PHRASE_COUNT = 4;
+// Crossfade half-width in viewport-height units.
+// Each phrase occupies 1 viewport of scroll; FADE controls how much they overlap.
+const FADE = 0.3;
+
+function phraseOpacity(progress: number, i: number): number {
+  const start = i;
+  const end   = i + 1;
+  if (progress < start - FADE) return 0;
+  if (progress < start + FADE) return (progress - start + FADE) / (2 * FADE); // fade in
+  if (i === PHRASE_COUNT - 1)  return 1;                                        // last phrase never fades out
+  if (progress < end   - FADE) return 1;                                        // fully visible
+  if (progress < end   + FADE) return 1 - (progress - end + FADE) / (2 * FADE); // fade out
+  return 0;
+}
+
+function phraseY(progress: number, i: number): number {
+  const PX = 14; // max translateY offset
+  const start = i, end = i + 1;
+  if (progress < start - FADE) return PX;
+  if (progress < start + FADE) {
+    const t = (progress - start + FADE) / (2 * FADE);
+    return (1 - t) * PX;                         // slide up while fading in
+  }
+  if (i === PHRASE_COUNT - 1 || progress < end - FADE) return 0;
+  if (progress < end + FADE) {
+    const t = (progress - end + FADE) / (2 * FADE);
+    return -t * PX;                              // slide up while fading out
+  }
+  return -PX;
+}
+
 export default function ManifestoSection() {
   const { t } = useLang();
   const isMobile = useIsMobile();
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeStep, setActiveStep] = useState(-1);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const scrolledIn = -rect.top;
-      if (scrolledIn < 0) {
-        setActiveStep(-1);
-        return;
-      }
-      const step = Math.min(3, Math.floor(scrolledIn / window.innerHeight));
-      setActiveStep(step);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const phraseRefs   = useRef<(HTMLParagraphElement | null)[]>([]);
+  const dotRefs      = useRef<(HTMLDivElement | null)[]>([]);
+  const rafRef       = useRef<number | null>(null);
+  const stepRef      = useRef(-1); // last active step — avoids dot thrashing
 
   const phrases = [
     t("manifesto_phrase_1"),
@@ -45,7 +63,60 @@ export default function ManifestoSection() {
     t("manifesto_phrase_4"),
   ];
 
-  /* On mobile: no sticky trap — show phrases stacked in normal flow */
+  useEffect(() => {
+    // Set all phrases to hidden before first scroll tick
+    phraseRefs.current.forEach((el) => {
+      if (!el) return;
+      el.style.opacity   = "0";
+      el.style.transform = "translateY(14px)";
+    });
+
+    const update = () => {
+      if (!containerRef.current) return;
+      const rect     = containerRef.current.getBoundingClientRect();
+      const progress = -rect.top / window.innerHeight; // viewport-height units scrolled in
+
+      // ── Phrases: continuous imperative updates (no React state, no CSS transition) ──
+      phraseRefs.current.forEach((el, i) => {
+        if (!el) return;
+        el.style.opacity   = String(Math.max(0, Math.min(1, phraseOpacity(progress, i))));
+        el.style.transform = `translateY(${phraseY(progress, i).toFixed(2)}px)`;
+      });
+
+      // ── Dots: update only when active step changes ───────────────────────────────
+      const step = progress < 0
+        ? -1
+        : Math.min(PHRASE_COUNT - 1, Math.floor(progress));
+
+      if (step !== stepRef.current) {
+        stepRef.current = step;
+        dotRefs.current.forEach((el, i) => {
+          if (!el) return;
+          const active = i === step;
+          el.style.background = active ? "#7C3AED" : "rgba(255,255,255,0.2)";
+          el.style.transform  = active ? "scale(1.6)" : "scale(1)";
+          el.style.boxShadow  = active ? "0 0 8px rgba(124,58,237,0.6)" : "none";
+        });
+      }
+    };
+
+    const onScroll = () => {
+      if (rafRef.current) return;           // coalesce multiple scroll events per frame
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        update();
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update(); // sync on mount
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  /* ── Mobile: simple stacked layout, no sticky ─────────────────────── */
   if (isMobile) {
     return (
       <div className="relative overflow-hidden py-20">
@@ -81,8 +152,8 @@ export default function ManifestoSection() {
     );
   }
 
+  /* ── Desktop: 500vh scroll trap with sticky panel ─────────────────── */
   return (
-    /* 500vh = 4 scroll steps × 100vh + 1 initial viewport */
     <div ref={containerRef} style={{ height: "500vh" }}>
       <div className="sticky top-0 h-screen overflow-hidden">
 
@@ -105,27 +176,29 @@ export default function ManifestoSection() {
           }}
         />
 
-        {/* Label */}
+        {/* Content */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center px-6">
           <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
             {t("manifesto_label")}
           </p>
 
-          {/* Phrases stacked — each absolutely positioned over each other */}
+          {/* Phrase container — phrases are absolutely stacked */}
           <div className="relative w-full max-w-3xl" style={{ height: "8rem" }}>
             {phrases.map((phrase, i) => (
               <p
                 key={i}
+                ref={(el) => { phraseRefs.current[i] = el; }}
                 className="absolute inset-0 flex items-center justify-center text-center text-white leading-snug"
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
                   fontStyle: "italic",
                   fontWeight: 400,
                   fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-                  opacity: activeStep === i ? 1 : 0,
-                  transform: activeStep === i ? "translateY(0)" : activeStep > i ? "translateY(-12px)" : "translateY(12px)",
-                  transition: "opacity 0.6s ease, transform 0.6s ease",
-                  pointerEvents: activeStep === i ? "auto" : "none",
+                  /* opacity & transform set imperatively by scroll handler */
+                  opacity: 0,
+                  transform: "translateY(14px)",
+                  willChange: "opacity, transform",
+                  pointerEvents: "none",
                 }}
               >
                 {phrase}
@@ -139,13 +212,15 @@ export default function ManifestoSection() {
           {phrases.map((_, i) => (
             <div
               key={i}
-              className="rounded-full transition-all duration-400"
+              ref={(el) => { dotRefs.current[i] = el; }}
               style={{
                 width: 6,
                 height: 6,
-                background: activeStep === i ? "#7C3AED" : "rgba(255,255,255,0.2)",
-                transform: activeStep === i ? "scale(1.5)" : "scale(1)",
-                transition: "background 0.4s ease, transform 0.4s ease",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.2)",
+                transform: "scale(1)",
+                boxShadow: "none",
+                transition: "background 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease",
               }}
             />
           ))}
