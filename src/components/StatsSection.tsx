@@ -46,11 +46,11 @@ export default function StatsSection() {
   const [scrollFired,   setScrollFired]   = useState(false);
 
   // ── i=3: < 5 min timer ────────────────────────────────────────
-  const [timerVal,    setTimerVal]    = useState(60);
+  const [timerVal,    setTimerVal]    = useState(5);   // default: < 5 min
   const rafTimerRef   = useRef<number | null>(null);
 
   // ── i=1: 50+ counter ─────────────────────────────────────────
-  const [counterVal,  setCounterVal]  = useState(0);
+  const [counterVal,  setCounterVal]  = useState(50);  // default: 50+
   const [plusPulse,   setPlusPulse]   = useState(false);
   const rafCounterRef = useRef<number | null>(null);
 
@@ -89,7 +89,7 @@ export default function StatsSection() {
 
   function resetTimer() {
     if (rafTimerRef.current) { cancelAnimationFrame(rafTimerRef.current); rafTimerRef.current = null; }
-    setTimerVal(60);
+    setTimerVal(5); // back to default display
   }
 
   function startCounter() {
@@ -109,8 +109,7 @@ export default function StatsSection() {
 
   function resetCounter() {
     if (rafCounterRef.current) { cancelAnimationFrame(rafCounterRef.current); rafCounterRef.current = null; }
-    setCounterVal(0);
-    setPlusPulse(false);
+    setCounterVal(50); // stays at 50+, never resets to 0 on leave
   }
 
   function startFill() {
@@ -347,30 +346,30 @@ export default function StatsSection() {
                   }} />
                 )}
 
-                {/* i=0: ★★★★★ — center star (si=2) reacts to hover */}
+                {/* i=0: ★★★★★ — all 5 stars turn golden on hover with 80ms stagger */}
                 {isStarBlock && (
                   <div style={{ display: "flex", gap: 5, marginBottom: 10 }}>
-                    {[0, 1, 2, 3, 4].map((si) => {
-                      const isCenter = si === 2;
-                      return (
-                        <span
-                          key={si}
-                          style={{
-                            color: (isCenter && starHovered) ? "#FFD700" : "#A78BFA",
-                            fontSize: 13,
-                            display: "inline-block",
-                            transform: (isCenter && starHovered && starsAnimDone) ? "scale(1.4)" : undefined,
-                            transition: starsAnimDone ? "transform 300ms ease, color 300ms ease" : undefined,
-                            opacity: starsAnimDone ? 1 : (starsActive ? undefined : 0),
-                            animation: (!starsAnimDone && starsActive)
-                              ? `starBounce 400ms cubic-bezier(0.34,1.56,0.64,1) ${si * 300}ms both`
-                              : "none",
-                          }}
-                        >
-                          ★
-                        </span>
-                      );
-                    })}
+                    {[0, 1, 2, 3, 4].map((si) => (
+                      <span
+                        key={si}
+                        style={{
+                          color: starHovered ? "#FFD700" : "#A78BFA",
+                          fontSize: 13,
+                          display: "inline-block",
+                          transition: starsAnimDone
+                            ? (starHovered
+                                ? `color 200ms ease ${si * 80}ms`
+                                : "color 200ms ease")
+                            : undefined,
+                          opacity: starsAnimDone ? 1 : (starsActive ? undefined : 0),
+                          animation: (!starsAnimDone && starsActive)
+                            ? `starBounce 400ms cubic-bezier(0.34,1.56,0.64,1) ${si * 300}ms both`
+                            : "none",
+                        }}
+                      >
+                        ★
+                      </span>
+                    ))}
                   </div>
                 )}
 
