@@ -54,7 +54,7 @@ export default function ManifestoSection() {
   const phraseRefs   = useRef<(HTMLParagraphElement | null)[]>([]);
   const dotRefs      = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef       = useRef<number | null>(null);
-  const stepRef      = useRef(-1); // last active step — avoids dot thrashing
+  const stepRef      = useRef(-1); // last active step, avoids dot thrashing
 
   const phrases = [
     t("manifesto_phrase_1"),
@@ -182,7 +182,7 @@ export default function ManifestoSection() {
             {t("manifesto_label")}
           </p>
 
-          {/* Phrase container — phrases are absolutely stacked */}
+          {/* Phrase container, phrases are absolutely stacked */}
           <div className="relative w-full max-w-3xl" style={{ height: "8rem" }}>
             {phrases.map((phrase, i) => (
               <p
@@ -207,7 +207,7 @@ export default function ManifestoSection() {
           </div>
         </div>
 
-        {/* Dot indicators — right side */}
+        {/* Dot indicators, right side */}
         <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex flex-col gap-3">
           {phrases.map((_, i) => (
             <div

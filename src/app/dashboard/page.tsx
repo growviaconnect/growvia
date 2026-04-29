@@ -75,15 +75,15 @@ function generateMatchReason(
   const skills = mentor.expertise?.slice(0, 2).join(" and ") ?? "their domain";
   const goal = profile?.main_goal?.toLowerCase() ?? "";
   if (goal.includes("startup") || goal.includes("entrepreneur"))
-    return `${first} has a proven track record guiding founders — expertise in ${skills} maps directly onto your goals.`;
+    return `${first} has a proven track record guiding founders, expertise in ${skills} maps directly onto your goals.`;
   if (goal.includes("career change") || goal.includes("transition"))
     return `${first}'s deep roots in ${mentor.industry ?? "their field"} make them an ideal guide for your career transition.`;
   if (goal.includes("job search") || goal.includes("interview"))
     return `With experience in ${mentor.industry ?? "their field"}, ${first} can help you stand out and land the right role.`;
   if (goal.includes("growth"))
-    return `${first}'s expertise in ${skills} closely matches your growth ambitions — they've helped professionals at similar stages advance fast.`;
+    return `${first}'s expertise in ${skills} closely matches your growth ambitions, they've helped professionals at similar stages advance fast.`;
   if (goal.includes("skill"))
-    return `${first} specialises in ${skills} — precisely the skills you're aiming to develop.`;
+    return `${first} specialises in ${skills}, precisely the skills you're aiming to develop.`;
   return `${first}'s background in ${skills} aligns strongly with your profile and career objectives.`;
 }
 
@@ -91,7 +91,7 @@ function computeMatchScore(
   profile: MenteeMatchProfile | null,
   mentor: Omit<MatchResult, "score" | "matchReason">
 ): number {
-  // Fixed demo scores take priority — ensures showcase mentors always display as intended
+  // Fixed demo scores take priority, ensures showcase mentors always display as intended
   if (mentor.match_score_override != null) return mentor.match_score_override;
 
   let raw = 0;
@@ -179,7 +179,7 @@ function EmptyState({ icon: Icon, title, desc, action }: {
 function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) {
   const { t, lang } = useLang();
   const other = userRole === "mentor" ? conn.mentees : conn.mentors;
-  const otherNom = other?.nom ?? "—";
+  const otherNom = other?.nom ?? ", ";
   const otherInfo =
     userRole === "mentor"
       ? (conn.mentees?.objectif ?? t("dash_role_mentee"))
@@ -336,7 +336,7 @@ function DashboardContent() {
   const [qPriorities, setQPriorities]       = useState<string[]>([]);
   const [qBio, setQBio]                     = useState("");
 
-  // Nav items — defined inside component so they react to lang changes
+  // Nav items, defined inside component so they react to lang changes
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
     { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
@@ -354,7 +354,7 @@ function DashboardContent() {
     user?.role === "school_admin" ? t("dash_role_school") :
                                     t("dash_role_mentee");
 
-  // Questionnaire options — English values stored to DB; labels are translated
+  // Questionnaire options, English values stored to DB; labels are translated
   const goalOptions = [
     { value: "Career growth",                label: t("dash_q_goal1") },
     { value: "Job search & interviews",       label: t("dash_q_goal2") },
@@ -402,7 +402,7 @@ function DashboardContent() {
           setShowQuestionnaire(false);
         }
       } catch {
-        // non-critical — ignore
+        // non-critical, ignore
       }
     })();
   }, [tab, menteeDbId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -544,7 +544,7 @@ function DashboardContent() {
   }
 
   function handleStartMatching() {
-    // Guard: free trial already used — never re-open questionnaire
+    // Guard: free trial already used, never re-open questionnaire
     if (hasUsedFreeMatch) {
       setTab("matching");
       return;
@@ -606,7 +606,7 @@ function DashboardContent() {
       languages: qLanguage ? [qLanguage] : (menteeProfile?.languages ?? null),
     };
 
-    // Snapshot questionnaire values now — state will be cleared during async work
+    // Snapshot questionnaire values now, state will be cleared during async work
     const snapshot = {
       goals: qGoals,
       industry: qField,
@@ -654,7 +654,7 @@ function DashboardContent() {
 
       setMatches(ranked);
 
-      // Save questionnaire response + match results — fire-and-forget
+      // Save questionnaire response + match results, fire-and-forget
       saveMatchingResponse({ ...snapshot, matchResults: ranked }).catch(() => {});
     } finally {
       setMatchLoading(false);
@@ -697,7 +697,7 @@ function DashboardContent() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-white text-sm leading-tight truncate">
-                    {user?.nom ?? "—"}
+                    {user?.nom ?? ", "}
                   </div>
                   <div className="text-xs text-white/35 mt-0.5">{roleLabel}</div>
                 </div>
@@ -822,7 +822,7 @@ function DashboardContent() {
                     {(() => {
                       const c = upcoming[0];
                       const other = user?.role === "mentor" ? c.mentees : c.mentors;
-                      const otherNom = other?.nom ?? "—";
+                      const otherNom = other?.nom ?? ", ";
                       return (
                         <div className="flex items-center gap-4">
                           <div
@@ -866,7 +866,7 @@ function DashboardContent() {
                   />
                 )}
 
-                {/* Bottom banner — freemium AI match or upgrade */}
+                {/* Bottom banner, freemium AI match or upgrade */}
                 {user?.role === "mentee" && user?.plan === "free" && (
                   <div
                     className="rounded-2xl p-6 border border-[#7C3AED]/30"
@@ -970,7 +970,7 @@ function DashboardContent() {
             {/* AI MATCHING */}
             {tab === "matching" && (
               <div className="space-y-5">
-                {/* Header — Premium badge only for subscribed users */}
+                {/* Header, Premium badge only for subscribed users */}
                 <div className="flex items-center gap-3">
                   <div>
                     <div className="flex items-center gap-2">
@@ -1002,7 +1002,7 @@ function DashboardContent() {
                   </Card>
                 )}
 
-                {/* ── Free trial available — entry CTA ── */}
+                {/* ── Free trial available, entry CTA ── */}
                 {!matchLoading && !showQuestionnaire && user?.plan === "free" && !hasUsedFreeMatch && (
                   <Card className="p-10 text-center">
                     <div
@@ -1077,7 +1077,7 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Q1 — goals (multi-select) */}
+                      {/* Q1, goals (multi-select) */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_goal_label")} <span className="text-[#7C3AED]">*</span>
@@ -1092,7 +1092,7 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Q2 — field */}
+                      {/* Q2, field */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_field_label")}
@@ -1107,7 +1107,7 @@ function DashboardContent() {
                         />
                       </div>
 
-                      {/* Q3 — experience level */}
+                      {/* Q3, experience level */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_level_label")}
@@ -1119,7 +1119,7 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Q4 — preferred language */}
+                      {/* Q4, preferred language */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_lang_label")}
@@ -1131,7 +1131,7 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Q5 — meeting frequency */}
+                      {/* Q5, meeting frequency */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_freq_label")}
@@ -1143,7 +1143,7 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Q6 — priorities (multi-select) */}
+                      {/* Q6, priorities (multi-select) */}
                       <div className="mb-6">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_pri_label")}
@@ -1158,7 +1158,7 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Q7 — free text */}
+                      {/* Q7, free text */}
                       <div className="mb-8">
                         <label className="block text-xs font-bold uppercase tracking-[0.15em] text-white/40 mb-3">
                           {t("dash_q_bio_label")}
@@ -1193,7 +1193,7 @@ function DashboardContent() {
                   );
                 })()}
 
-                {/* ── Paid plan — no results yet ── */}
+                {/* ── Paid plan, no results yet ── */}
                 {!matchLoading && user?.plan !== "free" && matches.length === 0 && (
                   <Card className="p-10 text-center">
                     <div
@@ -1240,7 +1240,7 @@ function DashboardContent() {
                   </>
                 )}
 
-                {/* ── Upgrade banner — shown to free users after trial is consumed ── */}
+                {/* ── Upgrade banner, shown to free users after trial is consumed ── */}
                 {!matchLoading && user?.plan === "free" && hasUsedFreeMatch && (
                   <div
                     className="rounded-2xl p-6 border border-[#7C3AED]/30"

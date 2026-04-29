@@ -188,7 +188,7 @@ export default function HomePage() {
                   className="absolute inset-0"
                   style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)" }}
                 />
-                {/* Violet tint — fades in on hover */}
+                {/* Violet tint, fades in on hover */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                   style={{ background: "linear-gradient(to top, rgba(76,29,149,0.45) 0%, transparent 60%)" }}

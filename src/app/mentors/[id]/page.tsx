@@ -79,7 +79,7 @@ export default function MentorProfilePage() {
   let availability: Record<string, string[]> = {};
   try {
     if (mentor.availability) availability = JSON.parse(mentor.availability);
-  } catch { /* invalid JSON — treat as empty */ }
+  } catch { /* invalid JSON, treat as empty */ }
 
   const availDays = DAY_ORDER.filter(d => (availability[d] ?? []).length > 0);
 

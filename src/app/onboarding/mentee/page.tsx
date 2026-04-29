@@ -313,7 +313,7 @@ export default function MenteeOnboarding() {
       const url = await uploadToStorage("avatars", `${userId}/avatar.${ext}`, file);
       setS1(prev => ({ ...prev, photo_url: url }));
     } catch {
-      setError("Photo upload failed — please try again.");
+      setError("Photo upload failed, please try again.");
       setPhotoPreview(s1.photo_url);
     } finally {
       setPhotoUploading(false);
@@ -330,7 +330,7 @@ export default function MenteeOnboarding() {
       setS4({ cv_url: url });
       setCvFileName(file.name);
     } catch {
-      setError("CV upload failed — please try again.");
+      setError("CV upload failed, please try again.");
     } finally {
       setCvUploading(false);
     }
@@ -452,7 +452,7 @@ export default function MenteeOnboarding() {
       await supabase.from("mentees").upsert(allData).throwOnError();
       setStep(s => s + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save — please try again.");
+      setError(err instanceof Error ? err.message : "Failed to save, please try again.");
     } finally {
       setLoading(false);
     }
@@ -512,7 +512,7 @@ export default function MenteeOnboarding() {
     { title: "Basic Profile",  sub: "Tell mentors who you are" },
     { title: "Goals & Career", sub: "Where you want to go" },
     { title: "Learning Style", sub: "How you like to grow" },
-    { title: "Upload your CV", sub: "Optional — helps mentors understand your background" },
+    { title: "Upload your CV", sub: "Optional, helps mentors understand your background" },
   ];
 
   const badgeColor = completion >= 75 ? "#10B981" : completion >= 40 ? "#F59E0B" : "#A78BFA";
@@ -757,7 +757,7 @@ export default function MenteeOnboarding() {
                   placeholder="e.g. Product Manager, Data Analyst, Consultant" />
               </div>
 
-              {/* Time horizon — scrollable chip selector */}
+              {/* Time horizon, scrollable chip selector */}
               <div>
                 <FieldLabel>Time horizon</FieldLabel>
                 <div className="flex flex-wrap gap-2">
@@ -902,7 +902,7 @@ export default function MenteeOnboarding() {
                 </div>
               </div>
 
-              {/* Frequency — toggle + number */}
+              {/* Frequency, toggle + number */}
               <div>
                 <FieldLabel>Desired mentoring frequency</FieldLabel>
                 <div className="flex items-center gap-3 flex-wrap">

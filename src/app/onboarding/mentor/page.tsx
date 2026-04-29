@@ -305,7 +305,7 @@ export default function MentorOnboarding() {
           type_profils_aides: existing.type_profils_aides ?? [],
         });
 
-        // Parse disponibilite_heures — supports new string format and legacy number
+        // Parse disponibilite_heures, supports new string format and legacy number
         const rawDisp = existing.disponibilite_heures;
         if (typeof rawDisp === "string") {
           const m = rawDisp.match(/^(\d+)h\/(week|month)$/);
@@ -361,14 +361,14 @@ export default function MentorOnboarding() {
       const url = await uploadViaApi(file, "avatars", `${userId}/avatar.${ext}`);
       setS1(prev => ({ ...prev, photo_url: url }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Photo upload failed — please try again.");
+      setError(err instanceof Error ? err.message : "Photo upload failed, please try again.");
       setPhotoPreview(s1.photo_url);
     } finally {
       setPhotoUploading(false);
     }
   }
 
-  // ── CV upload — direct Supabase Storage ─────────────────────────────────────
+  // ── CV upload, direct Supabase Storage ─────────────────────────────────────
   async function handleCVSelect(file: File) {
     if (!userId) return;
     setCvUploading(true);
@@ -380,7 +380,7 @@ export default function MentorOnboarding() {
       setS4({ cv_url: url });
       setCvFileName(file.name);
     } catch (err) {
-      setCvError(err instanceof Error ? err.message : "CV upload failed — please try again.");
+      setCvError(err instanceof Error ? err.message : "CV upload failed, please try again.");
     } finally {
       setCvUploading(false);
     }
@@ -475,7 +475,7 @@ export default function MentorOnboarding() {
     setError(null);
     try {
       const nomValue = s1.nom.trim() || authNom;
-      if (!nomValue) throw new Error("Please complete step 1 first — your name is required.");
+      if (!nomValue) throw new Error("Please complete step 1 first, your name is required.");
 
       const allData = {
         id:         userId,
@@ -502,7 +502,7 @@ export default function MentorOnboarding() {
       };
 
       if (step === TOTAL_STEPS) {
-        if (!s1.poste_actuel.trim()) throw new Error("'Job title' is empty — please go back to step 1.");
+        if (!s1.poste_actuel.trim()) throw new Error("'Job title' is empty, please go back to step 1.");
 
         const score = calcMentorScore(s1, s2, s4);
         const tier  = getPricingTier(score);
@@ -547,7 +547,7 @@ export default function MentorOnboarding() {
       await supabase.from("mentors").upsert(allData).throwOnError();
       setStep(s => s + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save — please try again.");
+      setError(err instanceof Error ? err.message : "Failed to save, please try again.");
     } finally {
       setLoading(false);
     }
@@ -697,7 +697,7 @@ export default function MentorOnboarding() {
     { title: "Basic Profile",   sub: "Tell mentees who you are" },
     { title: "Your Expertise",  sub: "Show what you bring to the table" },
     { title: "Mentoring Style", sub: "How you like to work" },
-    { title: "Upload your CV",  sub: "Optional — strengthens your profile" },
+    { title: "Upload your CV",  sub: "Optional, strengthens your profile" },
   ];
 
   const badgeColor = completion >= 75 ? "#10B981" : completion >= 40 ? "#F59E0B" : "#A78BFA";
@@ -1020,7 +1020,7 @@ export default function MentorOnboarding() {
                 </div>
               </div>
 
-              {/* Availability — count + unit toggle */}
+              {/* Availability, count + unit toggle */}
               <div>
                 <FieldLabel>Availability</FieldLabel>
                 <div className="flex items-center gap-3 flex-wrap">
@@ -1190,7 +1190,7 @@ export default function MentorOnboarding() {
                   </div>
                 </div>
               ) : s4.cv_url ? (
-                /* File uploaded — show name + actions */
+                /* File uploaded, show name + actions */
                 <div className="rounded-2xl border border-[#7C3AED]/30 p-5"
                   style={{ background: "rgba(124,58,237,0.06)" }}>
                   <div className="flex items-center gap-4">
@@ -1248,7 +1248,7 @@ export default function MentorOnboarding() {
               <input ref={cvInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleCVSelect(f); e.target.value = ""; }} />
 
-              {/* CV upload error — non-blocking */}
+              {/* CV upload error, non-blocking */}
               {cvError && (
                 <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs px-4 py-3 rounded-xl">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />

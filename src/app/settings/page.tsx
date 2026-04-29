@@ -80,7 +80,7 @@ export default function SettingsPage() {
     showMsg("Profil mis à jour ✓");
   }
 
-  /* Save password (client-side only — no backend auth) */
+  /* Save password (client-side only, no backend auth) */
   async function savePassword(e: React.FormEvent) {
     e.preventDefault();
     if (pwdForm.next !== pwdForm.confirm) { showMsg("Les mots de passe ne correspondent pas.", false); return; }
@@ -227,7 +227,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">Photo de profil</p>
-                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG — max 2 Mo</p>
+                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, max 2 Mo</p>
               </div>
             </div>
 
@@ -346,7 +346,7 @@ export default function SettingsPage() {
             {session.plan === "free" && (
               <div className="bg-[#1B1F3B] rounded-2xl p-6 text-white">
                 <p className="font-semibold mb-1">Passez au Plan Pro</p>
-                <p className="text-gray-400 text-sm mb-4">3 sessions/mois + matching AI illimité + support prioritaire — 39€/mois.</p>
+                <p className="text-gray-400 text-sm mb-4">3 sessions/mois + matching AI illimité + support prioritaire, 39€/mois.</p>
                 <Link href="/pricing" className="inline-flex items-center gap-2 bg-white text-[#1B1F3B] font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-100 transition-colors text-sm">
                   Voir les plans
                 </Link>

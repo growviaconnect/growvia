@@ -313,7 +313,7 @@ export default function ProfilePage() {
       if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
       else setMentee(p => ({ ...p, photo_url: url }));
     } catch {
-      setError("Photo upload failed — please try again.");
+      setError("Photo upload failed, please try again.");
       setPhotoPreview(role === "mentor" ? mentor.photo_url : mentee.photo_url);
     } finally {
       setPhotoUploading(false);
@@ -407,7 +407,7 @@ export default function ProfilePage() {
       setEditing(false);
       showToast("success");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save — please try again.");
+      setError(err instanceof Error ? err.message : "Failed to save, please try again.");
       showToast("error");
     } finally {
       setSaving(false);
@@ -455,7 +455,7 @@ export default function ProfilePage() {
             ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
             : <AlertCircle className="w-4 h-4 flex-shrink-0" />
           }
-          {toast === "success" ? "Profile saved successfully!" : "Failed to save — please try again."}
+          {toast === "success" ? "Profile saved successfully!" : "Failed to save, please try again."}
           <button onClick={() => setToast(null)} className="ml-2 opacity-50 hover:opacity-100 transition-opacity">
             <X className="w-3.5 h-3.5" />
           </button>
@@ -843,7 +843,7 @@ export default function ProfilePage() {
                         className="text-xs text-[#A78BFA] hover:underline flex-shrink-0">View</a>
                     </div>
                   ) : (
-                    <p className="text-sm text-white/30">No CV uploaded — complete the survey to add one.</p>
+                    <p className="text-sm text-white/30">No CV uploaded, complete the survey to add one.</p>
                   )}
                 </div>
               ) : (
@@ -1135,7 +1135,7 @@ export default function ProfilePage() {
                         className="text-xs text-[#A78BFA] hover:underline flex-shrink-0">View</a>
                     </div>
                   ) : (
-                    <p className="text-sm text-white/30">No CV uploaded — complete the survey to add one.</p>
+                    <p className="text-sm text-white/30">No CV uploaded, complete the survey to add one.</p>
                   )}
                 </div>
               ) : (
@@ -1152,7 +1152,7 @@ export default function ProfilePage() {
           </>
         )}
 
-        {/* Save button (bottom) — edit mode only */}
+        {/* Save button (bottom), edit mode only */}
         {editing && (
           <div className="flex gap-3 mt-2 pb-10">
             <button onClick={() => { setEditing(false); setError(null); }}

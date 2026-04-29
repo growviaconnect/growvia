@@ -46,7 +46,7 @@ export default function TestimonialsSection() {
   const prev = () => setActive((p) => (p - 1 + testimonials.length) % testimonials.length);
   const next = () => setActive((p) => (p + 1) % testimonials.length);
 
-  // Touch events — mobile
+  // Touch events, mobile
   function onTouchStart(e: React.TouchEvent) { swipeStartX.current = e.touches[0].clientX; }
   function onTouchEnd(e: React.TouchEvent) {
     if (swipeStartX.current === null) return;
@@ -55,7 +55,7 @@ export default function TestimonialsSection() {
     swipeStartX.current = null;
   }
 
-  // Pointer events — trackpad (pointerType !== 'touch' avoids duplicates with above)
+  // Pointer events, trackpad (pointerType !== 'touch' avoids duplicates with above)
   function onPointerDown(e: React.PointerEvent) { if (e.pointerType !== "touch") swipeStartX.current = e.clientX; }
   function onPointerUp(e: React.PointerEvent) {
     if (e.pointerType === "touch" || swipeStartX.current === null) return;
@@ -64,7 +64,7 @@ export default function TestimonialsSection() {
     swipeStartX.current = null;
   }
 
-  // Auto-play — reads pausedRef so the interval doesn't need to be torn down on hover
+  // Auto-play, reads pausedRef so the interval doesn't need to be torn down on hover
   useEffect(() => {
     timerRef.current = setInterval(() => {
       if (!pausedRef.current) {
@@ -125,7 +125,7 @@ export default function TestimonialsSection() {
                 key={t_.name}
                 style={{ flex: "0 0 100%", padding: "0 2px" }}
               >
-                {/* Card — centred, capped width, glassmorphism unchanged */}
+                {/* Card, centred, capped width, glassmorphism unchanged */}
                 <div style={{ maxWidth: 720, margin: "0 auto" }}>
                   <div
                     className="relative rounded-2xl p-8 md:p-10 flex flex-col gap-6"
