@@ -67,38 +67,39 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
-          <Link
-            href="/"
-            className="text-white font-extrabold text-lg tracking-tight flex-shrink-0"
-          >
-            GrowVia
-          </Link>
+          {/* Left: Logo + nav links */}
+          <div className="flex items-center gap-8">
+            <Link
+              href="/"
+              className="text-white font-extrabold text-lg tracking-tight flex-shrink-0"
+            >
+              GrowVia
+            </Link>
 
-          {/* Centered nav links — desktop */}
-          <div className="hidden lg:flex items-center gap-9 absolute left-1/2 -translate-x-1/2">
-            {pathname !== "/" && (
-              <Link
-                href="/"
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
-              >
-                {t("nav_home")}
-              </Link>
-            )}
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {/* Nav links — desktop only */}
+            <div className="hidden lg:flex items-center gap-6">
+              {pathname !== "/" && (
+                <Link
+                  href="/"
+                  className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+                >
+                  {t("nav_home")}
+                </Link>
+              )}
+              {navLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Right area — desktop */}
-          <div className="hidden lg:flex items-center gap-3">
-            <LangSwitcher />
+          <div className="hidden lg:flex items-center gap-3 mr-2">
 
             {/* Dynamic account button */}
             {session ? (
@@ -171,6 +172,8 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+
+            <LangSwitcher />
           </div>
 
           {/* Hamburger — mobile */}
