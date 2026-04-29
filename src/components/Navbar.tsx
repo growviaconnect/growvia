@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -11,6 +11,7 @@ import LangSwitcher from "@/components/LangSwitcher";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { session, clearSession } = useAuth();
   const { t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,6 +77,14 @@ export default function Navbar() {
 
           {/* Centered nav links — desktop */}
           <div className="hidden lg:flex items-center gap-9 absolute left-1/2 -translate-x-1/2">
+            {pathname !== "/" && (
+              <Link
+                href="/"
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+              >
+                {t("nav_home")}
+              </Link>
+            )}
             {navLinks.map((l) => (
               <Link
                 key={l.href}
@@ -172,6 +181,15 @@ export default function Navbar() {
 
           {/* Nav links */}
           <div className="space-y-0.5 mb-5">
+            {pathname !== "/" && (
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                className="block py-3 text-base font-medium text-white/60 hover:text-white transition-colors border-b border-white/[0.04]"
+              >
+                {t("nav_home")}
+              </Link>
+            )}
             {navLinks.map((l) => (
               <Link
                 key={l.href}

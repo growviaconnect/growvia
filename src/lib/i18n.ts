@@ -845,6 +845,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     final_footnote: 'No commitment required · Free to browse · Discovery Session from 9.99€',
 
     // Navbar aria-label
+    nav_home: 'Home',
     nav_toggle_menu: 'Toggle menu',
 
     // Explore page aria-labels
@@ -1852,6 +1853,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     final_footnote: "Sans engagement · Gratuit pour naviguer · Session Découverte à partir de 9,99€",
 
     // Navbar aria-label
+    nav_home: 'Accueil',
     nav_toggle_menu: 'Ouvrir le menu',
 
     // Explore page aria-labels
@@ -2859,6 +2861,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     reg_error_generic: 'Algo salió mal. Por favor inténtalo de nuevo.',
 
     // Navbar aria-label
+    nav_home: 'Inicio',
     nav_toggle_menu: 'Abrir menú',
 
     // Explore page aria-labels
