@@ -75,11 +75,11 @@ export default function TestimonialsSection() {
               key={t_.name}
               className={`reveal reveal-delay-${i + 1} relative rounded-2xl p-8 flex flex-col gap-6`}
               style={{
-                background: "linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(124,58,237,0.06) 100%)",
-                border: "1px solid rgba(124,58,237,0.18)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                boxShadow: "inset 0 1px 0 rgba(167,139,250,0.06)",
+                background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 50%, rgba(255,255,255,0.04) 100%)",
+                border: "1px solid rgba(167,139,250,0.25)",
+                backdropFilter: "blur(40px) saturate(180%)",
+                WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)",
               }}
             >
               {/* Top row: stars + badge */}

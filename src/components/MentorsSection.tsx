@@ -185,25 +185,25 @@ function MentorCardItem({
       ref={cardRef}
       className="group relative rounded-2xl p-6 flex flex-col gap-4 cursor-default"
       style={{
-        background: "linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(124,58,237,0.06) 100%)",
-        border: "1px solid rgba(124,58,237,0.18)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        boxShadow: "inset 0 1px 0 rgba(167,139,250,0.06)",
+        background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 50%, rgba(255,255,255,0.04) 100%)",
+        border: "1px solid rgba(167,139,250,0.25)",
+        backdropFilter: "blur(40px) saturate(180%)",
+        WebkitBackdropFilter: "blur(40px) saturate(180%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)",
         /* initial state set by JS, avoid flash */
         opacity: 0,
         transform: "translateY(32px)",
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "rgba(124,58,237,0.45)";
+        el.style.borderColor = "rgba(167,139,250,0.5)";
         el.style.boxShadow =
-          "inset 0 1px 0 rgba(167,139,250,0.06), 0 0 40px rgba(124,58,237,0.12), 0 16px 48px rgba(0,0,0,0.35)";
+          "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 40px rgba(124,58,237,0.2), 0 16px 48px rgba(0,0,0,0.35)";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "rgba(124,58,237,0.18)";
-        el.style.boxShadow = "inset 0 1px 0 rgba(167,139,250,0.06)";
+        el.style.borderColor = "rgba(167,139,250,0.25)";
+        el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)";
       }}
     >
       {/* Avatar + name */}

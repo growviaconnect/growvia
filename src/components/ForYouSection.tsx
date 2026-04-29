@@ -60,19 +60,21 @@ export default function ForYouSection() {
               key={card.href}
               className={`reveal reveal-delay-${i + 1} relative rounded-2xl p-8 lg:p-10 flex flex-col justify-between transition-all duration-300`}
               style={{
-                background: "linear-gradient(140deg, #12102A 0%, #180F2E 60%, #1A1535 100%)",
-                border: "1px solid rgba(124,58,237,0.14)",
-                boxShadow: "inset 0 1px 0 rgba(167,139,250,0.04)",
+                background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 50%, rgba(255,255,255,0.04) 100%)",
+                backdropFilter: "blur(40px) saturate(180%)",
+                WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                border: "1px solid rgba(167,139,250,0.25)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)",
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(124,58,237,0.55)";
-                el.style.boxShadow = "0 0 0 1px rgba(124,58,237,0.2), 0 8px 48px rgba(124,58,237,0.18), inset 0 1px 0 rgba(167,139,250,0.06)";
+                el.style.borderColor = "rgba(167,139,250,0.5)";
+                el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(124,58,237,0.2), 0 8px 48px rgba(124,58,237,0.25)";
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(124,58,237,0.14)";
-                el.style.boxShadow = "inset 0 1px 0 rgba(167,139,250,0.04)";
+                el.style.borderColor = "rgba(167,139,250,0.25)";
+                el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 24px rgba(124,58,237,0.15)";
               }}
             >
               {/* Top content */}
