@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useParallax } from "@/hooks/useParallax";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
@@ -27,6 +29,10 @@ function hl(text: string, words: string[]) {
 
 export default function HomePage() {
   const { t } = useLang();
+
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const heroImgRef     = useRef<HTMLImageElement>(null);
+  useParallax(heroImgRef, heroSectionRef);
 
   const categories = [
     {
@@ -58,9 +64,10 @@ export default function HomePage() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-end pb-24 overflow-hidden">
+      <section ref={heroSectionRef} className="relative min-h-screen flex items-end pb-24 overflow-hidden">
         <div className="absolute inset-0">
           <img
+            ref={heroImgRef}
             src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
             alt=""
             className="w-full h-full object-cover object-center"
