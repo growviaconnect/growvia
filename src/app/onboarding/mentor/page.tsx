@@ -643,15 +643,6 @@ export default function MentorOnboarding() {
               </p>
               <p className="text-xs text-white/30 mt-1">par session · basé sur votre profil</p>
             </div>
-            {/* DEBUG — remove once navigation is confirmed working */}
-            <button
-              type="button"
-              onClick={() => { window.location.href = "/dashboard"; }}
-              className="w-full mb-4 py-2 text-xs font-mono text-yellow-400 border border-yellow-400/30 rounded-lg hover:bg-yellow-400/10 transition-colors"
-            >
-              DEBUG: Go to dashboard (window.location)
-            </button>
-
             {showPriceSlider ? (
               <div className="mb-2">
                 <div className="flex items-center justify-between mb-3">
