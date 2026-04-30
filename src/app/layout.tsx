@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ScrollReveal from "@/components/ScrollReveal";
-import ScrollRevealEnhanced from "@/components/ScrollRevealEnhanced";
+import PageAnimations from "@/components/PageAnimations";
 import ScrollProgress from "@/components/ScrollProgress";
 import { LangProvider } from "@/contexts/LangContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -65,8 +64,7 @@ export default function RootLayout({
           <AuthProvider>
             <ScrollProgress />
             <Navbar />
-            <ScrollReveal />
-            <ScrollRevealEnhanced />
+            <PageAnimations />
             <main className="flex-1 pt-16">{children}</main>
             <Footer />
           </AuthProvider>
