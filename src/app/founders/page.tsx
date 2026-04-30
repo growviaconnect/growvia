@@ -206,7 +206,7 @@ export default function FoundersPage() {
           className="max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-20 items-start"
         >
           <div ref={missionTextRef}>
-            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-8">
+            <p className="text-sm font-bold text-[#A78BFA] uppercase tracking-[0.3em] mb-8">
               {t("founders_mission_label")}
             </p>
             <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-8">
@@ -218,18 +218,25 @@ export default function FoundersPage() {
               <p>{t("founders_mission_p3")}</p>
             </div>
           </div>
-          <div ref={missionStatsRef} className="grid grid-cols-2 gap-4">
-            {[
-              { value: "2024",   label: t("founders_stat_founded") },
-              { value: "Paris",  label: t("founders_stat_hq") },
-              { value: "3+",     label: t("founders_stat_langs") },
-              { value: "Global", label: t("founders_stat_vision") },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-xl p-7 ring-1 ring-white/8" style={{ background: "#0F0D1F" }}>
-                <p className="text-3xl font-extrabold text-white mb-1">{stat.value}</p>
-                <p className="text-xs text-white/35 uppercase tracking-widest">{stat.label}</p>
-              </div>
-            ))}
+          <div ref={missionStatsRef} className="flex flex-col justify-center">
+            <div className="flex flex-wrap gap-x-0 gap-y-4">
+              {[
+                { value: "2025",       label: t("founders_stat_founded") },
+                { value: "Barcelone",  label: t("founders_stat_hq") },
+                { value: "3+",         label: t("founders_stat_langs") },
+                { value: "Global",     label: t("founders_stat_vision") },
+              ].map((stat, i, arr) => (
+                <div key={stat.label} className="flex items-center">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-bold text-white/50 uppercase tracking-widest">{stat.value}</span>
+                    <span className="text-[10px] text-white/30 uppercase tracking-widest">{stat.label}</span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <span className="mx-5 text-[#7C3AED] select-none" aria-hidden="true">·</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
