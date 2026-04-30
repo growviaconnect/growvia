@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Heart, Target, Globe, Lightbulb, TrendingUp, RefreshCw, Shield } from "lucide-react";
+import { ArrowRight, TrendingUp, RefreshCw, Shield } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 import HeroParticles from "@/components/HeroParticles";
 
@@ -59,15 +59,15 @@ export default function FoundersPage() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── Values cards: fade-up stagger 100ms ────────────────────── */
+  /* ── Values rows: slide-in from left, stagger 80ms ─────────── */
   useEffect(() => {
     const cards = valueCardRefs.current.filter(Boolean) as HTMLDivElement[];
     const wrap  = valuesWrapRef.current;
     if (!cards.length || !wrap) return;
     cards.forEach((c, i) => {
       c.style.opacity   = "0";
-      c.style.transform = "translateY(20px)";
-      c.style.transition = `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms,transform 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms`;
+      c.style.transform = "translateX(-20px)";
+      c.style.transition = `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${i * 80}ms,transform 0.55s cubic-bezier(0.16,1,0.3,1) ${i * 80}ms`;
     });
     const obs = new IntersectionObserver((entries) => {
       if (!entries[0].isIntersecting) return;
@@ -94,14 +94,14 @@ export default function FoundersPage() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── Team cards: fade-up stagger 150ms ──────────────────────── */
+  /* ── Team rows: fade-up, second row delayed 150ms ───────────── */
   useEffect(() => {
     const cards = teamCardRefs.current.filter(Boolean) as HTMLDivElement[];
     const wrap  = teamWrapRef.current;
     if (!cards.length || !wrap) return;
     cards.forEach((c, i) => {
       c.style.opacity   = "0";
-      c.style.transform = "translateY(24px)";
+      c.style.transform = "translateY(20px)";
       c.style.transition = `opacity 0.65s cubic-bezier(0.16,1,0.3,1) ${i * 150}ms,transform 0.65s cubic-bezier(0.16,1,0.3,1) ${i * 150}ms`;
     });
     const obs = new IntersectionObserver((entries) => {
@@ -115,15 +115,34 @@ export default function FoundersPage() {
 
   /* ── Data ────────────────────────────────────────────────────── */
   const founders = [
-    { name: "Luna Davin",    role: "Co-Founder & CEO", initials: "LD", bio: t("founders_founder1_bio") },
-    { name: "Yasmine Tunon", role: "Co-Founder & COO", initials: "YT", bio: t("founders_founder2_bio") },
+    {
+      name: "Luna Davin",
+      role: "Co-Founder & CEO",
+      bio: "Luna a vécu de première main la confusion du choix d'un parcours professionnel après ses études. Incapable de trouver des mentors qui comprenaient vraiment son chemin, elle a décidé de créer la plateforme qu'elle aurait aimé avoir.",
+    },
+    {
+      name: "Yasmine Tunon",
+      role: "Co-Founder & COO",
+      bio: "Yasmine apporte une profonde passion pour le design centré sur l'humain et la construction de communautés. Ayant travaillé dans plusieurs pays et secteurs, elle comprend les complexités du marché du travail mondial.",
+    },
   ];
 
   const values = [
-    { icon: Heart,     title: t("founders_value1_title"), desc: t("founders_value1_desc") },
-    { icon: Target,    title: t("founders_value2_title"), desc: t("founders_value2_desc") },
-    { icon: Globe,     title: t("founders_value3_title"), desc: t("founders_value3_desc") },
-    { icon: Lightbulb, title: t("founders_value4_title"), desc: t("founders_value4_desc") },
+    {
+      num: "01",
+      title: "Grow Every Day",
+      desc: "Engagez-vous dans un développement personnel et professionnel continu. Le progrès, même petit, est la seule direction.",
+    },
+    {
+      num: "02",
+      title: "Embrace Change",
+      desc: "Adaptez-vous aux défis et conduisez activement le progrès. Le meilleur chemin n'est rarement le plus évident.",
+    },
+    {
+      num: "03",
+      title: "Build Trust",
+      desc: "Cultivez des relations honnêtes et transparentes qui créent un impact réel. La confiance est le fondement de chaque grande connexion de mentorat.",
+    },
   ];
 
   const visionCards = [
@@ -206,7 +225,7 @@ export default function FoundersPage() {
           className="max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-20 items-start"
         >
           <div ref={missionTextRef}>
-            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-8">
+            <p className="text-sm font-bold text-[#A78BFA] uppercase tracking-[0.3em] mb-8">
               {t("founders_mission_label")}
             </p>
             <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-8">
@@ -218,18 +237,25 @@ export default function FoundersPage() {
               <p>{t("founders_mission_p3")}</p>
             </div>
           </div>
-          <div ref={missionStatsRef} className="grid grid-cols-2 gap-4">
-            {[
-              { value: "2024",   label: t("founders_stat_founded") },
-              { value: "Paris",  label: t("founders_stat_hq") },
-              { value: "3+",     label: t("founders_stat_langs") },
-              { value: "Global", label: t("founders_stat_vision") },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-xl p-7 ring-1 ring-white/8" style={{ background: "#0F0D1F" }}>
-                <p className="text-3xl font-extrabold text-white mb-1">{stat.value}</p>
-                <p className="text-xs text-white/35 uppercase tracking-widest">{stat.label}</p>
-              </div>
-            ))}
+          <div ref={missionStatsRef} className="flex flex-col justify-center">
+            <div className="flex flex-wrap gap-x-0 gap-y-4">
+              {[
+                { value: "2025",       label: t("founders_stat_founded") },
+                { value: "Barcelone",  label: t("founders_stat_hq") },
+                { value: "3+",         label: t("founders_stat_langs") },
+                { value: "Global",     label: t("founders_stat_vision") },
+              ].map((stat, i, arr) => (
+                <div key={stat.label} className="flex items-center">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-bold text-white/50 uppercase tracking-widest">{stat.value}</span>
+                    <span className="text-[10px] text-white/30 uppercase tracking-widest">{stat.label}</span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <span className="mx-5 text-[#7C3AED] select-none" aria-hidden="true">·</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -249,12 +275,12 @@ export default function FoundersPage() {
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             <div className="lg:py-8">
-              <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-10">
+              <p className="text-sm font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-10">
                 {t("founders_vision_label")}
               </p>
               <blockquote>
                 <p
-                  className="text-2xl text-white/80 leading-relaxed"
+                  className="text-3xl md:text-4xl text-white/85 leading-snug max-w-3xl"
                   style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}
                 >
                   &ldquo;{t("founders_vision_quote")}&rdquo;
@@ -292,33 +318,33 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4 — Ce en quoi nous croyons (stagger 100ms) ──── */}
+      {/* ── SECTION 4 — Nos Valeurs (editorial list) ──────────────── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
-            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-5">
-              {t("founders_values_label")}
+            <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-5">
+              NOS VALEURS
             </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight">
               {t("founders_values_title")}
             </h2>
           </div>
-          <div ref={valuesWrapRef} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div ref={valuesWrapRef} className="border-t border-white/10">
             {values.map((v, i) => (
               <div
-                key={v.title}
+                key={v.num}
                 ref={(el) => { valueCardRefs.current[i] = el; }}
-                className="rounded-xl p-7 ring-1 ring-white/8"
-                style={{ background: "#0F0D1F" }}
+                className="group grid grid-cols-[80px_1fr_1fr] lg:grid-cols-[120px_1fr_1fr] items-center gap-8 py-8 border-b border-white/10 hover:border-[#7C3AED] transition-colors duration-300 cursor-default"
               >
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-6 ring-1 ring-[#7C3AED]/15"
-                  style={{ background: "rgba(76,29,149,0.25)" }}
-                >
-                  <v.icon className="w-5 h-5 text-[#7C3AED]" />
-                </div>
-                <h3 className="text-base font-bold text-white mb-2">{v.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{v.desc}</p>
+                <span className="text-6xl font-extrabold text-white/20 leading-none select-none">
+                  {v.num}
+                </span>
+                <h3 className="text-xl lg:text-2xl font-bold text-white inline-block transition-transform duration-300 ease-out group-hover:scale-105 origin-left">
+                  {v.title}
+                </h3>
+                <p className="text-sm text-white/50 leading-relaxed">
+                  {v.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -345,7 +371,7 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 6 — Rencontrez les fondatrices (stagger 150ms) ── */}
+      {/* ── SECTION 6 — Rencontrez les fondatrices (press style) ─── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
@@ -356,23 +382,26 @@ export default function FoundersPage() {
               {t("founders_team_title")}
             </h2>
           </div>
-          <div ref={teamWrapRef} className="grid md:grid-cols-2 gap-6 max-w-4xl">
+          <div ref={teamWrapRef} className="border-t border-white/10">
             {founders.map((f, i) => (
               <div
                 key={f.name}
                 ref={(el) => { teamCardRefs.current[i] = el; }}
-                className="rounded-2xl p-8 ring-1 ring-white/8"
-                style={{ background: "#0F0D1F" }}
+                className="group grid md:grid-cols-2 gap-10 items-start py-12 border-b border-white/10"
               >
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-base mb-7 ring-1 ring-[#7C3AED]/20"
-                  style={{ background: "rgba(76,29,149,0.35)" }}
-                >
-                  {f.initials}
+                <div>
+                  <h3
+                    className="text-5xl font-extrabold text-white transition-colors duration-300 group-hover:text-[#A78BFA] leading-none mb-3"
+                  >
+                    {f.name}
+                  </h3>
+                  <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest">
+                    {f.role}
+                  </p>
                 </div>
-                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.2em] mb-2">{f.role}</p>
-                <h3 className="text-xl font-bold text-white mb-4">{f.name}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{f.bio}</p>
+                <p className="text-base text-white/55 leading-relaxed md:pt-2">
+                  {f.bio}
+                </p>
               </div>
             ))}
           </div>
