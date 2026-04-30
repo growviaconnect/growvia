@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, RefreshCw, Shield } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 import HeroParticles from "@/components/HeroParticles";
 
@@ -126,9 +126,9 @@ export default function FoundersPage() {
   ];
 
   const visionCards = [
-    { icon: TrendingUp, title: t("founders_vision_c1_title"), desc: t("founders_vision_c1_desc") },
-    { icon: RefreshCw,  title: t("founders_vision_c2_title"), desc: t("founders_vision_c2_desc") },
-    { icon: Shield,     title: t("founders_vision_c3_title"), desc: t("founders_vision_c3_desc") },
+    { num: "01", title: t("founders_vision_c1_title"), desc: t("founders_vision_c1_desc") },
+    { num: "02", title: t("founders_vision_c2_title"), desc: t("founders_vision_c2_desc") },
+    { num: "03", title: t("founders_vision_c3_title"), desc: t("founders_vision_c3_desc") },
   ];
 
   return (
@@ -267,28 +267,18 @@ export default function FoundersPage() {
                 </p>
               </blockquote>
             </div>
-            <div ref={visionGridRef} className="flex flex-col gap-4">
+            <div ref={visionGridRef} className="border-t border-white/10 self-center">
               {visionCards.map((card, i) => (
                 <div
                   key={card.title}
                   ref={(el) => { visionCardRefs.current[i] = el; }}
-                  className="rounded-2xl p-7 flex gap-5 items-start"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 60%, rgba(255,255,255,0.03) 100%)",
-                    border: "1px solid rgba(167,139,250,0.25)",
-                    backdropFilter: "blur(40px) saturate(180%)",
-                    WebkitBackdropFilter: "blur(40px) saturate(180%)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 24px rgba(124,58,237,0.10)",
-                  }}
+                  className="grid grid-cols-[56px_1fr] gap-6 py-7 border-b border-white/10"
                 >
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ring-1 ring-[#7C3AED]/20"
-                    style={{ background: "rgba(76,29,149,0.35)" }}
-                  >
-                    <card.icon className="w-5 h-5 text-[#A78BFA]" />
-                  </div>
+                  <span className="text-5xl font-extrabold text-white/15 leading-none select-none">
+                    {card.num}
+                  </span>
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1.5">{card.title}</h3>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-2">{card.title}</h3>
                     <p className="text-sm text-white/50 leading-relaxed">{card.desc}</p>
                   </div>
                 </div>
