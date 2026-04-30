@@ -33,6 +33,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Hero (home page)
     home_badge: 'Early Access · Free for founding members',
+    home_hero_eyebrow: 'Meet the',
+    home_counter_label: 'active mentors',
     home_hero_title1: 'The mentor who',
     home_hero_title2: 'has been exactly',
     home_hero_title3: 'where you want to go.',
@@ -1067,6 +1069,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Hero (home page)
     home_badge: 'Accès Anticipé · Gratuit pour les premiers inscrits',
+    home_hero_eyebrow: 'Rencontrez le',
+    home_counter_label: 'mentors actifs',
     home_hero_title1: 'Le mentor qui',
     home_hero_title2: 'a été exactement',
     home_hero_title3: 'où tu veux aller.',
@@ -2101,6 +2105,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Hero (home page)
     home_badge: 'Acceso Anticipado · Gratis para los primeros inscritos',
+    home_hero_eyebrow: 'Conoce al',
+    home_counter_label: 'mentores activos',
     home_hero_title1: 'El mentor que',
     home_hero_title2: 'estuvo exactamente',
     home_hero_title3: 'donde tú quieres ir.',
