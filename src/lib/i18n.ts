@@ -108,10 +108,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     manifesto_phrase_4: 'Creating real and meaningful impact.',
 
     // Stats
-    stats_title_pre: 'From early momentum to',
-    stats_title_hl: 'global',
-    stats_title_post: 'awareness.',
-    stats_sub: 'Our network of mentors spans world-class professionals, entrepreneurs, and experts, people who shape careers, shift perspectives, and open doors.',
+    stats_title_pre: "Behind every great career, there's someone who extended a",
+    stats_title_hl: 'hand.',
+    stats_title_post: '',
+    stats_sub: "Our mentor network brings together top-tier professionals who chose to lend theirs, because they never forgot the hand that was once extended to them.",
     stats_badge_mentors: 'Mentors',
     stats_desc_mentors: 'Expert Mentors',
     stats_badge_mentees: 'Mentees',
@@ -2134,10 +2134,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     manifesto_phrase_4: 'Crear un impacto real y significativo.',
 
     // Stats
-    stats_title_pre: 'Del impulso inicial a la',
-    stats_title_hl: 'mundial',
-    stats_title_post: 'notoriedad.',
-    stats_sub: 'Nuestra red de mentores abarca profesionales de clase mundial, emprendedores y expertos, personas que moldean carreras, cambian perspectivas y abren puertas.',
+    stats_title_pre: 'Detrás de cada gran carrera, hay alguien que extendió la',
+    stats_title_hl: 'mano.',
+    stats_title_post: '',
+    stats_sub: 'Nuestra red de mentores reúne a profesionales de alto nivel que eligieron tender la suya, porque nunca olvidaron la mano que alguien les tendió.',
     stats_badge_mentors: 'Mentores',
     stats_desc_mentors: 'Mentores Expertos',
     stats_badge_mentees: 'Aprendices',
