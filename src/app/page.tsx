@@ -13,7 +13,6 @@ import LogoTicker from "@/components/LogoTicker";
 import MentorsSection from "@/components/MentorsSection";
 import HeroParticles from "@/components/HeroParticles";
 import TypewriterText from "@/components/TypewriterText";
-import SessionsGallery from "@/components/SessionsGallery";
 import { useLang } from "@/contexts/LangContext";
 
 const ACCENT = "#A78BFA";
@@ -127,9 +126,6 @@ export default function HomePage() {
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
-
-      {/* ── SESSIONS GALLERY ─────────────────────────────────────── */}
-      <SessionsGallery />
 
       {/* ── STATS ────────────────────────────────────────────────── */}
       <StatsSection />
