@@ -245,8 +245,6 @@ export default function MentorOnboarding() {
   });
   const [s4, setS4] = useState<S4>({ cv_url: "" });
 
-  const completion = computeCompletion(s1, s2, s3, s4);
-
   // Close lang dropdown on outside click
   useEffect(() => {
     if (!showLangDropdown) return;
@@ -264,6 +262,7 @@ export default function MentorOnboarding() {
   useEffect(() => {
     if (showSectorInput) sectorInputRef.current?.focus();
   }, [showSectorInput]);
+
 
   // ── Init: load existing data ─────────────────────────────────────────────────
   useEffect(() => {
@@ -569,11 +568,18 @@ export default function MentorOnboarding() {
     async function handleSavePrice(price: number) {
       setSavingPrice(true);
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser) {
-          await supabase.from("mentors")
-            .update({ session_price: price, onboarding_completed: true })
-            .eq("id", authUser.id);
+        const res = await fetch("/api/mentor/save-onboarding", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            userId,
+            data: { session_price: price, onboarding_completed: true },
+          }),
+        });
+        if (!res.ok) {
+          const json = await res.json() as { error?: string };
+          throw new Error(json.error ?? "Save failed");
         }
         router.push("/dashboard");
       } catch {
@@ -700,7 +706,8 @@ export default function MentorOnboarding() {
     { title: "Upload your CV",  sub: "Optional, strengthens your profile" },
   ];
 
-  const badgeColor = completion >= 75 ? "#10B981" : completion >= 40 ? "#F59E0B" : "#A78BFA";
+  const stepPct    = step * 25;
+  const badgeColor = stepPct >= 75 ? "#10B981" : stepPct >= 50 ? "#F59E0B" : "#A78BFA";
   const customSectors = s2.secteurs.filter(s => !SECTEURS_OPTIONS.includes(s));
   const customSkills  = s2.competences.filter(c => !COMPETENCES_OPTIONS.includes(c.name));
   const otherLangsSelected = s3.langues.filter(l => !QUICK_LANGUES.includes(l));
@@ -718,7 +725,7 @@ export default function MentorOnboarding() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold mb-4"
             style={{ background: "rgba(255,255,255,0.04)", color: badgeColor }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: badgeColor }} />
-            Profile {completion}% complete
+            Profile {stepPct}% complete
           </div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">
             {stepMeta[step - 1].title}
