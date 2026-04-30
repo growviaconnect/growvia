@@ -569,7 +569,7 @@ export default function MentorOnboarding() {
     async function handleSavePrice(price: number) {
       setSavingPrice(true);
       setScoringError(null);
-      console.log("[handleSavePrice] called with price:", price, "email:", email, "userId:", userId);
+      console.log("[handleSavePrice] called — price:", price, "email:", email, "userId:", userId);
       try {
         const res = await fetch("/api/mentor/save-onboarding", {
           method: "POST",
@@ -583,8 +583,9 @@ export default function MentorOnboarding() {
         const json = await res.json() as { error?: string; success?: boolean };
         console.log("[handleSavePrice] API response:", res.status, json);
         if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
-        console.log("[handleSavePrice] save confirmed, redirecting to /dashboard/mentor");
-        router.push("/dashboard/mentor");
+        console.log("[handleSavePrice] save confirmed — navigating");
+        // Full navigation so the dashboard guard re-reads onboarding_completed from DB
+        window.location.href = "/dashboard";
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Save failed — please try again.";
         console.error("[handleSavePrice] error:", msg);
@@ -642,6 +643,15 @@ export default function MentorOnboarding() {
               </p>
               <p className="text-xs text-white/30 mt-1">par session · basé sur votre profil</p>
             </div>
+            {/* DEBUG — remove once navigation is confirmed working */}
+            <button
+              type="button"
+              onClick={() => { window.location.href = "/dashboard"; }}
+              className="w-full mb-4 py-2 text-xs font-mono text-yellow-400 border border-yellow-400/30 rounded-lg hover:bg-yellow-400/10 transition-colors"
+            >
+              DEBUG: Go to dashboard (window.location)
+            </button>
+
             {showPriceSlider ? (
               <div className="mb-2">
                 <div className="flex items-center justify-between mb-3">
