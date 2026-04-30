@@ -115,34 +115,14 @@ export default function FoundersPage() {
 
   /* ── Data ────────────────────────────────────────────────────── */
   const founders = [
-    {
-      name: "Luna Davin",
-      role: "Co-Founder & CEO",
-      bio: "Luna a vécu de première main la confusion du choix d'un parcours professionnel après ses études. Incapable de trouver des mentors qui comprenaient vraiment son chemin, elle a décidé de créer la plateforme qu'elle aurait aimé avoir.",
-    },
-    {
-      name: "Yasmine Tunon",
-      role: "Co-Founder & COO",
-      bio: "Yasmine apporte une profonde passion pour le design centré sur l'humain et la construction de communautés. Ayant travaillé dans plusieurs pays et secteurs, elle comprend les complexités du marché du travail mondial.",
-    },
+    { name: "Luna Davin",    role: "Co-Founder & CEO", bio: t("founders_founder1_bio") },
+    { name: "Yasmine Tunon", role: "Co-Founder & COO", bio: t("founders_founder2_bio") },
   ];
 
   const values = [
-    {
-      num: "01",
-      title: "Grow Every Day",
-      desc: "Engagez-vous dans un développement personnel et professionnel continu. Le progrès, même petit, est la seule direction.",
-    },
-    {
-      num: "02",
-      title: "Embrace Change",
-      desc: "Adaptez-vous aux défis et conduisez activement le progrès. Le meilleur chemin n'est rarement le plus évident.",
-    },
-    {
-      num: "03",
-      title: "Build Trust",
-      desc: "Cultivez des relations honnêtes et transparentes qui créent un impact réel. La confiance est le fondement de chaque grande connexion de mentorat.",
-    },
+    { num: "01", title: t("founders_value1_title"), desc: t("founders_value1_desc") },
+    { num: "02", title: t("founders_value2_title"), desc: t("founders_value2_desc") },
+    { num: "03", title: t("founders_value3_title"), desc: t("founders_value3_desc") },
   ];
 
   const visionCards = [
@@ -240,10 +220,10 @@ export default function FoundersPage() {
           <div ref={missionStatsRef} className="flex flex-col justify-center">
             <div className="flex flex-wrap gap-x-0 gap-y-4">
               {[
-                { value: "2025",       label: t("founders_stat_founded") },
-                { value: "Barcelone",  label: t("founders_stat_hq") },
-                { value: "3+",         label: t("founders_stat_langs") },
-                { value: "Global",     label: t("founders_stat_vision") },
+                { value: "2025",                        label: t("founders_stat_founded") },
+                { value: t("founders_stat_hq_value"),  label: t("founders_stat_hq") },
+                { value: "3+",                          label: t("founders_stat_langs") },
+                { value: "Global",                      label: t("founders_stat_vision") },
               ].map((stat, i, arr) => (
                 <div key={stat.label} className="flex items-center">
                   <div className="flex flex-col gap-0.5">
@@ -323,7 +303,7 @@ export default function FoundersPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
             <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-5">
-              NOS VALEURS
+              {t("founders_values_label")}
             </p>
             <h2 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight">
               {t("founders_values_title")}
