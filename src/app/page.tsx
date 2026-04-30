@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useParallax } from "@/hooks/useParallax";
@@ -12,8 +12,14 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import LogoTicker from "@/components/LogoTicker";
 import MentorsSection from "@/components/MentorsSection";
 import HeroParticles from "@/components/HeroParticles";
-import TypewriterText from "@/components/TypewriterText";
+import SessionsGallery from "@/components/SessionsGallery";
 import { useLang } from "@/contexts/LangContext";
+
+const HERO_SECTORS = [
+  "Finance", "Tech", "Marketing", "Consulting", "Design", "RH",
+  "Stratégie", "Product", "Startups", "Growth", "Sales", "Data",
+  "Legal", "Venture Capital", "Real Estate", "Management",
+];
 
 const ACCENT = "#A78BFA";
 function hl(text: string, words: string[]) {
@@ -33,6 +39,21 @@ export default function HomePage() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroImgRef     = useRef<HTMLImageElement>(null);
   useParallax(heroImgRef, heroSectionRef);
+
+  const [mentorCount, setMentorCount] = useState(0);
+  useEffect(() => {
+    const target = 500;
+    const duration = 1800;
+    const totalFrames = Math.round(duration / (1000 / 60));
+    let frame = 0;
+    const timer = setInterval(() => {
+      frame++;
+      const progress = 1 - Math.pow(1 - frame / totalFrames, 3);
+      setMentorCount(Math.round(progress * target));
+      if (frame >= totalFrames) clearInterval(timer);
+    }, 1000 / 60);
+    return () => clearInterval(timer);
+  }, []);
 
   const categories = [
     {
@@ -64,61 +85,121 @@ export default function HomePage() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section ref={heroSectionRef} className="relative min-h-screen flex items-end pb-24 overflow-hidden">
+      <section ref={heroSectionRef} className="relative min-h-screen flex flex-col overflow-hidden">
+
+        {/* Background */}
         <div className="absolute inset-0">
           <img
             ref={heroImgRef}
             src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
             alt=""
-            className="w-full h-full object-cover object-center"
             aria-hidden="true"
+            className="w-full h-full object-cover object-center"
+            style={{ filter: "brightness(0.25) saturate(0.4)" }}
           />
-          <div className="absolute inset-0 bg-[#0D0A1A]/60" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, #0D0A1A 8%, rgba(13,10,26,0.7) 40%, rgba(13,10,26,0.2) 75%, transparent 100%)" }} />
+          <div
+            className="absolute inset-0"
+            style={{ background: "radial-gradient(ellipse 80% 60% at 30% 50%, rgba(124,58,237,0.18) 0%, transparent 70%)" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, rgba(13,10,26,0.5) 0%, transparent 30%, transparent 70%, #0D0A1A 100%)" }}
+          />
           <HeroParticles />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="animate-fade-up text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8" style={{ animationDelay: "0ms" }}>
-              {t("home_badge")}
-            </p>
-            <h1 className="animate-fade-up text-6xl md:text-7xl lg:text-8xl font-extrabold text-white leading-[0.92] tracking-tight mb-10" style={{ animationDelay: "120ms" }}>
-              {hl(t("home_hero_title1"), ["mentor"])}<br />{t("home_hero_title2")}<br />{hl(t("home_hero_title3"), ["you", "tu", "tú"])}
-            </h1>
-            <p className="animate-fade-up text-lg text-white/45 mb-12 max-w-md mx-auto leading-relaxed" style={{ animationDelay: "240ms" }}>
-              {hl(t("home_hero_sub_pre"), ["mentors", "matching"])}{" "}
-              <TypewriterText
-                texts={[
-                  t("home_hero_sub_typed"),
-                  t("home_hero_sub_typed_2"),
-                  t("home_hero_sub_typed_3"),
-                  t("home_hero_sub_typed_4"),
-                ]}
-                delay={1400}
-                speed={50}
-                className="text-white/70"
-              />
-            </p>
-            <div className="animate-fade-up flex flex-col sm:flex-row items-center justify-center gap-4" style={{ animationDelay: "360ms" }}>
-              <Link
-                href="/auth/register"
-                className="inline-flex items-center gap-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
+        {/* ── Main content — asymmetric grid ─────────────────────── */}
+        <div className="relative flex-1 flex items-center pt-28 pb-8">
+          <div className="w-full max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="grid lg:grid-cols-[1fr_380px] gap-16 items-center">
+
+              {/* LEFT — massive bleeding headline */}
+              <div>
+                <p
+                  className="animate-fade-up text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.32em] mb-8"
+                  style={{ animationDelay: "0ms" }}
+                >
+                  {t("home_badge")}
+                </p>
+                <div className="animate-fade-up overflow-visible" style={{ animationDelay: "80ms" }}>
+                  <p className="text-base md:text-lg font-semibold text-white/35 uppercase tracking-[0.25em] mb-1 leading-none">
+                    {t("home_hero_eyebrow")}
+                  </p>
+                  <h1
+                    className="font-extrabold text-white leading-[0.82] tracking-tighter whitespace-nowrap"
+                    style={{ fontSize: "clamp(80px, 16vw, 230px)" }}
+                  >
+                    mentor.
+                  </h1>
+                  <p className="text-xl md:text-2xl font-semibold text-white/50 mt-5 leading-snug max-w-sm">
+                    {t("home_hero_title3")}
+                  </p>
+                </div>
+              </div>
+
+              {/* RIGHT — counter + description + CTA */}
+              <div
+                className="animate-fade-up flex flex-col gap-8 lg:border-l lg:border-white/8 lg:pl-16"
+                style={{ animationDelay: "220ms" }}
               >
-                {t("home_build_future")} <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/become-a-mentor"
-                className="inline-flex items-center gap-3 text-white/45 hover:text-white font-medium py-3.5 transition-colors text-sm"
-              >
-                <span className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center flex-shrink-0">
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-                {t("home_watch_film")}
-              </Link>
+                {/* Animated counter */}
+                <div>
+                  <div className="flex items-end gap-1 leading-none mb-2">
+                    <span className="text-7xl font-extrabold text-white tabular-nums">
+                      {mentorCount}
+                    </span>
+                    <span className="text-5xl font-extrabold mb-1" style={{ color: "#7C3AED" }}>+</span>
+                  </div>
+                  <p className="text-xs text-white/35 uppercase tracking-[0.25em]">
+                    {t("home_counter_label")}
+                  </p>
+                </div>
+
+                <div className="w-10 h-px bg-white/12" />
+
+                {/* Description */}
+                <p className="text-white/50 text-[15px] leading-relaxed">
+                  {t("home_hero_sub")}
+                </p>
+
+                {/* Primary CTA */}
+                <div className="flex flex-col gap-3">
+                  <Link
+                    href="/auth/register"
+                    className="inline-flex items-center justify-center gap-2.5 text-white font-semibold px-7 py-4 rounded-lg transition-colors text-sm"
+                    style={{ background: "#7C3AED" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
+                  >
+                    {t("home_build_future")} <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/become-a-mentor"
+                    className="inline-flex items-center justify-center gap-2 text-white/35 hover:text-white/70 font-medium py-2 transition-colors text-sm"
+                  >
+                    {t("home_watch_film")} <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* ── Bottom sectors ticker ───────────────────────────────── */}
+        <div className="relative border-t border-white/[0.07] py-5 overflow-hidden">
+          <div className="animate-ticker flex items-center">
+            {[...HERO_SECTORS, ...HERO_SECTORS].map((sector, i) => (
+              <span
+                key={i}
+                className="flex-shrink-0 mx-10 text-[10px] font-bold uppercase tracking-[0.22em] text-white/25 whitespace-nowrap select-none"
+                aria-hidden={i >= HERO_SECTORS.length ? "true" : undefined}
+              >
+                {sector}
+              </span>
+            ))}
+          </div>
+        </div>
+
       </section>
 
       {/* ── FOR YOU ──────────────────────────────────────────────── */}
@@ -126,6 +207,9 @@ export default function HomePage() {
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
+
+      {/* ── SESSIONS GALLERY ─────────────────────────────────────── */}
+      <SessionsGallery />
 
       {/* ── STATS ────────────────────────────────────────────────── */}
       <StatsSection />
