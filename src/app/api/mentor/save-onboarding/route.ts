@@ -27,9 +27,11 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
 
-  // Upsert by id when available (stable PK); fall back to update by email
+  // Always UPDATE (never INSERT) — the row already exists from step 1.
+  // Using upsert here caused a NOT NULL violation on 'nom' when the stored id
+  // didn't match userId and Supabase fell back to an INSERT.
   const { error } = userId
-    ? await client.from("mentors").upsert({ id: userId, email, ...data })
+    ? await client.from("mentors").update(data).eq("id", userId)
     : await client.from("mentors").update(data).eq("email", email);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
