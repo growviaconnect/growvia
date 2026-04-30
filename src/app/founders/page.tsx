@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Heart, Target, Globe, Lightbulb, TrendingUp, RefreshCw, Shield } from "lucide-react";
+import { ArrowRight, TrendingUp, RefreshCw, Shield } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 import HeroParticles from "@/components/HeroParticles";
 
@@ -59,15 +59,15 @@ export default function FoundersPage() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── Values cards: fade-up stagger 100ms ────────────────────── */
+  /* ── Values rows: slide-in from left, stagger 80ms ─────────── */
   useEffect(() => {
     const cards = valueCardRefs.current.filter(Boolean) as HTMLDivElement[];
     const wrap  = valuesWrapRef.current;
     if (!cards.length || !wrap) return;
     cards.forEach((c, i) => {
       c.style.opacity   = "0";
-      c.style.transform = "translateY(20px)";
-      c.style.transition = `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms,transform 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms`;
+      c.style.transform = "translateX(-20px)";
+      c.style.transition = `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${i * 80}ms,transform 0.55s cubic-bezier(0.16,1,0.3,1) ${i * 80}ms`;
     });
     const obs = new IntersectionObserver((entries) => {
       if (!entries[0].isIntersecting) return;
@@ -120,10 +120,21 @@ export default function FoundersPage() {
   ];
 
   const values = [
-    { icon: Heart,     title: t("founders_value1_title"), desc: t("founders_value1_desc") },
-    { icon: Target,    title: t("founders_value2_title"), desc: t("founders_value2_desc") },
-    { icon: Globe,     title: t("founders_value3_title"), desc: t("founders_value3_desc") },
-    { icon: Lightbulb, title: t("founders_value4_title"), desc: t("founders_value4_desc") },
+    {
+      num: "01",
+      title: "Grow Every Day",
+      desc: "Engagez-vous dans un développement personnel et professionnel continu. Le progrès, même petit, est la seule direction.",
+    },
+    {
+      num: "02",
+      title: "Embrace Change",
+      desc: "Adaptez-vous aux défis et conduisez activement le progrès. Le meilleur chemin n'est rarement le plus évident.",
+    },
+    {
+      num: "03",
+      title: "Build Trust",
+      desc: "Cultivez des relations honnêtes et transparentes qui créent un impact réel. La confiance est le fondement de chaque grande connexion de mentorat.",
+    },
   ];
 
   const visionCards = [
@@ -299,33 +310,33 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4 — Ce en quoi nous croyons (stagger 100ms) ──── */}
+      {/* ── SECTION 4 — Nos Valeurs (editorial list) ──────────────── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
-            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-5">
-              {t("founders_values_label")}
+            <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-5">
+              NOS VALEURS
             </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight">
               {t("founders_values_title")}
             </h2>
           </div>
-          <div ref={valuesWrapRef} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div ref={valuesWrapRef} className="border-t border-white/10">
             {values.map((v, i) => (
               <div
-                key={v.title}
+                key={v.num}
                 ref={(el) => { valueCardRefs.current[i] = el; }}
-                className="rounded-xl p-7 ring-1 ring-white/8"
-                style={{ background: "#0F0D1F" }}
+                className="group grid grid-cols-[80px_1fr_1fr] lg:grid-cols-[120px_1fr_1fr] items-center gap-8 py-8 border-b border-white/10 hover:border-[#7C3AED] transition-colors duration-300 cursor-default"
               >
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-6 ring-1 ring-[#7C3AED]/15"
-                  style={{ background: "rgba(76,29,149,0.25)" }}
-                >
-                  <v.icon className="w-5 h-5 text-[#7C3AED]" />
-                </div>
-                <h3 className="text-base font-bold text-white mb-2">{v.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{v.desc}</p>
+                <span className="text-6xl font-extrabold text-white/20 leading-none select-none">
+                  {v.num}
+                </span>
+                <h3 className="text-xl lg:text-2xl font-bold text-white inline-block transition-transform duration-300 ease-out group-hover:scale-105 origin-left">
+                  {v.title}
+                </h3>
+                <p className="text-sm text-white/50 leading-relaxed">
+                  {v.desc}
+                </p>
               </div>
             ))}
           </div>
