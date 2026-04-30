@@ -199,6 +199,7 @@ export default function MentorOnboarding() {
   const [showPriceSlider, setShowPriceSlider] = useState(false);
   const [sliderPrice, setSliderPrice] = useState(20);
   const [savingPrice, setSavingPrice] = useState(false);
+  const [scoringError, setScoringError] = useState<string | null>(null);
   const [userId, setUserId]           = useState("");
   const [email, setEmail]             = useState("");
   const [authNom, setAuthNom]         = useState("");
@@ -567,6 +568,8 @@ export default function MentorOnboarding() {
 
     async function handleSavePrice(price: number) {
       setSavingPrice(true);
+      setScoringError(null);
+      console.log("[handleSavePrice] called with price:", price, "email:", email, "userId:", userId);
       try {
         const res = await fetch("/api/mentor/save-onboarding", {
           method: "POST",
@@ -577,12 +580,15 @@ export default function MentorOnboarding() {
             data: { session_price: price, onboarding_completed: true },
           }),
         });
-        if (!res.ok) {
-          const json = await res.json() as { error?: string };
-          throw new Error(json.error ?? "Save failed");
-        }
-        router.push("/dashboard");
-      } catch {
+        const json = await res.json() as { error?: string; success?: boolean };
+        console.log("[handleSavePrice] API response:", res.status, json);
+        if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+        console.log("[handleSavePrice] save confirmed, redirecting to /dashboard/mentor");
+        router.push("/dashboard/mentor");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Save failed — please try again.";
+        console.error("[handleSavePrice] error:", msg);
+        setScoringError(msg);
         setSavingPrice(false);
       }
     }
@@ -594,10 +600,15 @@ export default function MentorOnboarding() {
       <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           <button type="button"
-            onClick={() => { setPhase("form"); setStep(4); setShowPriceSlider(false); }}
+            onClick={() => { setPhase("form"); setStep(4); setShowPriceSlider(false); setScoringError(null); }}
             className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" /> Retour à l'étape 4
           </button>
+          {scoringError && (
+            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-4">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" /> {scoringError}
+            </div>
+          )}
           <div className="text-center mb-8">
             <GrowViaLogo />
             <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">Votre score de mentor</h1>
