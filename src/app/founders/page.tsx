@@ -94,14 +94,14 @@ export default function FoundersPage() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── Team cards: fade-up stagger 150ms ──────────────────────── */
+  /* ── Team rows: fade-up, second row delayed 150ms ───────────── */
   useEffect(() => {
     const cards = teamCardRefs.current.filter(Boolean) as HTMLDivElement[];
     const wrap  = teamWrapRef.current;
     if (!cards.length || !wrap) return;
     cards.forEach((c, i) => {
       c.style.opacity   = "0";
-      c.style.transform = "translateY(24px)";
+      c.style.transform = "translateY(20px)";
       c.style.transition = `opacity 0.65s cubic-bezier(0.16,1,0.3,1) ${i * 150}ms,transform 0.65s cubic-bezier(0.16,1,0.3,1) ${i * 150}ms`;
     });
     const obs = new IntersectionObserver((entries) => {
@@ -115,8 +115,16 @@ export default function FoundersPage() {
 
   /* ── Data ────────────────────────────────────────────────────── */
   const founders = [
-    { name: "Luna Davin",    role: "Co-Founder & CEO", initials: "LD", bio: t("founders_founder1_bio") },
-    { name: "Yasmine Tunon", role: "Co-Founder & COO", initials: "YT", bio: t("founders_founder2_bio") },
+    {
+      name: "Luna Davin",
+      role: "Co-Founder & CEO",
+      bio: "Luna a vécu de première main la confusion du choix d'un parcours professionnel après ses études. Incapable de trouver des mentors qui comprenaient vraiment son chemin, elle a décidé de créer la plateforme qu'elle aurait aimé avoir.",
+    },
+    {
+      name: "Yasmine Tunon",
+      role: "Co-Founder & COO",
+      bio: "Yasmine apporte une profonde passion pour le design centré sur l'humain et la construction de communautés. Ayant travaillé dans plusieurs pays et secteurs, elle comprend les complexités du marché du travail mondial.",
+    },
   ];
 
   const values = [
@@ -267,12 +275,12 @@ export default function FoundersPage() {
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             <div className="lg:py-8">
-              <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-10">
+              <p className="text-sm font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-10">
                 {t("founders_vision_label")}
               </p>
               <blockquote>
                 <p
-                  className="text-2xl text-white/80 leading-relaxed"
+                  className="text-3xl md:text-4xl text-white/85 leading-snug max-w-3xl"
                   style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}
                 >
                   &ldquo;{t("founders_vision_quote")}&rdquo;
@@ -363,7 +371,7 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 6 — Rencontrez les fondatrices (stagger 150ms) ── */}
+      {/* ── SECTION 6 — Rencontrez les fondatrices (press style) ─── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
@@ -374,23 +382,26 @@ export default function FoundersPage() {
               {t("founders_team_title")}
             </h2>
           </div>
-          <div ref={teamWrapRef} className="grid md:grid-cols-2 gap-6 max-w-4xl">
+          <div ref={teamWrapRef} className="border-t border-white/10">
             {founders.map((f, i) => (
               <div
                 key={f.name}
                 ref={(el) => { teamCardRefs.current[i] = el; }}
-                className="rounded-2xl p-8 ring-1 ring-white/8"
-                style={{ background: "#0F0D1F" }}
+                className="group grid md:grid-cols-2 gap-10 items-start py-12 border-b border-white/10"
               >
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-base mb-7 ring-1 ring-[#7C3AED]/20"
-                  style={{ background: "rgba(76,29,149,0.35)" }}
-                >
-                  {f.initials}
+                <div>
+                  <h3
+                    className="text-5xl font-extrabold text-white transition-colors duration-300 group-hover:text-[#A78BFA] leading-none mb-3"
+                  >
+                    {f.name}
+                  </h3>
+                  <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest">
+                    {f.role}
+                  </p>
                 </div>
-                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.2em] mb-2">{f.role}</p>
-                <h3 className="text-xl font-bold text-white mb-4">{f.name}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{f.bio}</p>
+                <p className="text-base text-white/55 leading-relaxed md:pt-2">
+                  {f.bio}
+                </p>
               </div>
             ))}
           </div>
