@@ -26,6 +26,7 @@ export default function ExplorePage() {
       links: [
         { label: t("explore_link_founders"),     href: "/founders" },
         { label: t("explore_link_how"),          href: "/how-it-works" },
+        { label: t("explore_link_testimonials"), href: "/testimonials" },
         { label: t("explore_link_pricing"),      href: "/pricing" },
         { label: t("explore_link_partnerships"), href: "/for-schools" },
         { label: t("explore_link_profile"),      href: "/dashboard" },
