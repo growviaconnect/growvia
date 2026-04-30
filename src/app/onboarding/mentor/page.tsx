@@ -584,8 +584,10 @@ export default function MentorOnboarding() {
         console.log("[handleSavePrice] API response:", res.status, json);
         if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
         console.log("[handleSavePrice] save confirmed — navigating");
-        // Full navigation so the dashboard guard re-reads onboarding_completed from DB
-        window.location.href = "/dashboard";
+        // ?onboarded=1 bypasses the dashboard onboarding_completed guard (see loadData).
+        // Full page reload ensures the dashboard fetches fresh data rather than using
+        // any cached React state from this component.
+        window.location.href = "/dashboard?onboarded=1";
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Save failed — please try again.";
         console.error("[handleSavePrice] error:", msg);
