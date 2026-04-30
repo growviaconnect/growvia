@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Heart, Target, Globe, Lightbulb, Play } from "lucide-react";
+import { ArrowRight, Heart, Target, Globe, Lightbulb, TrendingUp, RefreshCw, Shield } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
+import HeroParticles from "@/components/HeroParticles";
 
-/* ── Ticker names ─────────────────────────────────────────────── */
 const tickerNames = [
   "Luna Davin", "Yasmine Tunon", "Sarah Chen", "Marcus Johnson",
   "Aisha Patel", "Thomas Dubois", "Elena Rossi", "James Okonkwo",
@@ -14,19 +15,65 @@ const tickerNames = [
 export default function FoundersPage() {
   const { t } = useLang();
 
+  /* ── Refs ────────────────────────────────────────────────────── */
+  const missionWrapRef  = useRef<HTMLDivElement | null>(null);
+  const missionTextRef  = useRef<HTMLDivElement | null>(null);
+  const missionStatsRef = useRef<HTMLDivElement | null>(null);
+  const visionGridRef   = useRef<HTMLDivElement | null>(null);
+  const visionCardRefs  = useRef<(HTMLDivElement | null)[]>([]);
+
+  /* ── Mission slide-in (threshold 0.2) ───────────────────────── */
+  useEffect(() => {
+    const text  = missionTextRef.current;
+    const stats = missionStatsRef.current;
+    const wrap  = missionWrapRef.current;
+    if (!text || !stats || !wrap) return;
+
+    const ease = "0.75s cubic-bezier(0.16,1,0.3,1)";
+    text.style.cssText  += `opacity:0;transform:translateX(-40px);transition:opacity ${ease},transform ${ease};`;
+    stats.style.cssText += `opacity:0;transform:translateX(40px);transition:opacity ${ease} 0.1s,transform ${ease} 0.1s;`;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting) return;
+        text.style.opacity  = "1"; text.style.transform  = "translateX(0)";
+        stats.style.opacity = "1"; stats.style.transform = "translateX(0)";
+        observer.disconnect();
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(wrap);
+    return () => observer.disconnect();
+  }, []);
+
+  /* ── Vision cards fade-up stagger 100ms ─────────────────────── */
+  useEffect(() => {
+    const cards = visionCardRefs.current.filter(Boolean) as HTMLDivElement[];
+    const grid  = visionGridRef.current;
+    if (!cards.length || !grid) return;
+
+    cards.forEach((card, i) => {
+      card.style.opacity   = "0";
+      card.style.transform = "translateY(24px)";
+      card.style.transition = `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms,transform 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 100}ms`;
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting) return;
+        cards.forEach((c) => { c.style.opacity = "1"; c.style.transform = "translateY(0)"; });
+        observer.disconnect();
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, []);
+
+  /* ── Data ────────────────────────────────────────────────────── */
   const founders = [
-    {
-      name: "Luna Davin",
-      role: "Co-Founder & CEO",
-      initials: "LD",
-      bio: t("founders_founder1_bio"),
-    },
-    {
-      name: "Yasmine Tunon",
-      role: "Co-Founder & COO",
-      initials: "YT",
-      bio: t("founders_founder2_bio"),
-    },
+    { name: "Luna Davin",    role: "Co-Founder & CEO", initials: "LD", bio: t("founders_founder1_bio") },
+    { name: "Yasmine Tunon", role: "Co-Founder & COO", initials: "YT", bio: t("founders_founder2_bio") },
   ];
 
   const values = [
@@ -36,164 +83,193 @@ export default function FoundersPage() {
     { icon: Lightbulb, title: t("founders_value4_title"), desc: t("founders_value4_desc") },
   ];
 
-  const testimonials = [
-    {
-      type: "photo",
-      name: "Sarah Chen",
-      role: "Product Manager · Stripe",
-      label: t("founders_testimonial_mentee"),
-      image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80",
-      imageH: "h-64",
-      quote: t("founders_t1_quote"),
-    },
-    {
-      type: "quote",
-      name: "Marcus Johnson",
-      role: "VP Engineering · Mentor",
-      label: t("founders_testimonial_mentor"),
-      image: null,
-      imageH: null,
-      quote: t("founders_t2_quote"),
-    },
-    {
-      type: "photo",
-      name: "Aisha Patel",
-      role: "Founder · EduScale",
-      label: t("founders_testimonial_mentee"),
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&q=80",
-      imageH: "h-72",
-      quote: t("founders_t3_quote"),
-    },
-    {
-      type: "quote",
-      name: "Thomas Dubois",
-      role: "Strategy Consultant · Paris",
-      label: t("founders_testimonial_mentee"),
-      image: null,
-      imageH: null,
-      quote: t("founders_t4_quote"),
-    },
-    {
-      type: "quote",
-      name: "Elena Rossi",
-      role: "Partner · McKinsey",
-      label: t("founders_testimonial_mentor"),
-      image: null,
-      imageH: null,
-      quote: t("founders_t5_quote"),
-    },
-    {
-      type: "photo",
-      name: "James Okonkwo",
-      role: "Design Lead · Meta",
-      label: t("founders_testimonial_mentor"),
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
-      imageH: "h-60",
-      quote: t("founders_t6_quote"),
-    },
+  const visionCards = [
+    { icon: TrendingUp, title: t("founders_vision_c1_title"), desc: t("founders_vision_c1_desc") },
+    { icon: RefreshCw,  title: t("founders_vision_c2_title"), desc: t("founders_vision_c2_desc") },
+    { icon: Shield,     title: t("founders_vision_c3_title"), desc: t("founders_vision_c3_desc") },
   ];
 
   return (
     <div className="bg-[#0D0A1A]">
 
-      {/* ── SECTION 1: Hero ───────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-32">
-        <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
-          {t("founders_label")}
-        </p>
-
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.0] tracking-tight max-w-5xl mb-8">
-          {t("founders_hero_before")}
-          <span
+      {/* ── SECTION 1 — Hero ──────────────────────────────────────── */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        {/* Particles + gradient */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[#0D0A1A]" />
+          <div
+            className="absolute inset-0"
             style={{
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              fontStyle: "italic",
-              fontWeight: 400,
-              textShadow: "0 0 60px rgba(124,58,237,0.3)",
-              textDecoration: "underline",
-              textDecorationColor: "rgba(76,29,149,0.5)",
-              textDecorationThickness: "2px",
-              textUnderlineOffset: "6px",
+              background:
+                "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 70%)",
             }}
+          />
+          <HeroParticles />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full py-32 pt-40">
+          <p
+            className="animate-fade-up text-[10px] font-bold uppercase tracking-[0.28em] mb-8"
+            style={{ color: "#A78BFA", animationDelay: "0ms" }}
           >
-            {t("founders_hero_italic")}
-          </span>
-          {t("founders_hero_after")}
-        </h1>
+            {t("founders_reason_label")}
+          </p>
 
-        <p className="text-lg text-white/45 max-w-2xl leading-relaxed mb-12">
-          {t("founders_hero_sub")}
-        </p>
+          <h1
+            className="animate-fade-up text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight max-w-4xl mb-8"
+            style={{ animationDelay: "120ms" }}
+          >
+            {t("founders_reason_title")}
+          </h1>
 
-        <Link
-          href="/auth/register"
-          className="text-sm font-semibold text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-all duration-200 inline-flex items-center gap-2"
-        >
-          {t("founders_hero_cta")} <ArrowRight className="w-4 h-4" />
-        </Link>
+          <p
+            className="animate-fade-up text-lg text-white/45 max-w-xl leading-relaxed mb-12"
+            style={{ animationDelay: "240ms" }}
+          >
+            {t("founders_reason_sub")}
+          </p>
+
+          <div
+            className="animate-fade-up flex flex-col sm:flex-row items-start sm:items-center gap-4"
+            style={{ animationDelay: "360ms" }}
+          >
+            <Link
+              href="/explore/find-a-mentor"
+              className="inline-flex items-center gap-2.5 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
+              style={{ background: "#7C3AED" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
+            >
+              {t("for_you_mentee_cta")} <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href="/become-a-mentor"
+              className="inline-flex items-center gap-2.5 text-white/80 hover:text-white font-semibold px-7 py-3.5 rounded-lg transition-all text-sm"
+              style={{ border: "1px solid rgba(124,58,237,0.45)" }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = "rgba(124,58,237,0.85)";
+                el.style.background  = "rgba(124,58,237,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = "rgba(124,58,237,0.45)";
+                el.style.background  = "";
+              }}
+            >
+              {t("for_you_mentor_cta")}
+            </Link>
+          </div>
+        </div>
       </section>
 
-      {/* ── SECTION 2: Testimonials masonry ──────────────────── */}
+      {/* ── SECTION 2 — Notre Mission (slide-in) ─────────────────── */}
       <section className="border-t border-white/5 py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="mb-16">
-            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
-              {t("founders_stories_label")}
+        <div
+          ref={missionWrapRef}
+          className="max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-20 items-start"
+        >
+          <div ref={missionTextRef}>
+            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-8">
+              {t("founders_mission_label")}
             </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-              {t("founders_stories_title")}
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-8">
+              {t("founders_mission_title")}
             </h2>
+            <div className="space-y-5 text-white/45 text-base leading-relaxed">
+              <p>{t("founders_mission_p1")}</p>
+              <p>{t("founders_mission_p2")}</p>
+              <p>{t("founders_mission_p3")}</p>
+            </div>
           </div>
 
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-5">
-            {testimonials.map((item) => (
-              <div key={item.name} className="break-inside-avoid mb-5">
-                {item.type === "photo" ? (
-                  <div className="relative overflow-hidden rounded-2xl ring-1 ring-white/8">
-                    <img
-                      src={item.image!}
-                      alt={item.name}
-                      className={`w-full object-cover object-center ${item.imageH}`}
-                      style={{ filter: "brightness(0.45) saturate(0.5)" }}
-                    />
-                    <div
-                      className="absolute inset-0"
-                      style={{ background: "linear-gradient(to top, #0D0A1A 0%, rgba(13,10,26,0.6) 55%, transparent 100%)" }}
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <span className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.2em] mb-3 block">
-                        {item.label}
-                      </span>
-                      <p className="text-base font-semibold text-white leading-snug mb-4">
-                        &ldquo;{item.quote}&rdquo;
-                      </p>
-                      <div className="border-t border-white/8 pt-3">
-                        <p className="text-xs font-semibold text-white">{item.name}</p>
-                        <p className="text-xs text-white/35 mt-0.5">{item.role}</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-2xl p-7 ring-1 ring-white/8" style={{ background: "#1A1A2E" }}>
-                    <span className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.2em] mb-6 block">
-                      {item.label}
-                    </span>
-                    <p className="text-xl font-bold text-white leading-snug mb-7">
-                      &ldquo;{item.quote}&rdquo;
-                    </p>
-                    <div className="border-t border-white/8 pt-5">
-                      <p className="text-sm font-semibold text-white">{item.name}</p>
-                      <p className="text-xs text-white/35 mt-1">{item.role}</p>
-                    </div>
-                  </div>
-                )}
+          <div ref={missionStatsRef} className="grid grid-cols-2 gap-4">
+            {[
+              { value: "2024",   label: t("founders_stat_founded") },
+              { value: "Paris",  label: t("founders_stat_hq") },
+              { value: "3+",     label: t("founders_stat_langs") },
+              { value: "Global", label: t("founders_stat_vision") },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-xl p-7 ring-1 ring-white/8"
+                style={{ background: "#0F0D1F" }}
+              >
+                <p className="text-3xl font-extrabold text-white mb-1">{stat.value}</p>
+                <p className="text-xs text-white/35 uppercase tracking-widest">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 3: Ticker ────────────────────────────────── */}
+      {/* ── SECTION 3 — Notre Vision ──────────────────────────────── */}
+      <section className="relative border-t border-white/5 py-32 overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=1600&q=80"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover object-center"
+            style={{ filter: "brightness(0.28) saturate(0.4)" }}
+          />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+
+            {/* Left — quote */}
+            <div className="lg:py-8">
+              <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-10">
+                {t("founders_vision_label")}
+              </p>
+              <blockquote>
+                <p
+                  className="text-2xl text-white/80 leading-relaxed"
+                  style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}
+                >
+                  &ldquo;{t("founders_vision_quote")}&rdquo;
+                </p>
+              </blockquote>
+            </div>
+
+            {/* Right — 3 glassmorphism cards */}
+            <div ref={visionGridRef} className="flex flex-col gap-4">
+              {visionCards.map((card, i) => (
+                <div
+                  key={card.title}
+                  ref={(el) => { visionCardRefs.current[i] = el; }}
+                  className="rounded-2xl p-7 flex gap-5 items-start"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 60%, rgba(255,255,255,0.03) 100%)",
+                    border: "1px solid rgba(167,139,250,0.25)",
+                    backdropFilter: "blur(40px) saturate(180%)",
+                    WebkitBackdropFilter: "blur(40px) saturate(180%)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 24px rgba(124,58,237,0.10)",
+                  }}
+                >
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ring-1 ring-[#7C3AED]/20"
+                    style={{ background: "rgba(76,29,149,0.35)" }}
+                  >
+                    <card.icon className="w-5 h-5 text-[#A78BFA]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-1.5">{card.title}</h3>
+                    <p className="text-sm text-white/50 leading-relaxed">{card.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 4 — Ticker ───────────────────────────────────── */}
       <section className="border-t border-white/5 py-7 overflow-hidden">
         <div className="animate-ticker flex">
           {[...tickerNames, ...tickerNames].map((name, i) => (
@@ -205,105 +281,11 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4: Video placeholder ─────────────────────── */}
-      <section className="relative overflow-hidden" style={{ aspectRatio: "16 / 7" }}>
-        <img
-          src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=1600&q=80"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ filter: "brightness(0.3) saturate(0.4)" }}
-        />
-        <div className="absolute inset-0" style={{ background: "rgba(76,29,149,0.18)" }} />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #0D0A1A 0%, transparent 30%)" }} />
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
-          <button
-            className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center hover:border-white/50 hover:bg-white/8 transition-all duration-300 group"
-            aria-label="Play video"
-          >
-            <Play className="w-7 h-7 text-white fill-white ml-1 group-hover:scale-110 transition-transform" />
-          </button>
-          <p className="text-xs text-white/30 uppercase tracking-[0.25em]">{t("founders_video_label")}</p>
-        </div>
-      </section>
-
-      {/* ── SECTION 5: Stats ─────────────────────────────────── */}
-      <section className="border-t border-white/5 py-28 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 items-center gap-16">
-
-            <div className="hidden lg:flex justify-end">
-              <div
-                className="w-52 rounded-2xl p-6 ring-1 ring-white/8 flex-shrink-0"
-                style={{ background: "#1A1A2E", transform: "rotate(-9deg)" }}
-              >
-                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest mb-4">
-                  {t("founders_testimonial_mentee")}
-                </p>
-                <p className="text-sm font-bold text-white leading-snug">
-                  &ldquo;{t("founders_stat1_quote")}&rdquo;
-                </p>
-                <p className="text-xs text-white/25 mt-5">Sarah Chen · Stripe</p>
-              </div>
-            </div>
-
-            <div className="text-center space-y-8">
-              <div>
-                <p className="text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-none">500+</p>
-                <p className="text-xs text-white/25 uppercase tracking-[0.3em] mt-3">{t("stats_badge_mentors")}</p>
-              </div>
-              <div className="w-10 h-px bg-[#4C1D95]/40 mx-auto" />
-              <div>
-                <p className="text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-none">95%</p>
-                <p className="text-xs text-white/25 uppercase tracking-[0.3em] mt-3">{t("stats_badge_success")}</p>
-              </div>
-              <div className="w-10 h-px bg-[#4C1D95]/40 mx-auto" />
-              <div>
-                <p className="text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-none">10K+</p>
-                <p className="text-xs text-white/25 uppercase tracking-[0.3em] mt-3">{t("stats_badge_sessions")}</p>
-              </div>
-            </div>
-
-            <div className="hidden lg:flex justify-start">
-              <div
-                className="w-52 rounded-2xl p-6 ring-1 ring-white/8 flex-shrink-0"
-                style={{ background: "#1A1A2E", transform: "rotate(9deg)" }}
-              >
-                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest mb-4">
-                  {t("founders_testimonial_mentor")}
-                </p>
-                <p className="text-sm font-bold text-white leading-snug">
-                  &ldquo;{t("founders_stat2_quote")}&rdquo;
-                </p>
-                <p className="text-xs text-white/25 mt-5">Marcus Johnson · VP Eng</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 6: Partner ───────────────────────────────── */}
-      <section className="border-t border-white/5 py-40 text-center">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          <h2 className="text-6xl md:text-7xl lg:text-[6rem] font-extrabold text-white tracking-tight leading-none mb-12">
-            {t("founders_partner_title")}
-          </h2>
-          <Link
-            href="/contact"
-            className="text-xs font-bold text-white uppercase tracking-[0.3em] underline underline-offset-8 decoration-white/20 hover:decoration-white transition-all duration-200"
-          >
-            {t("founders_partner_cta")}
-          </Link>
-        </div>
-      </section>
-
-      {/* ── SECTION 7: Founders ───────────────────────────────── */}
+      {/* ── SECTION 5 — Fondatrices ──────────────────────────────── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
-            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
+            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-5">
               {t("founders_team_label")}
             </p>
             <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
@@ -324,9 +306,7 @@ export default function FoundersPage() {
                 >
                   {f.initials}
                 </div>
-                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.2em] mb-2">
-                  {f.role}
-                </p>
+                <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.2em] mb-2">{f.role}</p>
                 <h3 className="text-xl font-bold text-white mb-4">{f.name}</h3>
                 <p className="text-sm text-white/40 leading-relaxed">{f.bio}</p>
               </div>
@@ -335,50 +315,11 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 8: Mission ────────────────────────────────── */}
-      <section className="border-t border-white/5 py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-20 items-start">
-            <div>
-              <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
-                {t("founders_mission_label")}
-              </p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-8">
-                {t("founders_mission_title")}
-              </h2>
-              <div className="space-y-5 text-white/45 text-base leading-relaxed">
-                <p>{t("founders_mission_p1")}</p>
-                <p>{t("founders_mission_p2")}</p>
-                <p>{t("founders_mission_p3")}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { value: "2024", label: t("founders_stat_founded") },
-                { value: "Paris", label: t("founders_stat_hq") },
-                { value: "3+",    label: t("founders_stat_langs") },
-                { value: "Global", label: t("founders_stat_vision") },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-xl p-7 ring-1 ring-white/8"
-                  style={{ background: "#0F0D1F" }}
-                >
-                  <p className="text-3xl font-extrabold text-white mb-1">{stat.value}</p>
-                  <p className="text-xs text-white/35 uppercase tracking-widest">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 9: Values ─────────────────────────────────── */}
+      {/* ── SECTION 6 — Valeurs ──────────────────────────────────── */}
       <section className="border-t border-white/5 py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
-            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
+            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-5">
               {t("founders_values_label")}
             </p>
             <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
@@ -407,10 +348,10 @@ export default function FoundersPage() {
         </div>
       </section>
 
-      {/* ── SECTION 10: CTA ───────────────────────────────────── */}
+      {/* ── SECTION 7 — CTA Final ────────────────────────────────── */}
       <section className="border-t border-white/5 py-40 text-center">
         <div className="max-w-3xl mx-auto px-6 lg:px-8">
-          <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-10">
+          <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-10">
             {t("founders_cta_label")}
           </p>
           <h2 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-8">
