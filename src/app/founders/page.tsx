@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, RefreshCw, Shield } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 import HeroParticles from "@/components/HeroParticles";
 
@@ -115,40 +115,20 @@ export default function FoundersPage() {
 
   /* ── Data ────────────────────────────────────────────────────── */
   const founders = [
-    {
-      name: "Luna Davin",
-      role: "Co-Founder & CEO",
-      bio: "Luna a vécu de première main la confusion du choix d'un parcours professionnel après ses études. Incapable de trouver des mentors qui comprenaient vraiment son chemin, elle a décidé de créer la plateforme qu'elle aurait aimé avoir.",
-    },
-    {
-      name: "Yasmine Tunon",
-      role: "Co-Founder & COO",
-      bio: "Yasmine apporte une profonde passion pour le design centré sur l'humain et la construction de communautés. Ayant travaillé dans plusieurs pays et secteurs, elle comprend les complexités du marché du travail mondial.",
-    },
+    { name: "Luna Davin",    role: "Co-Founder & CEO", bio: t("founders_founder1_bio") },
+    { name: "Yasmine Tunon", role: "Co-Founder & COO", bio: t("founders_founder2_bio") },
   ];
 
   const values = [
-    {
-      num: "01",
-      title: "Grow Every Day",
-      desc: "Engagez-vous dans un développement personnel et professionnel continu. Le progrès, même petit, est la seule direction.",
-    },
-    {
-      num: "02",
-      title: "Embrace Change",
-      desc: "Adaptez-vous aux défis et conduisez activement le progrès. Le meilleur chemin n'est rarement le plus évident.",
-    },
-    {
-      num: "03",
-      title: "Build Trust",
-      desc: "Cultivez des relations honnêtes et transparentes qui créent un impact réel. La confiance est le fondement de chaque grande connexion de mentorat.",
-    },
+    { num: "01", title: t("founders_value1_title"), desc: t("founders_value1_desc") },
+    { num: "02", title: t("founders_value2_title"), desc: t("founders_value2_desc") },
+    { num: "03", title: t("founders_value3_title"), desc: t("founders_value3_desc") },
   ];
 
   const visionCards = [
-    { icon: TrendingUp, title: t("founders_vision_c1_title"), desc: t("founders_vision_c1_desc") },
-    { icon: RefreshCw,  title: t("founders_vision_c2_title"), desc: t("founders_vision_c2_desc") },
-    { icon: Shield,     title: t("founders_vision_c3_title"), desc: t("founders_vision_c3_desc") },
+    { num: "01", title: t("founders_vision_c1_title"), desc: t("founders_vision_c1_desc") },
+    { num: "02", title: t("founders_vision_c2_title"), desc: t("founders_vision_c2_desc") },
+    { num: "03", title: t("founders_vision_c3_title"), desc: t("founders_vision_c3_desc") },
   ];
 
   return (
@@ -240,10 +220,10 @@ export default function FoundersPage() {
           <div ref={missionStatsRef} className="flex flex-col justify-center">
             <div className="flex flex-wrap gap-x-0 gap-y-4">
               {[
-                { value: "2025",       label: t("founders_stat_founded") },
-                { value: "Barcelone",  label: t("founders_stat_hq") },
-                { value: "3+",         label: t("founders_stat_langs") },
-                { value: "Global",     label: t("founders_stat_vision") },
+                { value: "2025",                        label: t("founders_stat_founded") },
+                { value: t("founders_stat_hq_value"),  label: t("founders_stat_hq") },
+                { value: "3+",                          label: t("founders_stat_langs") },
+                { value: "Global",                      label: t("founders_stat_vision") },
               ].map((stat, i, arr) => (
                 <div key={stat.label} className="flex items-center">
                   <div className="flex flex-col gap-0.5">
@@ -287,28 +267,18 @@ export default function FoundersPage() {
                 </p>
               </blockquote>
             </div>
-            <div ref={visionGridRef} className="flex flex-col gap-4">
+            <div ref={visionGridRef} className="border-t border-white/10 self-center">
               {visionCards.map((card, i) => (
                 <div
                   key={card.title}
                   ref={(el) => { visionCardRefs.current[i] = el; }}
-                  className="rounded-2xl p-7 flex gap-5 items-start"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(124,58,237,0.06) 60%, rgba(255,255,255,0.03) 100%)",
-                    border: "1px solid rgba(167,139,250,0.25)",
-                    backdropFilter: "blur(40px) saturate(180%)",
-                    WebkitBackdropFilter: "blur(40px) saturate(180%)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 24px rgba(124,58,237,0.10)",
-                  }}
+                  className="grid grid-cols-[56px_1fr] gap-6 py-7 border-b border-white/10"
                 >
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ring-1 ring-[#7C3AED]/20"
-                    style={{ background: "rgba(76,29,149,0.35)" }}
-                  >
-                    <card.icon className="w-5 h-5 text-[#A78BFA]" />
-                  </div>
+                  <span className="text-5xl font-extrabold text-white/15 leading-none select-none">
+                    {card.num}
+                  </span>
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1.5">{card.title}</h3>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-2">{card.title}</h3>
                     <p className="text-sm text-white/50 leading-relaxed">{card.desc}</p>
                   </div>
                 </div>
@@ -323,7 +293,7 @@ export default function FoundersPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-16">
             <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-5">
-              NOS VALEURS
+              {t("founders_values_label")}
             </p>
             <h2 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight">
               {t("founders_values_title")}

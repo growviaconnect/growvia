@@ -18,9 +18,9 @@ const AVATAR_COLORS = [
 
 const INTERVAL_MS = 4000;
 
-function StarRow() {
+function StarRow({ label }: { label: string }) {
   return (
-    <div className="flex gap-0.5" aria-label="5 étoiles sur 5">
+    <div className="flex gap-0.5" aria-label={label}>
       {Array.from({ length: 5 }).map((_, i) => (
         <svg key={i} className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="#A78BFA">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -98,7 +98,7 @@ export default function TestimonialsSection() {
           {/* Left arrow */}
           <button
             onClick={prev}
-            aria-label="Témoignage précédent"
+            aria-label={t("aria_testimonials_prev")}
             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border border-white/15 hover:border-white/30 transition-all duration-200"
           >
             <ChevronLeft className="text-white/40 hover:text-white" style={{ width: 20, height: 20 }} />
@@ -139,7 +139,7 @@ export default function TestimonialsSection() {
                   >
                     {/* Top row: stars + badge */}
                     <div className="flex items-center justify-between">
-                      <StarRow />
+                      <StarRow label={t("aria_stars")} />
                       <span
                         className="text-[9px] font-bold uppercase tracking-[0.2em] rounded-full px-2.5 py-1"
                         style={{
@@ -186,7 +186,7 @@ export default function TestimonialsSection() {
           {/* Right arrow */}
           <button
             onClick={next}
-            aria-label="Témoignage suivant"
+            aria-label={t("aria_testimonials_next")}
             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border border-white/15 hover:border-white/30 transition-all duration-200"
           >
             <ChevronRight className="text-white/40 hover:text-white" style={{ width: 20, height: 20 }} />
@@ -194,13 +194,13 @@ export default function TestimonialsSection() {
         </div>
 
         {/* ── Pagination dots ───────────────────────────────────────── */}
-        <div className="flex items-center gap-2.5 justify-center mt-10" role="tablist" aria-label="Témoignages">
+        <div className="flex items-center gap-2.5 justify-center mt-10" role="tablist" aria-label={t("aria_testimonials_list")}>
           {testimonials.map((_, i) => (
             <button
               key={i}
               role="tab"
               aria-selected={i === active}
-              aria-label={`Témoignage ${i + 1}`}
+              aria-label={`${t("aria_testimonial_n")} ${i + 1}`}
               onClick={() => setActive(i)}
               style={{
                 height: 8,
