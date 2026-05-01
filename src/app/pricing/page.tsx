@@ -18,7 +18,8 @@ const EASE         = "cubic-bezier(0.16,1,0.3,1)";
 const PRICES       = ["4.99", "9.99", "14.99"];
 const PLAN_LABELS  = ["BASIQUE", "STANDARD", "PREMIUM"];
 
-// ── Orb visuals — crossfade on activePlan ────────────────────────────────
+// ── Orb visuals — planetary system, progression: 1→2→3 orbits ────────────
+// Each dot follows an elliptical translate path (3D-feel without transforms)
 
 function OrbBasique({ active }: { active: boolean }) {
   return (
@@ -29,12 +30,32 @@ function OrbBasique({ active }: { active: boolean }) {
       display: "flex", alignItems: "center", justifyContent: "center",
       pointerEvents: "none",
     }}>
+      {/* Core — small, calm */}
       <div style={{
-        width: "min(300px, 46vw)", height: "min(300px, 46vw)", borderRadius: "50%",
-        background: "radial-gradient(circle at 42% 38%, rgba(124,58,237,0.55) 0%, rgba(124,58,237,0.2) 45%, transparent 72%)",
-        animation: "orb-float 7s ease-in-out infinite",
-        boxShadow: "0 0 90px 25px rgba(124,58,237,0.14)",
+        position: "absolute",
+        width: 170, height: 170, borderRadius: "50%",
+        background: "radial-gradient(circle at 40% 36%, rgba(124,58,237,0.70) 0%, rgba(124,58,237,0.28) 50%, transparent 75%)",
+        animation: "orb-float 8s ease-in-out infinite",
+        boxShadow: "0 0 70px 18px rgba(124,58,237,0.18)",
       }} />
+
+      {/* 1 orbit ring — flat ellipse */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 280, height: 88,
+        transform: "translate(-50%,-50%)",
+        border: "1px solid rgba(167,139,250,0.20)", borderRadius: "50%",
+      }} />
+
+      {/* 1 orbiting dot */}
+      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: "rgba(220,210,255,0.95)",
+          boxShadow: "0 0 14px 5px rgba(167,139,250,0.80)",
+          animation: "orbit-a 9s linear infinite",
+        }} />
+      </div>
     </div>
   );
 }
@@ -48,26 +69,48 @@ function OrbStandard({ active }: { active: boolean }) {
       display: "flex", alignItems: "center", justifyContent: "center",
       pointerEvents: "none",
     }}>
-      {/* Pulsing rings */}
-      <div className="ring-pulse-a" style={{
-        position: "absolute", left: "50%", top: "50%",
-        width: "min(420px, 64vw)", height: "min(420px, 64vw)", borderRadius: "50%",
-        border: "1px solid rgba(167,139,250,0.28)",
-        transform: "translate(-50%,-50%)",
-      }} />
-      <div className="ring-pulse-b" style={{
-        position: "absolute", left: "50%", top: "50%",
-        width: "min(380px, 58vw)", height: "min(380px, 58vw)", borderRadius: "50%",
-        border: "1px solid rgba(167,139,250,0.18)",
-        transform: "translate(-50%,-50%)",
-      }} />
-      {/* Core orb */}
+      {/* Core — medium, brighter */}
       <div style={{
-        width: "min(270px, 42vw)", height: "min(270px, 42vw)", borderRadius: "50%",
-        background: "radial-gradient(circle at 38% 34%, rgba(180,150,255,0.7) 0%, rgba(124,58,237,0.4) 45%, transparent 72%)",
-        animation: "orb-float 5.5s ease-in-out infinite",
-        boxShadow: "0 0 110px 35px rgba(124,58,237,0.20), 0 0 45px 12px rgba(167,139,250,0.14)",
+        position: "absolute",
+        width: 210, height: 210, borderRadius: "50%",
+        background: "radial-gradient(circle at 38% 34%, rgba(167,139,250,0.72) 0%, rgba(124,58,237,0.38) 45%, transparent 72%)",
+        animation: "orb-float 6s ease-in-out infinite",
+        boxShadow: "0 0 100px 28px rgba(124,58,237,0.22), 0 0 40px 10px rgba(167,139,250,0.14)",
       }} />
+
+      {/* Ring 1 — flat */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 310, height: 96,
+        transform: "translate(-50%,-50%)",
+        border: "1px solid rgba(167,139,250,0.22)", borderRadius: "50%",
+      }} />
+      {/* Ring 2 — tilted 45° */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 240, height: 130,
+        transform: "translate(-50%,-50%) rotate(45deg)",
+        border: "1px solid rgba(167,139,250,0.14)", borderRadius: "50%",
+      }} />
+
+      {/* Dot 1 — flat orbit */}
+      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: "rgba(220,210,255,0.95)",
+          boxShadow: "0 0 14px 5px rgba(167,139,250,0.85)",
+          animation: "orbit-a 7s linear infinite",
+        }} />
+      </div>
+      {/* Dot 2 — diagonal orbit, reversed */}
+      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
+        <div style={{
+          width: 6, height: 6, borderRadius: "50%",
+          background: "rgba(200,178,255,0.85)",
+          boxShadow: "0 0 10px 3px rgba(124,58,237,0.75)",
+          animation: "orbit-b 11s linear infinite",
+        }} />
+      </div>
     </div>
   );
 }
@@ -81,31 +124,82 @@ function OrbPremium({ active }: { active: boolean }) {
       display: "flex", alignItems: "center", justifyContent: "center",
       pointerEvents: "none",
     }}>
-      {/* Rear satellite orbs */}
+      {/* Core — large, richest glow */}
       <div style={{
         position: "absolute",
-        left: "calc(50% - min(170px, 26vw))", top: "calc(50% - min(90px, 14vw))",
-        width: "min(210px, 32vw)", height: "min(210px, 32vw)", borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(109,40,217,0.45) 0%, transparent 70%)",
-        animation: "orb-float 8s ease-in-out infinite 1.2s",
-        filter: "blur(10px)",
-      }} />
-      <div style={{
-        position: "absolute",
-        right: "calc(50% - min(170px, 26vw))", top: "calc(50% - min(110px, 17vw))",
-        width: "min(190px, 29vw)", height: "min(190px, 29vw)", borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(167,139,250,0.38) 0%, transparent 70%)",
-        animation: "orb-float 6s ease-in-out infinite 0.6s",
-        filter: "blur(7px)",
-      }} />
-      {/* Main central orb */}
-      <div style={{
-        width: "min(330px, 50vw)", height: "min(330px, 50vw)", borderRadius: "50%",
-        background: "radial-gradient(circle at 33% 28%, rgba(210,185,255,0.75) 0%, rgba(167,139,250,0.52) 28%, rgba(124,58,237,0.30) 56%, transparent 75%)",
+        width: 250, height: 250, borderRadius: "50%",
+        background: "radial-gradient(circle at 33% 28%, rgba(215,190,255,0.78) 0%, rgba(167,139,250,0.52) 30%, rgba(124,58,237,0.28) 58%, transparent 76%)",
         animation: "orb-float 5s ease-in-out infinite",
-        boxShadow: "0 0 130px 50px rgba(124,58,237,0.26), 0 0 60px 18px rgba(167,139,250,0.20)",
-        position: "relative",
+        boxShadow: "0 0 130px 50px rgba(124,58,237,0.28), 0 0 60px 18px rgba(167,139,250,0.22)",
       }} />
+
+      {/* Ring 1 — flat */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 340, height: 104,
+        transform: "translate(-50%,-50%)",
+        border: "1px solid rgba(167,139,250,0.26)", borderRadius: "50%",
+      }} />
+      {/* Ring 2 — tilted 45° */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 265, height: 145,
+        transform: "translate(-50%,-50%) rotate(45deg)",
+        border: "1px solid rgba(167,139,250,0.17)", borderRadius: "50%",
+      }} />
+      {/* Ring 3 — near-vertical */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 180, height: 320,
+        transform: "translate(-50%,-50%) rotate(-18deg)",
+        border: "1px solid rgba(167,139,250,0.10)", borderRadius: "50%",
+      }} />
+
+      {/* Dot 1 — flat orbit */}
+      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
+        <div style={{
+          width: 9, height: 9, borderRadius: "50%",
+          background: "rgba(230,220,255,0.98)",
+          boxShadow: "0 0 16px 6px rgba(167,139,250,0.90)",
+          animation: "orbit-a 6s linear infinite",
+        }} />
+      </div>
+      {/* Dot 2 — diagonal orbit */}
+      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
+        <div style={{
+          width: 7, height: 7, borderRadius: "50%",
+          background: "rgba(200,178,255,0.90)",
+          boxShadow: "0 0 12px 4px rgba(124,58,237,0.80)",
+          animation: "orbit-b 10s linear infinite",
+        }} />
+      </div>
+      {/* Dot 3 — vertical orbit */}
+      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)" }}>
+        <div style={{
+          width: 5, height: 5, borderRadius: "50%",
+          background: "rgba(180,155,255,0.82)",
+          boxShadow: "0 0 10px 3px rgba(109,40,217,0.72)",
+          animation: "orbit-c 14s linear infinite",
+        }} />
+      </div>
+
+      {/* Floating micro-particles */}
+      {([
+        { l: "34%", t: "18%", s: 4.2, d: 0    },
+        { l: "66%", t: "26%", s: 5.8, d: 1.1  },
+        { l: "24%", t: "66%", s: 5.0, d: 2.0  },
+        { l: "72%", t: "72%", s: 6.5, d: 0.4  },
+        { l: "48%", t: "80%", s: 4.8, d: 1.7  },
+      ] as const).map((p, i) => (
+        <div key={i} style={{
+          position: "absolute", width: 3, height: 3, borderRadius: "50%",
+          background: "rgba(200,180,255,0.55)",
+          boxShadow: "0 0 6px 2px rgba(167,139,250,0.50)",
+          left: p.l, top: p.t,
+          animation: `orb-float ${p.s}s ease-in-out infinite ${p.d}s`,
+          opacity: 0.65,
+        }} />
+      ))}
     </div>
   );
 }
@@ -333,47 +427,6 @@ export default function PricingPage() {
                 <OrbBasique   active={activePlan === 0} />
                 <OrbStandard  active={activePlan === 1} />
                 <OrbPremium   active={activePlan === 2} />
-              </div>
-
-              {/* Plan name + price overlay — centered on orb, crossfades */}
-              <div style={{ position: "relative", zIndex: 3, textAlign: "center", pointerEvents: "none" }}>
-                {plans.map((plan, i) => (
-                  <div
-                    key={plan.key}
-                    style={{
-                      position: i === 0 ? "relative" : "absolute",
-                      top: i === 0 ? undefined : 0,
-                      left: i === 0 ? undefined : "50%",
-                      transform: i === 0 ? undefined : "translateX(-50%)",
-                      width: "100%",
-                      opacity: activePlan === i ? 1 : 0,
-                      transition: "opacity 0.6s ease",
-                    }}
-                  >
-                    <p style={{
-                      fontSize: 9, fontWeight: 700, letterSpacing: "0.38em",
-                      textTransform: "uppercase", color: "rgba(255,255,255,0.38)",
-                      margin: "0 0 10px",
-                    }}>
-                      {["I", "II", "III"][i]}
-                    </p>
-                    <p style={{
-                      fontSize: "clamp(36px, 5.5vw, 62px)", fontWeight: 800,
-                      color: "white", lineHeight: 1, letterSpacing: "-0.03em",
-                      margin: "0 0 12px",
-                      textShadow: "0 0 48px rgba(167,139,250,0.55), 0 2px 24px rgba(0,0,0,0.4)",
-                    }}>
-                      {plan.name}
-                    </p>
-                    <p style={{
-                      fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.38)",
-                      fontVariantNumeric: "tabular-nums", margin: 0,
-                      letterSpacing: "0.04em",
-                    }}>
-                      {PRICES[i]}€ <span style={{ opacity: 0.6 }}>/ mois</span>
-                    </p>
-                  </div>
-                ))}
               </div>
 
               {/* Progress dots */}
@@ -719,15 +772,36 @@ export default function PricingPage() {
       <style>{`
         @keyframes orb-float {
           0%, 100% { transform: translateY(0) scale(1); }
-          50%       { transform: translateY(-18px) scale(1.025); }
+          50%       { transform: translateY(-16px) scale(1.022); }
         }
-        @keyframes ring-pulse-anim {
-          0%   { transform: translate(-50%,-50%) scale(1);    opacity: 0.55; }
-          65%  { transform: translate(-50%,-50%) scale(1.30); opacity: 0; }
-          100% { transform: translate(-50%,-50%) scale(1.30); opacity: 0; }
+
+        /* orbit-a: flat ellipse 140×44px — like a planet on the horizon */
+        @keyframes orbit-a {
+          0%   { transform: translate(140px,  0px); }
+          25%  { transform: translate(  0px, 44px); }
+          50%  { transform: translate(-140px,  0px); }
+          75%  { transform: translate(  0px,-44px); }
+          100% { transform: translate(140px,  0px); }
         }
-        .ring-pulse-a { animation: ring-pulse-anim 3s ease-in-out infinite; }
-        .ring-pulse-b { animation: ring-pulse-anim 3s ease-in-out infinite 0.55s; }
+
+        /* orbit-b: diagonal ellipse 108×62px, counterclockwise */
+        @keyframes orbit-b {
+          0%   { transform: translate(-108px,   0px); }
+          25%  { transform: translate(    0px,  62px); }
+          50%  { transform: translate( 108px,   0px); }
+          75%  { transform: translate(    0px, -62px); }
+          100% { transform: translate(-108px,   0px); }
+        }
+
+        /* orbit-c: near-vertical ellipse 44×152px — like a polar orbit */
+        @keyframes orbit-c {
+          0%   { transform: translate(  0px,-152px); }
+          25%  { transform: translate( 44px,   0px); }
+          50%  { transform: translate(  0px, 152px); }
+          75%  { transform: translate(-44px,   0px); }
+          100% { transform: translate(  0px,-152px); }
+        }
+
         @keyframes pricing-bounce {
           0%, 100% { transform: translateX(-50%) translateY(0); }
           50%       { transform: translateX(-50%) translateY(-9px); }
