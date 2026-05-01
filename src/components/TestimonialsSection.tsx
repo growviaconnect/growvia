@@ -12,7 +12,7 @@ const ACCENT       = "#7C3AED";
 const ACCENT_LIGHT = "#A78BFA";
 const CARD_W  = 340;
 const CARD_H  = 520;
-const GAP     = 140;
+const GAP     = 260;
 const PHOTO_H = Math.round(CARD_H * 0.55); // 286px
 const HEADLINE = ["Des", "voix", "qui", "comptent."];
 
@@ -241,78 +241,100 @@ export default function TestimonialsSection() {
               top:        0,
               height:    "100vh",
               overflow:  "hidden",
-              background: "#110E1F",
+              background: "linear-gradient(145deg, #08051A 0%, #1B0D38 30%, #14093A 55%, #0D0828 80%, #06040F 100%)",
               display:   "flex",
               flexDirection: "column",
               justifyContent: "center",
             }}
           >
-            {/* ── Museum wall layers ── */}
-
-            {/* Wall texture: warm linen grain via inline SVG */}
+            {/* ── Wall layer 1: diamond/rhombus grid pattern ── */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2 L70 36 L36 70 L2 36 Z' fill='none' stroke='%237C3AED' stroke-opacity='0.13' stroke-width='0.8'/%3E%3C/svg%3E")`,
               backgroundRepeat: "repeat",
-              opacity: 1,
             }} />
 
-            {/* Vertical panel lines — subtle wainscoting */}
+            {/* ── Wall layer 2: fine dot grid overlay ── */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 319px, rgba(255,255,255,0.018) 320px, rgba(255,255,255,0.018) 321px)",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Ccircle cx='18' cy='18' r='1' fill='%23A78BFA' fill-opacity='0.10'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "repeat",
             }} />
 
-            {/* Ceiling warm amber spotlight — like track lighting above paintings */}
-            <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "45%",
-              pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,150,80,0.07) 0%, transparent 70%)",
-            }} />
-
-            {/* Secondary off-center spotlights for depth */}
-            <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "60%",
-              pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 35% 50% at 22% -5%, rgba(180,130,60,0.05) 0%, transparent 65%), radial-gradient(ellipse 35% 50% at 78% -5%, rgba(180,130,60,0.05) 0%, transparent 65%)",
-            }} />
-
-            {/* Violet gallery accent glow (brand) */}
+            {/* ── Wall layer 3: large central violet bloom ── */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%)",
+              background: "radial-gradient(ellipse 70% 65% at 50% 52%, rgba(109,40,217,0.28) 0%, rgba(124,58,237,0.10) 45%, transparent 70%)",
             }} />
 
-            {/* Picture rail molding — horizontal bar near top */}
+            {/* ── Wall layer 4: left accent bloom ── */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(ellipse 45% 55% at 8% 55%, rgba(124,58,237,0.18) 0%, transparent 65%)",
+            }} />
+
+            {/* ── Wall layer 5: right accent bloom ── */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(ellipse 45% 55% at 92% 50%, rgba(167,139,250,0.12) 0%, transparent 65%)",
+            }} />
+
+            {/* ── Wall layer 6: ceiling lavender light ── */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: "55%",
+              pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(ellipse 90% 70% at 50% -15%, rgba(190,160,255,0.14) 0%, transparent 65%)",
+            }} />
+
+            {/* ── Wall layer 7: floating luminous orbs ── */}
+            {/* Top-left orb */}
+            <div style={{
+              position: "absolute", top: "12%", left: "6%", width: 220, height: 220,
+              borderRadius: "50%", pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)",
+              filter: "blur(32px)",
+            }} />
+            {/* Top-right orb */}
+            <div style={{
+              position: "absolute", top: "8%", right: "9%", width: 180, height: 180,
+              borderRadius: "50%", pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%)",
+              filter: "blur(28px)",
+            }} />
+            {/* Bottom-center orb */}
+            <div style={{
+              position: "absolute", bottom: "10%", left: "42%", width: 260, height: 200,
+              borderRadius: "50%", pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(circle, rgba(109,40,217,0.15) 0%, transparent 70%)",
+              filter: "blur(40px)",
+            }} />
+
+            {/* ── Wall layer 8: picture rail molding ── */}
             <div style={{
               position: "absolute", top: 52, left: 0, right: 0,
               pointerEvents: "none", zIndex: 1,
             }}>
-              {/* Rail bar */}
-              <div style={{ height: 2, background: "linear-gradient(90deg, transparent 0%, rgba(180,150,100,0.25) 10%, rgba(200,170,110,0.35) 50%, rgba(180,150,100,0.25) 90%, transparent 100%)" }} />
-              {/* Rail shadow */}
-              <div style={{ height: 6, background: "linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)" }} />
-              {/* Rail highlight above */}
-              <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent 0%, rgba(255,230,170,0.12) 20%, rgba(255,240,190,0.18) 50%, rgba(255,230,170,0.12) 80%, transparent 100%)" }} />
+              <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(200,180,255,0.20) 20%, rgba(220,200,255,0.28) 50%, rgba(200,180,255,0.20) 80%, transparent)" }} />
+              <div style={{ height: 2, background: "linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.40) 15%, rgba(167,139,250,0.55) 50%, rgba(124,58,237,0.40) 85%, transparent 100%)" }} />
+              <div style={{ height: 8, background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)" }} />
             </div>
 
-            {/* Floor reflection — subtle floor at bottom */}
+            {/* ── Wall layer 9: floor line ── */}
             <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: "18%",
-              pointerEvents: "none", zIndex: 0,
-              background: "linear-gradient(to top, rgba(180,150,100,0.04) 0%, transparent 100%)",
-            }} />
-            {/* Floor line */}
-            <div style={{
-              position: "absolute", bottom: 72, left: "8%", right: "8%", height: 1,
-              background: "linear-gradient(90deg, transparent, rgba(200,170,110,0.12) 20%, rgba(200,170,110,0.18) 50%, rgba(200,170,110,0.12) 80%, transparent)",
+              position: "absolute", bottom: 68, left: "4%", right: "4%", height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(124,58,237,0.30) 20%, rgba(167,139,250,0.40) 50%, rgba(124,58,237,0.30) 80%, transparent)",
               pointerEvents: "none", zIndex: 1,
             }} />
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "16%",
+              pointerEvents: "none", zIndex: 0,
+              background: "linear-gradient(to top, rgba(109,40,217,0.08) 0%, transparent 100%)",
+            }} />
 
-            {/* Edge vignette */}
+            {/* ── Wall layer 10: edge vignette ── */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1,
-              background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(8,6,16,0.65) 100%)",
+              background: "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 35%, rgba(4,2,10,0.75) 100%)",
             }} />
             {/* Horizontal track */}
             <div
