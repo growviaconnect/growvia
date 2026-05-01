@@ -116,7 +116,7 @@ export default function HowItWorksPage() {
   useEffect(() => {
     if (isMobile) return;
 
-    const section = sectionRef.current;
+    const section = sectionRef.current as HTMLElement;
     if (!section) return;
 
     function tick() {
