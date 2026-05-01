@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Video, Bell, Clock, CheckCircle, ArrowRight, Mail } from "lucide-react";
+import { ArrowRight, Video, Bell, Clock, CheckCircle, Mail } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
 const serif = {
@@ -9,6 +10,20 @@ const serif = {
   fontStyle: "italic" as const,
   fontWeight: 400,
 };
+
+const ACCENT       = "#7C3AED";
+const ACCENT_LIGHT = "#A78BFA";
+
+// Slightly different bg per card — visual depth as they stack
+const CARD_BG = [
+  "#0D0A1A",
+  "#100D1E",
+  "#131023",
+  "#161228",
+  "#19152D",
+  "#1C1832",
+  "#1F1B37",
+];
 
 const stepImages = [
   "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80",
@@ -20,74 +35,70 @@ const stepImages = [
   "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",
 ];
 
+function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+
 export default function HowItWorksPage() {
   const { t } = useLang();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const steps = [
     {
-      num: "01",
-      title: t("hiw_s1_title"),
-      desc:  t("hiw_s1_desc"),
+      num: "01", title: t("hiw_s1_title"), desc: t("hiw_s1_desc"),
       detail: [t("hiw_s1_d1"), t("hiw_s1_d2"), t("hiw_s1_d3")],
       image: stepImages[0],
     },
     {
-      num: "02",
-      title: t("hiw_s2_title"),
-      desc:  t("hiw_s2_desc"),
+      num: "02", title: t("hiw_s2_title"), desc: t("hiw_s2_desc"),
       detail: [t("hiw_s2_d1"), t("hiw_s2_d2"), t("hiw_s2_d3")],
       image: stepImages[1],
     },
     {
-      num: "03",
-      title: t("hiw_s3_title"),
-      desc:  t("hiw_s3_desc"),
+      num: "03", title: t("hiw_s3_title"), desc: t("hiw_s3_desc"),
       detail: [t("hiw_s3_d1"), t("hiw_s3_d2"), t("hiw_s3_d3")],
       image: stepImages[2],
     },
     {
-      num: "04",
-      title: t("hiw_s4_title"),
-      desc:  t("hiw_s4_desc"),
+      num: "04", title: t("hiw_s4_title"), desc: t("hiw_s4_desc"),
       detail: [t("hiw_s4_d1"), t("hiw_s4_d2"), t("hiw_s4_d3")],
       image: stepImages[3],
     },
     {
-      num: "05",
-      title: t("hiw_s5_title"),
-      desc:  t("hiw_s5_desc"),
+      num: "05", title: t("hiw_s5_title"), desc: t("hiw_s5_desc"),
       detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3")],
       image: stepImages[4],
     },
     {
-      num: "06",
-      title: t("hiw_s6_title"),
-      desc:  t("hiw_s6_desc"),
+      num: "06", title: t("hiw_s6_title"), desc: t("hiw_s6_desc"),
       detail: [t("hiw_s6_d1"), t("hiw_s6_d2"), t("hiw_s6_d3")],
       image: stepImages[5],
     },
     {
-      num: "07",
-      title: t("hiw_s7_title"),
-      desc:  t("hiw_s7_desc"),
+      num: "07", title: t("hiw_s7_title"), desc: t("hiw_s7_desc"),
       detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3")],
       image: stepImages[6],
     },
   ];
+
+  const N = steps.length;
 
   const sessionCards = [
     { Icon: Video, title: t("hiw_c1_title"), desc: t("hiw_c1_desc") },
     { Icon: Bell,  title: t("hiw_c2_title"), desc: t("hiw_c2_desc") },
     { Icon: Clock, title: t("hiw_c3_title"), desc: t("hiw_c3_desc") },
   ];
-
   const notifications = [
     { time: "Now",            msg: t("hiw_notif_confirmed"), dot: "#10b981" },
     { time: "Tomorrow 09:00", msg: t("hiw_notif_reminder24"), dot: "#60a5fa" },
     { time: "Tomorrow 09:59", msg: t("hiw_notif_reminder1"),  dot: "#f59e0b" },
-    { time: "Tomorrow 11:00", msg: t("hiw_notif_join"),       dot: "#7C3AED" },
+    { time: "Tomorrow 11:00", msg: t("hiw_notif_join"),       dot: ACCENT },
   ];
-
   const notifItems = [
     { Icon: Mail,        label: t("hiw_n1") },
     { Icon: Bell,        label: t("hiw_n2") },
@@ -95,9 +106,59 @@ export default function HowItWorksPage() {
     { Icon: CheckCircle, label: t("hiw_n4") },
   ];
 
+  // ── Scroll-driven card stack ────────────────────────────────────────
+  const sectionRef      = useRef<HTMLElement>(null);
+  const cardRefs        = useRef<(HTMLDivElement | null)[]>([]);
+  const targetProgress  = useRef<number[]>(new Array(N).fill(0));
+  const currentProgress = useRef<number[]>(new Array(N).fill(0));
+  const rafId           = useRef(0);
+
+  useEffect(() => {
+    if (isMobile) return;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    function tick() {
+      let live = false;
+      for (let i = 0; i < N; i++) {
+        const card = cardRefs.current[i];
+        if (!card) continue;
+        const prev = currentProgress.current[i];
+        currentProgress.current[i] = lerp(prev, targetProgress.current[i], 0.1);
+        card.style.transform = `translateY(${-currentProgress.current[i] * 100}vh)`;
+        if (Math.abs(currentProgress.current[i] - targetProgress.current[i]) > 0.0005) live = true;
+      }
+      rafId.current = live ? requestAnimationFrame(tick) : 0;
+    }
+
+    function onScroll() {
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+      const vh = window.innerHeight;
+      for (let i = 0; i < N - 1; i++) {
+        // Card i slides away as scrollY moves through its 100vh window
+        const start = sectionTop + i * vh;
+        targetProgress.current[i] = Math.max(0, Math.min(1, (window.scrollY - start) / vh));
+      }
+      // Last card never slides away
+      targetProgress.current[N - 1] = 0;
+
+      if (!rafId.current) rafId.current = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
+
   return (
     <>
-      {/* ── SECTION 1, HERO ─────────────────────────────────── */}
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1600&q=80"
@@ -110,14 +171,13 @@ export default function HowItWorksPage() {
           className="absolute bottom-0 left-0 right-0 pointer-events-none"
           style={{ height: "30%", background: "linear-gradient(to bottom, transparent, #0D0A1A)" }}
         />
-
         <div className="relative px-6 max-w-4xl mx-auto">
           <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
             {t("hiw_label")}
           </p>
           <h1 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-8">
             {t("hiw_title1")}{" "}
-            <span style={{ ...serif, color: "#A78BFA" }}>{t("hiw_title2")}</span>
+            <span style={{ ...serif, color: ACCENT_LIGHT }}>{t("hiw_title2")}</span>
           </h1>
           <p className="reveal reveal-delay-2 text-lg md:text-xl text-white/50 leading-relaxed max-w-2xl mx-auto">
             {t("hiw_sub")}
@@ -125,63 +185,206 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 2, STEPS ──────────────────────────────────── */}
-      <section className="py-8">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      {/* ── CARD STACK — desktop ──────────────────────────────────────── */}
+      {!isMobile ? (
+        <section
+          ref={sectionRef}
+          style={{ height: `${N * 100}vh`, position: "relative" }}
+          aria-label="Étapes — comment ça marche"
+        >
           {steps.map((step, i) => {
-            const reversed = i % 2 === 1;
+            const bg = CARD_BG[i % CARD_BG.length];
             return (
-              <div key={step.num}>
-                <div
-                  className={`flex flex-col ${reversed ? "lg:flex-row-reverse" : "lg:flex-row"} gap-16 lg:gap-24 items-center py-28`}
-                >
-                  <div className="reveal flex-1 min-w-0">
-                    <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7C3AED] mb-5">
-                      {step.num}
-                    </p>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight mb-6 tracking-tight">
-                      {step.title}
-                    </h2>
-                    <p className="text-base text-white/50 leading-relaxed mb-8">
-                      {step.desc}
-                    </p>
-                    <ul className="space-y-4">
-                      {step.detail.map((d) => (
-                        <li key={d} className="flex items-start gap-3 text-sm text-white/55">
-                          <CheckCircle className="w-4 h-4 text-[#7C3AED] flex-shrink-0 mt-0.5" />
-                          {d}
-                        </li>
-                      ))}
-                    </ul>
+              <div
+                key={step.num}
+                ref={(el) => { cardRefs.current[i] = el; }}
+                style={{
+                  position:   "sticky",
+                  top:         0,
+                  height:     "100vh",
+                  overflow:   "hidden",
+                  zIndex:     (N - i) * 10,
+                  background: bg,
+                  display:    "flex",
+                  willChange: "transform",
+                }}
+              >
+                {/* ── LEFT — text content (50%) ──────────────── */}
+                <div style={{
+                  width: "50%", flexShrink: 0,
+                  display: "flex", flexDirection: "column", justifyContent: "center",
+                  padding: "0 clamp(36px, 6vw, 88px)",
+                  position: "relative", zIndex: 1,
+                }}>
+                  {/* Decorative step number — watermark */}
+                  <div style={{
+                    position: "absolute", top: "50%", left: "clamp(36px, 6vw, 88px)",
+                    transform: "translateY(-60%)",
+                    fontSize: "clamp(100px, 18vw, 160px)", fontWeight: 800,
+                    color: "rgba(124,58,237,0.07)", lineHeight: 1,
+                    userSelect: "none", pointerEvents: "none",
+                    letterSpacing: "-0.04em",
+                  }}>
+                    {step.num}
                   </div>
 
-                  <div className="reveal reveal-delay-2 flex-1 min-w-0 relative overflow-hidden rounded-2xl" style={{ aspectRatio: "4/3" }}>
-                    <div className="w-full h-full overflow-hidden rounded-2xl">
-                      <img
-                        src={step.image}
-                        alt={step.title}
-                        className="w-full h-full object-cover ken-burns-img"
-                        style={{ animationDelay: `${i * 0.8}s` }}
-                      />
+                  <div style={{ position: "relative" }}>
+                    <p style={{
+                      fontSize: 10, fontWeight: 700, letterSpacing: "0.32em",
+                      textTransform: "uppercase", color: ACCENT, marginBottom: 18,
+                    }}>
+                      ÉTAPE {step.num}
+                    </p>
+                    <h2 style={{
+                      fontSize: "clamp(28px, 3.8vw, 52px)", fontWeight: 800,
+                      color: "white", lineHeight: 1.12, margin: "0 0 20px",
+                      letterSpacing: "-0.025em",
+                    }}>
+                      {step.title}
+                    </h2>
+                    <p style={{
+                      fontSize: "clamp(14px, 1.5vw, 17px)", color: "rgba(255,255,255,0.48)",
+                      lineHeight: 1.78, margin: "0 0 30px", maxWidth: 460,
+                    }}>
+                      {step.desc}
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {step.detail.map((d) => (
+                        <div key={d} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                          <span style={{
+                            width: 18, height: 18, borderRadius: "50%",
+                            background: "rgba(124,58,237,0.15)",
+                            border: "1px solid rgba(124,58,237,0.35)",
+                            flexShrink: 0, marginTop: 1,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}>
+                            <svg width="8" height="7" viewBox="0 0 8 7" fill="none" aria-hidden="true">
+                              <path d="M1 3.5L3 5.5L7 1.5" stroke={ACCENT_LIGHT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.48)", lineHeight: 1.6 }}>
+                            {d}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                    <div
-                      className="absolute inset-0 rounded-2xl pointer-events-none"
-                      style={{ background: "linear-gradient(135deg, rgba(76,29,149,0.25) 0%, transparent 60%)" }}
-                    />
                   </div>
                 </div>
 
-                {i < steps.length - 1 && (
-                  <div className="w-full h-px" style={{ background: "linear-gradient(to right, transparent 0%, rgba(124,58,237,0.12) 50%, transparent 100%)" }} />
+                {/* ── RIGHT — full-bleed image (50%) ─────────── */}
+                <div style={{ width: "50%", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    style={{
+                      position: "absolute", inset: 0, width: "100%", height: "100%",
+                      objectFit: "cover", objectPosition: "center",
+                    }}
+                    loading="lazy"
+                  />
+                  {/* Gradient left → transparent so image bleeds into card bg */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
+                  }} />
+                  {/* Subtle violet tint */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "linear-gradient(145deg, rgba(76,29,149,0.38) 0%, transparent 60%)",
+                  }} />
+                  {/* Bottom fade */}
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
+                    background: `linear-gradient(to top, ${bg} 0%, transparent 100%)`,
+                  }} />
+                </div>
+
+                {/* ── Progress bar — bottom of card ──────────── */}
+                <div style={{
+                  position: "absolute", bottom: 0, left: 0, right: 0,
+                  height: 2, background: "rgba(255,255,255,0.04)",
+                  zIndex: 2,
+                }}>
+                  <div style={{
+                    height: "100%",
+                    width: `${((i + 1) / N) * 100}%`,
+                    background: `linear-gradient(to right, rgba(124,58,237,0.6), ${ACCENT_LIGHT})`,
+                  }} />
+                </div>
+
+                {/* ── Step counter — bottom right ─────────────── */}
+                <div style={{
+                  position: "absolute", bottom: 20, right: 28,
+                  fontFamily: "monospace", fontSize: 11,
+                  color: "rgba(255,255,255,0.18)", userSelect: "none", zIndex: 3,
+                }}>
+                  {step.num} / {String(N).padStart(2, "0")}
+                </div>
+
+                {/* ── Scroll cue — only on first card ─────────── */}
+                {i === 0 && (
+                  <div style={{
+                    position: "absolute", bottom: 28, left: "50%",
+                    transform: "translateX(-50%)",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                    pointerEvents: "none", zIndex: 3,
+                  }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+                      DÉFILER
+                    </span>
+                    <div style={{
+                      width: 1, height: 28,
+                      background: "linear-gradient(to bottom, rgba(124,58,237,0.5), transparent)",
+                      animation: "hiw-pulse 2s ease-in-out infinite",
+                    }} />
+                  </div>
                 )}
               </div>
             );
           })}
-        </div>
-      </section>
+        </section>
+      ) : (
+        /* ── MOBILE — simple vertical stack ─────────────────────── */
+        <section style={{ background: "#0D0A1A" }}>
+          {steps.map((step, i) => (
+            <div
+              key={step.num}
+              style={{
+                padding: "72px 24px 60px",
+                borderTop: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none",
+              }}
+            >
+              {/* Image */}
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: 12, marginBottom: 32 }}>
+                <img src={step.image} alt={step.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(76,29,149,0.4) 0%, transparent 60%)" }} />
+              </div>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: ACCENT, marginBottom: 12 }}>
+                ÉTAPE {step.num}
+              </p>
+              <h2 style={{ fontSize: 28, fontWeight: 800, color: "white", lineHeight: 1.15, margin: "0 0 16px" }}>
+                {step.title}
+              </h2>
+              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.48)", lineHeight: 1.75, margin: "0 0 20px" }}>
+                {step.desc}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {step.detail.map((d) => (
+                  <div key={d} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                    <span style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.35)", flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="7" height="6" viewBox="0 0 8 7" fill="none"><path d="M1 3.5L3 5.5L7 1.5" stroke={ACCENT_LIGHT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </span>
+                    <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>{d}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
-      {/* ── SECTION 3, SESSIONS ───────────────────────────────── */}
-      <section className="py-32">
+      {/* ── SECTION 3 — Sessions ─────────────────────────────────────── */}
+      <section className="py-32" style={{ background: "#0D0A1A" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
@@ -194,7 +397,6 @@ export default function HowItWorksPage() {
               {t("hiw_sessions_sub")}
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {sessionCards.map(({ Icon, title, desc }, i) => (
               <div
@@ -216,11 +418,10 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4, NOTIFICATIONS ──────────────────────────── */}
-      <section className="py-32">
+      {/* ── SECTION 4 — Notifications ────────────────────────────────── */}
+      <section className="py-32" style={{ background: "#0D0A1A" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
-
             <div>
               <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
                 {t("hiw_notif_label")}
@@ -246,7 +447,6 @@ export default function HowItWorksPage() {
                 ))}
               </div>
             </div>
-
             <div
               className="reveal reveal-delay-2 rounded-2xl p-8 border border-white/[0.07]"
               style={{ background: "rgba(255,255,255,0.03)" }}
@@ -273,12 +473,11 @@ export default function HowItWorksPage() {
                 ))}
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 5, CTA ─────────────────────────────────────── */}
+      {/* ── SECTION 5 — CTA ──────────────────────────────────────────── */}
       <section className="relative py-40 text-center overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover z-0">
           <source src="https://videos.pexels.com/video-files/3252312/3252312-uhd_2560_1440_25fps.mp4" type="video/mp4" />
@@ -286,7 +485,6 @@ export default function HowItWorksPage() {
         <div className="absolute inset-0 z-10" style={{ background: "rgba(60,20,100,0.75)" }} />
         <div className="absolute top-0 left-0 right-0 pointer-events-none z-20" style={{ height: "220px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }} />
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-20" style={{ height: "220px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }} />
-
         <div className="relative z-30 max-w-2xl mx-auto px-6">
           <p className="reveal text-xs font-semibold text-[#C4B5FD] uppercase tracking-[0.25em] mb-8">
             {t("hiw_cta_label")}
@@ -308,6 +506,13 @@ export default function HowItWorksPage() {
           </div>
         </div>
       </section>
+
+      <style>{`
+        @keyframes hiw-pulse {
+          0%, 100% { opacity: 0.5; transform: scaleY(1); }
+          50%       { opacity: 1;   transform: scaleY(1.15); }
+        }
+      `}</style>
     </>
   );
 }
