@@ -241,12 +241,79 @@ export default function TestimonialsSection() {
               top:        0,
               height:    "100vh",
               overflow:  "hidden",
-              background: "#0D0A1A",
+              background: "#110E1F",
               display:   "flex",
               flexDirection: "column",
               justifyContent: "center",
             }}
           >
+            {/* ── Museum wall layers ── */}
+
+            {/* Wall texture: warm linen grain via inline SVG */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "repeat",
+              opacity: 1,
+            }} />
+
+            {/* Vertical panel lines — subtle wainscoting */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+              backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 319px, rgba(255,255,255,0.018) 320px, rgba(255,255,255,0.018) 321px)",
+            }} />
+
+            {/* Ceiling warm amber spotlight — like track lighting above paintings */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: "45%",
+              pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,150,80,0.07) 0%, transparent 70%)",
+            }} />
+
+            {/* Secondary off-center spotlights for depth */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: "60%",
+              pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(ellipse 35% 50% at 22% -5%, rgba(180,130,60,0.05) 0%, transparent 65%), radial-gradient(ellipse 35% 50% at 78% -5%, rgba(180,130,60,0.05) 0%, transparent 65%)",
+            }} />
+
+            {/* Violet gallery accent glow (brand) */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+              background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%)",
+            }} />
+
+            {/* Picture rail molding — horizontal bar near top */}
+            <div style={{
+              position: "absolute", top: 52, left: 0, right: 0,
+              pointerEvents: "none", zIndex: 1,
+            }}>
+              {/* Rail bar */}
+              <div style={{ height: 2, background: "linear-gradient(90deg, transparent 0%, rgba(180,150,100,0.25) 10%, rgba(200,170,110,0.35) 50%, rgba(180,150,100,0.25) 90%, transparent 100%)" }} />
+              {/* Rail shadow */}
+              <div style={{ height: 6, background: "linear-gradient(to bottom, rgba(0,0,0,0.25), transparent)" }} />
+              {/* Rail highlight above */}
+              <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent 0%, rgba(255,230,170,0.12) 20%, rgba(255,240,190,0.18) 50%, rgba(255,230,170,0.12) 80%, transparent 100%)" }} />
+            </div>
+
+            {/* Floor reflection — subtle floor at bottom */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "18%",
+              pointerEvents: "none", zIndex: 0,
+              background: "linear-gradient(to top, rgba(180,150,100,0.04) 0%, transparent 100%)",
+            }} />
+            {/* Floor line */}
+            <div style={{
+              position: "absolute", bottom: 72, left: "8%", right: "8%", height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(200,170,110,0.12) 20%, rgba(200,170,110,0.18) 50%, rgba(200,170,110,0.12) 80%, transparent)",
+              pointerEvents: "none", zIndex: 1,
+            }} />
+
+            {/* Edge vignette */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1,
+              background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(8,6,16,0.65) 100%)",
+            }} />
             {/* Horizontal track */}
             <div
               ref={trackRef}
@@ -258,6 +325,8 @@ export default function TestimonialsSection() {
                 paddingRight:  trackPadding,
                 alignItems:    "center",
                 willChange:    "transform",
+                position:      "relative",
+                zIndex:        2,
               }}
             >
               {TESTIMONIALS.map((item, i) => (
@@ -274,6 +343,7 @@ export default function TestimonialsSection() {
                 right:       0,
                 height:      1,
                 background: "rgba(255,255,255,0.06)",
+                zIndex:      3,
               }}
             >
               <div
@@ -292,6 +362,7 @@ export default function TestimonialsSection() {
                 fontSize:    10,
                 color:      "rgba(255,255,255,0.2)",
                 userSelect: "none",
+                zIndex:      3,
               }}
             >
               {String(activeIdx + 1).padStart(2, "0")} / {String(N).padStart(2, "0")}
