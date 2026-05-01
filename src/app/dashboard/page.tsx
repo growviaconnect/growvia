@@ -12,6 +12,7 @@ import {
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
   Users, CheckCircle, XCircle, CalendarRange,
 } from "lucide-react";
+import AvailabilitySelector from "@/components/AvailabilitySelector";
 
 type Tab = "overview" | "sessions" | "saved" | "matching" | "mentees" | "calendar";
 
@@ -340,6 +341,7 @@ function DashboardContent() {
   // Mentor-specific state
   const [mentorSessionTab, setMentorSessionTab] = useState<"pending" | "upcoming" | "past">("pending");
   const [actionLoading, setActionLoading]       = useState<string | null>(null);
+  const [mentorDbId, setMentorDbId]             = useState<string | null>(null);
 
   // Nav items, defined inside component so they react to lang changes
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
@@ -503,6 +505,10 @@ function DashboardContent() {
               }
             }
           }
+        }
+
+        if (us.role === "mentor" && profile?.id) {
+          setMentorDbId(profile.id);
         }
 
         // Load their sessions using the DB row id
@@ -811,7 +817,9 @@ function DashboardContent() {
                   >
                     <div className="w-2 h-2 rounded-full bg-[#A78BFA] flex-shrink-0" />
                     <span className="text-[#C4B5FD] text-sm font-medium">
-                      {t("dash_profile_complete")}
+                      {user?.role === "mentor"
+                        ? "Profile complete! Mentees can now find and book sessions with you."
+                        : t("dash_profile_complete")}
                     </span>
                   </div>
                 )}
@@ -1556,6 +1564,7 @@ function DashboardContent() {
             {tab === "calendar" && user?.role === "mentor" && (
               <div className="space-y-6">
                 <h1 className="text-2xl font-extrabold text-white tracking-tight">Calendar</h1>
+                {mentorDbId && <AvailabilitySelector mentorId={mentorDbId} variant="dark" />}
                 <MentorCalendar connexions={connexions} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
               </div>
             )}
