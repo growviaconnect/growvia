@@ -52,12 +52,12 @@ function LoginContent() {
           .eq("email", user.email!)
           .single();
         if (!mentorRow?.onboarding_completed) {
-          router.push("/onboarding/mentor");
+          router.replace("/onboarding/mentor");
           return;
         }
       }
 
-      router.push(next);
+      router.replace(next);
     } catch {
       setError(t("login_error"));
     } finally {

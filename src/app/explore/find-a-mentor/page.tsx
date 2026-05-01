@@ -198,7 +198,7 @@ export default function FindAMentorPage() {
             <span style={{ color: "#A78BFA" }}>mentor</span>
           </h1>
           <p className="text-white/50 text-lg leading-relaxed mb-8">
-            Experienced professionals ready to guide you — matched in minutes.
+            Experienced professionals ready to guide you, matched in minutes.
           </p>
 
           {/* Search */}

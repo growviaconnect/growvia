@@ -1,24 +1,24 @@
 "use client";
 
-/* Seamless logo ticker — logos rendered as inverted SVG text/wordmarks */
+/* Seamless logo ticker, logos rendered as inverted SVG text/wordmarks */
 
 const logos = [
-  "Olympics",
-  "Oscars",
-  "Y Combinator",
-  "ATP Tour",
-  "BAFTA",
-  "UEFA",
-  "Premier League",
-  "Formula 1",
-  "NBA",
-  "NFL",
-  "Harvard",
-  "Stanford",
-  "HEC Paris",
-  "Google",
-  "McKinsey",
-  "Spotify",
+  "Finance",
+  "Tech",
+  "Marketing",
+  "Consulting",
+  "Entrepreneuriat",
+  "Startups",
+  "Private Equity",
+  "Venture Capital",
+  "Strategy",
+  "Business Development",
+  "Management",
+  "Sales",
+  "Product",
+  "Growth",
+  "Real Estate",
+  "Investment Banking",
 ];
 
 /* Duplicate for seamless loop */

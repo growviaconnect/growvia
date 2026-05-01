@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -11,6 +11,7 @@ import LangSwitcher from "@/components/LangSwitcher";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { session, clearSession } = useAuth();
   const { t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -66,30 +67,56 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
-          <Link
-            href="/"
-            className="text-white font-extrabold text-lg tracking-tight flex-shrink-0"
-          >
-            GrowVia
-          </Link>
+          {/* Left: Logo + nav links */}
+          <div className="flex items-center gap-8">
+            <Link
+              href="/"
+              className="text-white font-extrabold text-lg tracking-tight flex-shrink-0"
+            >
+              GrowVia
+            </Link>
 
-          {/* Centered nav links — desktop */}
-          <div className="hidden lg:flex items-center gap-9 absolute left-1/2 -translate-x-1/2">
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {/* Nav links, desktop only */}
+            <div className="hidden lg:flex items-center gap-6">
+              {pathname !== "/" && (
+                <Link
+                  href="/"
+                  className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+                >
+                  {t("nav_home")}
+                </Link>
+              )}
+              {navLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          {/* Right area — desktop */}
-          <div className="hidden lg:flex items-center gap-3">
-            <LangSwitcher />
+          {/* Right area, desktop */}
+          <div className="hidden lg:flex items-center gap-3 mr-2">
+
+            {/* Dynamic account button */}
+            {session ? (
+              <Link
+                href="/profile"
+                className="text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg border border-white/15 transition-all duration-200"
+              >
+                {t("nav_my_profile")}
+              </Link>
+            ) : (
+              <Link
+                href="/auth/register"
+                className="text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg border border-white/15 transition-all duration-200"
+              >
+                {t("nav_create_account")}
+              </Link>
+            )}
 
             {session ? (
               <>
@@ -145,9 +172,11 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+
+            <LangSwitcher />
           </div>
 
-          {/* Hamburger — mobile */}
+          {/* Hamburger, mobile */}
           <button
             className="lg:hidden text-white hover:text-white/70 transition-colors p-1"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -172,6 +201,15 @@ export default function Navbar() {
 
           {/* Nav links */}
           <div className="space-y-0.5 mb-5">
+            {pathname !== "/" && (
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                className="block py-3 text-base font-medium text-white/60 hover:text-white transition-colors border-b border-white/[0.04]"
+              >
+                {t("nav_home")}
+              </Link>
+            )}
             {navLinks.map((l) => (
               <Link
                 key={l.href}
@@ -189,7 +227,7 @@ export default function Navbar() {
             <LangSwitcher />
           </div>
 
-          {/* CTA buttons — always at bottom */}
+          {/* CTA buttons, always at bottom */}
           {session ? (
             <div className="space-y-3">
               <Link

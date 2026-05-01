@@ -48,9 +48,9 @@ As GrowVia operates as a marketplace, certain profile information (such as mento
     title: "Data Sharing",
     content: "We do not sell your personal data to third parties. We may share data with:",
     bullets: [
-      "Stripe — for secure payment processing between mentees and the GrowVia platform",
-      "Google — for Google Meet session link generation and integration",
-      "Independent mentors — limited profile and booking data necessary to confirm and deliver sessions",
+      "Stripe, for secure payment processing between mentees and the GrowVia platform",
+      "Google, for Google Meet session link generation and integration",
+      "Independent mentors, limited profile and booking data necessary to confirm and deliver sessions",
       "Service providers who help us operate the platform, under strict data processing agreements",
       "Law enforcement or regulatory authorities if required by applicable law",
     ],

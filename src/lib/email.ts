@@ -104,7 +104,7 @@ export async function sendWelcomeEmail(to: string, nom: string, role: string) {
 
   const body = `
     ${h1(`Welcome to GrowVia, ${nom} 👋`)}
-    ${p(`Your account is all set. You joined as a <strong>${roleLabel}</strong> — we're glad to have you.`)}
+    ${p(`Your account is all set. You joined as a <strong>${roleLabel}</strong>, we're glad to have you.`)}
     ${p("Complete your profile so we can match you with the right people.")}
     ${btn("Complete my profile →", `${BASE_URL}${nextPath}`)}
     <br/>
@@ -203,7 +203,7 @@ export async function sendSessionStatusNotification(params: StatusParams) {
       <br/><br/>
       ${h1("Your session was declined")}
       ${p(`Unfortunately, ${menteeNom}, <strong>${mentorNom}</strong> wasn't able to accept your session at this time.`)}
-      ${p("Don't be discouraged — explore other mentors who might be a great fit.")}
+      ${p("Don't be discouraged, explore other mentors who might be a great fit.")}
       ${btn("Find another mentor →", `${BASE_URL}/explore`)}
     `;
 
@@ -225,7 +225,7 @@ export type ReminderParams = {
   date:       string;
   role:       "mentor" | "mentee";
   hoursUntil: 24 | 2;
-  scheduledAt?: string; // ISO string — lets Resend deliver at the right time
+  scheduledAt?: string; // ISO string, lets Resend deliver at the right time
 };
 
 export async function sendSessionReminder(params: ReminderParams) {
@@ -235,7 +235,7 @@ export async function sendSessionReminder(params: ReminderParams) {
 
   const isUrgent = hoursUntil === 2;
   const timeLabel = isUrgent ? "in 2 hours" : "tomorrow";
-  const urgBadge  = isUrgent ? badge("#dc2626", "⏰ Starting in 2 hours") : badge("#7C3AED", "📅 Reminder — 24h");
+  const urgBadge  = isUrgent ? badge("#dc2626", "⏰ Starting in 2 hours") : badge("#7C3AED", "📅 Reminder, 24h");
   const tipRole   = role === "mentor"
     ? "Think about your key advice and prepare actionable takeaways for your mentee."
     : "Come prepared with your questions to make the most of your session.";
@@ -244,7 +244,7 @@ export async function sendSessionReminder(params: ReminderParams) {
     ${urgBadge}
     <br/><br/>
     ${h1(`Your session is ${timeLabel}`)}
-    ${p(`Hi ${nom}, just a heads-up — your mentoring session is coming up ${timeLabel}.`)}
+    ${p(`Hi ${nom}, just a heads-up, your mentoring session is coming up ${timeLabel}.`)}
     ${infoBox(
       highlight("Date & time", formattedDate) +
       highlight(role === "mentor" ? "Mentee" : "Mentor", otherNom)
@@ -264,7 +264,7 @@ export async function sendSessionReminder(params: ReminderParams) {
 
 // ─── Schedule all reminders at booking time ───────────────────────────────────
 // Called once when a session is booked. Resend queues and delivers each email
-// at the calculated future timestamp — no cron job required.
+// at the calculated future timestamp, no cron job required.
 
 export type ScheduleRemindersParams = {
   mentorEmail: string;
