@@ -335,6 +335,47 @@ export default function PricingPage() {
                 <OrbPremium   active={activePlan === 2} />
               </div>
 
+              {/* Plan name + price overlay — centered on orb, crossfades */}
+              <div style={{ position: "relative", zIndex: 3, textAlign: "center", pointerEvents: "none" }}>
+                {plans.map((plan, i) => (
+                  <div
+                    key={plan.key}
+                    style={{
+                      position: i === 0 ? "relative" : "absolute",
+                      top: i === 0 ? undefined : 0,
+                      left: i === 0 ? undefined : "50%",
+                      transform: i === 0 ? undefined : "translateX(-50%)",
+                      width: "100%",
+                      opacity: activePlan === i ? 1 : 0,
+                      transition: "opacity 0.6s ease",
+                    }}
+                  >
+                    <p style={{
+                      fontSize: 9, fontWeight: 700, letterSpacing: "0.38em",
+                      textTransform: "uppercase", color: "rgba(255,255,255,0.38)",
+                      margin: "0 0 10px",
+                    }}>
+                      {["I", "II", "III"][i]}
+                    </p>
+                    <p style={{
+                      fontSize: "clamp(36px, 5.5vw, 62px)", fontWeight: 800,
+                      color: "white", lineHeight: 1, letterSpacing: "-0.03em",
+                      margin: "0 0 12px",
+                      textShadow: "0 0 48px rgba(167,139,250,0.55), 0 2px 24px rgba(0,0,0,0.4)",
+                    }}>
+                      {plan.name}
+                    </p>
+                    <p style={{
+                      fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.38)",
+                      fontVariantNumeric: "tabular-nums", margin: 0,
+                      letterSpacing: "0.04em",
+                    }}>
+                      {PRICES[i]}€ <span style={{ opacity: 0.6 }}>/ mois</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+
               {/* Progress dots */}
               <div style={{
                 position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)",
@@ -593,7 +634,7 @@ export default function PricingPage() {
 
             {/* 0€ stat */}
             <div style={{ flexShrink: 0, textAlign: "center", ...fadeUp(extraVis[0], 0.12) }}>
-              <p style={{ fontSize: "clamp(48px, 8vw, 72px)", fontWeight: 800, color: "white", lineHeight: 1, letterSpacing: "-0.04em", margin: "0 0 10px" }}>
+              <p style={{ fontSize: "clamp(88px, 15vw, 160px)", fontWeight: 800, color: "white", lineHeight: 1, letterSpacing: "-0.05em", margin: "0 0 12px" }}>
                 0€
               </p>
               <p style={{ fontSize: 12, color: ACCENT_LIGHT, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
