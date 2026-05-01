@@ -10,16 +10,17 @@ import { useLang } from "@/contexts/LangContext";
 import {
   CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
+  Users, CheckCircle, XCircle, CalendarRange,
 } from "lucide-react";
 
-type Tab = "overview" | "sessions" | "saved" | "matching";
+type Tab = "overview" | "sessions" | "saved" | "matching" | "mentees" | "calendar";
 
 type Connexion = {
   id: string;
   date: string;
   statut: "pending" | "active" | "completed" | "cancelled";
   mentors: { nom: string; email: string; specialite: string | null } | null;
-  mentees: { nom: string; email: string; objectif: string | null } | null;
+  mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
 };
 
 type MatchResult = {
@@ -336,17 +337,29 @@ function DashboardContent() {
   const [qPriorities, setQPriorities]       = useState<string[]>([]);
   const [qBio, setQBio]                     = useState("");
 
+  // Mentor-specific state
+  const [mentorSessionTab, setMentorSessionTab] = useState<"pending" | "upcoming" | "past">("pending");
+  const [actionLoading, setActionLoading]       = useState<string | null>(null);
+
   // Nav items, defined inside component so they react to lang changes
-  const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
-    { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
-    { id: "saved",    label: t("dash_nav_saved"),    icon: Heart         },
-    { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
-  ];
+  const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
+    user?.role === "mentor"
+      ? [
+          { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
+          { id: "sessions", label: "My Sessions",           icon: CalendarCheck },
+          { id: "mentees",  label: "My Mentees",            icon: Users         },
+          { id: "calendar", label: "Calendar",              icon: CalendarRange },
+        ]
+      : [
+          { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
+          { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
+          { id: "saved",    label: t("dash_nav_saved"),    icon: Heart         },
+          { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
+        ];
   const secondaryNav = [
-    { href: "/profile",  label: t("dash_nav_profile"),   icon: User         },
-    { href: "/calendar", label: t("dash_nav_calendar"),  icon: CalendarCheck },
-    { href: "/settings", label: t("dash_nav_settings"),  icon: Settings      },
+    { href: "/profile",  label: t("dash_nav_profile"),  icon: User     },
+    ...(user?.role !== "mentor" ? [{ href: "/calendar", label: t("dash_nav_calendar"), icon: CalendarRange }] : []),
+    { href: "/settings", label: t("dash_nav_settings"), icon: Settings },
   ];
 
   const roleLabel =
@@ -497,7 +510,7 @@ function DashboardContent() {
           const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
           const { data: rows } = await supabase
             .from("connexions")
-            .select("id, date, statut, mentors(nom, email, specialite), mentees(nom, email, objectif)")
+            .select("id, date, statut, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
             .eq(idField, profile.id)
             .order("date", { ascending: true });
 
@@ -669,6 +682,36 @@ function DashboardContent() {
     (c) => c.statut === "completed" || (c.statut !== "cancelled" && new Date(c.date) < new Date())
   );
 
+  // Mentor-derived data
+  const mentorPending  = connexions.filter(c => c.statut === "pending");
+  const mentorUpcoming = connexions.filter(
+    c => c.statut === "active" && new Date(c.date) >= new Date()
+  );
+  const mentorPast = connexions.filter(
+    c => c.statut === "completed" || (["active", "pending"].includes(c.statut) && new Date(c.date) < new Date())
+  );
+  const myMentees = Array.from(
+    new Map(
+      connexions
+        .filter(c => ["active", "completed"].includes(c.statut) && c.mentees?.id)
+        .map(c => [c.mentees!.id, c.mentees!])
+    ).values()
+  );
+
+  async function handleAcceptSession(connId: string) {
+    setActionLoading(connId);
+    await supabase.from("connexions").update({ statut: "active" }).eq("id", connId);
+    setConnexions(prev => prev.map(c => c.id === connId ? { ...c, statut: "active" as const } : c));
+    setActionLoading(null);
+  }
+
+  async function handleDeclineSession(connId: string) {
+    setActionLoading(connId);
+    await supabase.from("connexions").update({ statut: "cancelled" }).eq("id", connId);
+    setConnexions(prev => prev.filter(c => c.id !== connId));
+    setActionLoading(null);
+  }
+
   const firstName = (user?.nom ?? "").split(" ")[0] || "there";
   const userInitials = initials(user?.nom ?? "?");
 
@@ -786,19 +829,24 @@ function DashboardContent() {
                   </div>
                 )}
 
-                {/* Stats */}
+                {/* Stats — mentor vs mentee */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { label: t("dash_stat_booked"),   value: connexions.length,  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
-                    { label: t("dash_stat_done"),      value: past.length,         icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
-                    { label: t("dash_stat_upcoming"),  value: upcoming.length,     icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                    { label: t("dash_stat_ai"),        value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
-                  ].map((stat) => (
+                  {(user?.role === "mentor"
+                    ? [
+                        { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
+                        { label: t("dash_stat_done"),       value: mentorPast.length,    icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
+                        { label: t("dash_stat_upcoming"),   value: mentorUpcoming.length, icon: Clock,        accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
+                        { label: "My Mentees",              value: myMentees.length,     icon: Users,         accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                      ]
+                    : [
+                        { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
+                        { label: t("dash_stat_done"),       value: past.length,          icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
+                        { label: t("dash_stat_upcoming"),   value: upcoming.length,      icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
+                        { label: t("dash_stat_ai"),         value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                      ]
+                  ).map((stat) => (
                     <Card key={stat.label} className="p-5">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                        style={{ background: stat.accent }}
-                      >
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: stat.accent }}>
                         <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
                       </div>
                       <div className="text-2xl font-extrabold text-white">{stat.value}</div>
@@ -807,99 +855,176 @@ function DashboardContent() {
                   ))}
                 </div>
 
-                {/* Next session or empty state */}
-                {upcoming.length > 0 ? (
-                  <Card className="p-6">
-                    <div className="flex justify-between items-center mb-5">
-                      <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
-                      <button
-                        onClick={() => setTab("sessions")}
-                        className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors"
-                      >
-                        {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                    {(() => {
-                      const c = upcoming[0];
-                      const other = user?.role === "mentor" ? c.mentees : c.mentors;
-                      const otherNom = other?.nom ?? ", ";
-                      return (
-                        <div className="flex items-center gap-4">
-                          <div
-                            className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                            style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-                          >
-                            {initials(otherNom)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-white text-sm">{otherNom}</div>
-                            <div className="text-xs text-white/35 mt-0.5">
-                              {user?.role === "mentor"
-                                ? c.mentees?.objectif ?? t("dash_role_mentee")
-                                : c.mentors?.specialite ?? t("dash_role_mentor")}
+                {/* ── Mentor overview: pending requests + next session ─────── */}
+                {user?.role === "mentor" && (
+                  <>
+                    {/* Pending requests */}
+                    {mentorPending.length > 0 && (
+                      <Card className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">Pending Requests</h2>
+                          <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full">
+                            {mentorPending.length} new
+                          </span>
+                        </div>
+                        <div className="divide-y divide-white/[0.06]">
+                          {mentorPending.map(c => (
+                            <div key={c.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                {initials(c.mentees?.nom ?? "?")}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                                <div className="text-xs text-white/40 mt-0.5">
+                                  {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} {fmtTime(c.date, lang)}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button onClick={() => handleAcceptSession(c.id)} disabled={actionLoading === c.id}
+                                  className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                                  {actionLoading === c.id
+                                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    : <CheckCircle className="w-3.5 h-3.5" />
+                                  } Accept
+                                </button>
+                                <button onClick={() => handleDeclineSession(c.id)} disabled={actionLoading === c.id}
+                                  className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                                  {actionLoading === c.id
+                                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    : <XCircle className="w-3.5 h-3.5" />
+                                  } Decline
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="text-right flex-shrink-0 hidden sm:block">
-                            <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
-                            <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
-                          </div>
-                          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
-                            <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Next upcoming session */}
+                    {mentorUpcoming.length > 0 ? (
+                      <Card className="p-6">
+                        <div className="flex justify-between items-center mb-5">
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
+                          <button onClick={() => setTab("sessions")}
+                            className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors">
+                            {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
                           </button>
                         </div>
-                      );
-                    })()}
-                  </Card>
-                ) : (
-                  <EmptyState
-                    icon={CalendarCheck}
-                    title={t("dash_no_upcoming")}
-                    desc={t("dash_no_upcoming_desc")}
-                    action={
-                      <Link
-                        href="/explore"
-                        className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                      >
-                        {t("dash_explore_mentors")}
-                      </Link>
-                    }
-                  />
+                        {(() => {
+                          const c = mentorUpcoming[0];
+                          return (
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                {initials(c.mentees?.nom ?? "?")}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                              </div>
+                              <div className="text-right flex-shrink-0 hidden sm:block">
+                                <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
+                              </div>
+                              <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </Card>
+                    ) : mentorPending.length === 0 && (
+                      <EmptyState
+                        icon={CalendarCheck}
+                        title="No upcoming sessions"
+                        desc="Your schedule is clear. Once a mentee books a session it will appear here."
+                      />
+                    )}
+                  </>
                 )}
 
-                {/* Bottom banner, freemium AI match or upgrade */}
-                {user?.role === "mentee" && user?.plan === "free" && (
-                  <div
-                    className="rounded-2xl p-6 border border-[#7C3AED]/30"
-                    style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}
-                  >
-                    {!hasUsedFreeMatch ? (
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
-                          <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
+                {/* ── Mentee overview: next session + freemium banner ──────── */}
+                {user?.role !== "mentor" && (
+                  <>
+                    {upcoming.length > 0 ? (
+                      <Card className="p-6">
+                        <div className="flex justify-between items-center mb-5">
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
+                          <button onClick={() => setTab("sessions")}
+                            className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors">
+                            {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
+                          </button>
                         </div>
-                        <button
-                          onClick={handleStartMatching}
-                          className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-                        >
-                          {t("dash_try_now")}
-                        </button>
-                      </div>
+                        {(() => {
+                          const c = upcoming[0];
+                          const other = c.mentors;
+                          const otherNom = other?.nom ?? ", ";
+                          return (
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                {initials(otherNom)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-white text-sm">{otherNom}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{c.mentors?.specialite ?? t("dash_role_mentor")}</div>
+                              </div>
+                              <div className="text-right flex-shrink-0 hidden sm:block">
+                                <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
+                              </div>
+                              <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </Card>
                     ) : (
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <div className="font-bold text-white mb-1">{t("dash_unlock_ai")}</div>
-                          <div className="text-white/45 text-sm">{t("dash_unlock_ai_desc")}</div>
-                        </div>
-                        <Link
-                          href="/pricing"
-                          className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-                        >
-                          {t("dash_upgrade")}
-                        </Link>
+                      <EmptyState
+                        icon={CalendarCheck}
+                        title={t("dash_no_upcoming")}
+                        desc={t("dash_no_upcoming_desc")}
+                        action={
+                          <Link href="/explore"
+                            className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                            {t("dash_explore_mentors")}
+                          </Link>
+                        }
+                      />
+                    )}
+
+                    {user?.plan === "free" && (
+                      <div className="rounded-2xl p-6 border border-[#7C3AED]/30"
+                        style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}>
+                        {!hasUsedFreeMatch ? (
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                              <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
+                              <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
+                            </div>
+                            <button onClick={handleStartMatching}
+                              className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+                              {t("dash_try_now")}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                              <div className="font-bold text-white mb-1">{t("dash_unlock_ai")}</div>
+                              <div className="text-white/45 text-sm">{t("dash_unlock_ai_desc")}</div>
+                            </div>
+                            <Link href="/pricing"
+                              className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+                              {t("dash_upgrade")}
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             )}
@@ -907,42 +1032,163 @@ function DashboardContent() {
             {/* MY SESSIONS */}
             {tab === "sessions" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_sessions_title")}</h1>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                  {user?.role === "mentor" ? "My Sessions" : t("dash_sessions_title")}
+                </h1>
 
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
-                  {upcoming.length > 0 ? (
-                    <div className="space-y-3">
-                      {upcoming.map((c) => (
-                        <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
+                {/* ── Mentor 3-tab sessions view ──────────────────────────── */}
+                {user?.role === "mentor" ? (
+                  <>
+                    {/* Tab bar */}
+                    <div className="flex gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit">
+                      {(["pending", "upcoming", "past"] as const).map((st) => (
+                        <button key={st} onClick={() => setMentorSessionTab(st)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            mentorSessionTab === st
+                              ? "bg-[#7C3AED] text-white"
+                              : "text-white/45 hover:text-white"
+                          }`}>
+                          {st === "pending"
+                            ? `Pending requests${mentorPending.length > 0 ? ` (${mentorPending.length})` : ""}`
+                            : st === "upcoming" ? "Upcoming" : "Past sessions"}
+                        </button>
                       ))}
                     </div>
-                  ) : (
-                    <EmptyState
-                      icon={CalendarCheck}
-                      title={t("dash_no_sessions")}
-                      desc={t("dash_no_sessions_desc")}
-                      action={
-                        <Link
-                          href="/explore"
-                          className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                        >
-                          <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
-                        </Link>
-                      }
-                    />
-                  )}
-                </div>
 
-                {past.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_past_label")}</p>
-                    <div className="space-y-3">
-                      {past.map((c) => (
-                        <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
-                      ))}
+                    {/* Pending requests */}
+                    {mentorSessionTab === "pending" && (
+                      mentorPending.length > 0 ? (
+                        <div className="space-y-3">
+                          {mentorPending.map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-start gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                  {initials(c.mentees?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-white">{c.mentees?.nom ?? "Mentee"}</div>
+                                  <div className="text-xs text-white/40 mt-0.5 mb-3">
+                                    {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                  </div>
+                                  <div className="flex gap-2 flex-wrap">
+                                    <button onClick={() => handleAcceptSession(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                      Accept
+                                    </button>
+                                    <button onClick={() => handleDeclineSession(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                                      Decline
+                                    </button>
+                                    <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+                                      <CalendarRange className="w-3.5 h-3.5" /> Propose new time
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState icon={CalendarCheck} title="No pending requests" desc="New session requests from mentees will appear here." />
+                      )
+                    )}
+
+                    {/* Upcoming confirmed */}
+                    {mentorSessionTab === "upcoming" && (
+                      mentorUpcoming.length > 0 ? (
+                        <div className="space-y-3">
+                          {mentorUpcoming.map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                  {initials(c.mentees?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-white">{c.mentees?.nom ?? "Mentee"}</div>
+                                  <div className="text-xs text-white/40 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                </div>
+                                <div className="text-right flex-shrink-0 hidden sm:block mr-4">
+                                  <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                                  <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
+                                </div>
+                                <div className="flex gap-2 flex-shrink-0">
+                                  <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+                                    <Video className="w-3.5 h-3.5" /> Join
+                                  </button>
+                                  <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+                                    Reschedule
+                                  </button>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState icon={Clock} title="No upcoming sessions" desc="Confirmed sessions will appear here once a request is accepted." />
+                      )
+                    )}
+
+                    {/* Past sessions */}
+                    {mentorSessionTab === "past" && (
+                      mentorPast.length > 0 ? (
+                        <div className="space-y-3">
+                          {mentorPast.map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "rgba(255,255,255,0.06)" }}>
+                                  {initials(c.mentees?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-white/70">{c.mentees?.nom ?? "Mentee"}</div>
+                                  <div className="text-xs text-white/30 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <div className="text-sm font-medium text-white/50">{fmtDate(c.date, t, lang)}</div>
+                                  <div className="text-xs text-white/25 mt-0.5">{fmtTime(c.date, lang)}</div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState icon={Video} title="No past sessions yet" desc="Completed sessions will show here." />
+                      )
+                    )}
+                  </>
+                ) : (
+                  /* ── Mentee sessions view (unchanged) ──────────────────── */
+                  <>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
+                      {upcoming.length > 0 ? (
+                        <div className="space-y-3">
+                          {upcoming.map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
+                        </div>
+                      ) : (
+                        <EmptyState icon={CalendarCheck} title={t("dash_no_sessions")} desc={t("dash_no_sessions_desc")}
+                          action={
+                            <Link href="/explore"
+                              className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                              <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
+                            </Link>
+                          }
+                        />
+                      )}
                     </div>
-                  </div>
+                    {past.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_past_label")}</p>
+                        <div className="space-y-3">
+                          {past.map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -1263,9 +1509,205 @@ function DashboardContent() {
               </div>
             )}
 
+            {/* MY MENTEES */}
+            {tab === "mentees" && user?.role === "mentor" && (
+              <div className="space-y-6">
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">My Mentees</h1>
+                {myMentees.length > 0 ? (
+                  <div className="space-y-3">
+                    {myMentees.map(mentee => {
+                      const sessionsDone = connexions.filter(
+                        c => c.mentees?.id === mentee.id && c.statut === "completed"
+                      ).length;
+                      return (
+                        <Card key={mentee.id} className="p-5">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0"
+                              style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                              {initials(mentee.nom)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-white">{mentee.nom}</div>
+                              <div className="text-xs text-white/40 mt-0.5">{mentee.objectif ?? "Mentoring"}</div>
+                            </div>
+                            <div className="text-center flex-shrink-0 mr-4 hidden sm:block">
+                              <div className="text-xl font-extrabold text-white">{sessionsDone}</div>
+                              <div className="text-xs text-white/35">sessions done</div>
+                            </div>
+                            <button className="flex items-center gap-1.5 border border-white/10 hover:border-[#7C3AED]/50 text-white/60 hover:text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                              View profile
+                            </button>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={Users}
+                    title="No mentees yet"
+                    desc="Mentees who have active or completed sessions with you will appear here."
+                  />
+                )}
+              </div>
+            )}
+
+            {/* CALENDAR */}
+            {tab === "calendar" && user?.role === "mentor" && (
+              <div className="space-y-6">
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">Calendar</h1>
+                <MentorCalendar connexions={connexions} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
+              </div>
+            )}
+
           </main>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Mentor Calendar ───────────────────────────────────────────────────────────
+function MentorCalendar({
+  connexions,
+  fmtDate,
+  fmtTime,
+  t,
+  lang,
+}: {
+  connexions: Connexion[];
+  fmtDate: (iso: string, t: (k: string) => string, lang: string) => string;
+  fmtTime: (iso: string, lang: string) => string;
+  t: (k: string) => string;
+  lang: string;
+}) {
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  const today = new Date();
+  const [viewYear, setViewYear]   = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const lastDay  = new Date(viewYear, viewMonth + 1, 0);
+  const startPad = firstDay.getDay(); // 0=Sun
+
+  const sessionsByDay = new Map<string, Connexion[]>();
+  connexions.forEach(c => {
+    const d = new Date(c.date);
+    if (d.getFullYear() === viewYear && d.getMonth() === viewMonth) {
+      const key = d.toDateString();
+      sessionsByDay.set(key, [...(sessionsByDay.get(key) ?? []), c]);
+    }
+  });
+
+  const monthLabel = new Date(viewYear, viewMonth).toLocaleString(
+    lang === "fr" ? "fr-FR" : lang === "es" ? "es-ES" : "en-US",
+    { month: "long", year: "numeric" }
+  );
+
+  const dayNames = lang === "fr"
+    ? ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const days: (number | null)[] = [
+    ...Array(startPad).fill(null),
+    ...Array.from({ length: lastDay.getDate() }, (_, i) => i + 1),
+  ];
+
+  const selectedSessions = selectedDay
+    ? (sessionsByDay.get(new Date(viewYear, viewMonth, Number(selectedDay)).toDateString()) ?? [])
+    : [];
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-6">
+        {/* Month navigation */}
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={() => {
+            const d = new Date(viewYear, viewMonth - 1);
+            setViewYear(d.getFullYear()); setViewMonth(d.getMonth()); setSelectedDay(null);
+          }} className="w-8 h-8 rounded-lg border border-white/10 hover:border-white/20 flex items-center justify-center text-white/50 hover:text-white transition-colors">
+            ‹
+          </button>
+          <span className="font-bold text-white capitalize">{monthLabel}</span>
+          <button onClick={() => {
+            const d = new Date(viewYear, viewMonth + 1);
+            setViewYear(d.getFullYear()); setViewMonth(d.getMonth()); setSelectedDay(null);
+          }} className="w-8 h-8 rounded-lg border border-white/10 hover:border-white/20 flex items-center justify-center text-white/50 hover:text-white transition-colors">
+            ›
+          </button>
+        </div>
+
+        {/* Day names */}
+        <div className="grid grid-cols-7 mb-2">
+          {dayNames.map(d => (
+            <div key={d} className="text-center text-xs font-semibold text-white/25 py-1">{d}</div>
+          ))}
+        </div>
+
+        {/* Day cells */}
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day, idx) => {
+            if (day === null) return <div key={`pad-${idx}`} />;
+            const key = new Date(viewYear, viewMonth, day).toDateString();
+            const sessions = sessionsByDay.get(key) ?? [];
+            const isToday = today.getDate() === day && today.getMonth() === viewMonth && today.getFullYear() === viewYear;
+            const isSelected = selectedDay === String(day);
+            return (
+              <button key={day} onClick={() => setSelectedDay(isSelected ? null : String(day))}
+                className={`relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-colors ${
+                  isSelected
+                    ? "bg-[#7C3AED] text-white"
+                    : isToday
+                      ? "border border-[#7C3AED]/50 text-[#A78BFA]"
+                      : sessions.length > 0
+                        ? "bg-[#7C3AED]/15 text-white hover:bg-[#7C3AED]/25"
+                        : "text-white/40 hover:text-white hover:bg-white/[0.05]"
+                }`}>
+                {day}
+                {sessions.length > 0 && !isSelected && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#A78BFA]" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Session details for selected day */}
+      {selectedDay && (
+        <Card className="p-6">
+          <h3 className="font-bold text-white text-sm uppercase tracking-[0.12em] mb-4">
+            {fmtDate(new Date(viewYear, viewMonth, Number(selectedDay)).toISOString(), t, lang)}
+          </h3>
+          {selectedSessions.length > 0 ? (
+            <div className="divide-y divide-white/[0.06]">
+              {selectedSessions.map(c => (
+                <div key={c.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                    {c.mentees?.nom?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                    <div className="text-xs text-white/40 mt-0.5">{fmtTime(c.date, lang)}</div>
+                  </div>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${
+                    c.statut === "active"    ? "bg-emerald-500/15 text-emerald-400" :
+                    c.statut === "pending"   ? "bg-amber-500/15 text-amber-400" :
+                    c.statut === "completed" ? "bg-white/8 text-white/40" :
+                                               "bg-red-500/10 text-red-400"
+                  }`}>
+                    {c.statut}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-white/30 text-sm">No sessions on this day.</p>
+          )}
+        </Card>
+      )}
     </div>
   );
 }
