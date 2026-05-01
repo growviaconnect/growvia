@@ -8,7 +8,6 @@ import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
 import ForYouSection from "@/components/ForYouSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import LogoTicker from "@/components/LogoTicker";
 import MentorsSection from "@/components/MentorsSection";
 import HeroParticles from "@/components/HeroParticles";
@@ -290,9 +289,6 @@ export default function HomePage() {
 
         </div>
       </section>
-
-      {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
-      <TestimonialsSection />
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <CTASection />

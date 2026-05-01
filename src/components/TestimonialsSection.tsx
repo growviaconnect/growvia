@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 const serifStyle = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -86,35 +86,10 @@ const HEADLINE = ["Des", "voix", "qui", "comptent."];
 
 export default function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const fillRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Scroll-driven progress spine
-    const onScroll = () => {
-      const section = sectionRef.current;
-      const fill = fillRef.current;
-      const dot = dotRef.current;
-      if (!section || !fill || !dot) return;
-
-      const sectionTop =
-        section.getBoundingClientRect().top + window.scrollY;
-      const sectionH = section.offsetHeight;
-      const vh = window.innerHeight;
-
-      const scrolledIn = Math.max(0, window.scrollY - sectionTop);
-      // Dot tracks current viewport center within the section
-      const dotPos = Math.min(scrolledIn + vh * 0.5, sectionH);
-
-      fill.style.height = `${dotPos}px`;
-      dot.style.top = `${dotPos - 6}px`;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
     // Animate header headline on scroll into view
     const hdrObs = new IntersectionObserver(
       (entries) => {
@@ -144,7 +119,6 @@ export default function TestimonialsSection() {
     panelRefs.current.forEach((el) => el && panelObs.observe(el));
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
       hdrObs.disconnect();
       panelObs.disconnect();
     };
@@ -185,50 +159,6 @@ export default function TestimonialsSection() {
         </div>
       </div>
 
-      {/* ── Vertical progress spine (center, desktop only) ──────── */}
-      <div
-        className="absolute inset-0 pointer-events-none hidden md:block"
-        aria-hidden="true"
-        style={{ zIndex: 20 }}
-      >
-        <div
-          className="absolute top-0 bottom-0"
-          style={{ left: "50%", transform: "translateX(-50%)", width: 1 }}
-        >
-          {/* Track */}
-          <div
-            className="absolute inset-0"
-            style={{ background: "rgba(124,58,237,0.15)" }}
-          />
-          {/* Fill — grows as user scrolls */}
-          <div
-            ref={fillRef}
-            className="absolute top-0 left-0 right-0"
-            style={{
-              height: 0,
-              background:
-                "linear-gradient(to bottom, #4C1D95 0%, #7C3AED 50%, #A78BFA 100%)",
-            }}
-          />
-          {/* Floating dot */}
-          <div
-            ref={dotRef}
-            className="absolute"
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: "50%",
-              background: "#7C3AED",
-              boxShadow:
-                "0 0 0 3px rgba(124,58,237,0.2), 0 0 20px rgba(124,58,237,0.85)",
-              left: "50%",
-              transform: "translateX(-50%)",
-              top: 0,
-            }}
-          />
-        </div>
-      </div>
-
       {/* ── Testimonial panels ──────────────────────────────────── */}
       {TESTIMONIALS.map((item, i) => {
         const photoLeft = i % 2 === 0;
@@ -236,18 +166,24 @@ export default function TestimonialsSection() {
           <div
             key={item.name}
             ref={(el) => { panelRefs.current[i] = el; }}
-            className="path-panel relative flex items-center"
+            className="path-panel relative flex items-center justify-center"
             style={{
               height: "100vh",
               flexDirection: photoLeft ? "row" : "row-reverse",
+              gap: "clamp(32px, 5vw, 80px)",
+              padding: "0 clamp(24px, 5vw, 80px)",
             }}
           >
-            {/* ── Photo half ───────────────────────── */}
+            {/* ── Photo ───────────────────────── */}
             <div
               className={`path-photo ${
                 photoLeft ? "path-photo-from-left" : "path-photo-from-right"
-              } relative overflow-hidden h-full hidden md:block`}
-              style={{ width: "50%" }}
+              } relative overflow-hidden rounded-2xl flex-shrink-0 hidden md:block`}
+              style={{
+                width: "clamp(200px, 22vw, 340px)",
+                aspectRatio: "3 / 4",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+              }}
             >
               <img
                 src={item.photoUrl}
@@ -255,31 +191,20 @@ export default function TestimonialsSection() {
                 className="absolute inset-0 w-full h-full object-cover object-top"
                 loading="lazy"
               />
-              {/* Bottom dark gradient */}
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 rounded-2xl"
                 style={{
-                  background:
-                    "linear-gradient(to top, rgba(13,10,26,0.9) 0%, rgba(13,10,26,0.15) 55%, transparent 100%)",
-                }}
-              />
-              {/* Side fade toward the center spine */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: photoLeft
-                    ? "linear-gradient(to right, transparent 60%, rgba(13,10,26,0.85) 100%)"
-                    : "linear-gradient(to left, transparent 60%, rgba(13,10,26,0.85) 100%)",
+                  background: "linear-gradient(to top, rgba(13,10,26,0.7) 0%, transparent 60%)",
                 }}
               />
             </div>
 
-            {/* ── Text half ────────────────────────── */}
+            {/* ── Text ────────────────────────── */}
             <div
-              className="relative flex items-center justify-center h-full w-full md:w-1/2"
-              style={{ zIndex: 2 }}
+              className="relative flex items-center justify-center w-full md:w-auto"
+              style={{ zIndex: 2, maxWidth: 520 }}
             >
-              <div className="w-full px-8 md:px-12 lg:px-20" style={{ maxWidth: 520 }}>
+              <div className="w-full">
 
                 {/* Type badge */}
                 <p
@@ -300,13 +225,15 @@ export default function TestimonialsSection() {
                 >
                   &ldquo;
                   {item.quote.split(" ").map((word, wi) => (
-                    <span
-                      key={wi}
-                      className="path-word"
-                      style={{ animationDelay: `${0.15 + wi * 0.04}s` }}
-                    >
-                      {word}{" "}
-                    </span>
+                    <React.Fragment key={wi}>
+                      <span
+                        className="path-word"
+                        style={{ animationDelay: `${0.15 + wi * 0.04}s` }}
+                      >
+                        {word}
+                      </span>
+                      {" "}
+                    </React.Fragment>
                   ))}
                   &rdquo;
                 </p>
