@@ -12,7 +12,7 @@ const ACCENT       = "#7C3AED";
 const ACCENT_LIGHT = "#A78BFA";
 const CARD_W  = 340;
 const CARD_H  = 520;
-const GAP     = 80;
+const GAP     = 140;
 const PHOTO_H = Math.round(CARD_H * 0.55); // 286px
 const HEADLINE = ["Des", "voix", "qui", "comptent."];
 
