@@ -128,10 +128,10 @@ export default function TestimonialsSection() {
   useEffect(() => {
     if (isMobile) return;
 
-    const section = sectionRef.current;
-    const track   = trackRef.current;
-    const fill    = fillRef.current;
-    if (!section || !track || !fill) return;
+    if (!sectionRef.current || !trackRef.current || !fillRef.current) return;
+    const section = sectionRef.current as HTMLElement;
+    const track   = trackRef.current  as HTMLDivElement;
+    const fill    = fillRef.current   as HTMLDivElement;
 
     const N    = TESTIMONIALS.length;
     const STEP = CARD_W + GAP;
