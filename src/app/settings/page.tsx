@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, User, Lock, CreditCard, Camera, CheckCircle, AlertCircle,
-  Loader2, Eye, EyeOff, LogOut, Crown, XCircle,
+  Loader2, Eye, EyeOff, LogOut, Crown, XCircle, CalendarRange, BellOff,
 } from "lucide-react";
 import { getUserSession, setUserSession, clearUserSession, type UserSession } from "@/lib/session";
+import { supabase } from "@/lib/supabase";
+import AvailabilitySelector from "@/components/AvailabilitySelector";
 
-type Tab = "profile" | "password" | "subscription";
+type Tab = "profile" | "password" | "subscription" | "availability";
 
 const specialites = ["Career & Leadership", "Entrepreneurship & Business", "Personal Development", "Student Guidance", "Tech & Product", "Finance & Investment", "Creative & Design", "Other"];
 const objectifs   = ["Find my career direction", "Change industries or roles", "Start or grow a business", "Improve my skills & confidence", "Prepare for university", "Navigate a specific challenge", "Other"];
@@ -37,12 +39,31 @@ export default function SettingsPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [pwdSaving, setPwdSaving] = useState(false);
 
+  // Mentor availability
+  const [mentorDbId, setMentorDbId]       = useState<string | null>(null);
+  const [pauseBookings, setPauseBookings] = useState(false);
+  const [pauseSaving, setPauseSaving]     = useState(false);
+
   useEffect(() => {
     const s = getUserSession();
     if (s) {
       setSession(s);
       setForm({ nom: s.nom, email: s.email, bio: s.bio ?? "", specialite: s.specialite ?? "", objectif: s.objectif ?? "" });
       setPhoto(s.photo ?? "");
+
+      if (s.role === "mentor") {
+        supabase
+          .from("mentors")
+          .select("id, pause_bookings")
+          .eq("email", s.email)
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              setMentorDbId(data.id as string);
+              setPauseBookings((data as { id: string; pause_bookings: boolean }).pause_bookings ?? false);
+            }
+          });
+      }
     }
   }, []);
 
@@ -100,6 +121,28 @@ export default function SettingsPage() {
     setSession(updated);
     setCancelConfirm(false);
     showMsg("Abonnement résilié. Vous êtes maintenant sur le plan Gratuit.");
+  }
+
+  async function togglePauseBookings() {
+    if (!mentorDbId) return;
+    const next = !pauseBookings;
+    setPauseBookings(next);
+    setPauseSaving(true);
+    try {
+      const res = await fetch("/api/mentor/save-availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentorId: mentorDbId, pauseBookings: next }),
+      });
+      const json = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      showMsg(next ? "Bookings paused — new requests will not be accepted." : "Bookings resumed — mentees can book again.");
+    } catch (err) {
+      setPauseBookings(!next);
+      showMsg(err instanceof Error ? err.message : "Failed to update booking status.", false);
+    } finally {
+      setPauseSaving(false);
+    }
   }
 
   function handleLogout() {
@@ -193,11 +236,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 bg-white rounded-2xl p-1.5 card-shadow">
+        <div className="flex gap-2 mb-6 bg-white rounded-2xl p-1.5 card-shadow flex-wrap">
           {([
-            { id: "profile",      label: "Profil",        icon: User },
-            { id: "password",     label: "Mot de passe",  icon: Lock },
-            { id: "subscription", label: "Abonnement",    icon: CreditCard },
+            { id: "profile",      label: "Profil",         icon: User },
+            { id: "password",     label: "Mot de passe",   icon: Lock },
+            { id: "subscription", label: "Abonnement",     icon: CreditCard },
+            ...(session.role === "mentor" ? [{ id: "availability" as Tab, label: "Disponibilité", icon: CalendarRange }] : []),
           ] as { id: Tab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${tab === id ? "gradient-bg text-white" : "text-gray-500 hover:text-gray-700"}`}>
@@ -352,6 +396,48 @@ export default function SettingsPage() {
                 </Link>
               </div>
             )}
+          </div>
+        )}
+        {/* ── Availability tab ── */}
+        {tab === "availability" && session.role === "mentor" && (
+          <div className="space-y-5">
+            {mentorDbId ? (
+              <AvailabilitySelector mentorId={mentorDbId} variant="light" />
+            ) : (
+              <div className="bg-white rounded-2xl p-8 card-shadow flex items-center justify-center">
+                <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+              </div>
+            )}
+
+            {/* Pause all bookings */}
+            <div className="bg-white rounded-2xl p-6 card-shadow">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <BellOff className="w-5 h-5 text-red-500" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 text-sm">Pause all bookings</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    When paused, mentees cannot request new sessions with you.
+                  </p>
+                </div>
+                <button
+                  onClick={togglePauseBookings}
+                  disabled={pauseSaving || !mentorDbId}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0 disabled:opacity-60 ${pauseBookings ? "bg-red-500" : "bg-gray-200"}`}
+                  aria-label="Toggle pause bookings"
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${pauseBookings ? "translate-x-6" : "translate-x-0"}`}
+                  />
+                </button>
+              </div>
+              {pauseBookings && (
+                <p className="mt-3 text-xs text-red-600 bg-red-50 rounded-xl px-4 py-2.5">
+                  Your profile is currently paused. Mentees will see you as unavailable.
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
