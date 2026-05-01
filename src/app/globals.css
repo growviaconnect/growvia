@@ -310,3 +310,60 @@ body::after {
     rgba(13,10,26,0.6) 100%
   ) !important;
 }
+
+/* ── The Path — Cinematic Testimonials ──────────────────────────────────────── */
+
+/* Headline: each word slides up from beneath its clipping wrapper */
+.path-headline-word {
+  display: block;
+  transform: translateY(110%);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.path-header.path-header-visible .path-headline-word {
+  transform: translateY(0);
+}
+
+/* Quote: words appear one by one with staggered delays (delay set inline) */
+@keyframes path-word-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.path-word {
+  display: inline-block;
+  opacity: 0;
+}
+.path-panel.path-panel-visible .path-word {
+  animation: path-word-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Author: fades in after the quote finishes */
+.path-author {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease 0.75s, transform 0.5s ease 0.75s;
+}
+.path-panel.path-panel-visible .path-author {
+  opacity: 1;
+  transform: none;
+}
+
+/* Photo: starts invisible, blurs in and slides from the side */
+.path-photo {
+  opacity: 0;
+}
+
+@keyframes path-from-left {
+  from { opacity: 0; filter: blur(20px); transform: translateX(-50px); }
+  to   { opacity: 1; filter: blur(0);    transform: translateX(0); }
+}
+@keyframes path-from-right {
+  from { opacity: 0; filter: blur(20px); transform: translateX(50px); }
+  to   { opacity: 1; filter: blur(0);    transform: translateX(0); }
+}
+
+.path-panel.path-panel-visible .path-photo-from-left {
+  animation: path-from-left  0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.path-panel.path-panel-visible .path-photo-from-right {
+  animation: path-from-right 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
