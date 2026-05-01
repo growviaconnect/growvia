@@ -1,93 +1,112 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, ArrowRight, TrendingUp, Loader2 } from "lucide-react";
+import { CheckCircle, ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { getUserSession, type UserSession } from "@/lib/session";
 import { useLang } from "@/contexts/LangContext";
 
-const serifStyle = {
+const serif: React.CSSProperties = {
   fontFamily: "'Playfair Display', Georgia, serif",
-  fontStyle: "italic" as const,
+  fontStyle: "italic",
   fontWeight: 400,
 };
+const ACCENT = "#7C3AED";
+const ACCENT_LIGHT = "#A78BFA";
+const EASE = "cubic-bezier(0.16,1,0.3,1)";
+const PRICES = ["4.99", "9.99", "14.99"];
 
 export default function PricingPage() {
   const { t } = useLang();
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [activePanel, setActivePanel] = useState(0);
+  const [vis, setVis] = useState<boolean[]>(new Array(6).fill(false));
+  const [priceDisplay, setPriceDisplay] = useState<string[]>([...PRICES]);
+  const [isMobile, setIsMobile] = useState(false);
+  const animatedPrices = useRef<Set<number>>(new Set());
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  useEffect(() => { setSession(getUserSession()); }, []);
+  useEffect(() => {
+    setSession(getUserSession());
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const plans = [
     {
-      name: t("pricing_plan_basic"),
-      key: "Basic",
-      price: "4.99",
+      name: t("pricing_plan_basic"), key: "Basic",
       desc: t("pricing_plan_basic_desc"),
-      features: [
-        t("pricing_plan_basic_f1"),
-        t("pricing_plan_basic_f2"),
-        t("pricing_plan_basic_f3"),
-        t("pricing_plan_basic_f4"),
-      ],
-      cta: t("pricing_plan_basic_cta"),
-      recommended: false,
+      features: [t("pricing_plan_basic_f1"), t("pricing_plan_basic_f2"), t("pricing_plan_basic_f3"), t("pricing_plan_basic_f4")],
+      cta: t("pricing_plan_basic_cta"), recommended: false,
     },
     {
-      name: t("pricing_plan_std"),
-      key: "Standard",
-      price: "9.99",
+      name: t("pricing_plan_std"), key: "Standard",
       desc: t("pricing_plan_std_desc"),
-      features: [
-        t("pricing_plan_std_f1"),
-        t("pricing_plan_std_f2"),
-        t("pricing_plan_std_f3"),
-        t("pricing_plan_std_f4"),
-        t("pricing_plan_std_f5"),
-      ],
-      cta: t("pricing_plan_std_cta"),
-      recommended: true,
+      features: [t("pricing_plan_std_f1"), t("pricing_plan_std_f2"), t("pricing_plan_std_f3"), t("pricing_plan_std_f4"), t("pricing_plan_std_f5")],
+      cta: t("pricing_plan_std_cta"), recommended: true,
     },
     {
-      name: t("pricing_plan_prem"),
-      key: "Premium",
-      price: "14.99",
+      name: t("pricing_plan_prem"), key: "Premium",
       desc: t("pricing_plan_prem_desc"),
-      features: [
-        t("pricing_plan_prem_f1"),
-        t("pricing_plan_prem_f2"),
-        t("pricing_plan_prem_f3"),
-        t("pricing_plan_prem_f4"),
-        t("pricing_plan_prem_f5"),
-      ],
-      cta: t("pricing_plan_prem_cta"),
-      recommended: false,
+      features: [t("pricing_plan_prem_f1"), t("pricing_plan_prem_f2"), t("pricing_plan_prem_f3"), t("pricing_plan_prem_f4"), t("pricing_plan_prem_f5")],
+      cta: t("pricing_plan_prem_cta"), recommended: false,
     },
   ];
+  const mentorPerks = [t("pricing_mentor_p1"), t("pricing_mentor_p2"), t("pricing_mentor_p3"), t("pricing_mentor_p4")];
+  const freeFeatures = [t("pricing_free_f1"), t("pricing_free_f2"), t("pricing_free_f3"), t("pricing_free_f4")];
 
-  const mentorPerks = [
-    t("pricing_mentor_p1"),
-    t("pricing_mentor_p2"),
-    t("pricing_mentor_p3"),
-    t("pricing_mentor_p4"),
-  ];
+  useEffect(() => {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const idx = parseInt(entry.target.getAttribute("data-pidx") ?? "0");
+        setActivePanel(idx);
+        setVis((prev) => {
+          if (prev[idx]) return prev;
+          const next = [...prev];
+          next[idx] = true;
+          return next;
+        });
+        // Price count-up for plan panels 1–3
+        if (idx >= 1 && idx <= 3 && !animatedPrices.current.has(idx)) {
+          animatedPrices.current.add(idx);
+          const pi = idx - 1;
+          const target = parseFloat(PRICES[pi]);
+          const dur = 700;
+          const t0 = performance.now();
+          const tick = (now: number) => {
+            const progress = Math.min((now - t0) / dur, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const val = (eased * target).toFixed(2);
+            setPriceDisplay((prev) => { const n = [...prev]; n[pi] = val; return n; });
+            if (progress < 1) requestAnimationFrame(tick);
+            else setPriceDisplay((prev) => { const n = [...prev]; n[pi] = PRICES[pi]; return n; });
+          };
+          requestAnimationFrame(tick);
+        }
+      });
+    }, { threshold: 0.2 });
 
-  const freeFeatures = [
-    t("pricing_free_f1"),
-    t("pricing_free_f2"),
-    t("pricing_free_f3"),
-    t("pricing_free_f4"),
-  ];
+    panelRefs.current.forEach((el) => el && obs.observe(el));
+    return () => obs.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const commissionItems = [
-    t("pricing_plan_basic"),
-    t("pricing_plan_std"),
-    t("pricing_plan_prem"),
-    t("pricing_label"),
-  ];
+  function refPanel(i: number) {
+    return (el: HTMLDivElement | null) => {
+      panelRefs.current[i] = el;
+      if (el) el.setAttribute("data-pidx", String(i));
+    };
+  }
+
+  function scrollToPanel(i: number) {
+    panelRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function handleCheckout(planKey: string) {
     if (!session) { router.push("/auth/register"); return; }
@@ -105,233 +124,295 @@ export default function PricingPage() {
     setLoadingPlan(null);
   }
 
+  // ── Style helpers ────────────────────────────────────────────
+  const panelBase: React.CSSProperties = {
+    scrollSnapAlign: isMobile ? "none" : "start",
+    minHeight: isMobile ? "auto" : "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    padding: isMobile ? "80px 24px 60px" : "0 clamp(24px, 5vw, 80px)",
+  };
+
+  function slideIn(show: boolean, fromLeft = true, delay = 0): React.CSSProperties {
+    return {
+      opacity: show || isMobile ? 1 : 0,
+      transform: show || isMobile ? "translateX(0)" : `translateX(${fromLeft ? -60 : 60}px)`,
+      transition: `opacity 0.8s ${EASE} ${delay}s, transform 0.8s ${EASE} ${delay}s`,
+    };
+  }
+
+  function featureItem(show: boolean, fi: number): React.CSSProperties {
+    return {
+      display: "flex", alignItems: "flex-start", gap: 12,
+      fontSize: 14, color: "rgba(255,255,255,0.6)",
+      opacity: show || isMobile ? 1 : 0,
+      transform: show || isMobile ? "translateY(0)" : "translateY(10px)",
+      transition: `opacity 0.5s ${EASE} ${0.3 + fi * 0.06}s, transform 0.5s ${EASE} ${0.3 + fi * 0.06}s`,
+    };
+  }
+
+  const ctaBtn = (highlighted: boolean): React.CSSProperties => ({
+    display: "inline-flex", alignItems: "center", gap: 8,
+    background: highlighted ? ACCENT : "transparent",
+    color: "white",
+    border: highlighted ? "none" : "1px solid rgba(255,255,255,0.2)",
+    borderRadius: 12, padding: "14px 28px",
+    fontSize: 14, fontWeight: 600, cursor: "pointer",
+  });
+
   return (
     <>
-      {/* ── HERO ──────────────────────────────────────────────── */}
-      <section className="relative min-h-[75vh] flex items-center justify-center text-center overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&q=80"
-          alt="" aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "brightness(0.28) saturate(0.55)" }}
-        />
-        <div className="absolute inset-0 bg-[#0D0A1A]/65" />
-        <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: "35%", background: "linear-gradient(to bottom, transparent, #0D0A1A)" }} />
+      {/* ── Full-screen scroll-snap wrapper ──────────────────────── */}
+      {/* margin-top: -64px cancels main's pt-16 so panels are truly full-viewport */}
+      <div
+        style={{
+          marginTop: "-64px",
+          height: isMobile ? "auto" : "100vh",
+          overflowY: isMobile ? "visible" : "scroll",
+          scrollSnapType: isMobile ? "none" : "y mandatory",
+        }}
+      >
 
-        <div className="relative px-6 max-w-3xl mx-auto">
-          <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-8">
-            {t("pricing_label")}
-          </p>
-          <h1 className="reveal reveal-delay-1 text-5xl md:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-7">
-            {t("pricing_title1")}{" "}
-            <span style={{ ...serifStyle, color: "#A78BFA" }}>{t("pricing_title2")}</span>
-          </h1>
-          <p className="reveal reveal-delay-2 text-lg text-white/50 leading-relaxed max-w-xl mx-auto">
-            {t("pricing_sub")}
-          </p>
-        </div>
-      </section>
+        {/* ── Panel 1 — Hero ───────────────────────────────────── */}
+        <div
+          ref={refPanel(0)}
+          style={{
+            ...panelBase,
+            background: "#0D0A1A",
+            flexDirection: "column",
+            textAlign: "center",
+            paddingTop: isMobile ? "100px" : 0,
+          }}
+        >
+          {/* Radial glow */}
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(124,58,237,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-      {/* ── SUBSCRIPTIONS ─────────────────────────────────────── */}
-      <section className="relative py-36 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&q=80"
-          alt="" aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "brightness(0.18) saturate(0.45)" }}
-        />
-        <div className="absolute inset-0 bg-[#0D0A1A]/55" />
-        <div className="absolute top-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }} />
-        <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }} />
-
-        <div className="relative z-20 max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <p className="reveal text-xs font-semibold text-[#A78BFA] uppercase tracking-[0.25em] mb-5">
-              {t("pricing_mentees_label")}
+          <div style={{ position: "relative", maxWidth: 680, padding: "0 24px" }}>
+            <p className="animate-fade-up" style={{ animationDelay: "0ms", fontSize: 10, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: ACCENT_LIGHT, marginBottom: 24 }}>
+              {t("pricing_label")}
             </p>
-            <h2 className="reveal reveal-delay-1 text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-              {t("pricing_choose")}
-            </h2>
-            <p className="reveal reveal-delay-2 text-white/40 mt-4 text-base">
-              {t("pricing_monthly")}
+            <h1 style={{ margin: "0 0 24px", lineHeight: 1.05, letterSpacing: "-0.02em" }}>
+              <span className="animate-fade-up" style={{ animationDelay: "100ms", display: "block", fontSize: "clamp(52px, 9vw, 100px)", fontWeight: 800, color: "white" }}>
+                {t("pricing_title1")}
+              </span>
+              <span className="animate-fade-up" style={{ animationDelay: "200ms", display: "block", fontSize: "clamp(52px, 9vw, 100px)", fontWeight: 800, color: ACCENT_LIGHT, ...serif }}>
+                {t("pricing_title2")}
+              </span>
+            </h1>
+            <p className="animate-fade-up" style={{ animationDelay: "320ms", fontSize: "clamp(15px, 1.8vw, 18px)", color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
+              {t("pricing_sub")}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {plans.map((plan, i) => (
-              <div
-                key={plan.key}
-                className={`reveal reveal-delay-${i + 1} relative rounded-2xl p-8 flex flex-col border transition-colors duration-300 ${
-                  plan.recommended ? "border-[#7C3AED]/60" : "border-white/[0.08] hover:border-[#7C3AED]/30"
-                }`}
-                style={{ background: plan.recommended ? "rgba(124,58,237,0.18)" : "rgba(255,255,255,0.04)" }}
-              >
-                {plan.recommended && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#7C3AED] text-white text-xs font-bold px-5 py-1.5 rounded-full whitespace-nowrap tracking-wide">
-                    {t("pricing_recommended")}
+          {/* Bouncing arrow */}
+          {!isMobile && (
+            <button
+              onClick={() => scrollToPanel(1)}
+              aria-label="Scroll to plans"
+              style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.3)" }}
+              className="pricing-bounce-arrow"
+            >
+              <ChevronDown size={28} />
+            </button>
+          )}
+        </div>
+
+        {/* ── Panels 2–4 — Basique, Standard, Premium ──────────── */}
+        {plans.map((plan, pi) => {
+          const idx = pi + 1;
+          const show = vis[idx];
+          const isStd = plan.recommended;
+          const fromLeft = pi % 2 === 0;
+
+          return (
+            <div
+              key={plan.key}
+              ref={refPanel(idx)}
+              style={{
+                ...panelBase,
+                background: isStd ? "rgba(124,58,237,0.04)" : "#0D0A1A",
+                borderLeft: isStd && !isMobile ? "2px solid rgba(124,58,237,0.4)" : "none",
+              }}
+            >
+              <div style={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : fromLeft ? "row" : "row-reverse",
+                alignItems: "center",
+                gap: "clamp(32px, 6vw, 100px)",
+                width: "100%", maxWidth: 1200,
+              }}>
+
+                {/* Content */}
+                <div style={{ flex: 1, ...slideIn(show, fromLeft) }}>
+                  {isStd && (
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: ACCENT_LIGHT, marginBottom: 12 }}>
+                      {t("pricing_recommended")}
+                    </p>
+                  )}
+                  {/* Plan name — BIG */}
+                  <h2 style={{ fontSize: "clamp(42px, 7vw, 80px)", fontWeight: 800, color: "white", lineHeight: 1, margin: "0 0 10px" }}>
+                    {plan.name}
+                  </h2>
+                  {/* Price — small, muted */}
+                  <p style={{
+                    fontSize: isStd ? 16 : "clamp(18px, 2.5vw, 24px)",
+                    fontWeight: 400,
+                    color: isStd ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.45)",
+                    margin: "0 0 14px",
+                    fontVariantNumeric: "tabular-nums",
+                  }}>
+                    {priceDisplay[pi]}€ / {t("pricing_month")}
+                  </p>
+                  {/* Description — prominent */}
+                  <p style={{ fontSize: "clamp(16px, 2vw, 20px)", color: "rgba(255,255,255,0.8)", lineHeight: 1.6, margin: "0 0 32px" }}>
+                    {plan.desc}
+                  </p>
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 40px", display: "flex", flexDirection: "column", gap: 14 }}>
+                    {plan.features.map((f, fi) => (
+                      <li key={f} style={featureItem(show, fi)}>
+                        <CheckCircle style={{ width: 16, height: 16, color: ACCENT, flexShrink: 0, marginTop: 2 }} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => handleCheckout(plan.key)}
+                    disabled={!!loadingPlan}
+                    style={{ ...ctaBtn(isStd), opacity: loadingPlan === plan.key ? 0.6 : 1 }}
+                  >
+                    {loadingPlan === plan.key && <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />}
+                    {plan.cta}
+                    {loadingPlan !== plan.key && <ArrowRight style={{ width: 16, height: 16 }} />}
+                  </button>
+                </div>
+
+                {/* Decorative number */}
+                {!isMobile && (
+                  <div aria-hidden="true" style={{ flexShrink: 0, fontSize: "clamp(120px, 20vw, 240px)", fontWeight: 800, color: "rgba(124,58,237,0.05)", lineHeight: 1, userSelect: "none", letterSpacing: "-0.04em" }}>
+                    0{pi + 1}
                   </div>
                 )}
-
-                <div className="mb-8">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#A78BFA] mb-4">{plan.name}</p>
-                  <div className="flex items-end gap-1.5 mb-2">
-                    <span className="text-5xl font-extrabold text-white leading-none">{plan.price}€</span>
-                    <span className="text-white/35 mb-1.5 text-sm">{t("pricing_month")}</span>
-                  </div>
-                  <p className="text-sm text-white/40">{plan.desc}</p>
-                </div>
-
-                <ul className="space-y-4 mb-10 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm text-white/60">
-                      <CheckCircle className="w-4 h-4 text-[#7C3AED] flex-shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => handleCheckout(plan.key)}
-                  disabled={loadingPlan === plan.key}
-                  className={`w-full flex items-center justify-center gap-2 font-semibold py-3.5 rounded-xl transition-colors text-sm disabled:opacity-60 ${
-                    plan.recommended
-                      ? "bg-[#7C3AED] text-white hover:bg-[#6D28D9]"
-                      : "border border-white/15 text-white/70 hover:border-[#7C3AED]/50 hover:text-white"
-                  }`}
-                >
-                  {loadingPlan === plan.key
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("pricing_loading")}</>
-                    : plan.cta}
-                </button>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
+          );
+        })}
 
-      {/* ── FREEMIUM ──────────────────────────────────────────── */}
-      <section className="py-24">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <div className="reveal rounded-2xl p-10 border border-white/[0.08]" style={{ background: "rgba(255,255,255,0.03)" }}>
-            <div className="flex flex-col md:flex-row md:items-start gap-10">
-              <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#F97316] mb-3">
-                  {t("pricing_free_badge")}
-                </p>
-                <h3 className="text-3xl font-extrabold text-white mb-3 tracking-tight">
-                  {t("pricing_free_title1")}{" "}
-                  <span style={serifStyle}>{t("pricing_free_title2")}</span>
-                </h3>
-                <p className="text-white/40 text-sm leading-relaxed mb-8">
-                  {t("pricing_free_sub")}
-                </p>
-                <ul className="space-y-4">
-                  {freeFeatures.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm text-white/60">
-                      <CheckCircle className="w-4 h-4 text-[#F97316] flex-shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-8">
-                  <Link
-                    href="/auth/register"
-                    className="inline-flex items-center gap-2 bg-[#F97316] hover:bg-[#EA6C0A] text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
-                  >
-                    {t("pricing_free_cta")} <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
+        {/* ── Panel 5 — Gratuit ─────────────────────────────────── */}
+        <div ref={refPanel(4)} style={{ ...panelBase, background: "#0D0A1A" }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", gap: "clamp(32px, 6vw, 100px)", width: "100%", maxWidth: 1200 }}>
 
-              <div className="flex-shrink-0 md:pt-2">
-                <div
-                  className="text-center rounded-2xl px-10 py-8 border"
-                  style={{ background: "rgba(249,115,22,0.08)", borderColor: "rgba(249,115,22,0.2)" }}
-                >
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#F97316]">
-                    {t("pricing_free_plan")}
-                  </p>
-                  <p className="text-5xl font-extrabold text-white mb-1">0€</p>
-                  <p className="text-xs text-white/35 font-medium">{t("pricing_free_forever")}</p>
-                </div>
-              </div>
+            {/* Left: content */}
+            <div style={{ flex: 1, ...slideIn(vis[4]) }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: ACCENT, marginBottom: 16 }}>
+                {t("pricing_free_badge")}
+              </p>
+              <h2 style={{ fontSize: "clamp(42px, 7vw, 80px)", fontWeight: 800, color: "white", lineHeight: 1, margin: "0 0 16px" }}>
+                {t("pricing_free_title1")}{" "}
+                <span style={serif}>{t("pricing_free_title2")}</span>
+              </h2>
+              <p style={{ fontSize: "clamp(15px, 1.8vw, 18px)", color: "rgba(255,255,255,0.5)", lineHeight: 1.7, margin: "0 0 32px" }}>
+                {t("pricing_free_sub")}
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 40px", display: "flex", flexDirection: "column", gap: 14 }}>
+                {freeFeatures.map((f, fi) => (
+                  <li key={f} style={featureItem(vis[4], fi)}>
+                    <CheckCircle style={{ width: 16, height: 16, color: ACCENT, flexShrink: 0, marginTop: 2 }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth/register" style={{ ...ctaBtn(true), textDecoration: "none" }}>
+                {t("pricing_free_cta")} <ArrowRight style={{ width: 16, height: 16 }} />
+              </Link>
+            </div>
+
+            {/* Right: GRATUIT + 0€ */}
+            <div style={{ flexShrink: 0, textAlign: "center", ...slideIn(vis[4], false) }}>
+              <p style={{ fontSize: "clamp(40px, 7vw, 88px)", fontWeight: 800, color: ACCENT, lineHeight: 1, letterSpacing: "-0.03em", margin: 0 }}>
+                GRATUIT
+              </p>
+              <p style={{ fontSize: "clamp(60px, 11vw, 130px)", fontWeight: 800, color: "white", lineHeight: 0.9, letterSpacing: "-0.04em", margin: 0 }}>
+                0€
+              </p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                {t("pricing_free_forever")}
+              </p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ── FOR MENTORS ───────────────────────────────────────── */}
-      <section className="relative py-36 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=1600&q=80"
-          alt="" aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "brightness(0.22) saturate(0.5)" }}
-        />
-        <div className="absolute inset-0 bg-[#0D0A1A]/60" />
-        <div className="absolute top-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }} />
-        <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10" style={{ height: "200px", background: "linear-gradient(to top, #0D0A1A 0%, transparent 100%)" }} />
+        {/* ── Panel 6 — Pour les mentors ───────────────────────── */}
+        <div ref={refPanel(5)} style={{ ...panelBase, background: "#0D0A1A" }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", gap: "clamp(32px, 6vw, 100px)", width: "100%", maxWidth: 1200 }}>
 
-        <div className="relative z-20 max-w-5xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}>
-              <TrendingUp className="w-4 h-4 text-[#A78BFA]" />
+            {/* Left: content */}
+            <div style={{ flex: 1, ...slideIn(vis[5]) }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: ACCENT_LIGHT, marginBottom: 16 }}>
+                {t("pricing_mentor_label")}
+              </p>
+              <h2 style={{ fontSize: "clamp(28px, 4.5vw, 52px)", fontWeight: 800, color: "white", lineHeight: 1.15, margin: "0 0 16px" }}>
+                {t("pricing_mentor_title")}
+              </h2>
+              <p style={{ fontSize: "clamp(15px, 1.8vw, 18px)", color: "rgba(255,255,255,0.5)", lineHeight: 1.7, margin: "0 0 32px" }}>
+                {t("pricing_mentor_sub")}
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 40px", display: "flex", flexDirection: "column", gap: 14 }}>
+                {mentorPerks.map((perk, pi) => (
+                  <li key={perk} style={featureItem(vis[5], pi)}>
+                    <CheckCircle style={{ width: 16, height: 16, color: ACCENT, flexShrink: 0, marginTop: 2 }} />
+                    {perk}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth/register?role=mentor" style={{ ...ctaBtn(true), textDecoration: "none" }}>
+                {t("pricing_mentor_cta")} <ArrowRight style={{ width: 16, height: 16 }} />
+              </Link>
             </div>
-            <h2 className="text-2xl font-bold text-white">{t("pricing_mentor_label")}</h2>
-          </div>
 
-          <div className="reveal rounded-2xl p-10 border border-[#7C3AED]/20" style={{ background: "rgba(13,10,26,0.75)" }}>
-            <div className="flex flex-col lg:flex-row lg:items-start gap-10">
-              <div className="flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
-                  {t("pricing_mentor_join")}
-                </p>
-                <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-                  {t("pricing_mentor_title")}
-                </h3>
-                <p className="text-white/40 leading-relaxed mb-8">
-                  {t("pricing_mentor_sub")}
-                </p>
-
-                <ul className="space-y-4">
-                  {mentorPerks.map((perk) => (
-                    <li key={perk} className="flex items-start gap-3 text-sm text-white/60">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#7C3AED]" />
-                      {perk}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-8">
-                  <Link
-                    href="/auth/register?role=mentor"
-                    className="inline-flex items-center gap-2 bg-[#7C3AED] text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-[#6D28D9] transition-colors text-sm"
-                  >
-                    {t("pricing_mentor_cta")} <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-
-              <div className="lg:w-64 flex-shrink-0">
-                <div className="rounded-2xl p-6 text-center border border-[#7C3AED]/25" style={{ background: "rgba(124,58,237,0.12)" }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3 text-[#A78BFA]">
-                    {t("pricing_commission")}
-                  </p>
-                  <p className="text-5xl font-extrabold text-white mb-1">20%</p>
-                  <p className="text-sm text-white/40 leading-relaxed">
-                    {t("pricing_commission_sub")}
-                  </p>
-                  <div className="mt-5 pt-5 space-y-2" style={{ borderTop: "1px solid rgba(124,58,237,0.15)" }}>
-                    {commissionItems.map((item) => (
-                      <p key={item} className="text-xs text-white/30">{item}</p>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* Right: 20% */}
+            <div style={{ flexShrink: 0, textAlign: "center", ...slideIn(vis[5], false) }}>
+              <p style={{ fontSize: "clamp(100px, 18vw, 180px)", fontWeight: 800, color: ACCENT, lineHeight: 1, letterSpacing: "-0.04em", margin: 0 }}>
+                20%
+              </p>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", marginTop: 8, lineHeight: 1.5, maxWidth: 200 }}>
+                {t("pricing_commission_sub")}
+              </p>
             </div>
           </div>
         </div>
-      </section>
+
+      </div>
+
+      {/* ── Nav dots — fixed right side, desktop only ─────────── */}
+      <div className="hidden md:flex flex-col" style={{ position: "fixed", right: 28, top: "50%", transform: "translateY(-50%)", zIndex: 100, gap: 10 }}>
+        {Array.from({ length: 6 }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => scrollToPanel(i)}
+            aria-label={`Panel ${i + 1}`}
+            style={{
+              width: 9, height: 9, borderRadius: "50%", padding: 0,
+              background: activePanel === i ? "white" : "transparent",
+              border: `1.5px solid ${activePanel === i ? "white" : "rgba(255,255,255,0.35)"}`,
+              cursor: "pointer",
+              transition: "all 0.25s ease",
+              flexShrink: 0,
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes pricing-bounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50%       { transform: translateX(-50%) translateY(-9px); }
+        }
+        .pricing-bounce-arrow {
+          animation: pricing-bounce 2s ease-in-out infinite;
+        }
+      `}</style>
     </>
   );
 }
