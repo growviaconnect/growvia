@@ -1,134 +1,205 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-const serifStyle = {
+// ── Constants ──────────────────────────────────────────────────────────────
+const serif: React.CSSProperties = {
   fontFamily: "'Playfair Display', Georgia, serif",
-  fontStyle: "italic" as const,
+  fontStyle: "italic",
+  fontWeight: 400,
 };
-
-type Testimonial = {
-  type: "MENTORÉ" | "MENTOR";
-  quote: string;
-  name: string;
-  role: string;
-  photoUrl: string;
-};
-
-const TESTIMONIALS: Testimonial[] = [
-  {
-    type: "MENTORÉ",
-    quote:
-      "En vingt minutes avec mon mentor, j'avais plus de clarté qu'en deux ans de cours. Une conversation qui a changé ma trajectoire.",
-    name: "Sarah Chen",
-    role: "Étudiante en Master, Sciences Po Paris",
-    photoUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    type: "MENTOR",
-    quote:
-      "Je donne deux heures par mois. Ce que je reçois en retour — la progression des mentoré·es, les questions qui m'obligent à me dépasser — est inestimable.",
-    name: "Marcus Johnson",
-    role: "Senior Engineer, Scale-up technologique",
-    photoUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    type: "MENTORÉ",
-    quote:
-      "Le matching était bluffant. Mon mentor avait exactement le même parcours atypique que moi. Pour la première fois, je me sentais véritablement compris.",
-    name: "Aisha Patel",
-    role: "Doctorante en reconversion, HEC",
-    photoUrl: "https://randomuser.me/api/portraits/women/68.jpg",
-  },
-  {
-    type: "MENTOR",
-    quote:
-      "J'aurais voulu avoir cet outil à vingt-cinq ans. Mentorer sur GrowVia, c'est transmettre ce que personne ne m'a jamais transmis.",
-    name: "Thomas Dubois",
-    role: "Directeur Général, Fintech",
-    photoUrl: "https://randomuser.me/api/portraits/men/54.jpg",
-  },
-  {
-    type: "MENTORÉ",
-    quote:
-      "Une heure avec ma mentore m'a ouvert des portes que je cherchais depuis des mois. Pas des conseils génériques — une carte de mon chemin exact.",
-    name: "Elena Rossi",
-    role: "Ingénieure logiciel, Milan",
-    photoUrl: "https://randomuser.me/api/portraits/women/23.jpg",
-  },
-  {
-    type: "MENTOR",
-    quote:
-      "Ce qui me touche, c'est de voir les mentoré·es prendre confiance en eux — pas seulement dans leur carrière, mais dans leur façon d'occuper l'espace.",
-    name: "James Okonkwo",
-    role: "Product Lead, Startup IA",
-    photoUrl: "https://randomuser.me/api/portraits/men/78.jpg",
-  },
-  {
-    type: "MENTORÉ",
-    quote:
-      "J'avais peur que ce soit trop formel. C'est exactement le contraire : une conversation entre quelqu'un qui sait et quelqu'un qui veut apprendre.",
-    name: "Léa Fontaine",
-    role: "Designer UX, Bordeaux",
-    photoUrl: "https://randomuser.me/api/portraits/women/12.jpg",
-  },
-  {
-    type: "MENTOR",
-    quote:
-      "Après quinze ans de carrière, mentorer me reconnecte à l'essentiel : pourquoi j'ai choisi ce métier. C'est un ancrage que je n'attendais pas.",
-    name: "David Nakamura",
-    role: "Chirurgien, CHU Lyon",
-    photoUrl: "https://randomuser.me/api/portraits/men/91.jpg",
-  },
-];
-
+const ACCENT       = "#7C3AED";
+const ACCENT_LIGHT = "#A78BFA";
+const CARD_W  = 340;
+const CARD_H  = 520;
+const GAP     = 80;
+const PHOTO_H = Math.round(CARD_H * 0.55); // 286px
 const HEADLINE = ["Des", "voix", "qui", "comptent."];
 
+const TESTIMONIALS = [
+  { type: "MENTORÉE", quote: "GrowVia ne m'a pas seulement connectée à un mentor. Ça a changé ma façon de voir mon potentiel.", name: "Sarah Chen",     role: "Product Manager · Stripe",       gender: "women", portrait: 44 },
+  { type: "MENTOR",   quote: "Voir mon mentoré décrocher le poste de ses rêves m'a rappelé pourquoi l'expérience est faite pour être partagée.", name: "Marcus Johnson", role: "VP Engineering · Mentor",         gender: "men",   portrait: 32 },
+  { type: "MENTORÉE", quote: "Le matching IA était étonnant. Mon mentor avait fait face exactement au même carrefour.", name: "Aisha Patel",    role: "Founder · EduScale",             gender: "women", portrait: 68 },
+  { type: "MENTORÉ",  quote: "J'avais la direction, pas la confiance. GrowVia m'a donné les deux dès ma première session.", name: "Thomas Dubois",  role: "Strategy Consultant · Paris",     gender: "men",   portrait: 56 },
+  { type: "MENTOR",   quote: "Mon emploi du temps est chargé, mais GrowVia rend le fait de donner en retour sans friction.", name: "Elena Rossi",    role: "Partner · McKinsey",             gender: "women", portrait: 22 },
+  { type: "MENTOR",   quote: "J'ai rejoint GrowVia pour donner en retour. J'ai fini par apprendre autant que j'ai enseigné.", name: "James Okonkwo",  role: "Design Lead · Meta",             gender: "men",   portrait: 75 },
+] as const;
+
+type T = typeof TESTIMONIALS[number];
+
+// ── Card component ─────────────────────────────────────────────────────────
+function GalleryCard({ item, isActive, mobile = false }: { item: T; isActive: boolean; mobile?: boolean }) {
+  return (
+    <div
+      style={{
+        width:       mobile ? "85vw" : CARD_W,
+        flexShrink:  0,
+        position:    "relative",
+        borderRadius: 2,
+        border: `3px solid ${isActive ? "rgba(167,139,250,0.7)" : "rgba(167,139,250,0.4)"}`,
+        boxShadow:
+          "0 0 0 1px rgba(124,58,237,0.2)," +
+          "0 0 0 8px rgba(13,10,26,0.8)," +
+          "0 0 0 10px rgba(124,58,237,0.15)," +
+          "0 8px 40px rgba(0,0,0,0.6)",
+        transform:  mobile ? "none" : isActive ? "scale(1.04)" : "scale(0.96)",
+        opacity:    mobile ? 1 : isActive ? 1 : 0.7,
+        transition: "transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s cubic-bezier(0.16,1,0.3,1), border-color 0.4s cubic-bezier(0.16,1,0.3,1)",
+        background: "#0D0A1A",
+      }}
+    >
+      {/* Corner brackets */}
+      <span className="tc-tl" aria-hidden="true" />
+      <span className="tc-tr" aria-hidden="true" />
+      <span className="tc-bl" aria-hidden="true" />
+      <span className="tc-br" aria-hidden="true" />
+
+      {/* Photo */}
+      <div style={{ height: mobile ? 200 : PHOTO_H, overflow: "hidden", position: "relative" }}>
+        <img
+          src={`https://randomuser.me/api/portraits/${item.gender}/${item.portrait}.jpg`}
+          alt={item.name}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+          loading="lazy"
+        />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, #0D0A1A 100%)" }} />
+      </div>
+
+      {/* Text */}
+      <div style={{ padding: "16px 20px 20px", background: "#0D0A1A" }}>
+        <p style={{ fontSize: 9, letterSpacing: "0.2em", color: ACCENT, textTransform: "uppercase", marginBottom: 8, fontWeight: 700 }}>
+          {item.type}
+        </p>
+        <p style={{ ...serif, fontSize: 13, lineHeight: 1.65, color: "rgba(255,255,255,0.85)", margin: 0 }}>
+          &ldquo;{item.quote}&rdquo;
+        </p>
+        <div style={{ width: 32, height: 1, background: "rgba(124,58,237,0.2)", margin: "12px 0" }} />
+        <p style={{ fontSize: 13, fontWeight: 700, color: "white", margin: 0 }}>{item.name}</p>
+        <p style={{ fontSize: 11, color: ACCENT_LIGHT, marginTop: 2 }}>{item.role}</p>
+      </div>
+
+      {/* Spotlight */}
+      <div
+        style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: `radial-gradient(ellipse at 50% -20%, ${isActive ? "rgba(124,58,237,0.2)" : "rgba(124,58,237,0.12)"} 0%, transparent 60%)`,
+          transition: "background 0.4s ease",
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────
 export default function TestimonialsSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRef   = useRef<HTMLElement>(null);
+  const trackRef     = useRef<HTMLDivElement>(null);
+  const fillRef      = useRef<HTMLDivElement>(null);
+  const headerRef    = useRef<HTMLDivElement>(null);
+  const currentX     = useRef(0);
+  const targetX      = useRef(0);
+  const rafId        = useRef(0);
+  const inView       = useRef(false);
+  const lastActive   = useRef(0);
 
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isMobile, setIsMobile]   = useState(false);
+
+  // Mobile detection
   useEffect(() => {
-    // Animate header headline on scroll into view
-    const hdrObs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("path-header-visible");
-            hdrObs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-    if (headerRef.current) hdrObs.observe(headerRef.current);
-
-    // Animate each testimonial panel on scroll into view
-    const panelObs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("path-panel-visible");
-            panelObs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.25 }
-    );
-    panelRefs.current.forEach((el) => el && panelObs.observe(el));
-
-    return () => {
-      hdrObs.disconnect();
-      panelObs.disconnect();
-    };
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
-  return (
-    <section ref={sectionRef} className="relative border-t border-white/5">
+  // Header reveal
+  useEffect(() => {
+    const hdr = headerRef.current;
+    if (!hdr) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { hdr.classList.add("path-header-visible"); obs.unobserve(hdr); }
+    }, { threshold: 0.4 });
+    obs.observe(hdr);
+    return () => obs.disconnect();
+  }, []);
 
-      {/* ── Section header ──────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-20 lg:pt-32 lg:pb-28">
+  // Horizontal scroll-driven gallery
+  useEffect(() => {
+    if (isMobile) return;
+
+    const section = sectionRef.current;
+    const track   = trackRef.current;
+    const fill    = fillRef.current;
+    if (!section || !track || !fill) return;
+
+    const N    = TESTIMONIALS.length;
+    const STEP = CARD_W + GAP;
+    const maxX = (N - 1) * STEP;
+
+    function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+
+    function tick() {
+      // Lerp toward target (inertia)
+      currentX.current = lerp(currentX.current, targetX.current, 0.08);
+
+      // Apply transform
+      track.style.transform = `translateX(${-currentX.current}px)`;
+
+      // Active card
+      const ai = Math.max(0, Math.min(N - 1, Math.round(currentX.current / STEP)));
+      if (ai !== lastActive.current) {
+        lastActive.current = ai;
+        setActiveIdx(ai);
+      }
+
+      // Progress fill
+      fill.style.width = `${(currentX.current / maxX) * 100}%`;
+
+      if (inView.current) rafId.current = requestAnimationFrame(tick);
+    }
+
+    function onScroll() {
+      const sectionTop  = section.offsetTop;
+      const scrollRange = section.offsetHeight - window.innerHeight;
+      const progress    = Math.max(0, Math.min(1, (window.scrollY - sectionTop) / scrollRange));
+      targetX.current   = progress * maxX;
+
+      // Restart RAF if settled and now scrolling again
+      if (!rafId.current && inView.current) rafId.current = requestAnimationFrame(tick);
+    }
+
+    // IntersectionObserver: only run RAF while section is on screen
+    const obs = new IntersectionObserver(([entry]) => {
+      inView.current = entry.isIntersecting;
+      if (entry.isIntersecting) {
+        rafId.current = requestAnimationFrame(tick);
+      } else {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = 0;
+      }
+    }, { threshold: 0 });
+    obs.observe(section);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId.current);
+      obs.disconnect();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
+
+  const N            = TESTIMONIALS.length;
+  const trackPadding = `calc((100vw - ${CARD_W}px) / 2)`;
+
+  return (
+    <div className="relative border-t border-white/5">
+
+      {/* ── Section header ────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-16 lg:pt-32 lg:pb-20">
         <div ref={headerRef} className="path-header">
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7C3AED] mb-5">
             CE QU&apos;ILS EN DISENT
@@ -143,120 +214,123 @@ export default function TestimonialsSection() {
                 className="inline-block overflow-hidden align-bottom"
                 style={{ marginRight: i < HEADLINE.length - 1 ? "0.28em" : 0 }}
               >
-                <span
-                  className="path-headline-word block"
-                  style={{ transitionDelay: `${i * 0.09}s` }}
-                >
-                  {i === HEADLINE.length - 1 ? (
-                    <span style={serifStyle}>{word}</span>
-                  ) : (
-                    word
-                  )}
+                <span className="path-headline-word block" style={{ transitionDelay: `${i * 0.09}s` }}>
+                  {i === HEADLINE.length - 1
+                    ? <span style={serif}>{word}</span>
+                    : word}
                 </span>
               </span>
             ))}
           </h2>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", fontStyle: "italic", marginTop: 16 }}>
+            Faites défiler pour découvrir leurs histoires →
+          </p>
         </div>
       </div>
 
-      {/* ── Testimonial panels ──────────────────────────────────── */}
-      {TESTIMONIALS.map((item, i) => {
-        const photoLeft = i % 2 === 0;
-        return (
+      {/* ── Desktop: horizontal sticky gallery ────────────────── */}
+      {!isMobile ? (
+        <section
+          ref={sectionRef}
+          style={{ height: `${N * 120}vh` }}
+          aria-label="Galerie de témoignages"
+        >
           <div
-            key={item.name}
-            ref={(el) => { panelRefs.current[i] = el; }}
-            className="path-panel relative flex items-center justify-center"
             style={{
-              height: "100vh",
-              flexDirection: photoLeft ? "row" : "row-reverse",
-              gap: "clamp(32px, 5vw, 80px)",
-              padding: "0 clamp(24px, 5vw, 80px)",
+              position:  "sticky",
+              top:        0,
+              height:    "100vh",
+              overflow:  "hidden",
+              background: "#0D0A1A",
+              display:   "flex",
+              flexDirection: "column",
+              justifyContent: "center",
             }}
           >
-            {/* ── Photo ───────────────────────── */}
+            {/* Horizontal track */}
             <div
-              className={`path-photo ${
-                photoLeft ? "path-photo-from-left" : "path-photo-from-right"
-              } relative overflow-hidden rounded-2xl flex-shrink-0 hidden md:block`}
+              ref={trackRef}
               style={{
-                width: "clamp(200px, 22vw, 340px)",
-                aspectRatio: "3 / 4",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                display:       "flex",
+                flexDirection: "row",
+                gap:           GAP,
+                paddingLeft:   trackPadding,
+                paddingRight:  trackPadding,
+                alignItems:    "center",
+                willChange:    "transform",
               }}
             >
-              <img
-                src={item.photoUrl}
-                alt={item.name}
-                className="absolute inset-0 w-full h-full object-cover object-top"
-                loading="lazy"
-              />
+              {TESTIMONIALS.map((item, i) => (
+                <GalleryCard key={item.name} item={item} isActive={i === activeIdx} />
+              ))}
+            </div>
+
+            {/* Progress bar */}
+            <div
+              style={{
+                position:   "absolute",
+                bottom:      0,
+                left:        0,
+                right:       0,
+                height:      1,
+                background: "rgba(255,255,255,0.06)",
+              }}
+            >
               <div
-                className="absolute inset-0 rounded-2xl"
-                style={{
-                  background: "linear-gradient(to top, rgba(13,10,26,0.7) 0%, transparent 60%)",
-                }}
+                ref={fillRef}
+                style={{ height: "100%", background: ACCENT, width: "0%", transition: "none" }}
               />
             </div>
 
-            {/* ── Text ────────────────────────── */}
+            {/* Counter */}
             <div
-              className="relative flex items-center justify-center w-full md:w-auto"
-              style={{ zIndex: 2, maxWidth: 520 }}
+              style={{
+                position:   "absolute",
+                bottom:      12,
+                right:       28,
+                fontFamily: "monospace",
+                fontSize:    10,
+                color:      "rgba(255,255,255,0.2)",
+                userSelect: "none",
+              }}
             >
-              <div className="w-full">
-
-                {/* Type badge */}
-                <p
-                  className="text-[10px] font-bold uppercase tracking-[0.28em] mb-7"
-                  style={{ color: "#7C3AED" }}
-                >
-                  {item.type}
-                </p>
-
-                {/* Quote — word-by-word staggered animation */}
-                <p
-                  className="path-quote leading-relaxed"
-                  style={{
-                    ...serifStyle,
-                    fontSize: "clamp(1.4rem, 2.5vw, 2.25rem)",
-                    color: "rgba(255,255,255,0.92)",
-                  }}
-                >
-                  &ldquo;
-                  {item.quote.split(" ").map((word, wi) => (
-                    <React.Fragment key={wi}>
-                      <span
-                        className="path-word"
-                        style={{ animationDelay: `${0.15 + wi * 0.04}s` }}
-                      >
-                        {word}
-                      </span>
-                      {" "}
-                    </React.Fragment>
-                  ))}
-                  &rdquo;
-                </p>
-
-                {/* Author */}
-                <div
-                  className="path-author mt-8 pt-6"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-                >
-                  <p className="font-bold text-white" style={{ fontSize: "1.0625rem" }}>
-                    {item.name}
-                  </p>
-                  <p className="mt-1 text-sm" style={{ color: "#A78BFA" }}>
-                    {item.role}
-                  </p>
-                </div>
-
-              </div>
+              {String(activeIdx + 1).padStart(2, "0")} / {String(N).padStart(2, "0")}
             </div>
           </div>
-        );
-      })}
+        </section>
+      ) : (
+        /* ── Mobile: vertical stack ─────────────────────────── */
+        <div
+          style={{
+            display:        "flex",
+            flexDirection:  "column",
+            alignItems:     "center",
+            gap:             48,
+            padding:        "0 0 80px",
+          }}
+        >
+          {TESTIMONIALS.map((item) => (
+            <GalleryCard key={item.name} item={item} isActive={false} mobile />
+          ))}
+        </div>
+      )}
 
-    </section>
+      {/* Corner bracket CSS */}
+      <style>{`
+        .tc-tl, .tc-tr, .tc-bl, .tc-br {
+          position: absolute;
+          width: 14px;
+          height: 14px;
+          border-color: #7C3AED;
+          border-style: solid;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .tc-tl { top: -3px; left: -3px; border-width: 2px 0 0 2px; }
+        .tc-tr { top: -3px; right: -3px; border-width: 2px 2px 0 0; }
+        .tc-bl { bottom: -3px; left: -3px; border-width: 0 0 2px 2px; }
+        .tc-br { bottom: -3px; right: -3px; border-width: 0 2px 2px 0; }
+      `}</style>
+    </div>
   );
 }
