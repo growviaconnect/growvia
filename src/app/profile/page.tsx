@@ -215,6 +215,195 @@ const defaultMentee: MenteeProfile = {
   format_prefere:"", langues:[], motivation:"", cv_url:"", survey_completed:false,
 };
 
+// ─── Crop modal ──────────────────────────────────────────────────────────────────
+const CROP_SIZE = 280; // px — diameter of the circular crop viewport
+
+function CropModal({
+  objectUrl,
+  onConfirm,
+  onCancel,
+}: {
+  objectUrl: string;
+  onConfirm: (blob: Blob) => void;
+  onCancel: () => void;
+}) {
+  const imgRef                      = useRef<HTMLImageElement>(null);
+  const [ready,      setReady]      = useState(false);
+  const [imgNW,      setImgNW]      = useState(0);
+  const [imgNH,      setImgNH]      = useState(0);
+  const [cropScale,  setCropScale]  = useState(1);
+  const [offsetX,    setOffsetX]    = useState(0);
+  const [offsetY,    setOffsetY]    = useState(0);
+
+  // Refs mirror state so handlers never read stale closures
+  const fitScaleRef  = useRef(1);
+  const cropScaleRef = useRef(1);
+  const offsetXRef   = useRef(0);
+  const offsetYRef   = useRef(0);
+
+  function setCS(v: number) { cropScaleRef.current = v; setCropScale(v); }
+  function setOX(v: number) { offsetXRef.current   = v; setOffsetX(v);  }
+  function setOY(v: number) { offsetYRef.current   = v; setOffsetY(v);  }
+
+  // Pointer tracking for drag + pinch
+  const ptrMap    = useRef(new Map<number, { x: number; y: number }>());
+  const dragStart = useRef<{ ptrX: number; ptrY: number; offX: number; offY: number } | null>(null);
+  const pinchInit = useRef<{ dist: number; scale: number } | null>(null);
+
+  function onLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget;
+    // Use cover fit: image fills the circle with no gaps
+    const fit = Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight);
+    fitScaleRef.current = fit;
+    setImgNW(img.naturalWidth);
+    setImgNH(img.naturalHeight);
+    const initOX = (CROP_SIZE - img.naturalWidth  * fit) / 2;
+    const initOY = (CROP_SIZE - img.naturalHeight * fit) / 2;
+    setOX(initOX); setOY(initOY);
+    setReady(true);
+  }
+
+  function ptDist() {
+    const pts = Array.from(ptrMap.current.values());
+    return pts.length >= 2 ? Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) : 0;
+  }
+
+  function onPD(e: React.PointerEvent<HTMLDivElement>) {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    ptrMap.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrMap.current.size === 1) {
+      dragStart.current = { ptrX: e.clientX, ptrY: e.clientY, offX: offsetXRef.current, offY: offsetYRef.current };
+    } else {
+      dragStart.current = null;
+      pinchInit.current = { dist: ptDist(), scale: cropScaleRef.current };
+    }
+  }
+
+  function onPM(e: React.PointerEvent<HTMLDivElement>) {
+    ptrMap.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrMap.current.size >= 2 && pinchInit.current) {
+      const s = pinchInit.current.scale * (ptDist() / pinchInit.current.dist);
+      setCS(Math.min(8, Math.max(0.5, s)));
+    } else if (dragStart.current) {
+      setOX(dragStart.current.offX + e.clientX - dragStart.current.ptrX);
+      setOY(dragStart.current.offY + e.clientY - dragStart.current.ptrY);
+    }
+  }
+
+  function onPU(e: React.PointerEvent<HTMLDivElement>) {
+    ptrMap.current.delete(e.pointerId);
+    pinchInit.current = null;
+    if (ptrMap.current.size === 1) {
+      const [pt] = ptrMap.current.values();
+      dragStart.current = { ptrX: pt.x, ptrY: pt.y, offX: offsetXRef.current, offY: offsetYRef.current };
+    } else if (ptrMap.current.size === 0) {
+      dragStart.current = null;
+    }
+  }
+
+  function onWh(e: React.WheelEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setCS(Math.min(8, Math.max(0.5, cropScaleRef.current * (1 - e.deltaY * 0.001))));
+  }
+
+  function confirm() {
+    const img = imgRef.current;
+    if (!img || !ready) return;
+    const canvas = document.createElement("canvas");
+    canvas.width  = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, 400, 400);
+    const ratio = 400 / CROP_SIZE;
+    ctx.drawImage(
+      img,
+      offsetXRef.current * ratio,
+      offsetYRef.current * ratio,
+      imgNW * fitScaleRef.current * cropScaleRef.current * ratio,
+      imgNH * fitScaleRef.current * cropScaleRef.current * ratio,
+    );
+    canvas.toBlob(blob => { if (blob) onConfirm(blob); }, "image/jpeg", 0.9);
+  }
+
+  const dW = imgNW * fitScaleRef.current * cropScale;
+  const dH = imgNH * fitScaleRef.current * cropScale;
+
+  return (
+    <>
+      <style>{`@keyframes cm-spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+      }}>
+        <div style={{
+          background: "#13111F", borderRadius: 24, padding: 28,
+          border: "1px solid rgba(255,255,255,0.08)",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 20,
+          width: "min(90vw, 380px)",
+        }}>
+          <h3 style={{ color: "white", fontWeight: 700, fontSize: 17, margin: 0 }}>
+            Recadrer la photo
+          </h3>
+
+          {/* Circular crop viewport */}
+          <div
+            style={{
+              width: CROP_SIZE, height: CROP_SIZE, borderRadius: "50%",
+              overflow: "hidden", position: "relative",
+              cursor: "grab", background: "#000", flexShrink: 0,
+              border: "3px solid #7C3AED",
+              boxShadow: "0 0 0 4px rgba(124,58,237,0.2), 0 8px 32px rgba(0,0,0,0.6)",
+              touchAction: "none",
+            }}
+            onPointerDown={onPD}
+            onPointerMove={onPM}
+            onPointerUp={onPU}
+            onPointerCancel={onPU}
+            onWheel={onWh}
+          >
+            {/* Hidden img gives us naturalWidth/Height and is the drawImage source */}
+            <img ref={imgRef} src={objectUrl} alt="" onLoad={onLoad} style={{ display: "none" }} />
+            {ready
+              ? <img src={objectUrl} alt="" draggable={false} style={{
+                  position: "absolute", left: offsetX, top: offsetY,
+                  width: dW, height: dH, pointerEvents: "none", userSelect: "none",
+                }} />
+              : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", border: "3px solid rgba(124,58,237,0.2)", borderTopColor: "#7C3AED", animation: "cm-spin 0.8s linear infinite" }} />
+                </div>
+            }
+          </div>
+
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, margin: 0, textAlign: "center" }}>
+            Glissez pour repositionner · Molette ou pincement pour zoomer
+          </p>
+
+          <div style={{ display: "flex", gap: 10, width: "100%" }}>
+            <button type="button" onClick={onCancel}
+              style={{
+                flex: 1, padding: "13px 0", borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.1)", background: "transparent",
+                color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 500, cursor: "pointer",
+              }}>
+              Annuler
+            </button>
+            <button type="button" onClick={confirm} disabled={!ready}
+              style={{
+                flex: 2, padding: "13px 0", borderRadius: 14, border: "none",
+                background: "#7C3AED", color: "white", fontSize: 14, fontWeight: 600,
+                cursor: ready ? "pointer" : "default", opacity: ready ? 1 : 0.5,
+              }}>
+              Recadrer &amp; Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Main component ─────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
@@ -230,10 +419,11 @@ export default function ProfilePage() {
   const [mentor, setMentor]             = useState<MentorProfile>(defaultMentor);
   const [mentee, setMentee]             = useState<MenteeProfile>(defaultMentee);
 
-  // Photo upload
-  const photoInputRef                       = useRef<HTMLInputElement>(null);
-  const [photoPreview, setPhotoPreview]     = useState("");
-  const [photoUploading, setPhotoUploading] = useState(false);
+  // Photo upload / crop
+  const photoInputRef                         = useRef<HTMLInputElement>(null);
+  const [photoPreview,   setPhotoPreview]     = useState("");
+  const [photoUploading, setPhotoUploading]   = useState(false);
+  const [cropObjectUrl,  setCropObjectUrl]    = useState<string | null>(null);
 
   // ── Toast helper ────────────────────────────────────────────────────────────
   const showToast = useCallback((type: "success" | "error") => {
@@ -315,23 +505,28 @@ export default function ProfilePage() {
     init();
   }, [router]);
 
-  // ── Photo upload ────────────────────────────────────────────────────────────
-  async function handlePhotoSelect(file: File) {
+  // ── Photo select → open crop UI ─────────────────────────────────────────
+  function handlePhotoSelect(file: File) {
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) { setError("Photo must be under 5 MB."); return; }
+    setError(null);
+    setCropObjectUrl(URL.createObjectURL(file));
+  }
+
+  // ── Crop confirmed → upload cropped blob ─────────────────────────────────
+  async function handleCropConfirm(blob: Blob) {
+    if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl);
+    setCropObjectUrl(null);
     if (!userId) return;
 
-    const MAX_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      setError("Photo must be under 5 MB.");
-      return;
-    }
-
     const prevUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
-    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoPreview(URL.createObjectURL(blob));
     setPhotoUploading(true);
     setError(null);
 
     try {
-      const url = await uploadPhotoViaApi(userId, file);
+      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+      const url  = await uploadPhotoViaApi(userId, file);
       if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
       else setMentee(p => ({ ...p, photo_url: url }));
     } catch (err) {
@@ -341,6 +536,11 @@ export default function ProfilePage() {
     } finally {
       setPhotoUploading(false);
     }
+  }
+
+  function handleCropCancel() {
+    if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl);
+    setCropObjectUrl(null);
   }
 
   // ── Toggle array helpers ────────────────────────────────────────────────────
@@ -380,10 +580,12 @@ export default function ProfilePage() {
     setSaving(true);
     setError(null);
     try {
-      const base = { id: userId, updated_at: new Date().toISOString() };
+      // Use UPDATE (not upsert) so we never touch NOT NULL columns like email
+      // that are not part of the edit form.
+      const ts = new Date().toISOString();
       if (role === "mentor") {
-        await supabase.from("mentors").upsert({
-          ...base,
+        await supabase.from("mentors").update({
+          updated_at:        ts,
           nom:               mentor.nom.trim()           || null,
           photo_url:         mentor.photo_url            || null,
           poste_actuel:      mentor.poste_actuel.trim()  || null,
@@ -402,10 +604,10 @@ export default function ProfilePage() {
           langues:           mentor.langues,
           motivation:        mentor.motivation.trim()    || null,
           cv_url:            mentor.cv_url               || null,
-        }).throwOnError();
+        }).eq("id", userId).throwOnError();
       } else {
-        await supabase.from("mentees").upsert({
-          ...base,
+        await supabase.from("mentees").update({
+          updated_at:         ts,
           nom:                mentee.nom.trim()              || null,
           photo_url:          mentee.photo_url               || null,
           niveau_etudes:      mentee.niveau_etudes           || null,
@@ -425,7 +627,7 @@ export default function ProfilePage() {
           langues:            mentee.langues,
           motivation:         mentee.motivation.trim()       || null,
           cv_url:             mentee.cv_url                  || null,
-        }).throwOnError();
+        }).eq("id", userId).throwOnError();
       }
       setEditing(false);
       showToast("success");
@@ -1191,6 +1393,15 @@ export default function ProfilePage() {
         )}
 
       </div>
+
+      {/* Crop modal — rendered outside the scroll container so it's always centered */}
+      {cropObjectUrl && (
+        <CropModal
+          objectUrl={cropObjectUrl}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }
