@@ -25,8 +25,6 @@ const CARD_BG = [
   "#1F1B37",
 ];
 
-// Subtle per-card tilt — organic "physical deck" feel
-const CARD_ROTATIONS = [-0.4, 0.3, -0.2, 0.4, -0.3, 0.2, -0.4];
 
 const stepImages = [
   "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80", // 01 — Créez votre profil
@@ -139,7 +137,12 @@ export default function HowItWorksPage() {
 
       {/* ── CARD STACK — desktop ──────────────────────────────────────── */}
       {!isMobile ? (
-        <section aria-label="Étapes — comment ça marche">
+        <section
+          aria-label="Étapes — comment ça marche"
+          style={{
+            background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(124,58,237,0.04) 0%, transparent 70%)",
+          }}
+        >
           <div id="hiw-container" style={{ position: "relative", height: `calc(${N} * 85vh + 100px)` }}>
           {steps.map((step, i) => {
             const bg = CARD_BG[i % CARD_BG.length];
@@ -147,25 +150,44 @@ export default function HowItWorksPage() {
               <div
                 key={step.num}
                 style={{
-                  position:    "sticky",
-                  top:         80,
-                  minHeight:   i === N - 1 ? "100vh" : "85vh",
-                  height:      "auto",
-                  overflow:    "hidden",
+                  position:     "sticky",
+                  top:          80,
+                  minHeight:    i === N - 1 ? "100vh" : "85vh",
+                  height:       "auto",
+                  overflow:     "hidden",
                   borderRadius: 24,
-                  zIndex:      (i + 1) * 10,
-                  background:  bg,
-                  display:     "flex",
-                  width:       "calc(100% - 64px)",
-                  marginLeft:  32,
-                  marginRight: 32,
-                  marginTop:   i > 0 ? -60 : 0,
+                  zIndex:       (i + 1) * 10,
+                  background:   bg,
+                  display:      "flex",
+                  width:        "calc(100% - 120px)",
+                  marginLeft:   60,
+                  marginRight:  60,
+                  marginTop:    i > 0 ? -60 : 0,
                   paddingBottom: 80,
-                  transform:   `rotate(${CARD_ROTATIONS[i]}deg)`,
-                  boxShadow:   "0 2px 0 0 rgba(124,58,237,0.15), 0 20px 80px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3)",
-                  borderTop:   "1px solid rgba(124,58,237,0.15)",
+                  // no rotate — clean architectural look
+                  boxShadow:    "0 0 0 1px rgba(124,58,237,0.1), 0 24px 80px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4)",
+                  borderTop:    "1px solid rgba(124,58,237,0.35)",
                 }}
               >
+                {/* ── Step number — centered on left/right split line ── */}
+                <div style={{
+                  position: "absolute", top: 32, left: "50%",
+                  transform: "translateX(-50%)",
+                  fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700,
+                  letterSpacing: "0.3em", textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.25)",
+                  userSelect: "none", pointerEvents: "none", zIndex: 4,
+                }}>
+                  {step.num}
+                </div>
+
+                {/* ── Vertical separator — left/right split ─────────── */}
+                <div style={{
+                  position: "absolute", top: 0, bottom: 0, left: "50%",
+                  width: 1, background: "rgba(124,58,237,0.15)",
+                  pointerEvents: "none", zIndex: 2,
+                }} />
+
                 {/* ── LEFT — text content (50%) ──────────────── */}
                 <div style={{
                   width: "50%", flexShrink: 0,
@@ -173,24 +195,12 @@ export default function HowItWorksPage() {
                   padding: "0 clamp(36px, 6vw, 88px)",
                   position: "relative", zIndex: 1,
                 }}>
-                  {/* Decorative step number — watermark */}
-                  <div style={{
-                    position: "absolute", top: "50%", left: "clamp(36px, 6vw, 88px)",
-                    transform: "translateY(-60%)",
-                    fontSize: "clamp(100px, 18vw, 160px)", fontWeight: 800,
-                    color: "rgba(124,58,237,0.07)", lineHeight: 1,
-                    userSelect: "none", pointerEvents: "none",
-                    letterSpacing: "-0.04em",
-                  }}>
-                    {step.num}
-                  </div>
-
                   <div style={{ position: "relative" }}>
                     <p style={{
                       fontSize: 10, fontWeight: 700, letterSpacing: "0.32em",
                       textTransform: "uppercase", color: ACCENT, marginBottom: 18,
                     }}>
-                      ÉTAPE {step.num}
+                      ÉTAPE
                     </p>
                     <h2 style={{
                       fontSize: "clamp(28px, 3.8vw, 52px)", fontWeight: 800,
@@ -239,10 +249,10 @@ export default function HowItWorksPage() {
                     }}
                     loading="lazy"
                   />
-                  {/* Gradient left → transparent so image bleeds into card bg */}
+                  {/* Gradient left → transparent — stronger blend */}
                   <div style={{
                     position: "absolute", inset: 0,
-                    background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
+                    background: "linear-gradient(to right, rgba(13,10,26,0.6) 0%, transparent 25%)",
                   }} />
                   {/* Subtle violet tint */}
                   <div style={{
@@ -271,7 +281,7 @@ export default function HowItWorksPage() {
 
                 {/* ── Step counter — bottom right ─────────────── */}
                 <div style={{
-                  position: "absolute", bottom: 20, right: 28,
+                  position: "absolute", bottom: 24, right: 28,
                   fontFamily: "monospace", fontSize: 11,
                   color: "rgba(255,255,255,0.18)", userSelect: "none", zIndex: 3,
                 }}>
