@@ -196,9 +196,18 @@ export default function HowItWorksPage() {
                   position: "relative", zIndex: 1,
                 }}>
                   <div style={{ position: "relative" }}>
+                    <span style={{
+                      position: "absolute", top: 20, left: 32,
+                      fontSize: "clamp(80px, 14vw, 140px)", fontWeight: 800,
+                      color: "rgba(124,58,237,0.08)", lineHeight: 1,
+                      pointerEvents: "none", userSelect: "none", zIndex: 0,
+                    }} aria-hidden="true">
+                      {step.num}
+                    </span>
                     <p style={{
                       fontSize: 10, fontWeight: 700, letterSpacing: "0.32em",
                       textTransform: "uppercase", color: ACCENT, marginBottom: 18,
+                      position: "relative", zIndex: 1,
                     }}>
                       ÉTAPE
                     </p>
@@ -206,16 +215,18 @@ export default function HowItWorksPage() {
                       fontSize: "clamp(28px, 3.8vw, 52px)", fontWeight: 800,
                       color: "white", lineHeight: 1.12, margin: "0 0 20px",
                       letterSpacing: "-0.025em",
+                      position: "relative", zIndex: 1,
                     }}>
                       {step.title}
                     </h2>
                     <p style={{
                       fontSize: "clamp(14px, 1.5vw, 17px)", color: "rgba(255,255,255,0.48)",
                       lineHeight: 1.78, margin: "0 0 30px", maxWidth: 460,
+                      position: "relative", zIndex: 1,
                     }}>
                       {step.desc}
                     </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
                       {step.detail.map((d) => (
                         <div key={d} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                           <span style={{
