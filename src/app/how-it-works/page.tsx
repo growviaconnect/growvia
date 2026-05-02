@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Video, Bell, Clock, CheckCircle, Mail } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
+import NetworkCanvas from "@/components/NetworkCanvas";
 
 const serif = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -283,32 +284,45 @@ export default function HowItWorksPage() {
                   </div>
                 </div>
 
-                {/* ── RIGHT — full-bleed image (50%) ─────────── */}
+                {/* ── RIGHT — canvas (steps 1-3) or full-bleed image ─── */}
                 <div style={{ width: "50%", flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                  <img
-                    src={step.image}
-                    alt={step.title}
-                    style={{
-                      position: "absolute", inset: 0, width: "100%", height: "100%",
-                      objectFit: "cover", objectPosition: "center",
-                    }}
-                    loading="lazy"
-                  />
-                  {/* Gradient left → transparent so image bleeds into card bg */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
-                  }} />
-                  {/* Subtle violet tint */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(145deg, rgba(76,29,149,0.38) 0%, transparent 60%)",
-                  }} />
-                  {/* Bottom fade */}
-                  <div style={{
-                    position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
-                    background: `linear-gradient(to top, ${bg} 0%, transparent 100%)`,
-                  }} />
+                  {i < 3 ? (
+                    <>
+                      <NetworkCanvas plan={i} />
+                      {/* Left-edge fade into card bg */}
+                      <div style={{
+                        position: "absolute", inset: 0, pointerEvents: "none",
+                        background: `linear-gradient(to right, ${bg} 0%, transparent 30%)`,
+                      }} />
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        src={step.image}
+                        alt={step.title}
+                        style={{
+                          position: "absolute", inset: 0, width: "100%", height: "100%",
+                          objectFit: "cover", objectPosition: "center",
+                        }}
+                        loading="lazy"
+                      />
+                      {/* Gradient left → transparent so image bleeds into card bg */}
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
+                      }} />
+                      {/* Subtle violet tint */}
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        background: "linear-gradient(145deg, rgba(76,29,149,0.38) 0%, transparent 60%)",
+                      }} />
+                      {/* Bottom fade */}
+                      <div style={{
+                        position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
+                        background: `linear-gradient(to top, ${bg} 0%, transparent 100%)`,
+                      }} />
+                    </>
+                  )}
                 </div>
 
                 {/* ── Progress bar — bottom of card ──────────── */}
