@@ -1,34 +1,22 @@
--- 009_mentor_availability.sql
--- Weekly availability slots for mentors + pause_bookings flag on mentors table
-
-CREATE TABLE IF NOT EXISTS mentor_availability (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  mentor_id    uuid NOT NULL REFERENCES mentors(id) ON DELETE CASCADE,
-  day_of_week  smallint NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
-  start_time   time NOT NULL,
-  end_time     time NOT NULL,
-  created_at   timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (mentor_id, day_of_week, start_time)
+CREATE TABLE IF NOT EXISTS public.mentor_availability (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  mentor_id uuid REFERENCES public.mentors(id) ON DELETE CASCADE,
+  day_of_week integer NOT NULL, -- 0=Monday, 6=Sunday
+  period text NOT NULL, -- 'morning', 'afternoon', 'evening'
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(mentor_id, day_of_week, period)
 );
 
-ALTER TABLE mentors ADD COLUMN IF NOT EXISTS pause_bookings boolean NOT NULL DEFAULT false;
+ALTER TABLE public.mentor_availability ENABLE ROW LEVEL SECURITY;
 
-ALTER TABLE mentor_availability ENABLE ROW LEVEL SECURITY;
-
--- Anyone can read availability (needed for booking flows)
-CREATE POLICY "mentor_availability_public_read" ON mentor_availability
-  FOR SELECT USING (true);
-
--- Mentors can manage their own slots
-CREATE POLICY "mentor_availability_self_write" ON mentor_availability
-  FOR ALL
-  USING (
-    mentor_id IN (
-      SELECT id FROM mentors WHERE email = (auth.jwt() ->> 'email')
-    )
+CREATE POLICY "Mentors can manage their own availability"
+ON public.mentor_availability
+FOR ALL USING (
+  mentor_id IN (
+    SELECT id FROM public.mentors WHERE user_id = auth.uid()
   )
-  WITH CHECK (
-    mentor_id IN (
-      SELECT id FROM mentors WHERE email = (auth.jwt() ->> 'email')
-    )
-  );
+);
+
+CREATE POLICY "Anyone can view mentor availability"
+ON public.mentor_availability
+FOR SELECT USING (true);

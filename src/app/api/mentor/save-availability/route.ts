@@ -7,13 +7,13 @@ export async function POST(req: NextRequest) {
   const anonKey     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   let mentorId: string;
-  let slots: { day_of_week: number; start_time: string; end_time: string }[] | undefined;
+  let slots: { day_of_week: number; period: string }[] | undefined;
   let pauseBookings: boolean | undefined;
 
   try {
     const body = await req.json() as {
       mentorId: string;
-      slots?: { day_of_week: number; start_time: string; end_time: string }[];
+      slots?: { day_of_week: number; period: string }[];
       pauseBookings?: boolean;
     };
     mentorId = (body.mentorId ?? "").trim();
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (slots.length > 0) {
-      const rows = slots.map(s => ({ mentor_id: mentorId, ...s }));
+      const rows = slots.map(s => ({ mentor_id: mentorId, day_of_week: s.day_of_week, period: s.period }));
       const { error: insertError } = await client
         .from("mentor_availability")
         .insert(rows);
