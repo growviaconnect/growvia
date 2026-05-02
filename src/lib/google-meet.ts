@@ -1,4 +1,5 @@
-import { createSign } from "crypto";
+import { createSign } from "node:crypto";
+import { Buffer } from "node:buffer";
 
 async function getAccessToken(): Promise<string> {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? "";
