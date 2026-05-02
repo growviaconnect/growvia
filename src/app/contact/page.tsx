@@ -125,7 +125,7 @@ export default function ContactPage() {
     {
       icon: MapPin,
       label: t("contact_hq_label"),
-      value: "Montpellier, France",
+      value: "Barcelone, Espagne",
       href: null,
     },
   ];
