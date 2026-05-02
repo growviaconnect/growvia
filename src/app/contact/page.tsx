@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Mail, MessageSquare, Clock, MapPin, Send } from "lucide-react";
+import { Mail, MessageSquare, Clock, MapPin, Phone, Send } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
 const BG       = "#0D0A1A";
@@ -105,6 +105,18 @@ export default function ContactPage() {
       href: "mailto:yasminchunon@growviaconnect.com",
     },
     {
+      icon: Phone,
+      label: "Co-fondatrice Luna Davin",
+      value: "+33 7 67 50 81 19",
+      href: "tel:+33767508119",
+    },
+    {
+      icon: Phone,
+      label: "Co-fondatrice Yasmine Tunon",
+      value: "+33 7 81 89 20 21",
+      href: "tel:+33781892021",
+    },
+    {
       icon: Clock,
       label: t("contact_response_label"),
       value: t("contact_response_value"),
@@ -113,7 +125,7 @@ export default function ContactPage() {
     {
       icon: MapPin,
       label: t("contact_hq_label"),
-      value: "Barcelone, Espagne",
+      value: "Montpellier, France",
       href: null,
     },
   ];
