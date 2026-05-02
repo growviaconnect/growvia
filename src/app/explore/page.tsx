@@ -76,8 +76,8 @@ export default function ExplorePage() {
     timers.current.push(id);
   }, []);
 
-  const goPrev = useCallback(() => { if (!flyOff && !isSnapping) goDir(-1); }, [flyOff, isSnapping, goDir]);
-  const goNext = useCallback(() => { if (!flyOff && !isSnapping) goDir(1);  }, [flyOff, isSnapping, goDir]);
+  const goPrev = useCallback(() => { if (!flyOff && !isSnapping) goDir(1);  }, [flyOff, isSnapping, goDir]);
+  const goNext = useCallback(() => { if (!flyOff && !isSnapping) goDir(-1); }, [flyOff, isSnapping, goDir]);
 
   // ── Mobile detection ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -183,7 +183,7 @@ export default function ExplorePage() {
       }
 
       if (Math.abs(dx) > SWIPE_THRESHOLD || velocity > VELOCITY_THRESH) {
-        goDir(dx < 0 ? 1 : -1);
+        goDir(dx < 0 ? -1 : 1);
       } else {
         // Spring snap-back
         setIsSnapping(true);
