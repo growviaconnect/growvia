@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { getUserSession, type UserSession } from "@/lib/session";
 import { useLang } from "@/contexts/LangContext";
+import PricingHorizonCanvas from "@/components/PricingHorizonCanvas";
 
 const serif: React.CSSProperties = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -18,9 +19,7 @@ const EASE         = "cubic-bezier(0.16,1,0.3,1)";
 const PRICES       = ["4.99", "9.99", "14.99"];
 const PLAN_LABELS  = ["BASIQUE", "STANDARD", "PREMIUM"];
 
-// ── Orb visuals — planetary system, progression: 1→2→3 orbits ────────────
-// Each dot follows an elliptical translate path (3D-feel without transforms)
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function OrbBasique({ active }: { active: boolean }) {
   return (
     <div style={{
@@ -60,6 +59,7 @@ function OrbBasique({ active }: { active: boolean }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function OrbStandard({ active }: { active: boolean }) {
   return (
     <div style={{
@@ -115,6 +115,7 @@ function OrbStandard({ active }: { active: boolean }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function OrbPremium({ active }: { active: boolean }) {
   return (
     <div style={{
@@ -408,26 +409,16 @@ export default function PricingPage() {
         {!isMobile ? (
           <div style={{ display: "flex", alignItems: "flex-start" }}>
 
-            {/* LEFT — sticky orb panel (45%) */}
+            {/* LEFT — sticky horizon canvas panel (45%) */}
             <div style={{
               width: "45%", flexShrink: 0,
               position: "sticky", top: 0, height: "100vh",
               overflow: "hidden",
-              background: "linear-gradient(160deg, #08051A 0%, #120930 50%, #07041A 100%)",
+              background: "#0D0A1A",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              {/* Subtle vignette */}
-              <div style={{
-                position: "absolute", inset: 0, pointerEvents: "none",
-                background: "radial-gradient(ellipse 88% 88% at 50% 50%, transparent 40%, rgba(4,2,12,0.6) 100%)",
-              }} />
-
-              {/* Orbs */}
-              <div style={{ position: "absolute", inset: 0 }}>
-                <OrbBasique   active={activePlan === 0} />
-                <OrbStandard  active={activePlan === 1} />
-                <OrbPremium   active={activePlan === 2} />
-              </div>
+              {/* Horizon perspective-field canvas */}
+              <PricingHorizonCanvas plan={activePlan} />
 
               {/* Plan name + price overlay — centered on orb, crossfades */}
               <div style={{ position: "relative", zIndex: 3, textAlign: "center", pointerEvents: "none" }}>
