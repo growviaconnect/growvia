@@ -39,14 +39,14 @@ const LinkedInIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-type SocialLink = { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; newTab?: boolean };
+type SocialLink = { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; newTab?: boolean; title?: string };
 
 const socials: SocialLink[] = [
   { label: "Instagram", href: "https://www.instagram.com/growviaconnect",                newTab: true,  Icon: InstagramIcon },
   { label: "TikTok",    href: "https://www.tiktok.com/@growviaconnect",                  newTab: true,  Icon: TikTokIcon    },
   { label: "LinkedIn",  href: "https://www.linkedin.com/in/growvia-connect-7bb495402/",  newTab: true,  Icon: LinkedInIcon  },
   { label: "Email",     href: "mailto:contact@growviaconnect.com",                        newTab: false, Icon: EmailIcon     },
-  { label: "Phone",     href: "tel:+33767508119",                                         newTab: false, Icon: PhoneIcon     },
+  { label: "Phone",     href: "tel:+33767508119",                                         newTab: false, Icon: PhoneIcon, title: "+33 7 67 50 81 19 / +33 7 81 89 20 21" },
 ];
 
 /* ── Footer component ─────────────────────────────────────────── */
@@ -187,11 +187,11 @@ export default function Footer() {
 
           {/* Social icons, right */}
           <div className="flex items-center gap-4 order-3">
-            {socials.map(({ label, href, Icon, newTab }) => (
+            {socials.map(({ label, href, Icon, newTab, title }) => (
               <a
                 key={label}
                 href={href}
-                title={label}
+                title={title ?? label}
                 {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="text-white/35 hover:text-[#7C3AED] transition-colors duration-200"
               >
