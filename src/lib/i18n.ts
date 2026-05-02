@@ -1218,7 +1218,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_badge_mentors: 'Mentors',
     explore_title_mentors: 'Partagez votre expertise',
     explore_link_become_mentor: 'Devenir Mentor',
-    explore_link_certification: 'Certification Mentor',
+    explore_link_certification: 'Mentors Certifiés & Qualifiés',
     explore_badge_support: 'Support',
     explore_title_support: 'Nous sommes là pour vous',
     explore_link_safety: 'Sécurité & Confiance',

@@ -273,8 +273,8 @@ export default function ExplorePage() {
       title: t("explore_title_support"),
       image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
       links: [
-        { label: t("explore_link_safety"),  href: "/safety-trust" },
         { label: t("explore_link_faq"),     href: "/faq" },
+        { label: t("explore_link_safety"),  href: "/safety-trust" },
         { label: t("explore_link_contact"), href: "/contact" },
       ],
     },
