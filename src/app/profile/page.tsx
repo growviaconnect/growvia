@@ -86,11 +86,24 @@ function menteeCompletion(p: MenteeProfile): number {
 }
 
 // ─── Storage helper ─────────────────────────────────────────────────────────────
-async function uploadToStorage(bucket: string, path: string, file: File): Promise<string> {
-  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
-  if (error) throw new Error(error.message);
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+async function uploadPhotoViaApi(userId: string, file: File): Promise<string> {
+  const ext  = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+  const path = `${userId}/avatar.${ext}`;
+
+  const form = new FormData();
+  form.append("file",   file);
+  form.append("bucket", "avatars");
+  form.append("path",   path);
+
+  const res  = await fetch("/api/mentor/upload-file", { method: "POST", body: form });
+  const json = await res.json();
+
+  if (!res.ok || json.error) {
+    console.error("[photo-upload] server error:", json.error);
+    throw new Error(json.error ?? `Upload failed (${res.status})`);
+  }
+
+  return json.url as string;
 }
 
 // ─── Shared UI ──────────────────────────────────────────────────────────────────
@@ -305,16 +318,26 @@ export default function ProfilePage() {
   // ── Photo upload ────────────────────────────────────────────────────────────
   async function handlePhotoSelect(file: File) {
     if (!userId) return;
+
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setError("Photo must be under 5 MB.");
+      return;
+    }
+
+    const prevUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
     setPhotoPreview(URL.createObjectURL(file));
     setPhotoUploading(true);
+    setError(null);
+
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const url = await uploadToStorage("avatars", `${userId}/avatar.${ext}`, file);
+      const url = await uploadPhotoViaApi(userId, file);
       if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
       else setMentee(p => ({ ...p, photo_url: url }));
-    } catch {
-      setError("Photo upload failed, please try again.");
-      setPhotoPreview(role === "mentor" ? mentor.photo_url : mentee.photo_url);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Photo upload failed, please try again.";
+      setError(msg);
+      setPhotoPreview(prevUrl);
     } finally {
       setPhotoUploading(false);
     }
@@ -524,7 +547,7 @@ export default function ProfilePage() {
                   {photoUploading ? <Loader2 className="w-3 h-3 text-white animate-spin" /> : <Upload className="w-3 h-3 text-white" />}
                 </button>
               )}
-              <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+              <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
                 className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoSelect(f); e.target.value = ""; }} />
             </div>
