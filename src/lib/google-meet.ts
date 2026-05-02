@@ -1,5 +1,17 @@
-import { createSign } from "node:crypto";
-import { Buffer } from "node:buffer";
+// Uses only Web Crypto API (no Node.js built-in imports) — compatible with
+// all Next.js runtimes including Turbopack and Edge.
+
+function toBase64url(bytes: Uint8Array): string {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 1024) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + 1024));
+  }
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+}
+
+function encodeBase64url(str: string): string {
+  return toBase64url(new TextEncoder().encode(str));
+}
 
 async function getAccessToken(): Promise<string> {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? "";
@@ -7,20 +19,40 @@ async function getAccessToken(): Promise<string> {
 
   if (!email || !key) throw new Error("Google service account credentials not configured");
 
-  const now    = Math.floor(Date.now() / 1000);
-  const header  = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
-  const payload = Buffer.from(JSON.stringify({
+  const now     = Math.floor(Date.now() / 1000);
+  const header  = encodeBase64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payload = encodeBase64url(JSON.stringify({
     iss:   email,
     scope: "https://www.googleapis.com/auth/calendar",
     aud:   "https://oauth2.googleapis.com/token",
     exp:   now + 3600,
     iat:   now,
-  })).toString("base64url");
+  }));
 
-  const sign = createSign("RSA-SHA256");
-  sign.update(`${header}.${payload}`);
-  const sig = sign.sign(key, "base64url");
-  const jwt = `${header}.${payload}.${sig}`;
+  const sigInput = `${header}.${payload}`;
+
+  // Import RSA private key (PKCS#8 PEM — Google service account format)
+  const pemBody = key
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\s+/g, "");
+  const der = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    der,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const sigBuf = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    cryptoKey,
+    new TextEncoder().encode(sigInput)
+  );
+
+  const jwt = `${sigInput}.${toBase64url(new Uint8Array(sigBuf))}`;
 
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method:  "POST",
