@@ -41,6 +41,7 @@ export default function SettingsPage() {
 
   // Mentor availability
   const [mentorDbId, setMentorDbId]       = useState<string | null>(null);
+  const [mentorIdLoaded, setMentorIdLoaded] = useState(false);
   const [pauseBookings, setPauseBookings] = useState(false);
   const [pauseSaving, setPauseSaving]     = useState(false);
 
@@ -52,17 +53,32 @@ export default function SettingsPage() {
       setPhoto(s.photo ?? "");
 
       if (s.role === "mentor") {
-        supabase
-          .from("mentors")
-          .select("id, pause_bookings")
-          .eq("email", s.email)
-          .single()
-          .then(({ data }) => {
-            if (data) {
+        (async () => {
+          try {
+            const { data } = await supabase
+              .from("mentors")
+              .select("id")
+              .eq("email", s.email)
+              .single();
+            if (data?.id) {
               setMentorDbId(data.id as string);
-              setPauseBookings((data as { id: string; pause_bookings: boolean }).pause_bookings ?? false);
+              // pause_bookings is a newer column — fetch separately so a missing
+              // column never blocks the id fetch above
+              const { data: pb } = await supabase
+                .from("mentors")
+                .select("pause_bookings")
+                .eq("id", data.id)
+                .single();
+              if (pb) setPauseBookings((pb as { pause_bookings?: boolean }).pause_bookings ?? false);
             }
-          });
+          } catch {
+            // silently ignore — spinner will resolve via mentorIdLoaded
+          } finally {
+            setMentorIdLoaded(true);
+          }
+        })();
+      } else {
+        setMentorIdLoaded(true);
       }
     }
   }, []);
@@ -401,11 +417,15 @@ export default function SettingsPage() {
         {/* ── Availability tab ── */}
         {tab === "availability" && session.role === "mentor" && (
           <div className="space-y-5">
-            {mentorDbId ? (
-              <AvailabilitySelector mentorId={mentorDbId} variant="light" />
-            ) : (
+            {!mentorIdLoaded ? (
               <div className="bg-white rounded-2xl p-8 card-shadow flex items-center justify-center">
                 <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+              </div>
+            ) : mentorDbId ? (
+              <AvailabilitySelector mentorId={mentorDbId} variant="light" />
+            ) : (
+              <div className="bg-white rounded-2xl p-8 card-shadow text-center">
+                <p className="text-sm text-gray-500">Could not load availability settings. Try refreshing the page.</p>
               </div>
             )}
 

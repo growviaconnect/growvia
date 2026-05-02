@@ -8,6 +8,7 @@ import {
   User, FileText, AlertCircle, CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import AvailabilitySelector from "@/components/AvailabilitySelector";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,7 @@ interface MentorProfile {
   secteurs: string[]; competences: CompetenceEntry[]; type_profils_aides: string[];
   style_mentorat: string; disponibilite_heures: number; max_mentees: number;
   format_prefere: string; langues: string[]; motivation: string; cv_url: string;
+  session_price: number | null;
   survey_completed: boolean;
 }
 interface MenteeProfile {
@@ -63,14 +65,24 @@ interface MenteeProfile {
 
 // ─── Completion helpers ─────────────────────────────────────────────────────────
 function mentorCompletion(p: MentorProfile): number {
-  const checks = [
-    !!p.nom.trim(), !!p.photo_url, !!p.poste_actuel.trim(), !!p.entreprise.trim(),
-    p.annees_experience !== "", !!p.localisation.trim(), !!p.linkedin_url.trim(), !!p.bio.trim(),
-    p.secteurs.length > 0, p.competences.length > 0, p.type_profils_aides.length > 0,
-    !!p.style_mentorat, p.disponibilite_heures > 0, p.max_mentees > 0,
-    !!p.format_prefere, p.langues.length > 0, !!p.motivation.trim(), !!p.cv_url,
+  // 8 required fields — all filled → 100%
+  const required = [
+    !!p.nom.trim(),
+    !!p.poste_actuel.trim(),
+    p.annees_experience !== "",
+    !!p.localisation.trim(),
+    p.secteurs.length > 0,
+    p.type_profils_aides.length > 0,  // help_with
+    !!p.motivation.trim(),
+    p.session_price != null && p.session_price > 0,  // tarif_horaire
   ];
-  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  if (required.every(Boolean)) return 100;
+
+  // Partial score: required fields worth 80%, optional bonus worth 20%
+  const reqScore = Math.round((required.filter(Boolean).length / required.length) * 80);
+  const optional = [!!p.photo_url, !!p.linkedin_url.trim(), !!p.bio.trim(), !!p.cv_url];
+  const optScore = Math.round((optional.filter(Boolean).length / optional.length) * 20);
+  return Math.min(99, reqScore + optScore);
 }
 function menteeCompletion(p: MenteeProfile): number {
   const checks = [
@@ -206,7 +218,7 @@ const defaultMentor: MentorProfile = {
   localisation:"", linkedin_url:"", bio:"",
   secteurs:[], competences:[], type_profils_aides:[],
   style_mentorat:"", disponibilite_heures:3, max_mentees:3,
-  format_prefere:"", langues:[], motivation:"", cv_url:"", survey_completed:false,
+  format_prefere:"", langues:[], motivation:"", cv_url:"", session_price:null, survey_completed:false,
 };
 const defaultMentee: MenteeProfile = {
   nom:"", photo_url:"", niveau_etudes:"", ecole:"", localisation:"", linkedin_url:"", bio:"",
@@ -415,6 +427,7 @@ export default function ProfilePage() {
   const [toast, setToast]               = useState<"success" | "error" | null>(null);
 
   const [userId, setUserId]             = useState("");
+  const [mentorDbId, setMentorDbId]     = useState<string | null>(null);
   const [role, setRole]                 = useState<Role>(null);
   const [mentor, setMentor]             = useState<MentorProfile>(defaultMentor);
   const [mentee, setMentee]             = useState<MenteeProfile>(defaultMentee);
@@ -444,6 +457,7 @@ export default function ProfilePage() {
 
       if (mentorRow) {
         setRole("mentor");
+        setMentorDbId(mentorRow.id as string);
         setMentor({
           nom:               mentorRow.nom               ?? "",
           photo_url:         mentorRow.photo_url         ?? "",
@@ -463,6 +477,7 @@ export default function ProfilePage() {
           langues:           mentorRow.langues           ?? [],
           motivation:        mentorRow.motivation        ?? "",
           cv_url:            mentorRow.cv_url            ?? "",
+          session_price:     mentorRow.session_price     ?? null,
           survey_completed:  mentorRow.survey_completed  ?? false,
         });
         if (mentorRow.photo_url) setPhotoPreview(mentorRow.photo_url);
@@ -878,6 +893,14 @@ export default function ProfilePage() {
                 </>
               )}
             </Section>
+
+            {/* My Availability */}
+            {mentorDbId && (
+              <Section>
+                <SectionTitle>My Availability</SectionTitle>
+                <AvailabilitySelector mentorId={mentorDbId} variant="dark" />
+              </Section>
+            )}
 
             {/* Expertise */}
             <Section>
