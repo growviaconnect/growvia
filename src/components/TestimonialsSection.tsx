@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import TestimonialsStarCanvas from "./TestimonialsStarCanvas";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const serif: React.CSSProperties = {
@@ -105,12 +106,38 @@ export default function TestimonialsSection() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isMobile, setIsMobile]   = useState(false);
 
+  // Shooting star
+  const [shooter, setShooter] = useState<{
+    active: boolean; top: number; left: number; angle: number; key: number;
+  }>({ active: false, top: 20, left: 30, angle: -25, key: 0 });
+
   // Mobile detection
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Shooting star scheduler
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    let hideTimeout: ReturnType<typeof setTimeout>;
+    function schedule() {
+      const delay = 8000 + Math.random() * 4000;
+      timeout = setTimeout(() => {
+        const top   = 5  + Math.random() * 40; // 5–45% from top
+        const left  = 10 + Math.random() * 55; // 10–65% from left
+        const angle = -(15 + Math.random() * 30); // -15 to -45 deg
+        setShooter(prev => ({ active: true, top, left, angle, key: prev.key + 1 }));
+        hideTimeout = setTimeout(() => {
+          setShooter(prev => ({ ...prev, active: false }));
+          schedule();
+        }, 700);
+      }, delay);
+    }
+    schedule();
+    return () => { clearTimeout(timeout); clearTimeout(hideTimeout); };
   }, []);
 
   // Header reveal
@@ -237,105 +264,60 @@ export default function TestimonialsSection() {
         >
           <div
             style={{
-              position:  "sticky",
-              top:        0,
-              height:    "100vh",
-              overflow:  "hidden",
-              background: "linear-gradient(145deg, #08051A 0%, #1B0D38 30%, #14093A 55%, #0D0828 80%, #06040F 100%)",
-              display:   "flex",
-              flexDirection: "column",
+              position:       "sticky",
+              top:             0,
+              height:         "100vh",
+              overflow:       "hidden",
+              background:     "radial-gradient(ellipse 120% 80% at 50% 30%, #1A0A3A 0%, #0D0A1A 45%, #050310 100%)",
+              display:        "flex",
+              flexDirection:  "column",
               justifyContent: "center",
             }}
           >
-            {/* ── Wall layer 1: diamond/rhombus grid pattern ── */}
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2 L70 36 L36 70 L2 36 Z' fill='none' stroke='%237C3AED' stroke-opacity='0.13' stroke-width='0.8'/%3E%3C/svg%3E")`,
-              backgroundRepeat: "repeat",
-            }} />
+            {/* ── Layer 1: animated star field + constellation lines (canvas) ── */}
+            <TestimonialsStarCanvas />
 
-            {/* ── Wall layer 2: fine dot grid overlay ── */}
+            {/* ── Layer 2a: nebula — top-left ── */}
             <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Ccircle cx='18' cy='18' r='1' fill='%23A78BFA' fill-opacity='0.10'/%3E%3C/svg%3E")`,
-              backgroundRepeat: "repeat",
-            }} />
-
-            {/* ── Wall layer 3: large central violet bloom ── */}
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 70% 65% at 50% 52%, rgba(109,40,217,0.28) 0%, rgba(124,58,237,0.10) 45%, transparent 70%)",
-            }} />
-
-            {/* ── Wall layer 4: left accent bloom ── */}
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 45% 55% at 8% 55%, rgba(124,58,237,0.18) 0%, transparent 65%)",
-            }} />
-
-            {/* ── Wall layer 5: right accent bloom ── */}
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 45% 55% at 92% 50%, rgba(167,139,250,0.12) 0%, transparent 65%)",
-            }} />
-
-            {/* ── Wall layer 6: ceiling lavender light ── */}
-            <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "55%",
-              pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(ellipse 90% 70% at 50% -15%, rgba(190,160,255,0.14) 0%, transparent 65%)",
-            }} />
-
-            {/* ── Wall layer 7: floating luminous orbs ── */}
-            {/* Top-left orb */}
-            <div style={{
-              position: "absolute", top: "12%", left: "6%", width: 220, height: 220,
-              borderRadius: "50%", pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)",
-              filter: "blur(32px)",
-            }} />
-            {/* Top-right orb */}
-            <div style={{
-              position: "absolute", top: "8%", right: "9%", width: 180, height: 180,
-              borderRadius: "50%", pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%)",
-              filter: "blur(28px)",
-            }} />
-            {/* Bottom-center orb */}
-            <div style={{
-              position: "absolute", bottom: "10%", left: "42%", width: 260, height: 200,
-              borderRadius: "50%", pointerEvents: "none", zIndex: 0,
-              background: "radial-gradient(circle, rgba(109,40,217,0.15) 0%, transparent 70%)",
-              filter: "blur(40px)",
-            }} />
-
-            {/* ── Wall layer 8: picture rail molding ── */}
-            <div style={{
-              position: "absolute", top: 52, left: 0, right: 0,
-              pointerEvents: "none", zIndex: 1,
-            }}>
-              <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(200,180,255,0.20) 20%, rgba(220,200,255,0.28) 50%, rgba(200,180,255,0.20) 80%, transparent)" }} />
-              <div style={{ height: 2, background: "linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.40) 15%, rgba(167,139,250,0.55) 50%, rgba(124,58,237,0.40) 85%, transparent 100%)" }} />
-              <div style={{ height: 8, background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)" }} />
-            </div>
-
-            {/* ── Wall layer 9: floor line ── */}
-            <div style={{
-              position: "absolute", bottom: 68, left: "4%", right: "4%", height: 1,
-              background: "linear-gradient(90deg, transparent, rgba(124,58,237,0.30) 20%, rgba(167,139,250,0.40) 50%, rgba(124,58,237,0.30) 80%, transparent)",
+              position: "absolute", top: "-10%", left: "-15%",
+              width: 600, height: 500,
+              background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, rgba(76,29,149,0.06) 40%, transparent 70%)",
+              filter: "blur(60px)",
               pointerEvents: "none", zIndex: 1,
             }} />
+
+            {/* ── Layer 2b: nebula — bottom-right ── */}
             <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: "16%",
-              pointerEvents: "none", zIndex: 0,
-              background: "linear-gradient(to top, rgba(109,40,217,0.08) 0%, transparent 100%)",
+              position: "absolute", bottom: "-5%", right: "-10%",
+              width: 700, height: 400,
+              background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, rgba(124,58,237,0.04) 45%, transparent 70%)",
+              filter: "blur(80px)",
+              pointerEvents: "none", zIndex: 1,
             }} />
 
-            {/* ── Wall layer 10: edge vignette ── */}
+            {/* ── Layer 3: floor glow — cards float in lit space ── */}
             <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1,
-              background: "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 35%, rgba(4,2,10,0.75) 100%)",
+              position: "absolute", inset: 0,
+              background: "radial-gradient(ellipse 80% 20% at 50% 60%, rgba(124,58,237,0.05) 0%, transparent 60%)",
+              pointerEvents: "none", zIndex: 1,
             }} />
+
+            {/* ── Layer 4: shooting star ── */}
+            {shooter.active && (
+              <div
+                key={shooter.key}
+                style={{
+                  position: "absolute",
+                  top:      `${shooter.top}%`,
+                  left:     `${shooter.left}%`,
+                  transform: `rotate(${shooter.angle}deg)`,
+                  pointerEvents: "none",
+                  zIndex: 2,
+                }}
+              >
+                <div className="testimonials-shooter" />
+              </div>
+            )}
             {/* Horizontal track */}
             <div
               ref={trackRef}
@@ -408,7 +390,7 @@ export default function TestimonialsSection() {
         </div>
       )}
 
-      {/* Corner bracket CSS */}
+      {/* Corner bracket + shooting star CSS */}
       <style>{`
         .tc-tl, .tc-tr, .tc-bl, .tc-br {
           position: absolute;
@@ -423,6 +405,22 @@ export default function TestimonialsSection() {
         .tc-tr { top: -3px; right: -3px; border-width: 2px 2px 0 0; }
         .tc-bl { bottom: -3px; left: -3px; border-width: 0 0 2px 2px; }
         .tc-br { bottom: -3px; right: -3px; border-width: 0 2px 2px 0; }
+
+        @keyframes testimonials-shoot {
+          0%   { transform: translateX(-20px) scaleX(0.1); opacity: 0; }
+          12%  { opacity: 0.65; }
+          75%  { transform: translateX(110px) scaleX(1); opacity: 0.5; }
+          100% { transform: translateX(180px) scaleX(0.4); opacity: 0; }
+        }
+        .testimonials-shooter {
+          width: 70px;
+          height: 2px;
+          border-radius: 1px;
+          background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.4) 60%, transparent 100%);
+          box-shadow: 0 0 5px 1px rgba(255,255,255,0.45);
+          transform-origin: left center;
+          animation: testimonials-shoot 600ms ease-out forwards;
+        }
       `}</style>
     </div>
   );
