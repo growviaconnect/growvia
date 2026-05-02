@@ -7,20 +7,13 @@ import { Loader2, Save } from "lucide-react";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const TIME_BLOCKS = [
-  { key: "morning",   label: "Morning",   sub: "8h – 12h",  start: "08:00", end: "12:00" },
-  { key: "afternoon", label: "Afternoon", sub: "12h – 18h", start: "12:00", end: "18:00" },
-  { key: "evening",   label: "Evening",   sub: "18h – 22h", start: "18:00", end: "22:00" },
+  { key: "morning",   label: "Morning",   sub: "8h – 12h"  },
+  { key: "afternoon", label: "Afternoon", sub: "12h – 18h" },
+  { key: "evening",   label: "Evening",   sub: "18h – 22h" },
 ] as const;
 
 type Block = "morning" | "afternoon" | "evening";
 
-function startToBlock(startTime: string): Block | null {
-  const hh = (startTime as string).slice(0, 5);
-  if (hh === "08:00") return "morning";
-  if (hh === "12:00") return "afternoon";
-  if (hh === "18:00") return "evening";
-  return null;
-}
 
 interface Props {
   mentorId: string;
@@ -41,13 +34,13 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
       try {
         const { data } = await supabase
           .from("mentor_availability")
-          .select("day_of_week, start_time")
+          .select("day_of_week, period")
           .eq("mentor_id", mentorId);
 
         const loaded: Record<number, Set<Block>> = {};
         for (const row of (data ?? [])) {
-          const block = startToBlock(row.start_time as string);
-          if (block) {
+          const block = row.period as Block;
+          if (block && ["morning", "afternoon", "evening"].includes(block)) {
             if (!loaded[row.day_of_week]) loaded[row.day_of_week] = new Set();
             loaded[row.day_of_week].add(block);
           }
@@ -72,11 +65,10 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
     setError(null);
     setSaved(false);
 
-    const slots: { day_of_week: number; start_time: string; end_time: string }[] = [];
+    const slots: { day_of_week: number; period: string }[] = [];
     for (const [day, blocks] of Object.entries(selected)) {
       for (const block of blocks) {
-        const tb = TIME_BLOCKS.find(b => b.key === block)!;
-        slots.push({ day_of_week: Number(day), start_time: tb.start, end_time: tb.end });
+        slots.push({ day_of_week: Number(day), period: block });
       }
     }
 
