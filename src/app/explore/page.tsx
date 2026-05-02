@@ -30,6 +30,7 @@ const EASE_SNAP = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
 const SWIPE_THRESHOLD = 80;    // px
 const VELOCITY_THRESH = 0.4;   // px/ms
+const DRAG_THRESHOLD  = 8;     // px — min movement before tap becomes a drag
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ExplorePage() {
@@ -53,12 +54,12 @@ export default function ExplorePage() {
   const [dragDeltaX, setDragDeltaX] = useState(0);
 
   // ── Drag refs — always current, never stale in closures ──────────────────
-  const dragActive    = useRef(false);
-  const dragStartX    = useRef(0);
-  const dragDeltaRef  = useRef(0);          // source of truth for delta
-  const dragPtrId     = useRef<number | null>(null);
-  const velocityBuf   = useRef<{ x: number; t: number }[]>([]);
-  const pointerMoved  = useRef(false);      // true only if pointer moved > 10px
+  const dragActive   = useRef(false);
+  const dragStartX   = useRef(0);
+  const dragStartY   = useRef(0);
+  const dragDeltaRef = useRef(0);
+  const velocityBuf  = useRef<{ x: number; t: number }[]>([]);
+  const didDrag      = useRef(false);   // true only after DRAG_THRESHOLD crossed
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const timers     = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -150,38 +151,46 @@ export default function ExplorePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
 
-  // ── Document-level pointer listeners — attached while dragging ───────────
-  // Using document-level handlers (not card-level) guarantees events are received
-  // even when the pointer moves outside the card element. This is the key fix for
-  // both desktop mouse drag AND mobile touch (via Pointer Events + touch-action:none).
+  // ── Document-level pointer listeners — always active, guarded by dragActive ─
+  // Never call setPointerCapture: that redirects the implicit click event to the
+  // capturing element (the card div), preventing links inside the card from ever
+  // receiving their click and navigating. Without capture, pointerup fires on the
+  // actual element under the cursor, so the browser generates the click on the link.
   useEffect(() => {
-    if (!isDragging) return;
-
     function handleMove(e: PointerEvent) {
-      if (!dragActive.current || e.pointerId !== dragPtrId.current) return;
+      if (!dragActive.current) return;
       const dx = e.clientX - dragStartX.current;
+      const dy = e.clientY - dragStartY.current;
+      if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+        didDrag.current = true;
+      }
       dragDeltaRef.current = dx;
-      if (Math.abs(dx) > 10) pointerMoved.current = true;  // crossed drag threshold
-      setDragDeltaX(dx);
+      if (didDrag.current) {
+        setIsDragging(true);
+        setDragDeltaX(dx);
+      }
       const buf = velocityBuf.current;
       buf.push({ x: e.clientX, t: performance.now() });
       if (buf.length > 6) buf.shift();
     }
 
     function handleUp(e: PointerEvent) {
-      if (!dragActive.current || e.pointerId !== dragPtrId.current) return;
+      if (!dragActive.current) return;
       dragActive.current = false;
-      dragPtrId.current  = null;
-      setIsDragging(false);
 
-      // Clean tap — pointer never moved significantly, let click propagate
-      if (!pointerMoved.current) {
-        dragDeltaRef.current = 0;
+      if (!didDrag.current) {
+        // Clean tap — do nothing here; the browser fires click on the link naturally
         setAllowHover(true);
         return;
       }
 
-      const dx = dragDeltaRef.current;
+      // Committed drag
+      setIsDragging(false);
+      setDragDeltaX(0);
+      dragDeltaRef.current = 0;
+      didDrag.current = false;
+
+      const dx  = e.clientX - dragStartX.current;
       const buf = velocityBuf.current;
       let velocity = 0;
       if (buf.length >= 2) {
@@ -195,8 +204,6 @@ export default function ExplorePage() {
       } else {
         // Spring snap-back
         setIsSnapping(true);
-        setDragDeltaX(0);
-        dragDeltaRef.current = 0;
         const id = setTimeout(() => {
           setIsSnapping(false);
           setAllowHover(true);
@@ -205,30 +212,29 @@ export default function ExplorePage() {
       }
     }
 
-    document.addEventListener("pointermove", handleMove);
-    document.addEventListener("pointerup",   handleUp);
+    document.addEventListener("pointermove", handleMove, { passive: true });
+    document.addEventListener("pointerup",     handleUp);
     document.addEventListener("pointercancel", handleUp);
     return () => {
       document.removeEventListener("pointermove", handleMove);
       document.removeEventListener("pointerup",   handleUp);
       document.removeEventListener("pointercancel", handleUp);
     };
-  }, [isDragging, goDir]);
+  }, [goDir]);  // stable — runs once on mount
 
   // ── Pointer-down on active card ───────────────────────────────────────────
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (!dealComplete || flyOff || isSnapping) return;
     dragActive.current   = true;
-    dragPtrId.current    = e.pointerId;
     dragStartX.current   = e.clientX;
+    dragStartY.current   = e.clientY;
     dragDeltaRef.current = 0;
-    pointerMoved.current = false;
+    didDrag.current      = false;
     velocityBuf.current  = [{ x: e.clientX, t: performance.now() }];
-    setIsDragging(true);
+    // Do NOT call setIsDragging(true) here — set it only once drag threshold is crossed
     setAllowHover(false);
     setHoveredCard(null);
-    // Capture pointer — ensures pointermove/pointerup delivered even outside element
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    // NO setPointerCapture — that is what broke link clicks
   }, [dealComplete, flyOff, isSnapping]);
 
   // ── Card data ─────────────────────────────────────────────────────────────
@@ -484,10 +490,6 @@ export default function ExplorePage() {
                             key={link.href}
                             href={link.href}
                             className="flex items-center justify-between py-2.5 text-sm text-white/55 hover:text-white transition-colors duration-200 group"
-                            onClick={(e) => {
-                              // Block nav only when the pointer actually dragged
-                              if (pointerMoved.current) e.preventDefault();
-                            }}
                           >
                             <span>{link.label}</span>
                             <span className="text-[#7C3AED] text-xs group-hover:translate-x-0.5 transition-transform duration-200">
