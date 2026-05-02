@@ -1,33 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
-// ── Resting positions (slot 0 = active/front) ─────────────────────────────
-// Updated to the natural scattered-pile feel from the design spec
+// ── Resting positions — straight (rotate: 0), tilt only during drag ──────────
 const DECK = [
-  { x: 0,   y: 0,  rotate: -3,   scale: 1,    z: 40 },
-  { x: 18,  y: 12, rotate: 4,    scale: 0.97, z: 30 },
-  { x: -12, y: 22, rotate: -1.5, scale: 0.94, z: 20 },
-  { x: 8,   y: 30, rotate: 6,    scale: 0.91, z: 10 },
+  { x: 0,   y: 0,  rotate: 0, scale: 1,    z: 40 },
+  { x: 16,  y: 10, rotate: 0, scale: 0.97, z: 30 },
+  { x: -10, y: 20, rotate: 0, scale: 0.94, z: 20 },
+  { x: 6,   y: 28, rotate: 0, scale: 0.91, z: 10 },
 ];
+const NUM_CARDS = 4;
 
-// ── Per-card flight start positions (card index 0-3) ─────────────────────
+// ── Per-card flight start positions ───────────────────────────────────────────
 const START_TRANSFORM = [
-  "translateX(-120%) translateY(-40%) rotate(-25deg) scale(0.85)", // Plateforme — top-left
-  "translateX(130%)  translateY(-60%) rotate(30deg)  scale(0.8)",  // Mentorés   — top-right
-  "translateX(-80%)  translateY(100%) rotate(20deg)  scale(0.85)", // Mentors    — bottom-left
-  "translateX(60%)   translateY(80%)  rotate(-35deg) scale(0.8)",  // Support    — bottom-right
+  "translateX(-120%) translateY(-40%) rotate(-20deg) scale(0.85)",
+  "translateX(130%)  translateY(-60%) rotate(20deg)  scale(0.8)",
+  "translateX(-80%)  translateY(100%) rotate(15deg)  scale(0.85)",
+  "translateX(60%)   translateY(80%)  rotate(-25deg) scale(0.8)",
 ];
 
-const DELAYS    = [0, 180, 320, 460];          // ms, staggered deal
-const DURATIONS = [700, 720, 680, 740];        // ms per card flight
+const DELAYS    = [0, 180, 320, 460];
+const DURATIONS = [700, 720, 680, 740];
 const EASE_DEAL = "cubic-bezier(0.22, 1, 0.36, 1)";
 const EASE_NAV  = "cubic-bezier(0.16, 1, 0.3, 1)";
+const EASE_SNAP = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
-// ── Component ─────────────────────────────────────────────────────────────
+const SWIPE_THRESHOLD = 80;   // px to commit
+const VELOCITY_THRESH = 0.45; // px/ms to commit with short drag
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function ExplorePage() {
   const { t } = useLang();
 
@@ -39,10 +43,36 @@ export default function ExplorePage() {
   const [thuddingCards, setThuddingCards] = useState<Set<number>>(new Set());
   const [isMobile,      setIsMobile]      = useState(false);
 
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const timers     = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Swipe / drag state
+  const [isDragging,  setIsDragging]  = useState(false);
+  const [dragDeltaX,  setDragDeltaX]  = useState(0);
+  const [flyOff,      setFlyOff]      = useState<{ dir: -1 | 1 } | null>(null);
+  const [isSnapping,  setIsSnapping]  = useState(false);
 
-  // ── Mobile detection ──────────────────────────────────────────────────
+  const sectionRef    = useRef<HTMLDivElement>(null);
+  const timers        = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const dragStartX    = useRef(0);
+  const dragPointerId = useRef<number | null>(null);
+  const velocityBuf   = useRef<{ x: number; t: number }[]>([]);
+
+  // ── Swipe commit — animate card off then advance ───────────────────────────
+  const goDir = useCallback((dir: -1 | 1) => {
+    setFlyOff({ dir });
+    setAllowHover(false);
+    setHoveredCard(null);
+    const id = setTimeout(() => {
+      setCurrent(c => (c - dir + NUM_CARDS) % NUM_CARDS);
+      setFlyOff(null);
+      setDragDeltaX(0);
+    }, 380);
+    timers.current.push(id);
+  }, []);
+
+  // Guarded wrappers used by nav buttons and keyboard
+  const goPrev = useCallback(() => { if (!flyOff && !isSnapping) goDir(-1); }, [flyOff, isSnapping, goDir]);
+  const goNext = useCallback(() => { if (!flyOff && !isSnapping) goDir(1);  }, [flyOff, isSnapping, goDir]);
+
+  // ── Mobile detection ───────────────────────────────────────────────────────
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -50,7 +80,17 @@ export default function ExplorePage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ── IntersectionObserver — deal on enter, reset on leave ─────────────
+  // ── Keyboard navigation ────────────────────────────────────────────────────
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft")  goPrev();
+      if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [goPrev, goNext]);
+
+  // ── IntersectionObserver — deal on enter, reset on leave ──────────────────
   useEffect(() => {
     if (isMobile) return;
     const el = sectionRef.current;
@@ -69,7 +109,6 @@ export default function ExplorePage() {
       setHoveredCard(null);
       setThuddingCards(new Set());
 
-      // Thud micro-animation for each card after it lands
       DELAYS.forEach((delay, i) => {
         const land = delay + DURATIONS[i];
         const t1 = setTimeout(() => {
@@ -82,7 +121,6 @@ export default function ExplorePage() {
         timers.current.push(t1);
       });
 
-      // Enable hover + mark deal complete after last card lands (card 3: 1200ms)
       const t3 = setTimeout(() => {
         setDealComplete(true);
         setAllowHover(true);
@@ -97,6 +135,10 @@ export default function ExplorePage() {
       setAllowHover(false);
       setHoveredCard(null);
       setThuddingCards(new Set());
+      setFlyOff(null);
+      setDragDeltaX(0);
+      setIsSnapping(false);
+      setIsDragging(false);
     }
 
     const obs = new IntersectionObserver(
@@ -111,7 +153,59 @@ export default function ExplorePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
 
-  // ── Card data ─────────────────────────────────────────────────────────
+  // ── Pointer drag handlers ─────────────────────────────────────────────────
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    if (!dealComplete || flyOff || isSnapping) return;
+    dragPointerId.current = e.pointerId;
+    dragStartX.current    = e.clientX;
+    velocityBuf.current   = [{ x: e.clientX, t: performance.now() }];
+    setIsDragging(true);
+    setAllowHover(false);
+    setHoveredCard(null);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [dealComplete, flyOff, isSnapping]);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging || e.pointerId !== dragPointerId.current) return;
+    const dx = e.clientX - dragStartX.current;
+    setDragDeltaX(dx);
+    const buf = velocityBuf.current;
+    buf.push({ x: e.clientX, t: performance.now() });
+    if (buf.length > 5) buf.shift();
+  }, [isDragging]);
+
+  const onPointerUp = useCallback((e: React.PointerEvent) => {
+    if (!isDragging || e.pointerId !== dragPointerId.current) return;
+
+    // Velocity from buffer
+    const buf = velocityBuf.current;
+    let velocity = 0;
+    if (buf.length >= 2) {
+      const first = buf[0], last = buf[buf.length - 1];
+      const dt = last.t - first.t;
+      if (dt > 0) velocity = Math.abs((last.x - first.x) / dt);
+    }
+
+    const dx = dragDeltaX;
+    const shouldCommit = Math.abs(dx) > SWIPE_THRESHOLD || velocity > VELOCITY_THRESH;
+
+    setIsDragging(false);
+
+    if (shouldCommit) {
+      // swipe left (dx<0) → go forward, swipe right (dx>0) → go back
+      goDir(dx < 0 ? 1 : -1);
+    } else {
+      setIsSnapping(true);
+      setDragDeltaX(0);
+      const id = setTimeout(() => {
+        setIsSnapping(false);
+        setAllowHover(true);
+      }, 420);
+      timers.current.push(id);
+    }
+  }, [isDragging, dragDeltaX, goDir]);
+
+  // ── Card data ──────────────────────────────────────────────────────────────
   const CARDS = [
     {
       id: "platform",
@@ -159,29 +253,28 @@ export default function ExplorePage() {
     },
   ];
 
-  const total  = CARDS.length;
-  const goNext = () => setCurrent((c) => (c + 1) % total);
-  const goPrev = () => setCurrent((c) => (c - 1 + total) % total);
-
-  // ── Deck position for card at index i ─────────────────────────────────
+  // ── Deck resting transform for card i ────────────────────────────────────
   function deckTransform(i: number) {
-    const diff = (i - current + total) % total;
+    const diff = (i - current + NUM_CARDS) % NUM_CARDS;
     const p = DECK[diff];
     return {
       transform: `translateX(${p.x}px) translateY(${p.y}px) rotate(${p.rotate}deg) scale(${p.scale})`,
-      zIndex:    p.z,
+      zIndex: p.z,
     };
   }
 
-  // ── Outer flight wrapper style ────────────────────────────────────────
-  function flightStyle(i: number): React.CSSProperties {
-    // Mobile: skip deal animation, use plain deck positions
+  // ── Per-card outer wrapper style ──────────────────────────────────────────
+  function cardStyle(i: number): React.CSSProperties {
+    const isActive = i === current;
+    const diff     = (i - current + NUM_CARDS) % NUM_CARDS;
+
+    // Mobile — skip deal, use plain deck positions
     if (isMobile) {
       const { transform, zIndex } = deckTransform(i);
       return { transform, zIndex, transition: `transform 0.55s ${EASE_NAV}` };
     }
 
-    // Pre-deal: cards sit at their off-screen start position, invisible
+    // Pre-deal
     if (!dealtIn) {
       return {
         opacity:    0,
@@ -191,14 +284,63 @@ export default function ExplorePage() {
       };
     }
 
-    const { transform: deckTf, zIndex: deckZ } = deckTransform(i);
-    const isHovered  = allowHover && hoveredCard === i;
-    const anyHovered = allowHover && hoveredCard !== null;
+    // Active card being dragged
+    if (isActive && isDragging) {
+      const tilt = dragDeltaX * 0.08;
+      return {
+        opacity:    1,
+        transform:  `translateX(${dragDeltaX}px) rotate(${tilt}deg) scale(1.04)`,
+        zIndex:     50,
+        transition: "none",
+        cursor:     "grabbing",
+        borderRadius: 16,
+        boxShadow:  "0 12px 48px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.35)",
+      };
+    }
 
-    let tf     = deckTf;
-    let zIdx   = deckZ;
+    // Active card flying off after committed swipe
+    if (isActive && flyOff) {
+      const offX   = flyOff.dir < 0 ? "-150%" : "150%";
+      const offRot = flyOff.dir < 0 ? "-35deg" : "35deg";
+      return {
+        opacity:    0,
+        transform:  `translateX(${offX}) rotate(${offRot}) scale(0.85)`,
+        zIndex:     50,
+        transition: `transform 360ms ${EASE_DEAL}, opacity 300ms ease`,
+        borderRadius: 16,
+      };
+    }
+
+    // Active card snapping back
+    if (isActive && isSnapping) {
+      return {
+        opacity:    1,
+        transform:  "translateX(0px) rotate(0deg) scale(1)",
+        zIndex:     40,
+        transition: `transform 420ms ${EASE_SNAP}`,
+        borderRadius: 16,
+        boxShadow:  "0 8px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)",
+      };
+    }
+
+    const { transform: deckTf, zIndex: deckZ } = deckTransform(i);
+    let tf      = deckTf;
+    let zIdx    = deckZ;
     let opacity = 1;
 
+    // Card-behind peek while dragging active card
+    if (isDragging && diff === 1) {
+      const pct         = Math.min(Math.abs(dragDeltaX) / SWIPE_THRESHOLD, 1);
+      const baseP       = DECK[1];
+      const peekScale   = baseP.scale + (DECK[0].scale - baseP.scale) * pct * 0.6;
+      tf      = `translateX(${baseP.x}px) translateY(${baseP.y * (1 - pct * 0.3)}px) rotate(0deg) scale(${peekScale})`;
+      opacity = 0.7 + 0.3 * pct;
+      zIdx    = 35;
+    }
+
+    // Hover effects (when idle)
+    const isHovered  = !isDragging && allowHover && hoveredCard === i;
+    const anyHovered = !isDragging && allowHover && hoveredCard !== null;
     if (anyHovered) {
       if (isHovered) {
         tf   = `${deckTf} translateY(-12px) scale(1.03)`;
@@ -209,7 +351,6 @@ export default function ExplorePage() {
       }
     }
 
-    // Transition: deal stagger → nav smooth → hover fast
     const transition = anyHovered
       ? `transform 0.3s ${EASE_NAV}, opacity 0.3s ease`
       : dealComplete
@@ -219,18 +360,17 @@ export default function ExplorePage() {
 
     return {
       opacity,
-      transform:  tf,
-      zIndex:     zIdx,
+      transform:    tf,
+      zIndex:       zIdx,
       transition,
-      borderRadius: 16,                                                      // rounded shadow
-      boxShadow: "0 8px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)", // physical table feel
+      borderRadius: 16,
+      boxShadow:    "0 8px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)",
     };
   }
 
-  // ── Render ────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Thud keyframe — lives here, not in globals */}
       <style>{`
         @keyframes card-thud {
           0%, 100% { transform: scale(1);    }
@@ -254,37 +394,43 @@ export default function ExplorePage() {
 
         {/* Card deck */}
         <div
-          className="relative"
+          className="relative select-none"
           style={{ width: "clamp(280px, 85vw, 340px)", height: "clamp(430px, 60vh, 520px)" }}
         >
           {CARDS.map((card, i) => {
             const isActive = i === current;
             return (
-              // ── Outer wrapper: handles flight transform, opacity, shadow ──
               <div
                 key={card.id}
                 className="absolute inset-0"
-                style={flightStyle(i)}
-                onMouseEnter={() => allowHover && setHoveredCard(i)}
-                onMouseLeave={() => allowHover && setHoveredCard(null)}
-                onClick={() => !isActive && setCurrent(i)}
+                style={{
+                  ...cardStyle(i),
+                  cursor:      isActive && dealComplete && !isDragging && !flyOff ? "grab" : undefined,
+                  touchAction: "none",
+                }}
+                onPointerDown={isActive ? onPointerDown : undefined}
+                onPointerMove={isActive ? onPointerMove : undefined}
+                onPointerUp={isActive ? onPointerUp : undefined}
+                onPointerCancel={isActive ? onPointerUp : undefined}
+                onMouseEnter={() => !isDragging && allowHover && setHoveredCard(i)}
+                onMouseLeave={() => !isDragging && allowHover && setHoveredCard(null)}
+                onClick={() => !isActive && !isDragging && setCurrent(i)}
               >
-                {/* ── Inner card: rounded clip + thud scale animation ──── */}
+                {/* Inner card: rounded clip + thud animation */}
                 <div
-                  className={`absolute inset-0 rounded-2xl overflow-hidden select-none${!isActive ? " cursor-pointer" : ""}`}
+                  className={`absolute inset-0 rounded-2xl overflow-hidden${!isActive ? " cursor-pointer" : ""}`}
                   style={{
                     animation: thuddingCards.has(i) ? "card-thud 120ms ease-out" : undefined,
                   }}
                 >
-                  {/* Photo background */}
                   <img
                     src={card.image}
                     alt=""
                     aria-hidden="true"
+                    draggable={false}
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ filter: "brightness(0.4) saturate(0.6)" }}
                   />
-                  {/* Gradient overlay */}
                   <div
                     className="absolute inset-0"
                     style={{
@@ -292,10 +438,8 @@ export default function ExplorePage() {
                         "linear-gradient(to bottom, transparent 20%, rgba(13,10,26,0.8) 60%, rgba(13,10,26,0.97) 100%)",
                     }}
                   />
-                  {/* Subtle border ring */}
                   <div className="absolute inset-0 rounded-2xl ring-1 ring-white/8 pointer-events-none" />
 
-                  {/* Content */}
                   <div className="absolute inset-0 flex flex-col justify-between p-7">
                     <div>
                       <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-white uppercase tracking-[0.15em] backdrop-blur-sm">
@@ -329,13 +473,14 @@ export default function ExplorePage() {
           })}
         </div>
 
-        {/* Navigation — unchanged */}
+        {/* Navigation */}
         <div className="flex flex-col items-center gap-5 mt-14">
           <div className="flex items-center gap-6">
             <button
               onClick={goPrev}
+              disabled={!!flyOff || isSnapping}
               aria-label={t("explore_prev_card")}
-              className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/25 transition-all duration-200"
+              className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/25 transition-all duration-200 disabled:opacity-30"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -355,15 +500,16 @@ export default function ExplorePage() {
 
             <button
               onClick={goNext}
+              disabled={!!flyOff || isSnapping}
               aria-label={t("explore_next_card")}
-              className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/25 transition-all duration-200"
+              className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/25 transition-all duration-200 disabled:opacity-30"
             >
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           <p className="text-xs text-white/20 tracking-widest font-mono">
-            {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            {String(current + 1).padStart(2, "0")} / {String(CARDS.length).padStart(2, "0")}
           </p>
         </div>
       </div>
