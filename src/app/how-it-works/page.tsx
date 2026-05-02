@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Video, Bell, Clock, CheckCircle, Mail } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
@@ -35,8 +35,6 @@ const stepImages = [
   "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80",
   "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",
 ];
-
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 export default function HowItWorksPage() {
   const { t } = useLang();
@@ -107,62 +105,6 @@ export default function HowItWorksPage() {
     { Icon: CheckCircle, label: t("hiw_n4") },
   ];
 
-  // ── Scroll-driven card peel ─────────────────────────────────────────
-  const CARD_VH = 85; // scroll runway per card (vh)
-
-  const sectionRef      = useRef<HTMLElement>(null);
-  const cardRefs        = useRef<(HTMLDivElement | null)[]>([]);
-  const targetProgress  = useRef<number[]>(new Array(N).fill(0));
-  const currentProgress = useRef<number[]>(new Array(N).fill(0));
-  const rafId           = useRef(0);
-
-  useEffect(() => {
-    if (isMobile) return;
-
-    const section = sectionRef.current as HTMLElement;
-    if (!section) return;
-
-    function tick() {
-      let live = false;
-      for (let i = 0; i < N; i++) {
-        const card = cardRefs.current[i];
-        if (!card) continue;
-        const prev = currentProgress.current[i];
-        currentProgress.current[i] = lerp(prev, targetProgress.current[i], 0.1);
-        const p = currentProgress.current[i];
-        const ty = -p * window.innerHeight;
-        const sc = 1 - p * 0.03;
-        const op = i === N - 1 ? 1 : Math.max(0.6, 1 - p * 0.4);
-        card.style.transform = `translateY(${ty}px) scale(${sc})`;
-        card.style.opacity   = String(op);
-        if (Math.abs(p - targetProgress.current[i]) > 0.0005) live = true;
-      }
-      rafId.current = live ? requestAnimationFrame(tick) : 0;
-    }
-
-    function onScroll() {
-      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-      const vh = window.innerHeight;
-      for (let i = 0; i < N - 1; i++) {
-        // Card i peels away across its CARD_VH runway
-        const start = sectionTop + i * (vh * CARD_VH / 100);
-        targetProgress.current[i] = Math.max(0, Math.min(1, (window.scrollY - start) / (vh * CARD_VH / 100)));
-      }
-      // Last card stays put
-      targetProgress.current[N - 1] = 0;
-
-      if (!rafId.current) rafId.current = requestAnimationFrame(tick);
-    }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(rafId.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
 
   return (
     <>
@@ -195,31 +137,27 @@ export default function HowItWorksPage() {
 
       {/* ── CARD STACK — desktop ──────────────────────────────────────── */}
       {!isMobile ? (
-        <section
-          ref={sectionRef}
-          style={{ height: `${N * CARD_VH}vh`, position: "relative" }}
-          aria-label="Étapes — comment ça marche"
-        >
+        <section aria-label="Étapes — comment ça marche">
+          <div id="hiw-container" style={{ position: "relative", height: `calc(${N} * 85vh + 100px)` }}>
           {steps.map((step, i) => {
             const bg = CARD_BG[i % CARD_BG.length];
             return (
               <div
                 key={step.num}
-                ref={(el) => { cardRefs.current[i] = el; }}
                 style={{
-                  position:     "sticky",
-                  top:          64,
-                  height:       "100vh",
-                  overflow:     "hidden",
+                  position:    "sticky",
+                  top:         80,
+                  minHeight:   i === N - 1 ? "100vh" : "85vh",
+                  height:      "auto",
+                  overflow:    "hidden",
                   borderRadius: 20,
-                  zIndex:       (N - i) * 10,
-                  background:   bg,
-                  display:      "flex",
-                  willChange:   "transform",
-                  marginTop:    i > 0 ? -48 : 0,
-                  transformOrigin: "top center",
-                  boxShadow:    "0 -12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.08)",
-                  borderTop:    "1px solid rgba(124,58,237,0.15)",
+                  zIndex:      (i + 1) * 10,
+                  background:  bg,
+                  display:     "flex",
+                  marginTop:   i > 0 ? -60 : 0,
+                  paddingBottom: 80,
+                  boxShadow:   "0 -4px 0 0 rgba(124,58,237,0.2), 0 -20px 60px rgba(0,0,0,0.5)",
+                  borderTop:   "1px solid rgba(124,58,237,0.15)",
                 }}
               >
                 {/* ── LEFT — text content (50%) ──────────────── */}
@@ -368,6 +306,7 @@ export default function HowItWorksPage() {
               </div>
             );
           })}
+          </div>{/* end #hiw-container */}
         </section>
       ) : (
         /* ── MOBILE — simple vertical stack ─────────────────────── */
