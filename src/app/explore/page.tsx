@@ -58,6 +58,7 @@ export default function ExplorePage() {
   const dragDeltaRef  = useRef(0);          // source of truth for delta
   const dragPtrId     = useRef<number | null>(null);
   const velocityBuf   = useRef<{ x: number; t: number }[]>([]);
+  const pointerMoved  = useRef(false);      // true only if pointer moved > 10px
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const timers     = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -159,8 +160,9 @@ export default function ExplorePage() {
     function handleMove(e: PointerEvent) {
       if (!dragActive.current || e.pointerId !== dragPtrId.current) return;
       const dx = e.clientX - dragStartX.current;
-      dragDeltaRef.current = dx;                  // always up to date
-      setDragDeltaX(dx);                           // triggers render
+      dragDeltaRef.current = dx;
+      if (Math.abs(dx) > 10) pointerMoved.current = true;  // crossed drag threshold
+      setDragDeltaX(dx);
       const buf = velocityBuf.current;
       buf.push({ x: e.clientX, t: performance.now() });
       if (buf.length > 6) buf.shift();
@@ -168,11 +170,17 @@ export default function ExplorePage() {
 
     function handleUp(e: PointerEvent) {
       if (!dragActive.current || e.pointerId !== dragPtrId.current) return;
-      dragActive.current   = false;
-      dragPtrId.current    = null;
+      dragActive.current = false;
+      dragPtrId.current  = null;
       setIsDragging(false);
 
-      // Read from ref — never stale
+      // Clean tap — pointer never moved significantly, let click propagate
+      if (!pointerMoved.current) {
+        dragDeltaRef.current = 0;
+        setAllowHover(true);
+        return;
+      }
+
       const dx = dragDeltaRef.current;
       const buf = velocityBuf.current;
       let velocity = 0;
@@ -214,6 +222,7 @@ export default function ExplorePage() {
     dragPtrId.current    = e.pointerId;
     dragStartX.current   = e.clientX;
     dragDeltaRef.current = 0;
+    pointerMoved.current = false;
     velocityBuf.current  = [{ x: e.clientX, t: performance.now() }];
     setIsDragging(true);
     setAllowHover(false);
@@ -254,7 +263,7 @@ export default function ExplorePage() {
       title: t("explore_title_mentors"),
       image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&q=80",
       links: [
-        { label: t("explore_link_become_mentor"), href: "/auth/register?role=mentor" },
+        { label: t("explore_link_become_mentor"), href: "/become-a-mentor" },
         { label: t("explore_link_certification"), href: "/mentor-certification" },
       ],
     },
@@ -476,9 +485,8 @@ export default function ExplorePage() {
                             href={link.href}
                             className="flex items-center justify-between py-2.5 text-sm text-white/55 hover:text-white transition-colors duration-200 group"
                             onClick={(e) => {
-                              // Prevent nav if this was a drag (moved > 5px)
-                              if (Math.abs(dragDeltaRef.current) > 5) e.preventDefault();
-                              e.stopPropagation();
+                              // Block nav only when the pointer actually dragged
+                              if (pointerMoved.current) e.preventDefault();
                             }}
                           >
                             <span>{link.label}</span>
