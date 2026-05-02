@@ -106,7 +106,9 @@ export default function HowItWorksPage() {
     { Icon: CheckCircle, label: t("hiw_n4") },
   ];
 
-  // ── Scroll-driven card stack ────────────────────────────────────────
+  // ── Scroll-driven card peel ─────────────────────────────────────────
+  const CARD_VH = 85; // scroll runway per card (vh)
+
   const sectionRef      = useRef<HTMLElement>(null);
   const cardRefs        = useRef<(HTMLDivElement | null)[]>([]);
   const targetProgress  = useRef<number[]>(new Array(N).fill(0));
@@ -126,8 +128,13 @@ export default function HowItWorksPage() {
         if (!card) continue;
         const prev = currentProgress.current[i];
         currentProgress.current[i] = lerp(prev, targetProgress.current[i], 0.1);
-        card.style.transform = `translateY(${-currentProgress.current[i] * 100}vh)`;
-        if (Math.abs(currentProgress.current[i] - targetProgress.current[i]) > 0.0005) live = true;
+        const p = currentProgress.current[i];
+        const ty = -p * window.innerHeight;
+        const sc = 1 - p * 0.03;
+        const op = i === N - 1 ? 1 : Math.max(0.6, 1 - p * 0.4);
+        card.style.transform = `translateY(${ty}px) scale(${sc})`;
+        card.style.opacity   = String(op);
+        if (Math.abs(p - targetProgress.current[i]) > 0.0005) live = true;
       }
       rafId.current = live ? requestAnimationFrame(tick) : 0;
     }
@@ -136,11 +143,11 @@ export default function HowItWorksPage() {
       const sectionTop = section.getBoundingClientRect().top + window.scrollY;
       const vh = window.innerHeight;
       for (let i = 0; i < N - 1; i++) {
-        // Card i slides away as scrollY moves through its 100vh window
-        const start = sectionTop + i * vh;
-        targetProgress.current[i] = Math.max(0, Math.min(1, (window.scrollY - start) / vh));
+        // Card i peels away across its CARD_VH runway
+        const start = sectionTop + i * (vh * CARD_VH / 100);
+        targetProgress.current[i] = Math.max(0, Math.min(1, (window.scrollY - start) / (vh * CARD_VH / 100)));
       }
-      // Last card never slides away
+      // Last card stays put
       targetProgress.current[N - 1] = 0;
 
       if (!rafId.current) rafId.current = requestAnimationFrame(tick);
@@ -189,7 +196,7 @@ export default function HowItWorksPage() {
       {!isMobile ? (
         <section
           ref={sectionRef}
-          style={{ height: `${N * 100}vh`, position: "relative" }}
+          style={{ height: `${N * CARD_VH}vh`, position: "relative" }}
           aria-label="Étapes — comment ça marche"
         >
           {steps.map((step, i) => {
@@ -199,14 +206,19 @@ export default function HowItWorksPage() {
                 key={step.num}
                 ref={(el) => { cardRefs.current[i] = el; }}
                 style={{
-                  position:   "sticky",
-                  top:         0,
-                  height:     "100vh",
-                  overflow:   "hidden",
-                  zIndex:     (N - i) * 10,
-                  background: bg,
-                  display:    "flex",
-                  willChange: "transform",
+                  position:     "sticky",
+                  top:          64,
+                  height:       "100vh",
+                  overflow:     "hidden",
+                  borderRadius: 20,
+                  zIndex:       (N - i) * 10,
+                  background:   bg,
+                  display:      "flex",
+                  willChange:   "transform",
+                  marginTop:    i > 0 ? -48 : 0,
+                  transformOrigin: "top center",
+                  boxShadow:    "0 -12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.08)",
+                  borderTop:    "1px solid rgba(124,58,237,0.15)",
                 }}
               >
                 {/* ── LEFT — text content (50%) ──────────────── */}
