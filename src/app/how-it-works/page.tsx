@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Video, Bell, Clock, CheckCircle, Mail } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
-import NetworkCanvas from "@/components/NetworkCanvas";
 
 const serif = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -26,10 +25,13 @@ const CARD_BG = [
   "#1F1B37",
 ];
 
+// Subtle per-card tilt — organic "physical deck" feel
+const CARD_ROTATIONS = [-0.4, 0.3, -0.2, 0.4, -0.3, 0.2, -0.4];
+
 const stepImages = [
-  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80",
-  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80",
-  "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&q=80",
+  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80", // 01 — Créez votre profil
+  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80", // 02 — Match IA
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80", // 03 — Session Découverte
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80",
   "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80",
   "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80",
@@ -150,13 +152,17 @@ export default function HowItWorksPage() {
                   minHeight:   i === N - 1 ? "100vh" : "85vh",
                   height:      "auto",
                   overflow:    "hidden",
-                  borderRadius: 20,
+                  borderRadius: 24,
                   zIndex:      (i + 1) * 10,
                   background:  bg,
                   display:     "flex",
+                  width:       "calc(100% - 64px)",
+                  marginLeft:  32,
+                  marginRight: 32,
                   marginTop:   i > 0 ? -60 : 0,
                   paddingBottom: 80,
-                  boxShadow:   "0 -4px 0 0 rgba(124,58,237,0.2), 0 -20px 60px rgba(0,0,0,0.5)",
+                  transform:   `rotate(${CARD_ROTATIONS[i]}deg)`,
+                  boxShadow:   "0 2px 0 0 rgba(124,58,237,0.15), 0 20px 80px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3)",
                   borderTop:   "1px solid rgba(124,58,237,0.15)",
                 }}
               >
@@ -222,45 +228,32 @@ export default function HowItWorksPage() {
                   </div>
                 </div>
 
-                {/* ── RIGHT — canvas (steps 1-3) or full-bleed image ─── */}
+                {/* ── RIGHT — full-bleed photo ─────────────────── */}
                 <div style={{ width: "50%", flexShrink: 0, position: "relative", overflow: "hidden" }}>
-                  {i < 3 ? (
-                    <>
-                      <NetworkCanvas plan={i} />
-                      {/* Left-edge fade into card bg */}
-                      <div style={{
-                        position: "absolute", inset: 0, pointerEvents: "none",
-                        background: `linear-gradient(to right, ${bg} 0%, transparent 30%)`,
-                      }} />
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src={step.image}
-                        alt={step.title}
-                        style={{
-                          position: "absolute", inset: 0, width: "100%", height: "100%",
-                          objectFit: "cover", objectPosition: "center",
-                        }}
-                        loading="lazy"
-                      />
-                      {/* Gradient left → transparent so image bleeds into card bg */}
-                      <div style={{
-                        position: "absolute", inset: 0,
-                        background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
-                      }} />
-                      {/* Subtle violet tint */}
-                      <div style={{
-                        position: "absolute", inset: 0,
-                        background: "linear-gradient(145deg, rgba(76,29,149,0.38) 0%, transparent 60%)",
-                      }} />
-                      {/* Bottom fade */}
-                      <div style={{
-                        position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
-                        background: `linear-gradient(to top, ${bg} 0%, transparent 100%)`,
-                      }} />
-                    </>
-                  )}
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    style={{
+                      position: "absolute", inset: 0, width: "100%", height: "100%",
+                      objectFit: "cover", objectPosition: "center",
+                    }}
+                    loading="lazy"
+                  />
+                  {/* Gradient left → transparent so image bleeds into card bg */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
+                  }} />
+                  {/* Subtle violet tint */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "linear-gradient(145deg, rgba(76,29,149,0.38) 0%, transparent 60%)",
+                  }} />
+                  {/* Bottom fade */}
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
+                    background: `linear-gradient(to top, ${bg} 0%, transparent 100%)`,
+                  }} />
                 </div>
 
                 {/* ── Progress bar — bottom of card ──────────── */}
@@ -316,7 +309,12 @@ export default function HowItWorksPage() {
               key={step.num}
               style={{
                 padding: "72px 24px 60px",
+                width: "calc(100% - 32px)",
+                marginLeft: 16,
+                marginRight: 16,
+                borderRadius: 16,
                 borderTop: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                boxSizing: "border-box",
               }}
             >
               {/* Image */}
