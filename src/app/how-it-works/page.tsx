@@ -169,18 +169,6 @@ export default function HowItWorksPage() {
                   borderTop:    "1px solid rgba(124,58,237,0.35)",
                 }}
               >
-                {/* ── Step number — centered on left/right split line ── */}
-                <div style={{
-                  position: "absolute", top: 32, left: "50%",
-                  transform: "translateX(-50%)",
-                  fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700,
-                  letterSpacing: "0.3em", textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.25)",
-                  userSelect: "none", pointerEvents: "none", zIndex: 4,
-                }}>
-                  {step.num}
-                </div>
-
                 {/* ── Vertical separator — left/right split ─────────── */}
                 <div style={{
                   position: "absolute", top: 0, bottom: 0, left: "50%",
@@ -208,8 +196,9 @@ export default function HowItWorksPage() {
                       fontSize: 10, fontWeight: 700, letterSpacing: "0.32em",
                       textTransform: "uppercase", color: ACCENT, marginBottom: 18,
                       position: "relative", zIndex: 1,
+                      display: "flex", alignItems: "center", gap: 6,
                     }}>
-                      ÉTAPE
+                      <span>ÉTAPE</span><span>{step.num}</span>
                     </p>
                     <h2 style={{
                       fontSize: "clamp(28px, 3.8vw, 52px)", fontWeight: 800,
