@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { getUserSession, type UserSession } from "@/lib/session";
 import { useLang } from "@/contexts/LangContext";
-import PricingHorizonCanvas from "@/components/PricingHorizonCanvas";
+import PricingSignalCanvas from "@/components/PricingSignalCanvas";
 
 const serif: React.CSSProperties = {
   fontFamily: "'Playfair Display', Georgia, serif",
@@ -18,6 +18,19 @@ const ACCENT_LIGHT = "#A78BFA";
 const EASE         = "cubic-bezier(0.16,1,0.3,1)";
 const PRICES       = ["4.99", "9.99", "14.99"];
 const PLAN_LABELS  = ["BASIQUE", "STANDARD", "PREMIUM"];
+
+// Static faint background dots for the free-plan section
+const FREE_BG_DOTS = [
+  { l:  5, t: 12, o: 0.14 }, { l: 18, t:  6, o: 0.18 }, { l: 33, t: 20, o: 0.11 },
+  { l: 47, t:  9, o: 0.16 }, { l: 62, t: 18, o: 0.13 }, { l: 76, t:  7, o: 0.19 },
+  { l: 88, t: 25, o: 0.12 }, { l:  3, t: 38, o: 0.17 }, { l: 15, t: 52, o: 0.13 },
+  { l: 28, t: 44, o: 0.15 }, { l: 42, t: 58, o: 0.11 }, { l: 56, t: 48, o: 0.18 },
+  { l: 70, t: 62, o: 0.14 }, { l: 83, t: 55, o: 0.16 }, { l: 94, t: 38, o: 0.12 },
+  { l:  9, t: 72, o: 0.19 }, { l: 23, t: 82, o: 0.13 }, { l: 38, t: 88, o: 0.15 },
+  { l: 52, t: 76, o: 0.11 }, { l: 65, t: 84, o: 0.17 }, { l: 79, t: 78, o: 0.14 },
+  { l: 91, t: 70, o: 0.12 }, { l: 46, t: 33, o: 0.16 }, { l: 72, t: 40, o: 0.13 },
+  { l: 58, t: 66, o: 0.18 },
+] as const;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function OrbBasique({ active }: { active: boolean }) {
@@ -417,8 +430,8 @@ export default function PricingPage() {
               background: "#0D0A1A",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              {/* Horizon perspective-field canvas */}
-              <PricingHorizonCanvas plan={activePlan} />
+              {/* Signal-strength network canvas */}
+              <PricingSignalCanvas plan={activePlan} />
 
               {/* Plan name + price overlay — centered on orb, crossfades */}
               <div style={{ position: "relative", zIndex: 3, textAlign: "center", pointerEvents: "none" }}>
@@ -449,13 +462,6 @@ export default function PricingPage() {
                       textShadow: "0 0 48px rgba(167,139,250,0.55), 0 2px 24px rgba(0,0,0,0.4)",
                     }}>
                       {plan.name}
-                    </p>
-                    <p style={{
-                      fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.38)",
-                      fontVariantNumeric: "tabular-nums", margin: 0,
-                      letterSpacing: "0.04em",
-                    }}>
-                      {PRICES[i]}€ <span style={{ opacity: 0.6 }}>/ mois</span>
                     </p>
                   </div>
                 ))}
@@ -672,13 +678,23 @@ export default function PricingPage() {
             padding: isMobile ? "80px 24px 72px" : "130px clamp(48px, 8vw, 120px)",
             borderTop: "1px solid rgba(255,255,255,0.05)",
             position: "relative", overflow: "hidden",
+            background: "linear-gradient(135deg, rgba(13,10,26,1) 0%, rgba(20,12,35,1) 50%, rgba(13,10,26,1) 100%)",
           }}
         >
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 55% 65% at 15% 50%, rgba(124,58,237,0.09) 0%, transparent 60%)", pointerEvents: "none" }} />
+          {/* Faint background star-dots — visual continuity with plans canvas */}
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+            {FREE_BG_DOTS.map((d, i) => (
+              <div key={i} style={{
+                position: "absolute", left: `${d.l}%`, top: `${d.t}%`,
+                width: 3, height: 3, borderRadius: "50%",
+                background: "#7C3AED", opacity: d.o,
+              }} />
+            ))}
+          </div>
           <div style={{
             display: "flex", flexDirection: isMobile ? "column" : "row",
             alignItems: "center", gap: "clamp(48px, 8vw, 120px)",
-            maxWidth: 1100, margin: "0 auto", position: "relative",
+            maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1,
           }}>
 
             {/* Content */}
@@ -706,25 +722,60 @@ export default function PricingPage() {
                 ))}
               </div>
               <div style={fadeUp(extraVis[0], 0.42)}>
-                <Link href="/auth/register" style={{
+                <Link href="/auth/register" className="pricing-free-cta" style={{
                   display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
-                  background: "transparent", color: "white",
-                  border: `1px solid ${ACCENT}`, borderRadius: 12, padding: "14px 28px",
-                  fontSize: 14, fontWeight: 600,
+                  background: "transparent", color: ACCENT_LIGHT,
+                  border: "1px solid rgba(167,139,250,0.4)", borderRadius: 12, padding: "14px 28px",
+                  fontSize: 14, fontWeight: 600, transition: "background 0.2s ease",
                 }}>
                   {t("pricing_free_cta")} <ArrowRight style={{ width: 16, height: 16 }} />
                 </Link>
               </div>
             </div>
 
-            {/* 0€ stat */}
-            <div style={{ flexShrink: 0, textAlign: "center", ...fadeUp(extraVis[0], 0.12) }}>
-              <p style={{ fontSize: "clamp(88px, 15vw, 160px)", fontWeight: 800, color: "white", lineHeight: 1, letterSpacing: "-0.05em", margin: "0 0 12px" }}>
-                0€
-              </p>
-              <p style={{ fontSize: 12, color: ACCENT_LIGHT, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
-                {t("pricing_free_forever")}
-              </p>
+            {/* 0€ — open gate: spinning ring circles + centered text */}
+            <div style={{
+              flexShrink: 0, position: "relative",
+              width: 220, height: 220,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              ...fadeUp(extraVis[0], 0.12),
+            }}>
+              {/* Pulsing blur blob behind rings */}
+              <div style={{
+                position: "absolute", top: "50%", left: "50%",
+                width: 400, height: 400,
+                background: "radial-gradient(circle, rgba(167,139,250,0.07) 0%, transparent 70%)",
+                filter: "blur(40px)",
+                animation: "pricing-pulse-blob 6s ease-in-out infinite",
+                pointerEvents: "none",
+              }} />
+              {/* Outer slow ring — 20s CW */}
+              <div style={{
+                position: "absolute", top: "50%", left: "50%",
+                width: 200, height: 200,
+                border: "1px solid rgba(124,58,237,0.18)",
+                borderRadius: "50%",
+                animation: "pricing-spin-cw 20s linear infinite",
+                pointerEvents: "none",
+              }} />
+              {/* Inner faster ring — 14s CCW */}
+              <div style={{
+                position: "absolute", top: "50%", left: "50%",
+                width: 160, height: 160,
+                border: "1.5px solid rgba(167,139,250,0.30)",
+                borderRadius: "50%",
+                animation: "pricing-spin-ccw 14s linear infinite",
+                pointerEvents: "none",
+              }} />
+              {/* Centered text */}
+              <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+                <p style={{ fontSize: 42, fontWeight: 800, color: "white", lineHeight: 1, margin: 0, letterSpacing: "-0.03em" }}>
+                  0€
+                </p>
+                <p style={{ fontSize: 10, color: ACCENT_LIGHT, letterSpacing: "0.18em", textTransform: "uppercase", margin: "8px 0 0" }}>
+                  {t("pricing_free_forever")}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -736,9 +787,14 @@ export default function PricingPage() {
             padding: isMobile ? "80px 24px 100px" : "130px clamp(48px, 8vw, 120px)",
             borderTop: "1px solid rgba(255,255,255,0.05)",
             position: "relative", overflow: "hidden",
+            background: "#08060F",
           }}
         >
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 50% 60% at 85% 50%, rgba(124,58,237,0.08) 0%, transparent 60%)", pointerEvents: "none" }} />
+          {/* Faint horizontal floor line at mid-section */}
+          <div style={{
+            position: "absolute", top: "50%", left: 0, right: 0, height: 1,
+            background: "rgba(124,58,237,0.06)", pointerEvents: "none",
+          }} />
           <div style={{
             display: "flex", flexDirection: isMobile ? "column" : "row",
             alignItems: "center", gap: "clamp(48px, 8vw, 100px)",
@@ -779,21 +835,48 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Commission metric card */}
-            <div style={{ flexShrink: 0, ...fadeUp(extraVis[1], 0.16) }}>
-              <div style={{
-                background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)",
-                borderRadius: 12, padding: "28px 36px", textAlign: "center", minWidth: 190,
-              }}>
-                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT, margin: "0 0 14px" }}>
-                  COMMISSION
-                </p>
-                <p style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 700, color: ACCENT, lineHeight: 1, margin: "0 0 10px" }}>
+            {/* 20% — free-floating deal display + commission flow */}
+            <div style={{
+              flexShrink: 0, display: "flex", alignItems: "center", gap: 40,
+              ...fadeUp(extraVis[1], 0.16),
+            }}>
+              {/* Text block — no card, numbers float free */}
+              <div>
+                <p style={{
+                  fontSize: "clamp(52px, 8vw, 80px)", fontWeight: 800, color: "white",
+                  lineHeight: 1, margin: 0, letterSpacing: "-0.03em",
+                }}>
                   20%
                 </p>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.32)", lineHeight: 1.5, margin: 0 }}>
-                  {t("pricing_commission_sub")}
+                <p style={{
+                  fontSize: 14, color: "rgba(255,255,255,0.3)",
+                  letterSpacing: "0.2em", textTransform: "uppercase", margin: "6px 0 0",
+                }}>
+                  par session
                 </p>
+                <div style={{
+                  width: 60, height: 1,
+                  background: "linear-gradient(to right, #7C3AED, transparent)",
+                  margin: "12px 0",
+                }} />
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0 }}>
+                  seulement quand vous gagnez
+                </p>
+              </div>
+
+              {/* Commission flow — dot travels down a vertical line */}
+              <div style={{ position: "relative", width: 20, height: 120, display: "flex", justifyContent: "center" }}>
+                <div style={{
+                  width: 1, height: "100%",
+                  background: "linear-gradient(to bottom, transparent, #7C3AED, transparent)",
+                }} />
+                <div style={{
+                  position: "absolute", top: 0, left: "50%",
+                  width: 6, height: 6, marginLeft: -3,
+                  borderRadius: "50%", background: "white",
+                  boxShadow: "0 0 6px #A78BFA",
+                  animation: "pricing-flow-dot 1.8s linear infinite",
+                }} />
               </div>
             </div>
           </div>
@@ -839,6 +922,33 @@ export default function PricingPage() {
           50%       { transform: translateX(-50%) translateY(-9px); }
         }
         .pricing-bounce-arrow { animation: pricing-bounce 2s ease-in-out infinite; }
+
+        /* Section 2 — spinning rings on 0€ */
+        @keyframes pricing-spin-cw {
+          from { transform: translate(-50%, -50%) rotate(0deg);    }
+          to   { transform: translate(-50%, -50%) rotate(360deg);  }
+        }
+        @keyframes pricing-spin-ccw {
+          from { transform: translate(-50%, -50%) rotate(0deg);    }
+          to   { transform: translate(-50%, -50%) rotate(-360deg); }
+        }
+
+        /* Section 2 — pulsing blur blob */
+        @keyframes pricing-pulse-blob {
+          0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.07; }
+          50%      { transform: translate(-50%, -50%) scale(1.15); opacity: 0.10; }
+        }
+
+        /* Section 2 — free CTA button hover */
+        .pricing-free-cta:hover { background: rgba(167,139,250,0.08) !important; }
+
+        /* Section 3 — commission flow dot */
+        @keyframes pricing-flow-dot {
+          0%   { transform: translateY(0px);   opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { transform: translateY(120px); opacity: 0; }
+        }
       `}</style>
     </>
   );
