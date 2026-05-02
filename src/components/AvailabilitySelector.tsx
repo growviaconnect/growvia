@@ -4,24 +4,22 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Save } from "lucide-react";
 
-const DAYS_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const DAYS_FULL  = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function generateSlots(): string[] {
-  const slots: string[] = [];
-  for (let h = 8; h <= 21; h++) {
-    slots.push(`${String(h).padStart(2, "0")}:00`);
-    slots.push(`${String(h).padStart(2, "0")}:30`);
-  }
-  return slots; // 28 slots: 08:00 – 21:30
-}
+const TIME_BLOCKS = [
+  { key: "morning",   label: "Morning",   sub: "8h – 12h",  start: "08:00", end: "12:00" },
+  { key: "afternoon", label: "Afternoon", sub: "12h – 18h", start: "12:00", end: "18:00" },
+  { key: "evening",   label: "Evening",   sub: "18h – 22h", start: "18:00", end: "22:00" },
+] as const;
 
-const ALL_SLOTS = generateSlots();
+type Block = "morning" | "afternoon" | "evening";
 
-function addHalfHour(time: string): string {
-  const [h, m] = time.split(":").map(Number);
-  const total = h * 60 + m + 30;
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+function startToBlock(startTime: string): Block | null {
+  const hh = (startTime as string).slice(0, 5);
+  if (hh === "08:00") return "morning";
+  if (hh === "12:00") return "afternoon";
+  if (hh === "18:00") return "evening";
+  return null;
 }
 
 interface Props {
@@ -30,12 +28,11 @@ interface Props {
 }
 
 export default function AvailabilitySelector({ mentorId, variant = "dark" }: Props) {
-  const [selectedDay, setSelectedDay]     = useState(0);
-  const [selectedSlots, setSelectedSlots] = useState<Record<number, Set<string>>>({});
-  const [loading, setLoading]             = useState(true);
-  const [saving, setSaving]               = useState(false);
-  const [error, setError]                 = useState<string | null>(null);
-  const [saved, setSaved]                 = useState(false);
+  const [selected, setSelected]   = useState<Record<number, Set<Block>>>({});
+  const [loading, setLoading]     = useState(true);
+  const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+  const [saved, setSaved]         = useState(false);
 
   useEffect(() => {
     if (!mentorId) return;
@@ -47,23 +44,26 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
           .select("day_of_week, start_time")
           .eq("mentor_id", mentorId);
 
-        const loaded: Record<number, Set<string>> = {};
+        const loaded: Record<number, Set<Block>> = {};
         for (const row of (data ?? [])) {
-          if (!loaded[row.day_of_week]) loaded[row.day_of_week] = new Set();
-          loaded[row.day_of_week].add((row.start_time as string).slice(0, 5));
+          const block = startToBlock(row.start_time as string);
+          if (block) {
+            if (!loaded[row.day_of_week]) loaded[row.day_of_week] = new Set();
+            loaded[row.day_of_week].add(block);
+          }
         }
-        setSelectedSlots(loaded);
+        setSelected(loaded);
       } finally {
         setLoading(false);
       }
     })();
   }, [mentorId]);
 
-  function toggleSlot(time: string) {
-    setSelectedSlots(prev => {
-      const daySet = new Set(prev[selectedDay] ?? []);
-      if (daySet.has(time)) daySet.delete(time); else daySet.add(time);
-      return { ...prev, [selectedDay]: daySet };
+  function toggle(day: number, block: Block) {
+    setSelected(prev => {
+      const daySet = new Set<Block>(prev[day] ?? []);
+      if (daySet.has(block)) daySet.delete(block); else daySet.add(block);
+      return { ...prev, [day]: daySet };
     });
   }
 
@@ -73,9 +73,10 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
     setSaved(false);
 
     const slots: { day_of_week: number; start_time: string; end_time: string }[] = [];
-    for (const [day, times] of Object.entries(selectedSlots)) {
-      for (const startTime of times) {
-        slots.push({ day_of_week: Number(day), start_time: startTime, end_time: addHalfHour(startTime) });
+    for (const [day, blocks] of Object.entries(selected)) {
+      for (const block of blocks) {
+        const tb = TIME_BLOCKS.find(b => b.key === block)!;
+        slots.push({ day_of_week: Number(day), start_time: tb.start, end_time: tb.end });
       }
     }
 
@@ -97,13 +98,11 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
   }
 
   const isDark = variant === "dark";
-  const activeCount = Object.values(selectedSlots).reduce((sum, s) => sum + s.size, 0);
-  const currentDaySlots = selectedSlots[selectedDay] ?? new Set<string>();
 
   if (loading) {
     return (
       <div
-        className="flex items-center justify-center py-12 rounded-2xl"
+        className="flex items-center justify-center py-10 rounded-2xl"
         style={{
           background: isDark ? "rgba(255,255,255,0.04)" : "#fff",
           border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid #e5e7eb",
@@ -127,7 +126,7 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
         <div>
           <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>Weekly Availability</h3>
           <p className={`text-xs mt-0.5 ${isDark ? "text-white/50" : "text-gray-500"}`}>
-            {activeCount} slot{activeCount !== 1 ? "s" : ""} selected across the week
+            Click a cell to mark yourself available
           </p>
         </div>
         <button
@@ -146,63 +145,65 @@ export default function AvailabilitySelector({ mentorId, variant = "dark" }: Pro
         </div>
       )}
 
-      {/* Day tabs */}
-      <div className="flex gap-1.5 flex-wrap">
-        {DAYS_SHORT.map((d, i) => {
-          const count = selectedSlots[i]?.size ?? 0;
-          const active = selectedDay === i;
-          return (
-            <button
-              key={d}
-              onClick={() => setSelectedDay(i)}
-              className={`px-3 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                active
-                  ? "bg-[#7C3AED] text-white"
-                  : isDark
-                    ? "text-white/50 hover:text-white hover:bg-white/10"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {d}
-              {count > 0 && (
-                <span
-                  className={`text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold ${
-                    active ? "bg-white/25 text-white" : "bg-[#7C3AED]/20 text-[#A78BFA]"
-                  }`}
-                >
-                  {count}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Grid */}
+      <div className="overflow-x-auto -mx-1">
+        <div className="min-w-[480px] px-1">
+          {/* Day header row */}
+          <div className="grid grid-cols-8 gap-1.5 mb-1.5">
+            <div />
+            {DAYS.map(d => (
+              <div key={d} className={`text-center text-xs font-semibold py-1.5 ${isDark ? "text-white/50" : "text-gray-500"}`}>
+                {d}
+              </div>
+            ))}
+          </div>
+
+          {/* Time block rows */}
+          {TIME_BLOCKS.map(({ key, label, sub }) => (
+            <div key={key} className="grid grid-cols-8 gap-1.5 mb-1.5">
+              <div className="flex flex-col justify-center pr-1">
+                <span className={`text-xs font-semibold leading-tight ${isDark ? "text-white/60" : "text-gray-700"}`}>{label}</span>
+                <span className={`text-[10px] leading-tight mt-0.5 ${isDark ? "text-white/30" : "text-gray-400"}`}>{sub}</span>
+              </div>
+              {DAYS.map((_, dayIdx) => {
+                const isSel = selected[dayIdx]?.has(key as Block) ?? false;
+                return (
+                  <button
+                    key={dayIdx}
+                    type="button"
+                    onClick={() => toggle(dayIdx, key as Block)}
+                    aria-label={`${label} ${DAYS[dayIdx]}`}
+                    aria-pressed={isSel}
+                    className={`h-12 rounded-xl border-2 transition-all ${
+                      isSel
+                        ? "border-[#7C3AED] bg-[#7C3AED]"
+                        : isDark
+                          ? "border-white/[0.06] hover:border-[#7C3AED]/40 hover:bg-[#7C3AED]/10"
+                          : "border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                    }`}
+                    style={!isSel && isDark ? { background: "rgba(255,255,255,0.05)" } : undefined}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Slot chips */}
-      <div>
-        <p className={`text-xs font-medium mb-3 ${isDark ? "text-white/50" : "text-gray-500"}`}>
-          {DAYS_FULL[selectedDay]} — select your available time slots
-        </p>
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-          {ALL_SLOTS.map(time => {
-            const sel = currentDaySlots.has(time);
-            return (
-              <button
-                key={time}
-                onClick={() => toggleSlot(time)}
-                className={`py-2 rounded-xl text-xs font-semibold transition-colors ${
-                  sel
-                    ? "bg-[#7C3AED] text-white"
-                    : isDark
-                      ? "text-white/60 hover:text-white hover:bg-white/15"
-                      : "bg-gray-100 text-gray-600 hover:bg-purple-50 hover:text-purple-700"
-                }`}
-                style={!sel && isDark ? { background: "rgba(255,255,255,0.08)" } : undefined}
-              >
-                {time}
-              </button>
-            );
-          })}
+      {/* Legend */}
+      <div className="flex items-center gap-4 flex-wrap pt-1">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-[#7C3AED]" />
+          <span className={`text-xs ${isDark ? "text-white/40" : "text-gray-500"}`}>Available</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div
+            className="w-3 h-3 rounded"
+            style={isDark
+              ? { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }
+              : { background: "white", border: "1px solid #e5e7eb" }}
+          />
+          <span className={`text-xs ${isDark ? "text-white/40" : "text-gray-500"}`}>Unavailable</span>
         </div>
       </div>
     </div>

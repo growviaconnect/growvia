@@ -1565,7 +1565,7 @@ function DashboardContent() {
               <div className="space-y-6">
                 <h1 className="text-2xl font-extrabold text-white tracking-tight">Calendar</h1>
                 {mentorDbId && <AvailabilitySelector mentorId={mentorDbId} variant="dark" />}
-                <MentorCalendar connexions={connexions} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
+                <MentorCalendar connexions={connexions} mentorId={mentorDbId} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
               </div>
             )}
 
@@ -1577,24 +1577,58 @@ function DashboardContent() {
 }
 
 // ── Mentor Calendar ───────────────────────────────────────────────────────────
+
+// Convert JS getDay() (0=Sun) to our day_of_week (0=Mon)
+function jsDayToAvailDay(jsDay: number): number {
+  return (jsDay + 6) % 7;
+}
+
+function sessionDotColor(c: Connexion): string {
+  const now = new Date();
+  if (c.statut === "pending") return "#F472B6";
+  if (c.statut === "active" && new Date(c.date) >= now) return "#4ADE80";
+  if (c.statut === "completed" || c.statut === "cancelled") return "#60A5FA";
+  if (c.statut === "active" && new Date(c.date) < now) return "#60A5FA"; // past active
+  return "#A78BFA";
+}
+
 function MentorCalendar({
   connexions,
+  mentorId,
   fmtDate,
   fmtTime,
   t,
   lang,
 }: {
   connexions: Connexion[];
+  mentorId: string | null;
   fmtDate: (iso: string, t: (k: string) => string, lang: string) => string;
   fmtTime: (iso: string, lang: string) => string;
   t: (k: string) => string;
   lang: string;
 }) {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [availableDays, setAvailableDays] = useState<Set<number>>(new Set());
 
   const today = new Date();
   const [viewYear, setViewYear]   = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  // Fetch which day_of_week values have availability slots
+  useEffect(() => {
+    if (!mentorId) return;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("mentor_availability")
+          .select("day_of_week")
+          .eq("mentor_id", mentorId);
+        setAvailableDays(new Set((data ?? []).map(r => r.day_of_week as number)));
+      } catch {
+        // table may not exist yet; show calendar without availability tint
+      }
+    })();
+  }, [mentorId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const firstDay = new Date(viewYear, viewMonth, 1);
   const lastDay  = new Date(viewYear, viewMonth + 1, 0);
@@ -1658,28 +1692,67 @@ function MentorCalendar({
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, idx) => {
             if (day === null) return <div key={`pad-${idx}`} />;
-            const key = new Date(viewYear, viewMonth, day).toDateString();
+            const dateObj = new Date(viewYear, viewMonth, day);
+            const key = dateObj.toDateString();
             const sessions = sessionsByDay.get(key) ?? [];
+            const ourDay = jsDayToAvailDay(dateObj.getDay());
+            const hasAvail = availableDays.has(ourDay);
             const isToday = today.getDate() === day && today.getMonth() === viewMonth && today.getFullYear() === viewYear;
             const isSelected = selectedDay === String(day);
+
+            // Background: selected > availability tint (+ session colour overlay)
+            let bgStyle: React.CSSProperties | undefined;
+            if (!isSelected) {
+              if (hasAvail && sessions.length > 0) {
+                bgStyle = { background: "rgba(196,181,253,0.18)" };
+              } else if (hasAvail) {
+                bgStyle = { background: "rgba(196,181,253,0.12)" };
+              } else if (sessions.length > 0) {
+                bgStyle = { background: "rgba(124,58,237,0.12)" };
+              }
+            }
+
+            // Session dots: up to 3, colored by status
+            const dots = sessions.slice(0, 3).map(c => sessionDotColor(c));
+
             return (
               <button key={day} onClick={() => setSelectedDay(isSelected ? null : String(day))}
+                style={bgStyle}
                 className={`relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-colors ${
                   isSelected
                     ? "bg-[#7C3AED] text-white"
                     : isToday
                       ? "border border-[#7C3AED]/50 text-[#A78BFA]"
-                      : sessions.length > 0
-                        ? "bg-[#7C3AED]/15 text-white hover:bg-[#7C3AED]/25"
+                      : sessions.length > 0 || hasAvail
+                        ? "text-white hover:opacity-80"
                         : "text-white/40 hover:text-white hover:bg-white/[0.05]"
                 }`}>
                 {day}
-                {sessions.length > 0 && !isSelected && (
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#A78BFA]" />
+                {dots.length > 0 && !isSelected && (
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                    {dots.map((color, i) => (
+                      <span key={i} className="w-1 h-1 rounded-full" style={{ background: color }} />
+                    ))}
+                  </div>
                 )}
               </button>
             );
           })}
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-5 pt-4 border-t border-white/[0.06]">
+          {[
+            { color: "rgba(196,181,253,0.5)", label: "Available slots" },
+            { color: "#4ADE80", label: "Confirmed" },
+            { color: "#F472B6", label: "Pending" },
+            { color: "#60A5FA", label: "Completed" },
+          ].map(({ color, label }) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
+              <span className="text-xs text-white/35">{label}</span>
+            </div>
+          ))}
         </div>
       </Card>
 
@@ -1691,26 +1764,26 @@ function MentorCalendar({
           </h3>
           {selectedSessions.length > 0 ? (
             <div className="divide-y divide-white/[0.06]">
-              {selectedSessions.map(c => (
-                <div key={c.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
-                    {c.mentees?.nom?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+              {selectedSessions.map(c => {
+                const dotColor = sessionDotColor(c);
+                return (
+                  <div key={c.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                      {c.mentees?.nom?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                      <div className="text-xs text-white/40 mt-0.5">{fmtTime(c.date, lang)}</div>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 flex items-center gap-1.5"
+                      style={{ background: `${dotColor}20`, color: dotColor }}>
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dotColor }} />
+                      {c.statut}
+                    </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
-                    <div className="text-xs text-white/40 mt-0.5">{fmtTime(c.date, lang)}</div>
-                  </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${
-                    c.statut === "active"    ? "bg-emerald-500/15 text-emerald-400" :
-                    c.statut === "pending"   ? "bg-amber-500/15 text-amber-400" :
-                    c.statut === "completed" ? "bg-white/8 text-white/40" :
-                                               "bg-red-500/10 text-red-400"
-                  }`}>
-                    {c.statut}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-white/30 text-sm">No sessions on this day.</p>
