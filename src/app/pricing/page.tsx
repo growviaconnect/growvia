@@ -231,6 +231,7 @@ export default function PricingPage() {
   const [extraVis,    setExtraVis]    = useState([false, false]);
   const [priceDisplay, setPriceDisplay] = useState<string[]>([...PRICES]);
   const [isMobile,    setIsMobile]    = useState(false);
+  const [badgeHovered, setBadgeHovered] = useState(false);
 
   const animatedPrices = useRef<Set<number>>(new Set());
   const planRefs  = useRef<(HTMLDivElement | null)[]>([null, null, null]);
@@ -693,7 +694,7 @@ export default function PricingPage() {
           </div>
           <div style={{
             display: "flex", flexDirection: isMobile ? "column" : "row",
-            alignItems: "center", gap: "clamp(48px, 8vw, 120px)",
+            alignItems: "flex-start", gap: "clamp(48px, 8vw, 120px)",
             maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1,
           }}>
 
@@ -734,12 +735,22 @@ export default function PricingPage() {
             </div>
 
             {/* 0€ — open gate: spinning ring circles + centered text */}
-            <div style={{
-              flexShrink: 0, position: "relative",
-              width: 220, height: 220,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              ...fadeUp(extraVis[0], 0.12),
-            }}>
+            <div
+              onMouseEnter={() => setBadgeHovered(true)}
+              onMouseLeave={() => setBadgeHovered(false)}
+              style={{
+                flexShrink: 0, position: "relative",
+                width: 220, height: 220,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: "50%",
+                border: `1px solid ${badgeHovered ? "rgba(124,58,237,0.7)" : "rgba(124,58,237,0.15)"}`,
+                boxShadow: badgeHovered
+                  ? "0 0 32px rgba(124,58,237,0.25), 0 0 64px rgba(124,58,237,0.12)"
+                  : "none",
+                transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+                cursor: "default",
+                ...fadeUp(extraVis[0], 0.12),
+              }}>
               {/* Pulsing blur blob behind rings */}
               <div style={{
                 position: "absolute", top: "50%", left: "50%",
