@@ -80,7 +80,7 @@ export default function HowItWorksPage() {
     },
     {
       num: "07", title: t("hiw_s7_title"), desc: t("hiw_s7_desc"),
-      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3")],
+      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3"), t("hiw_s7_d4")],
       image: stepImages[6],
     },
   ];
