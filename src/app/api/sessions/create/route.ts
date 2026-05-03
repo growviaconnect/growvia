@@ -8,19 +8,20 @@ export async function POST(req: NextRequest) {
   const anonKey     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   let mentorId: string, menteeEmail: string, topic: string,
-      date: string, time: string, language: string;
+      date: string, time: string, language: string, durationMinutes: number;
 
   try {
     const body = (await req.json()) as {
       mentorId: string; menteeEmail: string; topic: string;
-      date: string; time: string; language: string;
+      date: string; time: string; language: string; durationMinutes?: number;
     };
-    mentorId    = (body.mentorId    ?? "").trim();
-    menteeEmail = (body.menteeEmail ?? "").trim();
-    topic       = (body.topic       ?? "").trim();
-    date        = (body.date        ?? "").trim();
-    time        = (body.time        ?? "").trim();
-    language    = (body.language    ?? "").trim();
+    mentorId        = (body.mentorId    ?? "").trim();
+    menteeEmail     = (body.menteeEmail ?? "").trim();
+    topic           = (body.topic       ?? "").trim();
+    date            = (body.date        ?? "").trim();
+    time            = (body.time        ?? "").trim();
+    language        = (body.language    ?? "").trim();
+    durationMinutes = body.durationMinutes ?? 60;
     if (!mentorId || !menteeEmail || !date || !time) throw new Error("missing fields");
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
       topic:            topic || null,
       date,
       time,
-      duration_minutes: 60,
+      duration_minutes: durationMinutes,
       status:           "pending",
     })
     .select("id")

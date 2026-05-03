@@ -3,33 +3,33 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Star, Languages, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
 
 const SLOT_LABELS: Record<string, string> = {
-  morning: "Morning (7–12h)",
+  morning:   "Morning (8–12h)",
   afternoon: "Afternoon (12–18h)",
-  evening: "Evening (18–22h)",
+  evening:   "Evening (18–22h)",
 };
 const DAY_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-function scoreColor(s: number) {
-  return s >= 70 ? "#10B981" : s >= 40 ? "#F59E0B" : "#EF4444";
-}
-
-function scoreLabel(s: number) {
-  return s >= 70 ? "Top tier" : s >= 40 ? "Strong profile" : "Getting started";
-}
 
 function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h2 className="text-xs font-bold uppercase tracking-widest text-white/35 mb-3">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
 function BookCTA({ mentorId, price }: { mentorId: string; price: number | null | undefined }) {
   const session = getUserSession();
-  const isLoggedInMentee = session?.role === "mentee";
-  const bookHref = isLoggedInMentee
+  const bookHref = session?.role === "mentee"
     ? `/book/${mentorId}`
     : `/auth/register?redirect=/book/${mentorId}`;
 
@@ -52,6 +52,17 @@ function BookCTA({ mentorId, price }: { mentorId: string; price: number | null |
         Book a session <ArrowRight className="w-4 h-4" />
       </Link>
     </div>
+  );
+}
+
+function Tag({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="px-3 py-1.5 rounded-lg text-sm font-medium text-[#A78BFA] border border-[#7C3AED]/20"
+      style={{ background: "rgba(124,58,237,0.08)" }}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -93,25 +104,29 @@ export default function MentorProfilePage() {
     return (
       <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4">
         <p className="text-white/50 text-sm">Mentor not found.</p>
-        <Link
-          href="/mentors"
-          className="inline-flex items-center gap-2 text-sm text-[#A78BFA] hover:text-white transition-colors"
-        >
+        <Link href="/mentors" className="inline-flex items-center gap-2 text-sm text-[#A78BFA] hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to mentors
         </Link>
       </div>
     );
   }
 
-  const score = mentor.mentor_score;
-  const color = score != null ? scoreColor(score) : "#6B7280";
-
   let availability: Record<string, string[]> = {};
   try {
     if (mentor.availability) availability = JSON.parse(mentor.availability);
-  } catch { /* invalid JSON, treat as empty */ }
+  } catch { /* invalid JSON */ }
 
   const availDays = DAY_ORDER.filter(d => (availability[d] ?? []).length > 0);
+
+  // Merge languages from both fields, deduplicated
+  const allLanguages = Array.from(new Set([
+    ...(mentor.languages ?? []),
+    ...(mentor.langues ?? []),
+  ]));
+
+  // Sectors and expertise
+  const sectors   = mentor.secteurs ?? [];
+  const expertise = mentor.expertise ?? [];
 
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
@@ -128,25 +143,29 @@ export default function MentorProfilePage() {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 space-y-5">
 
-        {/* Hero card */}
-        <div
-          className="rounded-2xl p-8 border border-white/[0.08]"
-          style={{ background: "#13111F" }}
-        >
+        {/* ── Hero card ──────────────────────────────────────────────── */}
+        <div className="rounded-2xl p-8 border border-white/[0.08]" style={{ background: "#13111F" }}>
           <div className="flex items-start gap-5">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-            >
-              {initials(mentor.nom)}
-            </div>
+            {mentor.photo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mentor.photo_url}
+                alt={mentor.nom}
+                className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
+              />
+            ) : (
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+              >
+                {initials(mentor.nom)}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-extrabold text-white mb-1">{mentor.nom}</h1>
               <p className="text-white/60 text-sm">
                 {mentor.job_title}
-                {mentor.company && (
-                  <span className="text-white/35"> @ {mentor.company}</span>
-                )}
+                {mentor.company && <span className="text-white/35"> @ {mentor.company}</span>}
               </p>
               {mentor.industry && (
                 <p className="text-xs text-white/30 mt-1">{mentor.industry}</p>
@@ -154,19 +173,8 @@ export default function MentorProfilePage() {
             </div>
           </div>
 
-          {/* Badges row */}
+          {/* Badges — price + seniority only (no score on public view) */}
           <div className="flex flex-wrap items-center gap-3 mt-6">
-            {score != null && (
-              <div
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-white/[0.06]"
-                style={{ background: "#0D0A1A" }}
-              >
-                <Star className="w-4 h-4 flex-shrink-0" style={{ color }} />
-                <span className="font-bold text-sm" style={{ color }}>{score}</span>
-                <span className="text-xs text-white/30">/100</span>
-                <span className="text-xs text-white/25 ml-1">{scoreLabel(score)}</span>
-              </div>
-            )}
             {mentor.session_price != null && (
               <div
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-white/[0.06]"
@@ -181,101 +189,131 @@ export default function MentorProfilePage() {
                 {mentor.seniority}
               </span>
             )}
+            {mentor.annees_experience != null && (
+              <span className="px-3 py-1.5 rounded-lg text-xs font-medium text-white/40 border border-white/10 flex items-center gap-1.5">
+                <Clock className="w-3 h-3" /> {mentor.annees_experience} yrs exp.
+              </span>
+            )}
           </div>
         </div>
 
-        {/* How I can help */}
-        {mentor.help_with && (
-          <div
-            className="rounded-2xl p-6 border border-white/[0.08]"
-            style={{ background: "#13111F" }}
-          >
-            <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">
-              How I can help
-            </h2>
-            <p className="text-white/70 text-sm leading-relaxed">{mentor.help_with}</p>
-          </div>
-        )}
+        {/* ── Full description card ───────────────────────────────────── */}
+        <div className="rounded-2xl p-6 border border-white/[0.08] space-y-6" style={{ background: "#13111F" }}>
 
-        {/* Expertise */}
-        {mentor.expertise && mentor.expertise.length > 0 && (
-          <div
-            className="rounded-2xl p-6 border border-white/[0.08]"
-            style={{ background: "#13111F" }}
-          >
-            <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">
-              Expertise
+          {/* Bio */}
+          {mentor.bio && (
+            <Section title="About">
+              <p className="text-white/70 text-sm leading-relaxed">{mentor.bio}</p>
+            </Section>
+          )}
+
+          {/* Role + experience */}
+          <Section title="Professional background">
+            <div className="space-y-2.5">
+              {(mentor.job_title || mentor.company) && (
+                <div className="flex items-start gap-2.5">
+                  <Briefcase className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-white/70">
+                    {mentor.poste_actuel || mentor.job_title}
+                    {(mentor.entreprise || mentor.company) &&
+                      <span className="text-white/40"> at {mentor.entreprise || mentor.company}</span>
+                    }
+                  </p>
+                </div>
+              )}
+              {mentor.annees_experience != null && (
+                <div className="flex items-start gap-2.5">
+                  <Clock className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-white/70">{mentor.annees_experience} years of experience</p>
+                </div>
+              )}
+              {(mentor.years_experience) && !mentor.annees_experience && (
+                <div className="flex items-start gap-2.5">
+                  <Clock className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-white/70">{mentor.years_experience} of experience</p>
+                </div>
+              )}
+            </div>
+          </Section>
+
+          {/* Sectors */}
+          {sectors.length > 0 && (
+            <Section title="Sectors">
+              <div className="flex flex-wrap gap-2">
+                {sectors.map(s => <Tag key={s}>{s}</Tag>)}
+              </div>
+            </Section>
+          )}
+
+          {/* Expertise / skills */}
+          {expertise.length > 0 && (
+            <Section title="Areas of expertise">
+              <div className="flex flex-wrap gap-2">
+                {expertise.map(tag => <Tag key={tag}>{tag}</Tag>)}
+              </div>
+            </Section>
+          )}
+
+          {/* What they help with */}
+          {mentor.help_with && (
+            <Section title="What I can help you with">
+              <p className="text-white/70 text-sm leading-relaxed">{mentor.help_with}</p>
+            </Section>
+          )}
+
+          {/* Mentoring style */}
+          {mentor.style_mentorat && (
+            <Section title="Mentoring style">
+              <div className="flex items-start gap-2.5">
+                <MessageSquare className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-white/70">{mentor.style_mentorat}</p>
+              </div>
+            </Section>
+          )}
+
+          {/* Languages */}
+          {allLanguages.length > 0 && (
+            <Section title="Languages">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Languages className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
+                {allLanguages.map(lang => (
+                  <span key={lang} className="px-3 py-1.5 rounded-lg text-sm text-white/70 border border-white/10">
+                    {lang}
+                  </span>
+                ))}
+              </div>
+            </Section>
+          )}
+        </div>
+
+        {/* ── Availability ────────────────────────────────────────────── */}
+        {availDays.length > 0 && (
+          <div className="rounded-2xl p-6 border border-white/[0.08]" style={{ background: "#13111F" }}>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-white/35 mb-4 flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5" /> Availability
             </h2>
-            <div className="flex flex-wrap gap-2">
-              {mentor.expertise.map(tag => (
-                <span
-                  key={tag}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-[#A78BFA] border border-[#7C3AED]/20"
-                  style={{ background: "rgba(124,58,237,0.08)" }}
-                >
-                  {tag}
-                </span>
+            <div className="space-y-2">
+              {availDays.map(day => (
+                <div key={day} className="flex items-start gap-3">
+                  <span className="text-xs font-semibold text-white/50 w-8 flex-shrink-0 pt-0.5">{day}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {availability[day].map(slot => (
+                      <span
+                        key={slot}
+                        className="text-xs px-2 py-0.5 rounded text-white/50"
+                        style={{ background: "rgba(255,255,255,0.05)" }}
+                      >
+                        {SLOT_LABELS[slot] ?? slot}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Languages + Availability */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {mentor.languages && mentor.languages.length > 0 && (
-            <div
-              className="rounded-2xl p-6 border border-white/[0.08]"
-              style={{ background: "#13111F" }}
-            >
-              <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
-                <Languages className="w-3.5 h-3.5" /> Languages
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {mentor.languages.map(lang => (
-                  <span
-                    key={lang}
-                    className="px-3 py-1.5 rounded-lg text-sm text-white/70 border border-white/10"
-                  >
-                    {lang}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {availDays.length > 0 && (
-            <div
-              className="rounded-2xl p-6 border border-white/[0.08]"
-              style={{ background: "#13111F" }}
-            >
-              <h2 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5" /> Availability
-              </h2>
-              <div className="space-y-2">
-                {availDays.map(day => (
-                  <div key={day} className="flex items-start gap-3">
-                    <span className="text-xs font-semibold text-white/50 w-8 flex-shrink-0 pt-0.5">
-                      {day}
-                    </span>
-                    <div className="flex flex-wrap gap-1">
-                      {availability[day].map(slot => (
-                        <span
-                          key={slot}
-                          className="text-xs px-2 py-0.5 rounded text-white/50"
-                          style={{ background: "rgba(255,255,255,0.05)" }}
-                        >
-                          {SLOT_LABELS[slot] ?? slot}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Book CTA */}
+        {/* ── Book CTA ────────────────────────────────────────────────── */}
         <BookCTA mentorId={id} price={mentor.session_price} />
 
       </div>
