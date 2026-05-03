@@ -9,8 +9,10 @@ import {
   BellOff, ArrowLeft, Check,
 } from "lucide-react";
 import { getUserSession, setUserSession, clearUserSession, type UserSession } from "@/lib/session";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import AvailabilitySelector from "@/components/AvailabilitySelector";
+import UserAvatar from "@/components/UserAvatar";
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Tab = "profile" | "password" | "subscription" | "availability";
@@ -129,6 +131,7 @@ function SaveBtn({
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function SettingsPage() {
   const router = useRouter();
+  const { setSession: setGlobalSession } = useAuth();
 
   /* ── Core state ─────────────────────────────────────────────── */
   const [session, setSession]     = useState<UserSession | null>(null);
@@ -288,6 +291,7 @@ export default function SettingsPage() {
     };
     setUserSession(updated);
     setSession(updated);
+    setGlobalSession(updated);
     setProfileSaving(false);
     setProfileSuccess(true);
     setTimeout(() => setProfileSuccess(false), 2500);
@@ -366,7 +370,6 @@ export default function SettingsPage() {
     school: { label: "Plan École" },
   };
   const currentPlan = planLabels[plan] ?? planLabels.free;
-  const initials = session.nom.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
   const strength = pwdStrength(pwdForm.next);
   const { onFocus, onBlur } = useFocusStyle();
 
@@ -500,14 +503,7 @@ export default function SettingsPage() {
           <div className="flex items-center gap-4">
             {/* Avatar */}
             <div className="relative w-14 h-14 flex-shrink-0">
-              {photo ? (
-                <img src={photo} alt="profil" className="w-14 h-14 rounded-full object-cover" />
-              ) : (
-                <div className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl text-white"
-                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)" }}>
-                  {initials}
-                </div>
-              )}
+              <UserAvatar photo={photo} name={session.nom} size={56} />
             </div>
             <div>
               <p className="font-bold text-white text-base">{session.nom}</p>
@@ -600,14 +596,7 @@ export default function SettingsPage() {
               {/* Photo upload */}
               <div className="flex items-center gap-5">
                 <div className="relative flex-shrink-0">
-                  {photo ? (
-                    <img src={photo} alt="profil" className="w-20 h-20 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-2xl text-white"
-                      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)" }}>
-                      {initials}
-                    </div>
-                  )}
+                  <UserAvatar photo={photo} name={session.nom} size={80} />
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}

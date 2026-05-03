@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useLang } from "@/contexts/LangContext";
 import LangSwitcher from "@/components/LangSwitcher";
+import UserAvatar from "@/components/UserAvatar";
 
 export default function Navbar() {
   const router = useRouter();
@@ -42,10 +43,6 @@ export default function Navbar() {
     { href: "/explore",     label: t("nav_explore") },
     { href: "/for-schools", label: t("nav_for_schools") },
   ];
-
-  const initials = session?.nom
-    ? session.nom.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()
-    : "";
 
   return (
     <nav
@@ -124,12 +121,7 @@ export default function Navbar() {
                   href="/dashboard"
                   className="flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
                 >
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-                  >
-                    {initials}
-                  </div>
+                  <UserAvatar photo={session.photo} name={session.nom} size={28} rounded="lg" />
                   {t("nav_dashboard")}
                 </Link>
                 <button
@@ -235,12 +227,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 py-3 text-base font-medium text-white/70 hover:text-white transition-colors"
               >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs"
-                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-                >
-                  {initials}
-                </div>
+                <UserAvatar photo={session.photo} name={session.nom} size={32} rounded="lg" />
                 {t("nav_dashboard")}
               </Link>
               <button
