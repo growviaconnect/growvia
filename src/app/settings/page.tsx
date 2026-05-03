@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   User, Lock, CreditCard, CheckCircle, AlertCircle,
   Loader2, Eye, EyeOff, LogOut, Crown, XCircle, CalendarRange,
-  BellOff, ArrowLeft, Check,
+  BellOff, ArrowLeft, Check, AlertTriangle,
 } from "lucide-react";
 import { getUserSession, setUserSession, clearUserSession, type UserSession } from "@/lib/session";
 import { useAuth } from "@/contexts/AuthContext";
@@ -227,6 +227,13 @@ export default function SettingsPage() {
   const [mentorIdLoaded, setMentorIdLoaded] = useState(false);
   const [pauseBookings, setPauseBookings]   = useState(false);
   const [pauseSaving, setPauseSaving]       = useState(false);
+  const [mentorBalance, setMentorBalance]   = useState(0);
+
+  /* ── Account deletion ───────────────────────────────────────── */
+  const [deleteStep,      setDeleteStep]      = useState<0|1|2>(0);
+  const [deleteEmail,     setDeleteEmail]     = useState("");
+  const [deleteLockUntil, setDeleteLockUntil] = useState<number | null>(null);
+  const [deleting,        setDeleting]        = useState(false);
 
   /* ── Init ───────────────────────────────────────────────────── */
   useEffect(() => {
@@ -241,8 +248,11 @@ export default function SettingsPage() {
             const { data } = await supabase.from("mentors").select("id").eq("email", s.email).single();
             if (data?.id) {
               setMentorDbId(data.id as string);
-              const { data: pb } = await supabase.from("mentors").select("pause_bookings").eq("id", data.id).single();
-              if (pb) setPauseBookings((pb as { pause_bookings?: boolean }).pause_bookings ?? false);
+              const { data: pb } = await supabase.from("mentors").select("pause_bookings,pending_balance").eq("id", data.id).single();
+              if (pb) {
+                setPauseBookings((pb as { pause_bookings?: boolean }).pause_bookings ?? false);
+                setMentorBalance((pb as { pending_balance?: number }).pending_balance ?? 0);
+              }
             }
           } catch { /* silent */ } finally { setMentorIdLoaded(true); }
         })();
@@ -385,6 +395,33 @@ export default function SettingsPage() {
 
   function handleLogout() { clearUserSession(); router.push("/"); }
 
+  /* ── Delete account ─────────────────────────────────────────── */
+  async function handleDeleteAccount() {
+    if (deleteLockUntil && Date.now() < deleteLockUntil) return;
+    setDeleting(true);
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      if (!authSession?.access_token) throw new Error("Non authentifié.");
+      const res  = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${authSession.access_token}` },
+      });
+      const json = await res.json() as { error?: string; message?: string };
+      if (res.status === 429) {
+        setDeleteLockUntil(Date.now() + 15 * 60 * 1000);
+        throw new Error(json.message ?? "Trop de tentatives. Réessayez dans 15 minutes.");
+      }
+      if (!res.ok) throw new Error(json.error ?? "Erreur lors de la suppression.");
+      clearUserSession();
+      router.push("/?account_deleted=1");
+    } catch (err) {
+      showMsg(err instanceof Error ? err.message : "Erreur lors de la suppression.", false);
+      setDeleteStep(0);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   /* ── Not logged in ──────────────────────────────────────────── */
   if (!session) return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: T.bg }}>
@@ -471,6 +508,140 @@ export default function SettingsPage() {
               <button onClick={cancelSubscription}
                 className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 text-sm transition-colors">
                 Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete modal step 1: warning ───────────────────────── */}
+      {deleteStep === 1 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="rounded-2xl p-8 w-full max-w-md"
+            style={{ background: "#1A1226", border: "1px solid rgba(239,68,68,0.3)" }}>
+            <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
+              style={{ background: "rgba(239,68,68,0.12)" }}>
+              <AlertTriangle className="w-7 h-7 text-red-500" />
+            </div>
+            <h3 className="text-xl font-bold text-white text-center mb-4">Attention — Action irréversible</h3>
+
+            {/* Mentor: pending balance warning */}
+            {session.role === "mentor" && mentorBalance > 0 && (
+              <div className="rounded-xl px-4 py-3 mb-4"
+                style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)" }}>
+                <p className="text-sm font-medium mb-2" style={{ color: "#fbbf24" }}>
+                  ⚠️ Vous avez un solde en attente de {mentorBalance.toFixed(2)}€. Avant de supprimer votre compte, vous devez transférer votre solde sur votre compte bancaire.
+                </p>
+                <Link href="/dashboard?tab=revenus"
+                  className="text-xs font-semibold transition-colors"
+                  style={{ color: "#f59e0b" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#fbbf24"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#f59e0b"; }}>
+                  Accéder à mes paiements →
+                </Link>
+              </div>
+            )}
+
+            <p className="text-sm mb-3" style={{ color: T.muted }}>
+              En supprimant votre compte, vous perdrez définitivement :
+            </p>
+            <ul className="text-sm space-y-2 mb-4" style={{ color: T.muted }}>
+              {[
+                "Votre profil et toutes vos informations",
+                "Votre historique de sessions",
+                "Vos matchings IA et favoris",
+                "Tout accès à la plateforme GrowVia",
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm font-semibold mb-6" style={{ color: "#f87171" }}>
+              Cette action est irréversible et immédiate.
+            </p>
+
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteStep(0)}
+                className="flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors"
+                style={{ border: `1px solid ${T.faint}`, color: T.muted }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; }}>
+                Annuler
+              </button>
+              <button
+                onClick={() => { setDeleteEmail(""); setDeleteStep(2); }}
+                disabled={session.role === "mentor" && mentorBalance > 0}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: "#dc2626" }}
+                onMouseEnter={e => { if (!(session.role === "mentor" && mentorBalance > 0)) (e.currentTarget as HTMLElement).style.background = "#b91c1c"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#dc2626"; }}>
+                Continuer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete modal step 2: email confirm ─────────────────── */}
+      {deleteStep === 2 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="rounded-2xl p-8 w-full max-w-md"
+            style={{ background: "#1A1226", border: "1px solid rgba(239,68,68,0.3)" }}>
+            <h3 className="text-xl font-bold text-white text-center mb-4">Êtes-vous absolument certain ?</h3>
+
+            {deleteLockUntil && Date.now() < deleteLockUntil && (
+              <div className="rounded-xl px-4 py-3 mb-4"
+                style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)" }}>
+                <p className="text-sm" style={{ color: "#f87171" }}>
+                  Trop de tentatives. Réessayez dans {Math.ceil((deleteLockUntil - Date.now()) / 60000)} minute(s).
+                </p>
+              </div>
+            )}
+
+            <p className="text-sm mb-3" style={{ color: T.muted }}>
+              Pour confirmer la suppression, tapez votre adresse email ci-dessous :
+            </p>
+            <input
+              type="email"
+              value={deleteEmail}
+              onChange={e => setDeleteEmail(e.target.value)}
+              placeholder={session.email}
+              className={inputCls + " mb-6"}
+              style={inputStyle}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              disabled={deleting || !!(deleteLockUntil && Date.now() < deleteLockUntil)}
+              autoComplete="off"
+            />
+
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteStep(1)} disabled={deleting}
+                className="flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                style={{ border: `1px solid ${T.faint}`, color: T.muted }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; }}>
+                Retour
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={
+                  deleteEmail.trim().toLowerCase() !== session.email.toLowerCase() ||
+                  deleting ||
+                  !!(deleteLockUntil && Date.now() < deleteLockUntil)
+                }
+                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                style={{ background: "#dc2626" }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  if (!el.disabled) el.style.background = "#b91c1c";
+                }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#dc2626"; }}>
+                {deleting
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Suppression…</>
+                  : "Supprimer définitivement mon compte"
+                }
               </button>
             </div>
           </div>
@@ -1132,6 +1303,43 @@ export default function SettingsPage() {
           )}
 
         </div>{/* end tab content */}
+
+        {/* ── Danger zone ───────────────────────────────────────── */}
+        <div className="mt-10 pt-6" style={{ borderTop: "1px solid rgba(239,68,68,0.2)" }}>
+          <p
+            className="text-xs font-semibold uppercase tracking-widest mb-3"
+            style={{ color: "#ef4444" }}
+          >
+            Zone de danger
+          </p>
+          <div
+            className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4"
+            style={{ background: T.card, border: "1px solid rgba(239,68,68,0.12)" }}
+          >
+            <div>
+              <p className="font-semibold text-white text-sm mb-1">Supprimer mon compte</p>
+              <p className="text-xs" style={{ color: T.muted }}>
+                Une fois votre compte supprimé, toutes vos données seront définitivement effacées et irrécupérables.
+              </p>
+            </div>
+            <button
+              onClick={() => setDeleteStep(1)}
+              className="flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
+              style={{ border: "1px solid rgba(239,68,68,0.4)", color: "#f87171" }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background    = "rgba(239,68,68,0.08)";
+                (e.currentTarget as HTMLElement).style.borderColor   = "#ef4444";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background    = "";
+                (e.currentTarget as HTMLElement).style.borderColor   = "rgba(239,68,68,0.4)";
+              }}
+            >
+              Supprimer mon compte
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );

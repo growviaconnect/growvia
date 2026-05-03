@@ -262,6 +262,34 @@ export async function sendSessionReminder(params: ReminderParams) {
   return r.emails.send({ from: FROM, to: email, subject, html: layout(body), ...(scheduledAt ? { scheduledAt } : {}) });
 }
 
+// ─── 6. Account deletion confirmation ────────────────────────────────────────
+
+export async function sendAccountDeletionEmail(to: string, nom: string, deletedAt: Date) {
+  const formattedDate = deletedAt.toLocaleString("fr-FR", {
+    day: "numeric", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris",
+  });
+
+  const body = `
+    ${badge("#dc2626", "Compte supprimé")}
+    <br/><br/>
+    ${h1("Votre compte GrowVia a été supprimé")}
+    ${p(`Bonjour ${nom},`)}
+    ${p(`Votre compte et toutes vos données associées ont été définitivement supprimés le <strong>${formattedDate}</strong>.`)}
+    ${p("Si vous êtes à l'origine de cette demande, aucune action supplémentaire n'est requise.")}
+    ${p(`Si ce n'était <strong>pas vous</strong>, contactez-nous immédiatement à <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;">contact@growviaconnect.com</a>`)}
+  `;
+
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({
+    from: FROM,
+    to,
+    subject: "Votre compte GrowVia a été supprimé",
+    html: layout(body),
+  });
+}
+
 // ─── Schedule all reminders at booking time ───────────────────────────────────
 // Called once when a session is booked. Resend queues and delivers each email
 // at the calculated future timestamp, no cron job required.
