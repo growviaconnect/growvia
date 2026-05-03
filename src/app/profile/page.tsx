@@ -399,11 +399,12 @@ export default function ProfilePage() {
       }
       setEditing(false);
       showToast("success");
-      // Sync name into global session
+      // Sync name + photo into global session
       const cur = getUserSession();
       if (cur) {
         const nom = role === "mentor" ? mentor.nom : mentee.nom;
-        setGlobalSession({ ...cur, nom: nom || cur.nom });
+        const photoUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
+        setGlobalSession({ ...cur, nom: nom || cur.nom, photo: photoPreview || photoUrl || cur.photo });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save, please try again.");
