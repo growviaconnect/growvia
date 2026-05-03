@@ -8,12 +8,10 @@ import { supabase } from "@/lib/supabase";
 type MentorRow = {
   id: string;
   nom: string;
-  job_title: string | null;
-  company: string | null;
-  expertise: string[] | null;
-  mentor_score: number | null;
+  poste_actuel: string | null;
+  entreprise: string | null;
+  photo_url: string | null;
   session_price: number | null;
-  seniority: string | null;
 };
 
 function initials(name: string) {
@@ -21,49 +19,34 @@ function initials(name: string) {
 }
 
 function MentorCard({ mentor }: { mentor: MentorRow }) {
-  const tags = (mentor.expertise ?? []).slice(0, 3);
-  const extra = (mentor.expertise ?? []).length - 3;
-
   return (
     <div
       className="rounded-2xl p-6 border border-white/[0.08] flex flex-col gap-4 hover:border-[#7C3AED]/40 transition-colors duration-300"
       style={{ background: "#13111F" }}
     >
-      <div className="flex items-start gap-4">
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-        >
-          {initials(mentor.nom)}
-        </div>
+      {/* Identity */}
+      <div className="flex items-center gap-4">
+        {mentor.photo_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={mentor.photo_url} alt={mentor.nom} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+        ) : (
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+          >
+            {initials(mentor.nom)}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="font-bold text-white truncate">{mentor.nom}</h3>
           <p className="text-sm text-white/50 truncate">
-            {mentor.job_title}
-            {mentor.company && <span className="text-white/30"> @ {mentor.company}</span>}
+            {mentor.poste_actuel}
+            {mentor.entreprise && <span className="text-white/30"> · {mentor.entreprise}</span>}
           </p>
         </div>
       </div>
 
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map(tag => (
-            <span
-              key={tag}
-              className="px-2.5 py-1 rounded-lg text-xs font-medium text-[#A78BFA] border border-[#7C3AED]/20"
-              style={{ background: "rgba(124,58,237,0.06)" }}
-            >
-              {tag}
-            </span>
-          ))}
-          {extra > 0 && (
-            <span className="px-2.5 py-1 rounded-lg text-xs font-medium text-white/30 border border-white/10">
-              +{extra}
-            </span>
-          )}
-        </div>
-      )}
-
+      {/* Price */}
       {mentor.session_price != null && (
         <div
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06] self-start"
@@ -121,10 +104,10 @@ export default function FindAMentorPage() {
     async function fetchMentors() {
       const { data } = await supabase
         .from("mentors")
-        .select("id, nom, job_title, company, expertise, mentor_score, session_price, seniority")
+        .select("id, nom, poste_actuel, entreprise, photo_url, session_price")
         .eq("onboarding_completed", true)
         .eq("statut", "active")
-        .order("mentor_score", { ascending: false });
+        .order("created_at", { ascending: false });
 
       setMentors((data as MentorRow[]) ?? []);
       setLoading(false);
@@ -146,8 +129,8 @@ export default function FindAMentorPage() {
         const q = search.toLowerCase();
         return (
           m.nom.toLowerCase().includes(q) ||
-          (m.job_title ?? "").toLowerCase().includes(q) ||
-          (m.expertise ?? []).some(e => e.toLowerCase().includes(q))
+          (m.poste_actuel ?? "").toLowerCase().includes(q) ||
+          (m.entreprise ?? "").toLowerCase().includes(q)
         );
       })
     : mentors;
