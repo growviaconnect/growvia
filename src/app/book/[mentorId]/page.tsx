@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, Star, ChevronLeft, ChevronRight,
+  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown,
   Clock, Globe, Loader2, CheckCircle,
 } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
@@ -32,14 +32,20 @@ const PERIOD_SLOTS: Record<string, string[]> = {
 };
 const PERIOD_ORDER = ["morning", "afternoon", "evening"];
 
+const DURATIONS: { label: string; minutes: number; multiplier: number }[] = [
+  { label: "30 min",  minutes: 30, multiplier: 0.5  },
+  { label: "45 min",  minutes: 45, multiplier: 0.75 },
+  { label: "1h",      minutes: 60, multiplier: 1.0  },
+  { label: "1h30",    minutes: 90, multiplier: 1.5  },
+];
+
+const BASE_LANGS = ["French", "English", "Spanish"];
+
 /** Convert JS Date.getDay() (0=Sun) to our table convention (0=Mon). */
 function jsDayToAvail(jsDay: number): number {
   return (jsDay + 6) % 7;
 }
 
-function scoreColor(s: number) {
-  return s >= 70 ? "#10B981" : s >= 40 ? "#F59E0B" : "#EF4444";
-}
 function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
@@ -95,8 +101,10 @@ export default function BookingPage() {
   const [selTime,  setSelTime]  = useState<string | null>(null);
 
   // ── Form state
-  const [topic,    setTopic]    = useState("");
-  const [language, setLanguage] = useState("");
+  const [topic,       setTopic]      = useState("");
+  const [language,    setLanguage]   = useState("");
+  const [langOpen,    setLangOpen]   = useState(false);
+  const [duration,    setDuration]   = useState(60);
 
   // ── Submission state
   const [submitting, setSubmitting] = useState(false);
@@ -115,8 +123,9 @@ export default function BookingPage() {
       if (mErr || !m) { setNotFound(true); setLoading(false); return; }
       setMentor(m as Mentor);
       setAvail(av ?? []);
-      const langs = (m as Mentor).languages;
-      if (langs && langs.length > 0) setLanguage(langs[0]);
+      const mentorLangs = (m as Mentor).languages ?? [];
+      const firstLang = mentorLangs[0] ?? "French";
+      setLanguage(firstLang);
       setLoading(false);
     });
   }, [mentorId]);
@@ -184,6 +193,7 @@ export default function BookingPage() {
           date: toDateKey(selDate),
           time: selTime,
           language,
+          durationMinutes: duration,
         }),
       });
       const json = (await res.json()) as { success?: boolean; error?: string };
@@ -215,13 +225,19 @@ export default function BookingPage() {
   }
 
   const price   = mentor.session_price;
-  const score   = mentor.mentor_score;
   const canBook = !!selDate && !!selTime;
 
-  // ── Languages list for dropdown
-  const langs = mentor.languages && mentor.languages.length > 0
-    ? mentor.languages
-    : ["English", "French"];
+  // Calculated price based on selected duration
+  const durMultiplier = DURATIONS.find(d => d.minutes === duration)?.multiplier ?? 1;
+  const sessionPrice  = price != null ? Math.round(price * durMultiplier) : null;
+  const durLabel      = DURATIONS.find(d => d.minutes === duration)?.label ?? "1h";
+
+  // Language list: base set + mentor languages, deduplicated
+  const langs = Array.from(new Set([
+    ...(mentor.languages ?? []),
+    ...(mentor.langues ?? []),
+    ...BASE_LANGS,
+  ]));
 
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
@@ -266,21 +282,13 @@ export default function BookingPage() {
                     {mentor.job_title}
                     {mentor.company && <span className="text-white/30"> @ {mentor.company}</span>}
                   </p>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {score != null && (
-                      <span
-                        className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg"
-                        style={{ background: `${scoreColor(score)}18`, color: scoreColor(score) }}
-                      >
-                        <Star className="w-3 h-3" /> {score}/100
-                      </span>
-                    )}
-                    {price != null && (
+                  {price != null && (
+                    <div className="mt-3">
                       <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/70 px-2.5 py-1 rounded-lg border border-white/10">
                         {price}€ / session
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -455,33 +463,74 @@ export default function BookingPage() {
                 </div>
 
                 {/* Duration */}
-                <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-white/35 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-white/70">Duration</p>
-                    <p className="text-xs text-white/35 mt-0.5">60 minutes</p>
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2.5 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-white/35" /> Duration
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {DURATIONS.map(d => (
+                      <button
+                        key={d.minutes}
+                        type="button"
+                        onClick={() => setDuration(d.minutes)}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                          duration === d.minutes
+                            ? "bg-[#7C3AED] border-[#7C3AED] text-white"
+                            : "border-white/10 text-white/55 hover:border-[#7C3AED]/50 hover:text-white"
+                        }`}
+                      >
+                        {d.label}
+                        {price != null && (
+                          <span className={`ml-2 text-xs ${duration === d.minutes ? "text-white/70" : "text-white/30"}`}>
+                            {Math.round(price * d.multiplier)}€
+                          </span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 {/* Language */}
-                <div>
-                  <label className="block text-sm font-semibold text-white/70 mb-2 flex items-center gap-2">
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-white/70 mb-2.5 flex items-center gap-2">
                     <Globe className="w-4 h-4 text-white/35" /> Session language
                   </label>
-                  <select
-                    value={language}
-                    onChange={e => setLanguage(e.target.value)}
-                    className="w-full rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/50 transition-shadow appearance-none"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  <button
+                    type="button"
+                    onClick={() => setLangOpen(o => !o)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm text-white transition-all focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/50"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: `1px solid ${langOpen ? "rgba(124,58,237,0.5)" : "rgba(255,255,255,0.08)"}`,
+                    }}
                   >
-                    {langs.map(l => <option key={l} value={l} style={{ background: "#13111F" }}>{l}</option>)}
-                    {!langs.includes("English") && (
-                      <option value="English" style={{ background: "#13111F" }}>English</option>
-                    )}
-                    {!langs.includes("French") && (
-                      <option value="French" style={{ background: "#13111F" }}>French</option>
-                    )}
-                  </select>
+                    <span>{language || "Select a language"}</span>
+                    <ChevronDown
+                      className="w-4 h-4 text-white/40 flex-shrink-0 transition-transform"
+                      style={{ transform: langOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                    />
+                  </button>
+                  {langOpen && (
+                    <div
+                      className="absolute left-0 right-0 top-full mt-1.5 rounded-xl overflow-hidden z-20 shadow-xl"
+                      style={{ background: "#1A1828", border: "1px solid rgba(255,255,255,0.10)" }}
+                    >
+                      {langs.map(l => (
+                        <button
+                          key={l}
+                          type="button"
+                          onClick={() => { setLanguage(l); setLangOpen(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                            language === l
+                              ? "text-white bg-[#7C3AED]/30"
+                              : "text-white/60 hover:text-white hover:bg-white/[0.05]"
+                          }`}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -504,7 +553,7 @@ export default function BookingPage() {
                     </p>
                   )}
                   {selTime && (
-                    <p className="text-xs text-white/50">{selTime} · 60 min</p>
+                    <p className="text-xs text-white/50">{selTime} · {durLabel}</p>
                   )}
                 </div>
               )}
@@ -512,21 +561,19 @@ export default function BookingPage() {
               {/* Price breakdown */}
               <div className="space-y-3 mb-5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/50">Session (60 min)</span>
+                  <span className="text-white/50">Session ({durLabel})</span>
                   <span className="text-white font-semibold">
-                    {price != null ? `${price}€` : "–"}
+                    {sessionPrice != null ? `${sessionPrice}€` : "–"}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">GrowVia fee</span>
                   <span className="text-[#10B981] text-xs font-semibold">Included</span>
                 </div>
-                <div
-                  className="flex justify-between text-sm font-bold border-t border-white/[0.06] pt-3"
-                >
+                <div className="flex justify-between text-sm font-bold border-t border-white/[0.06] pt-3">
                   <span className="text-white">Total</span>
                   <span className="text-white">
-                    {price != null ? `${price}€` : "Price on request"}
+                    {sessionPrice != null ? `${sessionPrice}€` : "Price on request"}
                   </span>
                 </div>
               </div>
@@ -564,7 +611,7 @@ export default function BookingPage() {
                 ) : (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    Request &amp; Pay {price != null ? `${price}€` : ""}
+                    Request &amp; Pay {sessionPrice != null ? `${sessionPrice}€` : ""}
                   </>
                 )}
               </button>
