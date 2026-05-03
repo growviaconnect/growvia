@@ -8,6 +8,8 @@ import {
   User, FileText, AlertCircle, CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { getUserSession } from "@/lib/session";
 import AvailabilitySelector from "@/components/AvailabilitySelector";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -419,6 +421,7 @@ function CropModal({
 // ─── Main component ─────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
+  const { setSession: setGlobalSession } = useAuth();
 
   const [pageLoading, setPageLoading]   = useState(true);
   const [saving, setSaving]             = useState(false);
@@ -544,6 +547,9 @@ export default function ProfilePage() {
       const url  = await uploadPhotoViaApi(userId, file);
       if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
       else setMentee(p => ({ ...p, photo_url: url }));
+      // Sync photo into global session so navbar updates immediately
+      const cur = getUserSession();
+      if (cur) setGlobalSession({ ...cur, photo: url });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Photo upload failed, please try again.";
       setError(msg);
@@ -646,6 +652,13 @@ export default function ProfilePage() {
       }
       setEditing(false);
       showToast("success");
+      // Sync name + photo into global session so navbar updates immediately
+      const cur = getUserSession();
+      if (cur) {
+        const photoUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
+        const nom = role === "mentor" ? mentor.nom : mentee.nom;
+        setGlobalSession({ ...cur, nom: nom || cur.nom, photo: photoUrl || cur.photo });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save, please try again.");
       showToast("error");
@@ -871,8 +884,8 @@ export default function ProfilePage() {
                       placeholder="https://linkedin.com/in/..." />
                   </div>
                   <div>
-                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentor.bio.length}/300</span></FieldLabel>
-                    <textarea rows={3} maxLength={300} className={`${inputCls} resize-none`} value={mentor.bio}
+                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentor.bio.length}/500</span></FieldLabel>
+                    <textarea rows={4} maxLength={500} className={`${inputCls} resize-none`} value={mentor.bio}
                       onChange={e => setMentor(p => ({ ...p, bio: e.target.value }))}
                       placeholder="A few sentences about your background…" />
                   </div>
@@ -1152,8 +1165,8 @@ export default function ProfilePage() {
                       placeholder="https://linkedin.com/in/..." />
                   </div>
                   <div>
-                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentee.bio.length}/300</span></FieldLabel>
-                    <textarea rows={3} maxLength={300} className={`${inputCls} resize-none`} value={mentee.bio}
+                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentee.bio.length}/500</span></FieldLabel>
+                    <textarea rows={4} maxLength={500} className={`${inputCls} resize-none`} value={mentee.bio}
                       onChange={e => setMentee(p => ({ ...p, bio: e.target.value }))}
                       placeholder="A few sentences about yourself…" />
                   </div>
