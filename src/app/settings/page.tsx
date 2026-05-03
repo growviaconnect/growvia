@@ -40,6 +40,69 @@ const T = {
   faint:      "rgba(255,255,255,0.07)",
 };
 
+/* ─── Plan definitions (source of truth) ─────────────────────────── */
+type PlanKey = "free" | "basic" | "standard" | "premium";
+
+const PLANS: {
+  key: PlanKey;
+  label: string;
+  price: number;
+  priceLabel: string;
+  features: string[];
+  recommended?: boolean;
+}[] = [
+  {
+    key: "free",
+    label: "Gratuit",
+    price: 0,
+    priceLabel: "0€/mois",
+    features: [
+      "1 session découverte incluse",
+      "Matching IA (1 par inscription)",
+      "Accès aux profils mentors",
+    ],
+  },
+  {
+    key: "basic",
+    label: "Basique",
+    price: 4.99,
+    priceLabel: "4.99€/mois",
+    features: [
+      "Accès à plus de mentors",
+      "2–3 matchings IA par mois",
+      "Sessions standard",
+      "Filtres de base",
+    ],
+  },
+  {
+    key: "standard",
+    label: "Standard",
+    price: 9.99,
+    priceLabel: "9.99€/mois",
+    features: [
+      "Accès à la majorité des mentors",
+      "Matching IA étendu",
+      "Mentors certifiés",
+      "Filtres avancés",
+      "Recommandations personnalisées",
+    ],
+    recommended: true,
+  },
+  {
+    key: "premium",
+    label: "Premium",
+    price: 14.99,
+    priceLabel: "14.99€/mois",
+    features: [
+      "Accès à TOUS les mentors",
+      "Matching IA illimité",
+      "Réservation prioritaire",
+      "Meilleurs mentors en exclusivité",
+      "Contenu exclusif",
+    ],
+  },
+];
+
 /* ─── Password strength ───────────────────────────────────────────── */
 function pwdStrength(pw: string): { score: 0|1|2|3; label: string; color: string } {
   if (!pw) return { score: 0, label: "", color: "" };
@@ -341,15 +404,11 @@ export default function SettingsPage() {
     </div>
   );
 
-  const plan = (session.plan ?? "free") as "free" | "pro" | "school";
-  const planLabels: Record<string, { label: string; proFeatures?: string[] }> = {
-    free:   { label: "Plan Gratuit",
-      proFeatures: ["1 session découverte incluse", "Matching AI (1 par inscription)", "Accès aux profils mentors"]
-    },
-    pro:    { label: "Plan Pro" },
-    school: { label: "Plan École" },
-  };
-  const currentPlan = planLabels[plan] ?? planLabels.free;
+  const rawPlan  = session.plan ?? "free";
+  // Map legacy keys to new plan system
+  const planKey  = (rawPlan === "pro" ? "premium" : rawPlan === "school" ? "premium" : rawPlan) as PlanKey;
+  const currentPlanData = PLANS.find(p => p.key === planKey) ?? PLANS[0];
+  const otherPlans      = PLANS.filter(p => p.key !== planKey);
   const strength = pwdStrength(pwdForm.next);
   const { onFocus, onBlur } = useFocusStyle();
 
@@ -368,9 +427,12 @@ export default function SettingsPage() {
         @keyframes fadeUp   { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
         @keyframes shimmerBtn { 0%{transform:translateX(-100%)} 60%,100%{transform:translateX(200%)} }
         @keyframes pulseGreen { 0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0.4)} 50%{box-shadow:0 0 0 8px rgba(74,222,128,0)} }
+        @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.6)} }
         .settings-card-in { animation: fadeUp 0.4s ease forwards; opacity:0; }
         .settings-tab-in  { animation: fadeUp 0.35s ease forwards; opacity:0; }
         .settings-content-in { animation: fadeUp 0.4s ease 0.15s forwards; opacity:0; }
+        .plan-card-hover { transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease; }
+        .plan-card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,58,237,0.15); border-color: rgba(157,141,241,0.35) !important; }
       `}</style>
 
       {/* ── Flash toast ─────────────────────────────────────────── */}
@@ -396,7 +458,7 @@ export default function SettingsPage() {
             <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-white mb-2">Résilier l&apos;abonnement ?</h3>
             <p className="text-sm mb-6" style={{ color: T.muted }}>
-              Votre accès au plan <strong className="text-white">{currentPlan.label}</strong> sera supprimé à la fin de la période en cours.
+              Votre accès au plan <strong className="text-white">Plan {currentPlanData.label}</strong> sera supprimé à la fin de la période en cours.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setCancelConfirm(false)}
@@ -448,15 +510,15 @@ export default function SettingsPage() {
                   className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full cursor-default"
                   style={{ background: "rgba(157,141,241,0.12)", color: T.purpleL }}
                 >
-                  {currentPlan.label}
+                  Plan {currentPlanData.label}
                 </span>
-                {plan === "free" && (
+                {planKey === "free" && (
                   <div
                     className="absolute left-0 top-full mt-1.5 z-10 text-xs font-medium text-white rounded-lg px-3 py-2 whitespace-nowrap
                       opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200"
                     style={{ background: "#1E1533", border: `1px solid ${T.cardBorder}` }}
                   >
-                    Passer au plan Pro →
+                    Choisir un abonnement →
                   </div>
                 )}
               </div>
@@ -868,101 +930,151 @@ export default function SettingsPage() {
           {/* ══ SUBSCRIPTION ══════════════════════════════════════ */}
           {tab === "subscription" && (
             <div className="space-y-4">
-              {/* Current plan card */}
-              <div className="rounded-2xl px-6 py-7"
-                style={{ background: T.card, border: `1px solid ${T.cardBorder}` }}>
-                <p className="text-[10px] font-bold uppercase tracking-[1.4px] mb-4" style={{ color: T.sub }}>
+
+              {/* ── Current plan card ─────────────────────────────── */}
+              <div className="rounded-2xl px-6 py-6"
+                style={{ background: "rgba(157,141,241,0.06)", border: "1px solid rgba(157,141,241,0.30)" }}>
+
+                <p className="text-[10px] font-bold uppercase tracking-[1.4px] mb-5" style={{ color: T.sub }}>
                   Mon abonnement
                 </p>
 
-                {/* Plan row */}
-                <div className="flex items-center gap-4 rounded-xl px-5 py-4 mb-5"
-                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.20)" }}>
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: T.purple }}>
-                    <Crown className="w-5 h-5 text-white" />
+                {/* Plan header row */}
+                <div className="flex items-start justify-between gap-4 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}>
+                      <Crown className="w-5 h-5" style={{ color: T.purpleL }} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-base">Plan {currentPlanData.label}</p>
+                      <p className="text-xs mt-0.5" style={{ color: T.muted }}>{currentPlanData.priceLabel}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-white">{currentPlan.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: T.muted }}>
-                      {plan === "free" ? "0€ / mois" : plan === "pro" ? "39€ / mois" : "Sur devis"}
-                    </p>
+                  {/* Actif badge with pulsing dot */}
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full flex-shrink-0"
+                    style={{ background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.25)" }}>
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ background: "#4ade80", animation: "pulseDot 2s ease-in-out infinite" }} />
+                    <span className="text-xs font-semibold" style={{ color: "#4ade80" }}>Actif</span>
                   </div>
-                  <span className="text-xs font-bold px-3 py-1 rounded-full"
-                    style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80" }}>
-                    Actif
-                  </span>
                 </div>
 
-                {/* Free plan features */}
-                {plan === "free" && currentPlan.proFeatures && (
-                  <div className="space-y-2 mb-5">
-                    {currentPlan.proFeatures.map(f => (
-                      <div key={f} className="flex items-center gap-2.5 text-sm" style={{ color: T.muted }}>
-                        <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: T.purpleL }} />
-                        {f}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* Features */}
+                <div className="space-y-2 mb-6">
+                  {currentPlanData.features.map(f => (
+                    <div key={f} className="flex items-center gap-2.5 text-sm" style={{ color: T.muted }}>
+                      <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: T.purpleL }} />
+                      {f}
+                    </div>
+                  ))}
+                </div>
 
-                <div className="space-y-3">
-                  <Link href="/pricing"
-                    className="flex items-center justify-center gap-2 w-full text-white font-bold py-3.5 rounded-xl text-sm transition-colors relative overflow-hidden"
-                    style={{ background: T.purple }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = T.purple; }}>
-                    <Crown className="w-4 h-4" />
-                    {plan === "free" ? "Choisir un abonnement" : "Changer / Upgrader mon abonnement"}
-                  </Link>
-                  {plan !== "free" && (
-                    <button onClick={() => setCancelConfirm(true)}
-                      className="w-full font-semibold py-3.5 rounded-xl text-sm transition-colors"
-                      style={{ border: "1px solid rgba(239,68,68,0.3)", color: "#f87171" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.06)"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; }}>
-                      Résilier mon abonnement
-                    </button>
+                {/* CTA */}
+                <div className="space-y-2.5">
+                  {planKey === "free" ? (
+                    <Link href="/pricing"
+                      className="flex items-center justify-center gap-2 w-full text-white font-bold py-3.5 rounded-xl text-sm transition-colors"
+                      style={{ background: T.purple }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = T.purple; }}>
+                      <Crown className="w-4 h-4" />
+                      Choisir un abonnement
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/pricing"
+                        className="flex items-center justify-center gap-2 w-full font-semibold py-3.5 rounded-xl text-sm transition-colors"
+                        style={{ border: "1px solid rgba(157,141,241,0.35)", color: T.purpleL }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(157,141,241,0.08)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; }}>
+                        Gérer mon abonnement
+                      </Link>
+                      <button onClick={() => setCancelConfirm(true)}
+                        className="w-full font-semibold py-3 rounded-xl text-sm transition-colors"
+                        style={{ border: "1px solid rgba(239,68,68,0.2)", color: "rgba(248,113,113,0.7)" }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.06)";
+                          (e.currentTarget as HTMLElement).style.color = "#f87171";
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLElement).style.background = "";
+                          (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.7)";
+                        }}>
+                        Résilier mon abonnement
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
 
-              {/* Pro upgrade card (free users) */}
-              {plan === "free" && (
-                <div
-                  className="rounded-2xl px-6 py-6"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(167,139,250,0.04) 100%)",
-                    border: "1px solid rgba(124,58,237,0.35)",
-                    boxShadow: "0 0 40px rgba(124,58,237,0.06)",
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Crown className="w-4 h-4" style={{ color: T.purpleL }} />
-                    <p className="font-bold text-white">Plan Pro</p>
-                  </div>
-                  <p className="text-sm mb-4" style={{ color: T.muted }}>
-                    3 sessions/mois · Matching AI illimité · Support prioritaire
-                  </p>
-                  {[
-                    "Sessions de 30 à 60 min avec vos mentors",
-                    "Matching AI avancé sans limite mensuelle",
-                    "Accès à tous les mentors certifiés",
-                    "Support prioritaire 7j/7",
-                  ].map(f => (
-                    <div key={f} className="flex items-center gap-2.5 text-sm mb-2" style={{ color: T.muted }}>
-                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: T.purpleL }} /> {f}
-                    </div>
-                  ))}
-                  <Link href="/pricing"
-                    className="inline-flex items-center gap-2 text-white font-bold px-6 py-3 rounded-xl text-sm mt-4 transition-colors"
-                    style={{ background: T.purple }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = T.purple; }}>
-                    Passer au Pro → <span className="font-normal text-white/60">39€/mois</span>
-                  </Link>
+              {/* ── Other plans ───────────────────────────────────── */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[1.4px] mb-3 px-1" style={{ color: T.sub }}>
+                  Changer de plan
+                </p>
+                <div className="space-y-3">
+                  {otherPlans.map((plan, idx) => {
+                    const isUpgrade = plan.price > currentPlanData.price;
+                    return (
+                      <div
+                        key={plan.key}
+                        className="plan-card-hover relative rounded-[14px] px-5 py-5"
+                        style={{
+                          background: "rgba(255,255,255,0.02)",
+                          border: "1px solid rgba(157,141,241,0.12)",
+                          animation: `fadeUp 0.4s ease ${0.05 + idx * 0.06}s both`,
+                        }}
+                      >
+                        {/* RECOMMANDÉ badge */}
+                        {plan.recommended && (
+                          <span className="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                            style={{ background: "rgba(124,58,237,0.18)", color: T.purpleL, border: "1px solid rgba(124,58,237,0.30)" }}>
+                            Recommandé
+                          </span>
+                        )}
+
+                        {/* Plan name + price */}
+                        <div className="flex items-baseline gap-2 mb-0.5">
+                          <p className="font-bold text-white text-sm">{plan.label}</p>
+                          <p className="text-xs" style={{ color: T.muted }}>{plan.priceLabel}</p>
+                        </div>
+
+                        {/* Features */}
+                        <div className="space-y-1.5 mt-3 mb-4">
+                          {plan.features.slice(0, 4).map(f => (
+                            <div key={f} className="flex items-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                              <Check className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(157,141,241,0.6)" }} />
+                              {f}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* CTA */}
+                        <Link
+                          href="/pricing"
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors"
+                          style={isUpgrade
+                            ? { background: T.purple, color: "#fff" }
+                            : { border: `1px solid ${T.faint}`, color: T.muted }
+                          }
+                          onMouseEnter={e => {
+                            if (isUpgrade) (e.currentTarget as HTMLElement).style.background = "#6D28D9";
+                            else (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.2)";
+                          }}
+                          onMouseLeave={e => {
+                            if (isUpgrade) (e.currentTarget as HTMLElement).style.background = T.purple;
+                            else (e.currentTarget as HTMLElement).style.borderColor = T.faint;
+                          }}
+                        >
+                          Passer au {plan.label} →{isUpgrade && <span className="font-normal opacity-70 ml-1">{plan.priceLabel}</span>}
+                        </Link>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
+
             </div>
           )}
 

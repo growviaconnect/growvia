@@ -37,7 +37,7 @@ export type UserSession = {
   objectif?: string | null;
   bio?: string;
   photo?: string;
-  plan?: "free" | "pro" | "school";
+  plan?: "free" | "basic" | "standard" | "premium" | "pro" | "school";
 };
 
 export function getUserSession(): UserSession | null {
