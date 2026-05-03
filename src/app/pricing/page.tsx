@@ -245,6 +245,12 @@ export default function PricingPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  // Map session plan to pricing page keys (case-insensitive)
+  const userPlanKey = session?.plan?.toLowerCase() ?? null;
+  function isCurrentPlan(planKey: string) {
+    return userPlanKey === planKey.toLowerCase();
+  }
+
   const plans = [
     {
       name: t("pricing_plan_basic"), key: "Basic",
@@ -530,6 +536,21 @@ export default function PricingPage() {
                         </div>
                       )}
 
+                      {/* Votre plan actuel badge */}
+                      {isCurrentPlan(plan.key) && (
+                        <div style={{ marginBottom: 12, ...fadeUp(show, 0.05) }}>
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", gap: 6,
+                            fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase",
+                            color: "#4ade80", background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.30)",
+                            borderRadius: 4, padding: "4px 9px",
+                          }}>
+                            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
+                            Votre plan actuel
+                          </span>
+                        </div>
+                      )}
+
                       {/* Plan name — MASSIVE */}
                       <h2 style={{
                         fontSize: "clamp(52px, 9vw, 96px)", fontWeight: 800, color: "white",
@@ -576,26 +597,39 @@ export default function PricingPage() {
 
                       {/* CTA */}
                       <div style={fadeUp(show, 0.42)}>
-                        <button
-                          onClick={() => handleCheckout(plan.key)}
-                          disabled={!!loadingPlan}
-                          style={{
+                        {isCurrentPlan(plan.key) ? (
+                          <button disabled style={{
                             display: "inline-flex", alignItems: "center", gap: 8,
-                            background: plan.recommended ? ACCENT : "transparent",
-                            color: "white",
-                            border: plan.recommended ? "none" : "1px solid rgba(255,255,255,0.2)",
+                            background: "rgba(255,255,255,0.06)",
+                            color: "rgba(255,255,255,0.35)",
+                            border: "1px solid rgba(255,255,255,0.1)",
                             borderRadius: 12, padding: "14px 28px",
-                            fontSize: 14, fontWeight: 600, cursor: "pointer",
-                            opacity: loadingPlan === plan.key ? 0.6 : 1,
-                            transition: "opacity 0.2s ease",
-                          }}
-                        >
-                          {loadingPlan === plan.key
-                            ? <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />
-                            : null}
-                          {plan.cta}
-                          {loadingPlan !== plan.key && <ArrowRight style={{ width: 16, height: 16 }} />}
-                        </button>
+                            fontSize: 14, fontWeight: 600, cursor: "default",
+                          }}>
+                            Plan actuel ✓
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleCheckout(plan.key)}
+                            disabled={!!loadingPlan}
+                            style={{
+                              display: "inline-flex", alignItems: "center", gap: 8,
+                              background: plan.recommended ? ACCENT : "transparent",
+                              color: "white",
+                              border: plan.recommended ? "none" : "1px solid rgba(255,255,255,0.2)",
+                              borderRadius: 12, padding: "14px 28px",
+                              fontSize: 14, fontWeight: 600, cursor: "pointer",
+                              opacity: loadingPlan === plan.key ? 0.6 : 1,
+                              transition: "opacity 0.2s ease",
+                            }}
+                          >
+                            {loadingPlan === plan.key
+                              ? <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" />
+                              : null}
+                            {plan.cta}
+                            {loadingPlan !== plan.key && <ArrowRight style={{ width: 16, height: 16 }} />}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -631,6 +665,20 @@ export default function PricingPage() {
                   </div>
                 )}
 
+                {isCurrentPlan(plan.key) && (
+                  <div style={{ marginBottom: 10 }}>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase",
+                      color: "#4ade80", background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.30)",
+                      borderRadius: 4, padding: "4px 9px",
+                    }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
+                      Votre plan actuel
+                    </span>
+                  </div>
+                )}
+
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: ACCENT, marginBottom: 10 }}>
                   {PLAN_LABELS[pi]}
                 </p>
@@ -650,23 +698,36 @@ export default function PricingPage() {
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={() => handleCheckout(plan.key)}
-                  disabled={!!loadingPlan}
-                  style={{
+                {isCurrentPlan(plan.key) ? (
+                  <button disabled style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     width: "100%",
-                    background: plan.recommended ? ACCENT : "transparent",
-                    color: "white",
-                    border: plan.recommended ? "none" : "1px solid rgba(255,255,255,0.2)",
+                    background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.35)",
+                    border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: 12, padding: "14px 28px",
-                    fontSize: 14, fontWeight: 600, cursor: "pointer",
-                  }}
-                >
-                  {loadingPlan === plan.key ? <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> : null}
-                  {plan.cta}
-                  {loadingPlan !== plan.key && <ArrowRight style={{ width: 16, height: 16 }} />}
-                </button>
+                    fontSize: 14, fontWeight: 600, cursor: "default",
+                  }}>
+                    Plan actuel ✓
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleCheckout(plan.key)}
+                    disabled={!!loadingPlan}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      width: "100%",
+                      background: plan.recommended ? ACCENT : "transparent",
+                      color: "white",
+                      border: plan.recommended ? "none" : "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 12, padding: "14px 28px",
+                      fontSize: 14, fontWeight: 600, cursor: "pointer",
+                    }}
+                  >
+                    {loadingPlan === plan.key ? <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> : null}
+                    {plan.cta}
+                    {loadingPlan !== plan.key && <ArrowRight style={{ width: 16, height: 16 }} />}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -703,6 +764,21 @@ export default function PricingPage() {
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: ACCENT, marginBottom: 16, ...fadeUp(extraVis[0], 0) }}>
                 {t("pricing_free_badge")}
               </p>
+
+              {/* Votre plan actuel badge — free plan */}
+              {(!userPlanKey || userPlanKey === "free") && session && (
+                <div style={{ marginBottom: 18, ...fadeUp(extraVis[0], 0.03) }}>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase",
+                    color: "#4ade80", background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.30)",
+                    borderRadius: 4, padding: "4px 9px",
+                  }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
+                    Votre plan actuel
+                  </span>
+                </div>
+              )}
               <h2 style={{ fontSize: "clamp(38px, 6vw, 68px)", fontWeight: 800, color: "white", lineHeight: 1.05, margin: "0 0 20px", letterSpacing: "-0.02em", ...fadeUp(extraVis[0], 0.07) }}>
                 {t("pricing_free_title1")}{" "}
                 <span style={{ ...serif, color: ACCENT_LIGHT }}>{t("pricing_free_title2")}</span>

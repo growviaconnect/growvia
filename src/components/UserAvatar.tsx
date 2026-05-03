@@ -73,13 +73,14 @@ export default function UserAvatar({
 
       const url = json.url as string;
 
-      // Persist photo_url to DB
+      // Persist clean URL to DB
       const table = session?.role === "mentor" ? "mentors" : "mentees";
       await supabase.from(table).update({ photo_url: url }).eq("id", user.id);
 
-      // Update global session → all UserAvatar instances re-render instantly
-      if (session) setSession({ ...session, photo: url });
-      onPhotoUploaded?.(url);
+      // Cache-bust for display — same storage path is overwritten, browser would serve stale image otherwise
+      const displayUrl = `${url.split("?")[0]}?v=${Date.now()}`;
+      if (session) setSession({ ...session, photo: displayUrl });
+      onPhotoUploaded?.(displayUrl);
     } catch (err) {
       console.error("[avatar-upload]", err);
     } finally {
