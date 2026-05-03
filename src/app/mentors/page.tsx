@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Star, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 
 type MentorRow = Pick<Mentor,
@@ -25,17 +25,11 @@ const PLACEHOLDERS: MentorRow[] = [
   },
 ];
 
-function scoreColor(s: number | null | undefined) {
-  if (!s) return "#6B7280";
-  return s >= 70 ? "#10B981" : s >= 40 ? "#F59E0B" : "#EF4444";
-}
-
 function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function MentorCard({ mentor, placeholder = false }: { mentor: MentorRow; placeholder?: boolean }) {
-  const color = scoreColor(mentor.mentor_score);
   const tags = (mentor.expertise ?? []).slice(0, 3);
   const extra = (mentor.expertise ?? []).length - 3;
 
@@ -88,28 +82,16 @@ function MentorCard({ mentor, placeholder = false }: { mentor: MentorRow; placeh
         </div>
       )}
 
-      {/* Score + Price */}
-      <div className="flex items-center gap-3">
-        {mentor.mentor_score != null && (
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06]"
-            style={{ background: "#0D0A1A" }}
-          >
-            <Star className="w-3 h-3 flex-shrink-0" style={{ color }} />
-            <span className="text-sm font-bold" style={{ color }}>{mentor.mentor_score}</span>
-            <span className="text-xs text-white/30">/100</span>
-          </div>
-        )}
-        {mentor.session_price != null && (
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06]"
-            style={{ background: "#0D0A1A" }}
-          >
-            <span className="text-sm font-bold text-white">{mentor.session_price}€</span>
-            <span className="text-xs text-white/30">/ session</span>
-          </div>
-        )}
-      </div>
+      {/* Price */}
+      {mentor.session_price != null && (
+        <div
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06] self-start"
+          style={{ background: "#0D0A1A" }}
+        >
+          <span className="text-sm font-bold text-white">{mentor.session_price}€</span>
+          <span className="text-xs text-white/30">/ session</span>
+        </div>
+      )}
 
       {/* CTA */}
       <div className="mt-auto">
