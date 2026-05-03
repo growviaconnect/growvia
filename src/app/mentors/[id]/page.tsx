@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Star, Languages, Calendar } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
+import { getUserSession } from "@/lib/session";
 
 const SLOT_LABELS: Record<string, string> = {
   morning: "Morning (7–12h)",
@@ -23,6 +24,35 @@ function scoreLabel(s: number) {
 
 function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function BookCTA({ mentorId, price }: { mentorId: string; price: number | null | undefined }) {
+  const session = getUserSession();
+  const isLoggedInMentee = session?.role === "mentee";
+  const bookHref = isLoggedInMentee
+    ? `/book/${mentorId}`
+    : `/auth/register?redirect=/book/${mentorId}`;
+
+  return (
+    <div
+      className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      style={{ background: "rgba(124,58,237,0.06)" }}
+    >
+      <div>
+        <p className="text-white font-semibold mb-0.5">Ready to start?</p>
+        <p className="text-white/40 text-sm">
+          {price != null ? `${price}€ per session · No commitment` : "Price on request"}
+        </p>
+      </div>
+      <Link
+        href={bookHref}
+        className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
+        style={{ background: "#7C3AED" }}
+      >
+        Book a session <ArrowRight className="w-4 h-4" />
+      </Link>
+    </div>
+  );
 }
 
 export default function MentorProfilePage() {
@@ -246,26 +276,7 @@ export default function MentorProfilePage() {
         </div>
 
         {/* Book CTA */}
-        <div
-          className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-          style={{ background: "rgba(124,58,237,0.06)" }}
-        >
-          <div>
-            <p className="text-white font-semibold mb-0.5">Ready to start?</p>
-            <p className="text-white/40 text-sm">
-              {mentor.session_price != null
-                ? `${mentor.session_price}€ per session · No commitment`
-                : "Price on request"}
-            </p>
-          </div>
-          <Link
-            href="/auth/register"
-            className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
-            style={{ background: "#7C3AED" }}
-          >
-            Book a session <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <BookCTA mentorId={id} price={mentor.session_price} />
 
       </div>
     </div>
