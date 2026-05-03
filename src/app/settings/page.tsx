@@ -92,12 +92,12 @@ function useFocusStyle() {
 
 /* ─── Save button ───────────────────────────────────────────────── */
 function SaveBtn({
-  loading, success, label = "Sauvegarder les modifications",
-}: { loading?: boolean; success?: boolean; label?: string }) {
+  loading, success, disabled: extraDisabled, label = "Sauvegarder les modifications",
+}: { loading?: boolean; success?: boolean; disabled?: boolean; label?: string }) {
   return (
     <button
       type="submit"
-      disabled={loading}
+      disabled={loading || extraDisabled}
       className="w-full relative overflow-hidden flex items-center justify-center gap-2 font-bold text-sm text-white py-3.5 rounded-xl transition-all disabled:opacity-60"
       style={{
         background: success ? "#16a34a" : T.purple,
@@ -151,6 +151,13 @@ export default function SettingsPage() {
   const [showPwds, setShowPwds] = useState({ current: false, next: false, confirm: false });
   const [pwdSaving, setPwdSaving]   = useState(false);
   const [pwdSuccess, setPwdSuccess] = useState(false);
+  const [currentPwdVerified,  setCurrentPwdVerified]  = useState(false);
+  const [currentPwdVerifying, setCurrentPwdVerifying] = useState(false);
+  const [currentPwdError,     setCurrentPwdError]     = useState<string | null>(null);
+  const [isResetMode,         setIsResetMode]         = useState(false);
+  const [forgotExpanded,      setForgotExpanded]      = useState(false);
+  const [forgotSending,       setForgotSending]       = useState(false);
+  const [forgotSent,          setForgotSent]          = useState(false);
 
   /* ── Mentor availability ────────────────────────────────────── */
   const [mentorDbId, setMentorDbId]         = useState<string | null>(null);
@@ -177,6 +184,15 @@ export default function SettingsPage() {
           } catch { /* silent */ } finally { setMentorIdLoaded(true); }
         })();
       } else { setMentorIdLoaded(true); }
+    }
+  }, []);
+
+  /* ── Detect ?tab=password&reset=true (email recovery link) ─── */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "true" && params.get("tab") === "password") {
+      setTab("password");
+      setIsResetMode(true);
     }
   }, []);
 
@@ -212,17 +228,66 @@ export default function SettingsPage() {
     setTimeout(() => setProfileSuccess(false), 2500);
   }
 
+  /* ── Verify current password via Supabase re-auth ──────────── */
+  async function verifyCurrentPassword() {
+    if (!pwdForm.current || !session) return;
+    setCurrentPwdVerifying(true);
+    setCurrentPwdError(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: session.email,
+        password: pwdForm.current,
+      });
+      if (error) {
+        setCurrentPwdVerified(false);
+        setCurrentPwdError("Mot de passe incorrect. Réessayez ou utilisez la récupération par email.");
+      } else {
+        setCurrentPwdVerified(true);
+        setCurrentPwdError(null);
+      }
+    } catch {
+      setCurrentPwdError("Erreur de vérification. Réessayez.");
+    } finally {
+      setCurrentPwdVerifying(false);
+    }
+  }
+
+  /* ── Send password reset email ───────────────────────────── */
+  async function sendResetEmail() {
+    if (!session) return;
+    setForgotSending(true);
+    try {
+      const redirectTo = `${window.location.origin}/settings?tab=password&reset=true`;
+      const { error } = await supabase.auth.resetPasswordForEmail(session.email, { redirectTo });
+      if (error) throw error;
+      setForgotSent(true);
+      setForgotExpanded(false);
+    } catch {
+      showMsg("Impossible d'envoyer l'email. Réessayez.", false);
+    } finally {
+      setForgotSending(false);
+    }
+  }
+
   /* ── Save password ──────────────────────────────────────────── */
   async function savePassword(e: React.FormEvent) {
     e.preventDefault();
-    if (pwdForm.next !== pwdForm.confirm) { showMsg("Les mots de passe ne correspondent pas.", false); return; }
-    if (pwdForm.next.length < 8) { showMsg("Mot de passe trop court (8 caractères minimum).", false); return; }
+    if (pwdForm.next !== pwdForm.confirm || pwdForm.next.length < 8) return;
+    if (!currentPwdVerified && !isResetMode) return;
     setPwdSaving(true);
-    await new Promise(r => setTimeout(r, 700));
-    setPwdSaving(false);
-    setPwdForm({ current: "", next: "", confirm: "" });
-    setPwdSuccess(true);
-    setTimeout(() => setPwdSuccess(false), 2500);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pwdForm.next });
+      if (error) throw error;
+      setPwdForm({ current: "", next: "", confirm: "" });
+      setCurrentPwdVerified(false);
+      setIsResetMode(false);
+      setPwdSuccess(true);
+      setTimeout(() => setPwdSuccess(false), 2500);
+    } catch (err) {
+      showMsg(err instanceof Error ? err.message : "Erreur lors de la mise à jour.", false);
+    } finally {
+      setPwdSaving(false);
+    }
   }
 
   /* ── Cancel subscription ────────────────────────────────────── */
@@ -555,57 +620,247 @@ export default function SettingsPage() {
                 <div className="h-px" style={{ background: "rgba(124,58,237,0.10)" }} />
               </div>
 
-              {(["current", "next", "confirm"] as const).map(f => (
-                <div key={f}>
-                  <DarkField label={
-                    f === "current" ? "Mot de passe actuel"
-                    : f === "next"  ? "Nouveau mot de passe"
-                    : "Confirmer le nouveau mot de passe"
-                  }>
-                    <div className="relative">
-                      <input
-                        type={showPwds[f] ? "text" : "password"}
-                        required={f !== "current"}
-                        value={pwdForm[f]}
-                        onChange={e => setPwdForm({ ...pwdForm, [f]: e.target.value })}
-                        placeholder="••••••••"
-                        className={inputCls} style={{ ...inputStyle, paddingRight: "2.75rem" }}
-                        onFocus={onFocus} onBlur={onBlur}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPwds(s => ({ ...s, [f]: !s[f] }))}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
-                        style={{ color: T.sub }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.purpleL; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.sub; }}
-                      >
-                        {showPwds[f] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+              {/* Reset mode banner */}
+              {isResetMode && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                  style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.20)" }}>
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#4ade80" }} />
+                  <p className="text-sm" style={{ color: "#4ade80" }}>
+                    Vous pouvez maintenant définir un nouveau mot de passe
+                  </p>
+                </div>
+              )}
+
+              {/* Current password — hidden in reset mode */}
+              {!isResetMode && (
+                <div>
+                  <DarkField label="Mot de passe actuel">
+                    <div className="flex gap-2">
+                      {/* Input */}
+                      <div className="relative flex-1">
+                        <input
+                          type={showPwds.current ? "text" : "password"}
+                          value={pwdForm.current}
+                          onChange={e => {
+                            setPwdForm(p => ({ ...p, current: e.target.value }));
+                            setCurrentPwdVerified(false);
+                            setCurrentPwdError(null);
+                          }}
+                          onBlur={() => { if (pwdForm.current.length >= 6 && !currentPwdVerified) verifyCurrentPassword(); }}
+                          placeholder="••••••••"
+                          className={inputCls}
+                          style={{
+                            ...inputStyle,
+                            paddingRight: "2.75rem",
+                            borderColor: currentPwdError
+                              ? "#ef4444"
+                              : currentPwdVerified
+                              ? "#4ade80"
+                              : T.inputBdr,
+                          }}
+                          onFocus={onFocus}
+                        />
+                        {/* Checkmark when verified */}
+                        {currentPwdVerified && (
+                          <CheckCircle
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4"
+                            style={{ color: "#4ade80" }}
+                          />
+                        )}
+                        {/* Eye toggle (only when not verified — avoids icon overlap) */}
+                        {!currentPwdVerified && (
+                          <button
+                            type="button"
+                            onClick={() => setShowPwds(s => ({ ...s, current: !s.current }))}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+                            style={{ color: T.sub }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.purpleL; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.sub; }}
+                          >
+                            {showPwds.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                      {/* Verify button (disappears once verified) */}
+                      {!currentPwdVerified && (
+                        <button
+                          type="button"
+                          onClick={verifyCurrentPassword}
+                          disabled={!pwdForm.current || currentPwdVerifying}
+                          className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 rounded-xl text-xs font-semibold transition-all disabled:opacity-40"
+                          style={{ background: "rgba(124,58,237,0.20)", color: T.purpleL, border: "1px solid rgba(124,58,237,0.30)" }}
+                          onMouseEnter={e => { if (pwdForm.current && !currentPwdVerifying) (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.35)"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.20)"; }}
+                        >
+                          {currentPwdVerifying
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : "Vérifier"}
+                        </button>
+                      )}
                     </div>
                   </DarkField>
 
-                  {/* Password strength (only on "next" field) */}
-                  {f === "next" && pwdForm.next && (
-                    <div className="mt-2">
-                      <div className="flex gap-1 mb-1">
-                        {[1, 2, 3].map(n => (
-                          <div key={n} className="flex-1 h-1 rounded-full transition-all duration-300"
-                            style={{
-                              background: strength.score >= n ? strength.color : "rgba(255,255,255,0.1)",
-                            }} />
-                        ))}
+                  {/* Error */}
+                  {currentPwdError && (
+                    <p className="mt-1.5 text-xs" style={{ color: "#f87171" }}>{currentPwdError}</p>
+                  )}
+
+                  {/* Forgot password link */}
+                  {!forgotSent && !forgotExpanded && (
+                    <button
+                      type="button"
+                      onClick={() => setForgotExpanded(true)}
+                      className="mt-2 text-xs transition-colors hover:underline block"
+                      style={{ color: T.sub }}
+                    >
+                      Mot de passe oublié ? Recevoir un email de récupération
+                    </button>
+                  )}
+
+                  {/* Forgot password confirmation block */}
+                  {forgotExpanded && !forgotSent && (
+                    <div className="mt-3 px-4 py-3 rounded-xl"
+                      style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.20)" }}>
+                      <p className="text-xs mb-3" style={{ color: T.muted }}>
+                        Un email de récupération va être envoyé à{" "}
+                        <span className="text-white font-medium">{session.email}</span>
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={sendResetEmail}
+                          disabled={forgotSending}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-60"
+                          style={{ background: T.purple, color: "#fff" }}
+                        >
+                          {forgotSending && <Loader2 className="w-3 h-3 animate-spin" />}
+                          Envoyer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setForgotExpanded(false)}
+                          className="text-xs transition-colors hover:underline"
+                          style={{ color: T.muted }}
+                        >
+                          Annuler
+                        </button>
                       </div>
-                      <p className="text-xs font-medium" style={{ color: strength.color }}>{strength.label}</p>
                     </div>
                   )}
+
+                  {/* Sent confirmation */}
+                  {forgotSent && (
+                    <p className="mt-2 text-xs font-medium" style={{ color: "#4ade80" }}>
+                      Email envoyé ✓ Vérifiez votre boîte mail
+                    </p>
+                  )}
                 </div>
-              ))}
+              )}
+
+              {/* New password */}
+              <div style={{
+                opacity: currentPwdVerified || isResetMode ? 1 : 0.4,
+                transition: "opacity 0.3s ease",
+                pointerEvents: currentPwdVerified || isResetMode ? "auto" : "none",
+              }}>
+                <DarkField label="Nouveau mot de passe">
+                  <div className="relative">
+                    <input
+                      type={showPwds.next ? "text" : "password"}
+                      value={pwdForm.next}
+                      onChange={e => setPwdForm(p => ({ ...p, next: e.target.value }))}
+                      placeholder="••••••••"
+                      disabled={!currentPwdVerified && !isResetMode}
+                      className={inputCls}
+                      style={{
+                        ...inputStyle,
+                        paddingRight: "2.75rem",
+                        cursor: currentPwdVerified || isResetMode ? undefined : "not-allowed",
+                      }}
+                      onFocus={onFocus} onBlur={onBlur}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwds(s => ({ ...s, next: !s.next }))}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+                      style={{ color: T.sub }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.purpleL; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.sub; }}
+                    >
+                      {showPwds.next ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </DarkField>
+                {/* Strength bar */}
+                {pwdForm.next && (
+                  <div className="mt-2">
+                    <div className="flex gap-1 mb-1">
+                      {[1, 2, 3].map(n => (
+                        <div key={n} className="flex-1 h-1 rounded-full transition-all duration-300"
+                          style={{ background: strength.score >= n ? strength.color : "rgba(255,255,255,0.1)" }} />
+                      ))}
+                    </div>
+                    <p className="text-xs font-medium" style={{ color: strength.color }}>{strength.label}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm password */}
+              <div style={{
+                opacity: currentPwdVerified || isResetMode ? 1 : 0.4,
+                transition: "opacity 0.3s ease",
+                pointerEvents: currentPwdVerified || isResetMode ? "auto" : "none",
+              }}>
+                <DarkField label="Confirmer le nouveau mot de passe">
+                  <div className="relative">
+                    <input
+                      type={showPwds.confirm ? "text" : "password"}
+                      value={pwdForm.confirm}
+                      onChange={e => setPwdForm(p => ({ ...p, confirm: e.target.value }))}
+                      placeholder="••••••••"
+                      disabled={!currentPwdVerified && !isResetMode}
+                      className={inputCls}
+                      style={{
+                        ...inputStyle,
+                        paddingRight: "2.75rem",
+                        cursor: currentPwdVerified || isResetMode ? undefined : "not-allowed",
+                        borderColor: pwdForm.confirm
+                          ? pwdForm.confirm === pwdForm.next ? "#4ade80" : "#ef4444"
+                          : T.inputBdr,
+                      }}
+                      onFocus={onFocus} onBlur={onBlur}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwds(s => ({ ...s, confirm: !s.confirm }))}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+                      style={{ color: T.sub }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.purpleL; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.sub; }}
+                    >
+                      {showPwds.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </DarkField>
+                {pwdForm.confirm && pwdForm.confirm !== pwdForm.next && (
+                  <p className="mt-1.5 text-xs" style={{ color: "#f87171" }}>
+                    Les mots de passe ne correspondent pas
+                  </p>
+                )}
+              </div>
 
               <SaveBtn
                 loading={pwdSaving}
                 success={pwdSuccess}
-                label="Mettre à jour le mot de passe"
+                label={pwdSuccess ? "Mot de passe mis à jour ✓" : "Mettre à jour le mot de passe"}
+                disabled={
+                  !(
+                    (currentPwdVerified || isResetMode) &&
+                    pwdForm.next.length >= 8 &&
+                    strength.score >= 2 &&
+                    pwdForm.next === pwdForm.confirm
+                  )
+                }
               />
             </form>
           )}
