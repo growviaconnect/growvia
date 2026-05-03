@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  User, Lock, CreditCard, Camera, CheckCircle, AlertCircle,
+  User, Lock, CreditCard, CheckCircle, AlertCircle,
   Loader2, Eye, EyeOff, LogOut, Crown, XCircle, CalendarRange,
   BellOff, ArrowLeft, Check,
 } from "lucide-react";
@@ -139,23 +139,12 @@ export default function SettingsPage() {
   const [tabFading, setTabFading] = useState(false);
   const [flash, setFlash]         = useState<{ msg: string; ok: boolean } | null>(null);
   const [cancelConfirm, setCancelConfirm] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   /* ── Profile form ───────────────────────────────────────────── */
   const [form, setForm]         = useState({ nom: "", email: "", bio: "", specialite: "", objectif: "" });
   const [photo, setPhoto]       = useState<string>("");
   const [profileSaving, setProfileSaving]   = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
-
-  /* ── Photo crop ─────────────────────────────────────────────── */
-  const [cropSrc, setCropSrc]   = useState<string | null>(null);
-  const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 });
-  const [cropScale, setCropScale]   = useState(1);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart]   = useState({ x: 0, y: 0 });
-  const cropCanvasRef = useRef<HTMLCanvasElement>(null);
-  const cropImgRef    = useRef<HTMLImageElement | null>(null);
-  const cropSize = 200;
 
   /* ── Password form ──────────────────────────────────────────── */
   const [pwdForm, setPwdForm]   = useState({ current: "", next: "", confirm: "" });
@@ -202,80 +191,6 @@ export default function SettingsPage() {
   function showMsg(msg: string, ok = true) {
     setFlash({ msg, ok });
     setTimeout(() => setFlash(null), 3500);
-  }
-
-  /* ── Photo file pick ────────────────────────────────────────── */
-  function handlePhotoFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const src = ev.target?.result as string;
-      const img = new Image();
-      img.onload = () => {
-        cropImgRef.current = img;
-        setCropSrc(src);
-        setCropOffset({ x: 0, y: 0 });
-        setCropScale(1);
-      };
-      img.src = src;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  }
-
-  /* ── Crop canvas draw ───────────────────────────────────────── */
-  const drawCrop = useCallback(() => {
-    const canvas = cropCanvasRef.current;
-    const img = cropImgRef.current;
-    if (!canvas || !img) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.clearRect(0, 0, cropSize, cropSize);
-
-    /* circular clip */
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cropSize / 2, cropSize / 2, cropSize / 2, 0, Math.PI * 2);
-    ctx.clip();
-
-    const drawW = img.naturalWidth  * cropScale;
-    const drawH = img.naturalHeight * cropScale;
-    const x = cropSize / 2 - drawW / 2 + cropOffset.x;
-    const y = cropSize / 2 - drawH / 2 + cropOffset.y;
-    ctx.drawImage(img, x, y, drawW, drawH);
-    ctx.restore();
-
-    /* border ring */
-    ctx.beginPath();
-    ctx.arc(cropSize / 2, cropSize / 2, cropSize / 2 - 1, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(157,141,241,0.6)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }, [cropOffset, cropScale]);
-
-  useEffect(() => { if (cropSrc) drawCrop(); }, [cropSrc, cropOffset, cropScale, drawCrop]);
-
-  function cropMouseDown(e: React.MouseEvent) {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - cropOffset.x, y: e.clientY - cropOffset.y });
-  }
-  function cropMouseMove(e: React.MouseEvent) {
-    if (!isDragging) return;
-    setCropOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
-  }
-  function cropMouseUp() { setIsDragging(false); }
-  function cropWheel(e: React.WheelEvent) {
-    e.preventDefault();
-    setCropScale((s) => Math.max(0.5, Math.min(4, s - e.deltaY * 0.001)));
-  }
-
-  function confirmCrop() {
-    const canvas = cropCanvasRef.current;
-    if (!canvas) return;
-    const cropped = canvas.toDataURL("image/jpeg", 0.9);
-    setPhoto(cropped);
-    setCropSrc(null);
   }
 
   /* ── Save profile ───────────────────────────────────────────── */
@@ -435,52 +350,6 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ── Photo crop modal ────────────────────────────────────── */}
-      {cropSrc && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
-          <div className="rounded-2xl p-8 w-full max-w-sm"
-            style={{ background: "#130F23", border: `1px solid ${T.cardBorder}` }}>
-            <h3 className="text-white font-bold text-base mb-2 text-center">Recadrer la photo</h3>
-            <p className="text-xs text-center mb-5" style={{ color: T.muted }}>
-              Faites glisser pour repositionner · Molette pour zoomer
-            </p>
-            <div className="flex justify-center mb-6">
-              <canvas
-                ref={cropCanvasRef}
-                width={cropSize} height={cropSize}
-                className="rounded-full cursor-move select-none"
-                style={{ border: "2px solid rgba(157,141,241,0.4)", touchAction: "none" }}
-                onMouseDown={cropMouseDown}
-                onMouseMove={cropMouseMove}
-                onMouseUp={cropMouseUp}
-                onMouseLeave={cropMouseUp}
-                onWheel={cropWheel}
-              />
-            </div>
-            <input
-              type="range" min={0.5} max={4} step={0.01}
-              value={cropScale}
-              onChange={e => setCropScale(Number(e.target.value))}
-              className="w-full mb-5 accent-[#7C3AED]"
-            />
-            <div className="flex gap-3">
-              <button onClick={() => setCropSrc(null)}
-                className="flex-1 py-3 rounded-xl text-sm font-medium transition-colors"
-                style={{ border: `1px solid ${T.faint}`, color: T.muted }}>
-                Annuler
-              </button>
-              <button onClick={confirmCrop}
-                className="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-colors"
-                style={{ background: T.purple }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = T.purple; }}>
-                Recadrer &amp; Enregistrer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── Main ────────────────────────────────────────────────── */}
       <div className="max-w-[740px] mx-auto px-4 sm:px-6 pt-24 pb-16">
 
@@ -595,23 +464,16 @@ export default function SettingsPage() {
 
               {/* Photo upload */}
               <div className="flex items-center gap-5">
-                <div className="relative flex-shrink-0">
-                  <UserAvatar photo={photo} name={session.nom} size={80} />
-                  <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
-                    style={{ background: "#1A1226", border: `2px solid ${T.bg}` }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.purple; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#1A1226"; }}
-                  >
-                    <Camera className="w-3.5 h-3.5" style={{ color: T.purpleL }} />
-                  </button>
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoFile} />
-                </div>
+                <UserAvatar
+                  editable
+                  photo={photo}
+                  name={session.nom}
+                  size={80}
+                  onPhotoUploaded={(url) => setPhoto(url)}
+                />
                 <div>
                   <p className="text-sm font-semibold text-white">Photo de profil</p>
-                  <p className="text-xs mt-0.5" style={{ color: T.muted }}>JPG, PNG, max 2 Mo</p>
+                  <p className="text-xs mt-0.5" style={{ color: T.muted }}>JPG, PNG · cliquez pour changer</p>
                 </div>
               </div>
 
