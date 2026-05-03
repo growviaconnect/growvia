@@ -110,13 +110,15 @@ export default function Navbar() {
 
             {session ? (
               <>
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
-                >
-                  <UserAvatar photo={session.photo} name={session.nom} size={28} rounded="lg" />
-                  {t("nav_dashboard")}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <UserAvatar editable photo={session.photo} name={session.nom} size={28} rounded="lg" />
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+                  >
+                    {t("nav_dashboard")}
+                  </Link>
+                </div>
                 <button
                   onClick={handleLogout}
                   className="text-sm font-medium text-white/35 hover:text-white/70 transition-colors"
@@ -215,14 +217,16 @@ export default function Navbar() {
           {/* CTA buttons, always at bottom */}
           {session ? (
             <div className="space-y-3">
-              <Link
-                href="/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 py-3 text-base font-medium text-white/70 hover:text-white transition-colors"
-              >
-                <UserAvatar photo={session.photo} name={session.nom} size={32} rounded="lg" />
-                {t("nav_dashboard")}
-              </Link>
+              <div className="flex items-center gap-3 py-3">
+                <UserAvatar editable photo={session.photo} name={session.nom} size={32} rounded="lg" />
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-base font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  {t("nav_dashboard")}
+                </Link>
+              </div>
               <button
                 onClick={handleLogout}
                 className="block w-full text-left py-3 text-base font-medium text-red-400/70 hover:text-red-400 transition-colors"

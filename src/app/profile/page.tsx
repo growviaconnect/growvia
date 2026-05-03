@@ -1,15 +1,16 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Edit3, Save, X, Check, Loader2, Upload,
-  User, FileText, AlertCircle, CheckCircle2,
+  ArrowLeft, Edit3, Save, X, Loader2,
+  AlertCircle, CheckCircle2, Check, FileText, User,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserSession } from "@/lib/session";
+import UserAvatar from "@/components/UserAvatar";
 import AvailabilitySelector from "@/components/AvailabilitySelector";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -99,26 +100,6 @@ function menteeCompletion(p: MenteeProfile): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-// ─── Storage helper ─────────────────────────────────────────────────────────────
-async function uploadPhotoViaApi(userId: string, file: File): Promise<string> {
-  const ext  = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  const path = `${userId}/avatar.${ext}`;
-
-  const form = new FormData();
-  form.append("file",   file);
-  form.append("bucket", "avatars");
-  form.append("path",   path);
-
-  const res  = await fetch("/api/mentor/upload-file", { method: "POST", body: form });
-  const json = await res.json();
-
-  if (!res.ok || json.error) {
-    console.error("[photo-upload] server error:", json.error);
-    throw new Error(json.error ?? `Upload failed (${res.status})`);
-  }
-
-  return json.url as string;
-}
 
 // ─── Shared UI ──────────────────────────────────────────────────────────────────
 const inputCls =
@@ -229,195 +210,6 @@ const defaultMentee: MenteeProfile = {
   format_prefere:"", langues:[], motivation:"", cv_url:"", survey_completed:false,
 };
 
-// ─── Crop modal ──────────────────────────────────────────────────────────────────
-const CROP_SIZE = 280; // px — diameter of the circular crop viewport
-
-function CropModal({
-  objectUrl,
-  onConfirm,
-  onCancel,
-}: {
-  objectUrl: string;
-  onConfirm: (blob: Blob) => void;
-  onCancel: () => void;
-}) {
-  const imgRef                      = useRef<HTMLImageElement>(null);
-  const [ready,      setReady]      = useState(false);
-  const [imgNW,      setImgNW]      = useState(0);
-  const [imgNH,      setImgNH]      = useState(0);
-  const [cropScale,  setCropScale]  = useState(1);
-  const [offsetX,    setOffsetX]    = useState(0);
-  const [offsetY,    setOffsetY]    = useState(0);
-
-  // Refs mirror state so handlers never read stale closures
-  const fitScaleRef  = useRef(1);
-  const cropScaleRef = useRef(1);
-  const offsetXRef   = useRef(0);
-  const offsetYRef   = useRef(0);
-
-  function setCS(v: number) { cropScaleRef.current = v; setCropScale(v); }
-  function setOX(v: number) { offsetXRef.current   = v; setOffsetX(v);  }
-  function setOY(v: number) { offsetYRef.current   = v; setOffsetY(v);  }
-
-  // Pointer tracking for drag + pinch
-  const ptrMap    = useRef(new Map<number, { x: number; y: number }>());
-  const dragStart = useRef<{ ptrX: number; ptrY: number; offX: number; offY: number } | null>(null);
-  const pinchInit = useRef<{ dist: number; scale: number } | null>(null);
-
-  function onLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    const img = e.currentTarget;
-    // Use cover fit: image fills the circle with no gaps
-    const fit = Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight);
-    fitScaleRef.current = fit;
-    setImgNW(img.naturalWidth);
-    setImgNH(img.naturalHeight);
-    const initOX = (CROP_SIZE - img.naturalWidth  * fit) / 2;
-    const initOY = (CROP_SIZE - img.naturalHeight * fit) / 2;
-    setOX(initOX); setOY(initOY);
-    setReady(true);
-  }
-
-  function ptDist() {
-    const pts = Array.from(ptrMap.current.values());
-    return pts.length >= 2 ? Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) : 0;
-  }
-
-  function onPD(e: React.PointerEvent<HTMLDivElement>) {
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    ptrMap.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (ptrMap.current.size === 1) {
-      dragStart.current = { ptrX: e.clientX, ptrY: e.clientY, offX: offsetXRef.current, offY: offsetYRef.current };
-    } else {
-      dragStart.current = null;
-      pinchInit.current = { dist: ptDist(), scale: cropScaleRef.current };
-    }
-  }
-
-  function onPM(e: React.PointerEvent<HTMLDivElement>) {
-    ptrMap.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (ptrMap.current.size >= 2 && pinchInit.current) {
-      const s = pinchInit.current.scale * (ptDist() / pinchInit.current.dist);
-      setCS(Math.min(8, Math.max(0.5, s)));
-    } else if (dragStart.current) {
-      setOX(dragStart.current.offX + e.clientX - dragStart.current.ptrX);
-      setOY(dragStart.current.offY + e.clientY - dragStart.current.ptrY);
-    }
-  }
-
-  function onPU(e: React.PointerEvent<HTMLDivElement>) {
-    ptrMap.current.delete(e.pointerId);
-    pinchInit.current = null;
-    if (ptrMap.current.size === 1) {
-      const [pt] = ptrMap.current.values();
-      dragStart.current = { ptrX: pt.x, ptrY: pt.y, offX: offsetXRef.current, offY: offsetYRef.current };
-    } else if (ptrMap.current.size === 0) {
-      dragStart.current = null;
-    }
-  }
-
-  function onWh(e: React.WheelEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setCS(Math.min(8, Math.max(0.5, cropScaleRef.current * (1 - e.deltaY * 0.001))));
-  }
-
-  function confirm() {
-    const img = imgRef.current;
-    if (!img || !ready) return;
-    const canvas = document.createElement("canvas");
-    canvas.width  = 400;
-    canvas.height = 400;
-    const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, 400, 400);
-    const ratio = 400 / CROP_SIZE;
-    ctx.drawImage(
-      img,
-      offsetXRef.current * ratio,
-      offsetYRef.current * ratio,
-      imgNW * fitScaleRef.current * cropScaleRef.current * ratio,
-      imgNH * fitScaleRef.current * cropScaleRef.current * ratio,
-    );
-    canvas.toBlob(blob => { if (blob) onConfirm(blob); }, "image/jpeg", 0.9);
-  }
-
-  const dW = imgNW * fitScaleRef.current * cropScale;
-  const dH = imgNH * fitScaleRef.current * cropScale;
-
-  return (
-    <>
-      <style>{`@keyframes cm-spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 9999,
-        background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)",
-        display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
-      }}>
-        <div style={{
-          background: "#13111F", borderRadius: 24, padding: 28,
-          border: "1px solid rgba(255,255,255,0.08)",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 20,
-          width: "min(90vw, 380px)",
-        }}>
-          <h3 style={{ color: "white", fontWeight: 700, fontSize: 17, margin: 0 }}>
-            Recadrer la photo
-          </h3>
-
-          {/* Circular crop viewport */}
-          <div
-            style={{
-              width: CROP_SIZE, height: CROP_SIZE, borderRadius: "50%",
-              overflow: "hidden", position: "relative",
-              cursor: "grab", background: "#000", flexShrink: 0,
-              border: "3px solid #7C3AED",
-              boxShadow: "0 0 0 4px rgba(124,58,237,0.2), 0 8px 32px rgba(0,0,0,0.6)",
-              touchAction: "none",
-            }}
-            onPointerDown={onPD}
-            onPointerMove={onPM}
-            onPointerUp={onPU}
-            onPointerCancel={onPU}
-            onWheel={onWh}
-          >
-            {/* Hidden img gives us naturalWidth/Height and is the drawImage source */}
-            <img ref={imgRef} src={objectUrl} alt="" onLoad={onLoad} style={{ display: "none" }} />
-            {ready
-              ? <img src={objectUrl} alt="" draggable={false} style={{
-                  position: "absolute", left: offsetX, top: offsetY,
-                  width: dW, height: dH, pointerEvents: "none", userSelect: "none",
-                }} />
-              : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", border: "3px solid rgba(124,58,237,0.2)", borderTopColor: "#7C3AED", animation: "cm-spin 0.8s linear infinite" }} />
-                </div>
-            }
-          </div>
-
-          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, margin: 0, textAlign: "center" }}>
-            Glissez pour repositionner · Molette ou pincement pour zoomer
-          </p>
-
-          <div style={{ display: "flex", gap: 10, width: "100%" }}>
-            <button type="button" onClick={onCancel}
-              style={{
-                flex: 1, padding: "13px 0", borderRadius: 14,
-                border: "1px solid rgba(255,255,255,0.1)", background: "transparent",
-                color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 500, cursor: "pointer",
-              }}>
-              Annuler
-            </button>
-            <button type="button" onClick={confirm} disabled={!ready}
-              style={{
-                flex: 2, padding: "13px 0", borderRadius: 14, border: "none",
-                background: "#7C3AED", color: "white", fontSize: 14, fontWeight: 600,
-                cursor: ready ? "pointer" : "default", opacity: ready ? 1 : 0.5,
-              }}>
-              Recadrer &amp; Enregistrer
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
 // ─── Main component ─────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
@@ -435,11 +227,7 @@ export default function ProfilePage() {
   const [mentor, setMentor]             = useState<MentorProfile>(defaultMentor);
   const [mentee, setMentee]             = useState<MenteeProfile>(defaultMentee);
 
-  // Photo upload / crop
-  const photoInputRef                         = useRef<HTMLInputElement>(null);
-  const [photoPreview,   setPhotoPreview]     = useState("");
-  const [photoUploading, setPhotoUploading]   = useState(false);
-  const [cropObjectUrl,  setCropObjectUrl]    = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState("");
 
   // ── Toast helper ────────────────────────────────────────────────────────────
   const showToast = useCallback((type: "success" | "error") => {
@@ -522,47 +310,6 @@ export default function ProfilePage() {
     }
     init();
   }, [router]);
-
-  // ── Photo select → open crop UI ─────────────────────────────────────────
-  function handlePhotoSelect(file: File) {
-    const MAX_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) { setError("Photo must be under 5 MB."); return; }
-    setError(null);
-    setCropObjectUrl(URL.createObjectURL(file));
-  }
-
-  // ── Crop confirmed → upload cropped blob ─────────────────────────────────
-  async function handleCropConfirm(blob: Blob) {
-    if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl);
-    setCropObjectUrl(null);
-    if (!userId) return;
-
-    const prevUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
-    setPhotoPreview(URL.createObjectURL(blob));
-    setPhotoUploading(true);
-    setError(null);
-
-    try {
-      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-      const url  = await uploadPhotoViaApi(userId, file);
-      if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
-      else setMentee(p => ({ ...p, photo_url: url }));
-      // Sync photo into global session so navbar updates immediately
-      const cur = getUserSession();
-      if (cur) setGlobalSession({ ...cur, photo: url });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Photo upload failed, please try again.";
-      setError(msg);
-      setPhotoPreview(prevUrl);
-    } finally {
-      setPhotoUploading(false);
-    }
-  }
-
-  function handleCropCancel() {
-    if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl);
-    setCropObjectUrl(null);
-  }
 
   // ── Toggle array helpers ────────────────────────────────────────────────────
   function toggleMentorArr(field: keyof Pick<MentorProfile,"secteurs"|"type_profils_aides"|"langues">, val: string) {
@@ -652,12 +399,11 @@ export default function ProfilePage() {
       }
       setEditing(false);
       showToast("success");
-      // Sync name + photo into global session so navbar updates immediately
+      // Sync name into global session
       const cur = getUserSession();
       if (cur) {
-        const photoUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
         const nom = role === "mentor" ? mentor.nom : mentee.nom;
-        setGlobalSession({ ...cur, nom: nom || cur.nom, photo: photoUrl || cur.photo });
+        setGlobalSession({ ...cur, nom: nom || cur.nom });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save, please try again.");
@@ -760,26 +506,21 @@ export default function ProfilePage() {
           <div className="px-8 pb-8 -mt-12">
             {/* Avatar */}
             <div className="relative inline-block mb-4">
-              <div className="w-20 h-20 rounded-2xl border-4 overflow-hidden flex items-center justify-center"
+              <div className="w-20 h-20 rounded-2xl border-4 overflow-hidden"
                 style={{ borderColor: "#13111F", background: "rgba(124,58,237,0.2)" }}>
-                {photoPreview
-                  ? <img src={photoPreview} alt="avatar" className="w-full h-full object-cover" />
-                  : <span className="text-white font-bold text-xl">{initials}</span>
-                }
+                <UserAvatar
+                  editable={editing}
+                  photo={photoPreview || null}
+                  name={profileName || "?"}
+                  size={80}
+                  rounded="lg"
+                  onPhotoUploaded={(url) => {
+                    setPhotoPreview(url);
+                    if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
+                    else setMentee(p => ({ ...p, photo_url: url }));
+                  }}
+                />
               </div>
-              {editing && (
-                <button
-                  type="button"
-                  disabled={photoUploading}
-                  onClick={() => photoInputRef.current?.click()}
-                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-colors disabled:opacity-50"
-                  style={{ background: "#7C3AED", borderColor: "#13111F" }}>
-                  {photoUploading ? <Loader2 className="w-3 h-3 text-white animate-spin" /> : <Upload className="w-3 h-3 text-white" />}
-                </button>
-              )}
-              <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-                className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoSelect(f); e.target.value = ""; }} />
             </div>
 
             <div className="flex items-start justify-between gap-4">
@@ -1430,14 +1171,6 @@ export default function ProfilePage() {
 
       </div>
 
-      {/* Crop modal — rendered outside the scroll container so it's always centered */}
-      {cropObjectUrl && (
-        <CropModal
-          objectUrl={cropObjectUrl}
-          onConfirm={handleCropConfirm}
-          onCancel={handleCropCancel}
-        />
-      )}
     </div>
   );
 }
@@ -1452,6 +1185,3 @@ function Section({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ── User icon re-export (used in JSX above) ─────────────────────────────────────
-// (already imported at top)
-void User;
