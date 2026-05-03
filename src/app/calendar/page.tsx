@@ -2,15 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Video, Clock } from "lucide-react";
+import { Video, Clock, Calendar } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
 /* ── Session data ──────────────────────────────────────────────── */
 const TODAY = new Date();
-
-function d(y: number, mo: number, day: number, h = 10, min = 0) {
-  return new Date(y, mo - 1, day, h, min);
-}
 
 interface Session {
   id: number;
@@ -23,65 +19,8 @@ interface Session {
   meetLink?: string;
 }
 
-const sessions: Session[] = [
-  {
-    id: 1,
-    mentor: "Sophie Chen",
-    role: "Product Manager @ Spotify",
-    initials: "SC",
-    date: d(TODAY.getFullYear(), TODAY.getMonth() + 1, TODAY.getDate(), 16, 0),
-    duration: 60,
-    status: "upcoming",
-    meetLink: "#",
-  },
-  {
-    id: 2,
-    mentor: "Marcus Dubois",
-    role: "Lead Engineer @ Alan",
-    initials: "MD",
-    date: d(TODAY.getFullYear(), TODAY.getMonth() + 1, TODAY.getDate() + 6, 10, 30),
-    duration: 30,
-    status: "upcoming",
-    meetLink: "#",
-  },
-  {
-    id: 3,
-    mentor: "Aisha Patel",
-    role: "UX Designer @ Figma",
-    initials: "AP",
-    date: d(TODAY.getFullYear(), TODAY.getMonth() + 1, TODAY.getDate() + 13, 14, 0),
-    duration: 45,
-    status: "upcoming",
-    meetLink: "#",
-  },
-  {
-    id: 4,
-    mentor: "Julien Martin",
-    role: "Founder @ Ledger",
-    initials: "JM",
-    date: d(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() - 10, 11, 0),
-    duration: 45,
-    status: "completed",
-  },
-  {
-    id: 5,
-    mentor: "Camille Rousseau",
-    role: "Data Scientist @ BlaBlaCar",
-    initials: "CR",
-    date: d(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() - 22, 15, 30),
-    duration: 60,
-    status: "completed",
-  },
-  {
-    id: 6,
-    mentor: "Jules Fontaine",
-    role: "Venture Analyst @ Sequoia",
-    initials: "JF",
-    date: d(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() - 27, 9, 0),
-    duration: 30,
-    status: "cancelled",
-  },
-];
+// Real sessions will be loaded from the database — empty until connected
+const sessions: Session[] = [];
 
 function sameDay(a: Date, b: Date) {
   return (
@@ -145,6 +84,31 @@ export default function CalendarPage() {
     setListVisible(false);
     setTimeout(() => {
       setSelectedDate(next);
+      setListVisible(true);
+    }, 160);
+  }
+
+  function goToToday() {
+    const isCurrentMonth =
+      viewDate.getFullYear() === TODAY.getFullYear() &&
+      viewDate.getMonth() === TODAY.getMonth();
+
+    if (!isCurrentMonth) {
+      setGridFading(true);
+      setTimeout(() => {
+        setViewDate(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1));
+        setGridFading(false);
+      }, 160);
+    }
+
+    if (selectedDate && sameDay(selectedDate, TODAY)) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    setListVisible(false);
+    setTimeout(() => {
+      setSelectedDate(TODAY);
       setListVisible(true);
     }, 160);
   }
@@ -397,13 +361,30 @@ export default function CalendarPage() {
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#A78BFA" }} />
                   {t("cal_legend_session")}
                 </div>
-                <div className="flex items-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                <button
+                  onClick={goToToday}
+                  className="inline-flex items-center gap-2 text-xs rounded-full px-3 py-1 transition-all duration-200"
+                  style={{
+                    color: "rgba(255,255,255,0.45)",
+                    border: "1px solid rgba(157,141,241,0.2)",
+                    background: "transparent",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#A78BFA";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.75)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(157,141,241,0.2)";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+                  }}
+                >
                   <span
                     className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                     style={{ border: "1.5px solid #A78BFA" }}
                   />
                   {t("cal_legend_today")}
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -421,10 +402,39 @@ export default function CalendarPage() {
               style={{ opacity: listVisible ? 1 : 0 }}
             >
               {sectionKeys.every(({ key }) => groups[key].length === 0) ? (
-                <div className="text-center py-16" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  <div className="text-4xl mb-3 opacity-40">📅</div>
-                  <p className="text-sm">{t("cal_empty")}</p>
-                </div>
+                selectedDate ? (
+                  /* A day was selected but has no sessions */
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      {sameDay(selectedDate, TODAY)
+                        ? "Aucune session aujourd'hui"
+                        : "Aucune session ce jour-là"}
+                    </p>
+                  </div>
+                ) : (
+                  /* No sessions at all */
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 flex-shrink-0"
+                      style={{ background: "rgba(124,58,237,0.10)" }}
+                    >
+                      <Calendar className="w-7 h-7" style={{ color: "#A78BFA", opacity: 0.55 }} />
+                    </div>
+                    <p className="font-semibold text-white text-base mb-2">Aucune session à venir</p>
+                    <p className="text-sm mb-7" style={{ color: "rgba(157,141,241,0.60)" }}>
+                      Réservez une session avec un mentor pour commencer
+                    </p>
+                    <Link
+                      href="/explore/find-a-mentor"
+                      className="inline-flex items-center gap-2 text-sm font-bold text-white px-5 py-2.5 rounded-full transition-colors"
+                      style={{ background: "#7C3AED" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
+                    >
+                      Trouver un mentor →
+                    </Link>
+                  </div>
+                )
               ) : (
                 sectionKeys.map(({ key, labelKey, accentColor }) => {
                   const list = groups[key];
