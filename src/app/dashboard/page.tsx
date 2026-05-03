@@ -20,6 +20,7 @@ type Connexion = {
   id: string;
   date: string;
   statut: "pending" | "active" | "completed" | "cancelled";
+  meet_link?: string | null;
   mentors: { nom: string; email: string; specialite: string | null } | null;
   mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
 };
@@ -516,7 +517,7 @@ function DashboardContent() {
           const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
           const { data: rows } = await supabase
             .from("connexions")
-            .select("id, date, statut, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
+            .select("id, date, statut, meet_link, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
             .eq(idField, profile.id)
             .order("date", { ascending: true });
 
@@ -706,16 +707,42 @@ function DashboardContent() {
 
   async function handleAcceptSession(connId: string) {
     setActionLoading(connId);
-    await supabase.from("connexions").update({ statut: "active" }).eq("id", connId);
-    setConnexions(prev => prev.map(c => c.id === connId ? { ...c, statut: "active" as const } : c));
-    setActionLoading(null);
+    try {
+      const res = await fetch("/api/sessions/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      const json = (await res.json()) as { success?: boolean; meetLink?: string | null; error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      setConnexions(prev => prev.map(c =>
+        c.id === connId ? { ...c, statut: "active" as const, meet_link: json.meetLink ?? null } : c
+      ));
+    } catch (err) {
+      console.error("[accept]", err);
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleDeclineSession(connId: string) {
     setActionLoading(connId);
-    await supabase.from("connexions").update({ statut: "cancelled" }).eq("id", connId);
-    setConnexions(prev => prev.filter(c => c.id !== connId));
-    setActionLoading(null);
+    try {
+      const res = await fetch("/api/sessions/decline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+      setConnexions(prev => prev.filter(c => c.id !== connId));
+    } catch (err) {
+      console.error("[decline]", err);
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   const firstName = (user?.nom ?? "").split(" ")[0] || "there";
@@ -1124,9 +1151,20 @@ function DashboardContent() {
                                   <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
                                 </div>
                                 <div className="flex gap-2 flex-shrink-0">
-                                  <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-                                    <Video className="w-3.5 h-3.5" /> Join
-                                  </button>
+                                  {c.meet_link ? (
+                                    <a
+                                      href={c.meet_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                                    >
+                                      <Video className="w-3.5 h-3.5" /> Join session
+                                    </a>
+                                  ) : (
+                                    <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+                                      <Video className="w-3.5 h-3.5" /> Join
+                                    </button>
+                                  )}
                                   <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
                                     Reschedule
                                   </button>

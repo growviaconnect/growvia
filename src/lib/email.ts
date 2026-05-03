@@ -290,6 +290,65 @@ export async function sendAccountDeletionEmail(to: string, nom: string, deletedA
   });
 }
 
+// ─── 7. Session confirmed — sent to BOTH mentor and mentee with Meet link ─────
+
+export type ConfirmWithMeetParams = {
+  mentorEmail: string;
+  mentorNom:   string;
+  menteeEmail: string;
+  menteeNom:   string;
+  date:        string;
+  meetLink?:   string;
+};
+
+export async function sendConfirmationWithMeet(params: ConfirmWithMeetParams) {
+  const { mentorEmail, mentorNom, menteeEmail, menteeNom, date, meetLink } = params;
+  const formattedDate = formatDate(date);
+  const dashUrl = `${BASE_URL}/dashboard`;
+
+  const joinBtn = meetLink
+    ? `<a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;">Join session →</a>`
+    : btn("View dashboard →", dashUrl);
+
+  const meetRow = meetLink
+    ? highlight("Google Meet", `<a href="${meetLink}" style="color:#7C3AED;word-break:break-all;">${meetLink}</a>`)
+    : "";
+
+  const mentorBody = `
+    ${badge("#059669", "Session confirmed ✓")}
+    <br/><br/>
+    ${h1("Your session is confirmed!")}
+    ${p(`You accepted <strong>${menteeNom}</strong>'s session request. Here's what you need:`)}
+    ${infoBox(
+      highlight("Date & time", formattedDate) +
+      highlight("Mentee",      menteeNom) +
+      meetRow
+    )}
+    ${joinBtn}
+  `;
+
+  const menteeBody = `
+    ${badge("#059669", "Session confirmed ✓")}
+    <br/><br/>
+    ${h1("Your session is confirmed!")}
+    ${p(`Great news! <strong>${mentorNom}</strong> accepted your session request.`)}
+    ${infoBox(
+      highlight("Date & time", formattedDate) +
+      highlight("Mentor",      mentorNom) +
+      meetRow
+    )}
+    ${joinBtn}
+  `;
+
+  const subject = "Your GrowVia session is confirmed ✅";
+  const r = getResend();
+  if (!r) return;
+  await Promise.all([
+    r.emails.send({ from: FROM, to: mentorEmail, subject, html: layout(mentorBody) }),
+    r.emails.send({ from: FROM, to: menteeEmail, subject, html: layout(menteeBody) }),
+  ]);
+}
+
 // ─── Schedule all reminders at booking time ───────────────────────────────────
 // Called once when a session is booked. Resend queues and delivers each email
 // at the calculated future timestamp, no cron job required.
