@@ -190,7 +190,7 @@ export default function CalendarPage() {
   }
 
   const sectionKeys: Array<{ key: "upcoming" | "completed" | "cancelled"; labelKey: string; accentColor: string }> = [
-    { key: "upcoming",  labelKey: "cal_section_upcoming",  accentColor: "#7C3AED" },
+    { key: "upcoming",  labelKey: "cal_section_upcoming",  accentColor: "#f59e0b" },
     { key: "completed", labelKey: "cal_section_completed", accentColor: "#4ade80" },
     { key: "cancelled", labelKey: "cal_section_cancelled", accentColor: "rgba(255,255,255,0.12)" },
   ];
@@ -511,7 +511,7 @@ export default function CalendarPage() {
                                   className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
                                   style={
                                     session.status === "upcoming"
-                                      ? { background: "rgba(124,58,237,0.15)", color: "#A78BFA" }
+                                      ? { background: "rgba(245,158,11,0.12)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
                                       : session.status === "completed"
                                       ? { background: "rgba(74,222,128,0.10)", color: "#4ade80" }
                                       : { background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }
@@ -521,7 +521,7 @@ export default function CalendarPage() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-                                <Clock className="w-3 h-3 flex-shrink-0" style={{ color: "#A78BFA" }} />
+                                <Clock className="w-3 h-3 flex-shrink-0" />
                                 {formatDate(session.date)} · {session.duration} min
                               </div>
                             </div>
