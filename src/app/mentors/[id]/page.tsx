@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare, MapPin, Monitor } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
 
@@ -128,6 +128,13 @@ export default function MentorProfilePage() {
   const sectors   = mentor.secteurs ?? [];
   const expertise = mentor.expertise ?? [];
 
+  // Skills from competences map — show keys with truthy values
+  const skills = mentor.competences
+    ? Object.entries(mentor.competences)
+        .filter(([, v]) => !!v)
+        .map(([k]) => k)
+    : [];
+
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
 
@@ -207,7 +214,7 @@ export default function MentorProfilePage() {
             </Section>
           )}
 
-          {/* Role + experience */}
+          {/* Role + experience + location */}
           <Section title="Professional background">
             <div className="space-y-2.5">
               {(mentor.job_title || mentor.company) && (
@@ -227,10 +234,16 @@ export default function MentorProfilePage() {
                   <p className="text-sm text-white/70">{mentor.annees_experience} years of experience</p>
                 </div>
               )}
-              {(mentor.years_experience) && !mentor.annees_experience && (
+              {mentor.years_experience && !mentor.annees_experience && (
                 <div className="flex items-start gap-2.5">
                   <Clock className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-white/70">{mentor.years_experience} of experience</p>
+                </div>
+              )}
+              {mentor.localisation && (
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-white/70">{mentor.localisation}</p>
                 </div>
               )}
             </div>
@@ -254,6 +267,15 @@ export default function MentorProfilePage() {
             </Section>
           )}
 
+          {/* Competences / skills map */}
+          {skills.length > 0 && (
+            <Section title="Skills">
+              <div className="flex flex-wrap gap-2">
+                {skills.map(s => <Tag key={s}>{s}</Tag>)}
+              </div>
+            </Section>
+          )}
+
           {/* What they help with */}
           {mentor.help_with && (
             <Section title="What I can help you with">
@@ -267,6 +289,16 @@ export default function MentorProfilePage() {
               <div className="flex items-start gap-2.5">
                 <MessageSquare className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-white/70">{mentor.style_mentorat}</p>
+              </div>
+            </Section>
+          )}
+
+          {/* Preferred format */}
+          {mentor.format_prefere && (
+            <Section title="Preferred format">
+              <div className="flex items-start gap-2.5">
+                <Monitor className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-white/70">{mentor.format_prefere}</p>
               </div>
             </Section>
           )}
