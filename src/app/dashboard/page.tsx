@@ -1565,7 +1565,7 @@ function DashboardContent() {
               <div className="space-y-6">
                 <h1 className="text-2xl font-extrabold text-white tracking-tight">Calendar</h1>
                 {mentorDbId && <AvailabilitySelector mentorId={mentorDbId} variant="dark" />}
-                <MentorCalendar connexions={connexions} mentorId={mentorDbId} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
+                <MentorCalendar connexions={connexions} userEmail={user?.email ?? null} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
               </div>
             )}
 
@@ -1594,14 +1594,14 @@ function sessionDotColor(c: Connexion): string {
 
 function MentorCalendar({
   connexions,
-  mentorId,
+  userEmail,
   fmtDate,
   fmtTime,
   t,
   lang,
 }: {
   connexions: Connexion[];
-  mentorId: string | null;
+  userEmail: string | null;
   fmtDate: (iso: string, t: (k: string) => string, lang: string) => string;
   fmtTime: (iso: string, lang: string) => string;
   t: (k: string) => string;
@@ -1614,21 +1614,27 @@ function MentorCalendar({
   const [viewYear, setViewYear]   = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
-  // Fetch which day_of_week values have availability slots
+  // Fetch which day_of_week values have availability slots (resolve mentor id from email)
   useEffect(() => {
-    if (!mentorId) return;
+    if (!userEmail) return;
     (async () => {
       try {
-        const { data } = await supabase
+        const { data: mentorRow } = await supabase
+          .from("mentors")
+          .select("id")
+          .eq("email", userEmail)
+          .single();
+        if (!mentorRow?.id) return;
+        const { data: slots } = await supabase
           .from("mentor_availability")
           .select("day_of_week")
-          .eq("mentor_id", mentorId);
-        setAvailableDays(new Set((data ?? []).map(r => r.day_of_week as number)));
+          .eq("mentor_id", mentorRow.id);
+        setAvailableDays(new Set((slots ?? []).map(s => s.day_of_week as number)));
       } catch {
-        // table may not exist yet; show calendar without availability tint
+        // show calendar without availability tint if fetch fails
       }
     })();
-  }, [mentorId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userEmail]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const firstDay = new Date(viewYear, viewMonth, 1);
   const lastDay  = new Date(viewYear, viewMonth + 1, 0);
@@ -1743,7 +1749,7 @@ function MentorCalendar({
         {/* Legend */}
         <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-5 pt-4 border-t border-white/[0.06]">
           {[
-            { color: "rgba(196,181,253,0.5)", label: "Available slots" },
+            { color: "#C4B5FD", label: "Available slots" },
             { color: "#4ADE80", label: "Confirmed" },
             { color: "#F472B6", label: "Pending" },
             { color: "#60A5FA", label: "Completed" },
