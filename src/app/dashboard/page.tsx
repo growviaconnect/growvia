@@ -20,6 +20,7 @@ type Connexion = {
   id: string;
   date: string;
   statut: "pending" | "active" | "completed" | "cancelled";
+  meet_link: string | null;
   mentors: { nom: string; email: string; specialite: string | null } | null;
   mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
 };
@@ -211,10 +212,15 @@ function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) 
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {!isPast && (
-          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-            <Video className="w-3.5 h-3.5" /> {t("dash_join")}
-          </button>
+        {!isPast && conn.statut === "active" && (
+          conn.meet_link
+            ? <a href={conn.meet_link} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+              </a>
+            : <span className="flex items-center gap-1.5 bg-white/[0.06] text-white/30 text-xs font-semibold px-4 py-2 rounded-xl cursor-default">
+                <Video className="w-3.5 h-3.5" /> Lien en cours…
+              </span>
         )}
         <span
           className="text-xs font-medium px-2.5 py-1 rounded-full"
@@ -516,7 +522,7 @@ function DashboardContent() {
           const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
           const { data: rows } = await supabase
             .from("connexions")
-            .select("id, date, statut, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
+            .select("id, date, statut, meet_link, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
             .eq(idField, profile.id)
             .order("date", { ascending: true });
 
@@ -706,9 +712,22 @@ function DashboardContent() {
 
   async function handleAcceptSession(connId: string) {
     setActionLoading(connId);
-    await supabase.from("connexions").update({ statut: "active" }).eq("id", connId);
-    setConnexions(prev => prev.map(c => c.id === connId ? { ...c, statut: "active" as const } : c));
-    setActionLoading(null);
+    try {
+      const res  = await fetch("/api/session/accept", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ connexId: connId }),
+      });
+      const json = await res.json() as { meetLink?: string | null };
+      setConnexions(prev =>
+        prev.map(c => c.id === connId
+          ? { ...c, statut: "active" as const, meet_link: json.meetLink ?? null }
+          : c
+        )
+      );
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleDeclineSession(connId: string) {
@@ -936,9 +955,15 @@ function DashboardContent() {
                                 <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
                                 <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
                               </div>
-                              <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
-                                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
-                              </button>
+                              {c.meet_link
+                                ? <a href={c.meet_link} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                                    <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                                  </a>
+                                : <span className="flex items-center gap-1.5 bg-white/[0.06] text-white/30 text-xs font-semibold px-4 py-2 rounded-xl flex-shrink-0 cursor-default">
+                                    <Video className="w-3.5 h-3.5" /> Lien en cours…
+                                  </span>
+                              }
                             </div>
                           );
                         })()}
@@ -983,9 +1008,15 @@ function DashboardContent() {
                                 <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
                                 <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
                               </div>
-                              <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
-                                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
-                              </button>
+                              {c.meet_link
+                                ? <a href={c.meet_link} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                                    <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                                  </a>
+                                : <span className="flex items-center gap-1.5 bg-white/[0.06] text-white/30 text-xs font-semibold px-4 py-2 rounded-xl flex-shrink-0 cursor-default">
+                                    <Video className="w-3.5 h-3.5" /> Lien en cours…
+                                  </span>
+                              }
                             </div>
                           );
                         })()}
@@ -1124,9 +1155,15 @@ function DashboardContent() {
                                   <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
                                 </div>
                                 <div className="flex gap-2 flex-shrink-0">
-                                  <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-                                    <Video className="w-3.5 h-3.5" /> Join
-                                  </button>
+                                  {c.meet_link
+                                    ? <a href={c.meet_link} target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+                                        <Video className="w-3.5 h-3.5" /> Join
+                                      </a>
+                                    : <span className="flex items-center gap-1.5 bg-white/[0.06] text-white/30 text-xs font-semibold px-4 py-2 rounded-xl cursor-default">
+                                        <Video className="w-3.5 h-3.5" /> Lien en cours…
+                                      </span>
+                                  }
                                   <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
                                     Reschedule
                                   </button>
