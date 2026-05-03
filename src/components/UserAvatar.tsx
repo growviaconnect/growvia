@@ -26,9 +26,12 @@ export default function UserAvatar({
   onPhotoUploaded,
 }: Props) {
   const { session, setSession } = useAuth();
-  const [uploading, setUploading] = useState(false);
-  const [cropUrl, setCropUrl]     = useState<string | null>(null);
-  const [hovered, setHovered]     = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [cropUrl, setCropUrl]       = useState<string | null>(null);
+  const [hovered, setHovered]       = useState(false);
+  // Keeps the freshly-uploaded URL so the img re-renders immediately,
+  // independent of whether the parent has already updated the photo prop.
+  const [uploadedSrc, setUploadedSrc] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = name
@@ -79,6 +82,7 @@ export default function UserAvatar({
 
       // Cache-bust for display — same storage path is overwritten, browser would serve stale image otherwise
       const displayUrl = `${url.split("?")[0]}?v=${Date.now()}`;
+      setUploadedSrc(displayUrl);
       if (session) setSession({ ...session, photo: displayUrl });
       onPhotoUploaded?.(displayUrl);
     } catch (err) {
@@ -103,9 +107,9 @@ export default function UserAvatar({
         onMouseLeave={() => editable && setHovered(false)}
       >
         {/* Photo or initials */}
-        {photo ? (
+        {(uploadedSrc ?? photo) ? (
           <img
-            src={photo}
+            src={uploadedSrc ?? photo!}
             alt={name}
             className={`w-full h-full object-cover ${roundedCls}`}
           />
