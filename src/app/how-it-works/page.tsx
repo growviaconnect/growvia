@@ -70,7 +70,7 @@ export default function HowItWorksPage() {
     },
     {
       num: "05", title: t("hiw_s5_title"), desc: t("hiw_s5_desc"),
-      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3")],
+      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3"), t("hiw_s5_d4")],
       image: stepImages[4],
     },
     {
