@@ -156,7 +156,7 @@ export default function CalendarPage() {
   const sectionKeys: Array<{ key: "upcoming" | "completed" | "cancelled"; labelKey: string; accentColor: string }> = [
     { key: "upcoming",  labelKey: "cal_section_upcoming",  accentColor: "#f59e0b" },
     { key: "completed", labelKey: "cal_section_completed", accentColor: "#4ade80" },
-    { key: "cancelled", labelKey: "cal_section_cancelled", accentColor: "rgba(255,255,255,0.12)" },
+    { key: "cancelled", labelKey: "cal_section_cancelled", accentColor: "#ef4444" },
   ];
 
   return (
@@ -524,7 +524,7 @@ export default function CalendarPage() {
                                       ? { background: "rgba(245,158,11,0.12)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
                                       : session.status === "completed"
                                       ? { background: "rgba(74,222,128,0.10)", color: "#4ade80" }
-                                      : { background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }
+                                      : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }
                                   }
                                 >
                                   {t(`cal_badge_${session.status}`)}
