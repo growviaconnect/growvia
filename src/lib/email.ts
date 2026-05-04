@@ -391,3 +391,38 @@ export async function scheduleSessionReminders(params: ScheduleRemindersParams) 
 
   return Promise.allSettled(sends);
 }
+
+// ─── 8. Payment failed — mentee needs to update card ──────────────────────────
+
+export type PaymentFailedParams = {
+  menteeEmail: string;
+  menteeNom:   string;
+  sessionDate: string;
+};
+
+export async function sendPaymentFailedEmail(params: PaymentFailedParams) {
+  const { menteeEmail, menteeNom, sessionDate } = params;
+  const formattedDate = formatDate(sessionDate);
+  const portalUrl     = `${BASE_URL}/settings?tab=subscription`;
+
+  const body = `
+    ${badge("#dc2626", "Payment failed")}
+    <br/><br/>
+    ${h1("We couldn't process your session payment")}
+    ${p(`Hi ${menteeNom}, your mentor accepted the session but the payment for the following session could not be processed.`)}
+    ${infoBox(
+      highlight("Scheduled date", formattedDate)
+    )}
+    ${p("Please update your payment method to confirm the session. Your spot is reserved for 24 hours.")}
+    ${btn("Update payment method →", portalUrl)}
+  `;
+
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({
+    from:    FROM,
+    to:      menteeEmail,
+    subject: "⚠️ Action required: session payment failed",
+    html:    layout(body),
+  });
+}

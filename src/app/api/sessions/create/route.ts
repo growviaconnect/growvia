@@ -8,12 +8,12 @@ export async function POST(req: NextRequest) {
   const anonKey     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   let mentorId: string, menteeEmail: string, topic: string,
-      date: string, time: string, language: string, durationMinutes: number;
+      date: string, time: string, language: string, durationMinutes: number, priceCents: number | null;
 
   try {
     const body = (await req.json()) as {
       mentorId: string; menteeEmail: string; topic: string;
-      date: string; time: string; language: string; durationMinutes?: number;
+      date: string; time: string; language?: string; durationMinutes?: number; priceCents?: number | null;
     };
     mentorId        = (body.mentorId    ?? "").trim();
     menteeEmail     = (body.menteeEmail ?? "").trim();
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     time            = (body.time        ?? "").trim();
     language        = (body.language    ?? "").trim();
     durationMinutes = body.durationMinutes ?? 60;
+    priceCents      = body.priceCents ?? null;
     if (!mentorId || !menteeEmail || !date || !time) throw new Error("missing fields");
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
@@ -62,10 +63,13 @@ export async function POST(req: NextRequest) {
     .insert({
       mentor_id:        mentorId,
       mentee_id:        menteeRow.id,
+      mentee_email:     menteeEmail,
       topic:            topic || null,
       date,
       time,
+      language:         language || null,
       duration_minutes: durationMinutes,
+      price_cents:      priceCents,
       status:           "pending",
     })
     .select("id")

@@ -3,9 +3,15 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare, MapPin, Monitor } from "lucide-react";
+import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare, MapPin, Monitor, Crown } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
+
+const PLAN_SCORE_LIMITS: Record<string, number> = {
+  basic:    75,
+  standard: 90,
+  premium:  Infinity,
+};
 
 const SLOT_LABELS: Record<string, string> = {
   morning:   "Morning (8–12h)",
@@ -27,12 +33,130 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function BookCTA({ mentorId, price }: { mentorId: string; price: number | null | undefined }) {
+function BookCTA({ mentorId, price, mentorScore }: {
+  mentorId:    string;
+  price:       number | null | undefined;
+  mentorScore: number | null | undefined;
+}) {
   const session = getUserSession();
-  const bookHref = session?.role === "mentee"
-    ? `/book/${mentorId}`
-    : `/auth/register?redirect=/book/${mentorId}`;
 
+  // Subscription + plan state
+  const [subPlan,    setSubPlan]    = useState<string | null>(null);
+  const [subLoading, setSubLoading] = useState(false);
+
+  useEffect(() => {
+    if (session?.role !== "mentee" || !session.email) return;
+    setSubLoading(true);
+    // Look up the mentee row first to get their DB id
+    supabase
+      .from("mentees")
+      .select("id")
+      .eq("email", session.email)
+      .single()
+      .then(({ data: menteeRow }) => {
+        if (!menteeRow) { setSubLoading(false); return; }
+        supabase
+          .from("mentee_subscriptions")
+          .select("plan, status")
+          .eq("mentee_id", (menteeRow as { id: string }).id)
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .then(({ data }) => {
+            setSubPlan((data?.[0] as { plan: string } | undefined)?.plan ?? null);
+            setSubLoading(false);
+          });
+      });
+  }, [session?.role, session?.email]);
+
+  // Not logged in
+  if (!session) {
+    return (
+      <div
+        className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style={{ background: "rgba(124,58,237,0.06)" }}
+      >
+        <div>
+          <p className="text-white font-semibold mb-0.5">Ready to start?</p>
+          <p className="text-white/40 text-sm">Create a free account to book a session.</p>
+        </div>
+        <Link
+          href={`/auth/register?redirect=/book/${mentorId}`}
+          className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
+          style={{ background: "#7C3AED" }}
+        >
+          Sign up to book <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    );
+  }
+
+  // Mentor role — no booking
+  if (session.role !== "mentee") return null;
+
+  if (subLoading) {
+    return (
+      <div
+        className="rounded-2xl p-6 border border-white/[0.06] animate-pulse h-24"
+        style={{ background: "#13111F" }}
+      />
+    );
+  }
+
+  // No active subscription → gate to /subscribe
+  if (!subPlan) {
+    return (
+      <div
+        className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style={{ background: "rgba(124,58,237,0.06)" }}
+      >
+        <div>
+          <p className="text-white font-semibold mb-0.5">Subscribe to book sessions</p>
+          <p className="text-white/40 text-sm">
+            A subscription is required. From 4.99€/month — cancel anytime.
+          </p>
+        </div>
+        <Link
+          href="/subscribe"
+          className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
+          style={{ background: "#7C3AED" }}
+        >
+          <Crown className="w-4 h-4" /> Choose a plan
+        </Link>
+      </div>
+    );
+  }
+
+  // Score gating: check if mentor is accessible at current plan level
+  const scoreLimit   = PLAN_SCORE_LIMITS[subPlan] ?? 75;
+  const mentorScoreN = mentorScore ?? 0;
+  const scoreBlocked = mentorScoreN > 0 && mentorScoreN > scoreLimit;
+
+  if (scoreBlocked) {
+    const requiredPlan = mentorScoreN <= 90 ? "Standard" : "Premium";
+    return (
+      <div
+        className="rounded-2xl p-6 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        style={{ background: "rgba(245,158,11,0.05)" }}
+      >
+        <div>
+          <p className="text-white font-semibold mb-0.5">Upgrade to book this mentor</p>
+          <p className="text-white/40 text-sm">
+            This mentor is available on the <span className="text-[#A78BFA]">{requiredPlan}</span> plan and above.
+          </p>
+        </div>
+        <Link
+          href="/subscribe"
+          className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
+          style={{ background: "#7C3AED" }}
+        >
+          <Crown className="w-4 h-4" /> Upgrade plan
+        </Link>
+      </div>
+    );
+  }
+
+  // All good — show book button
   return (
     <div
       className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -42,10 +166,11 @@ function BookCTA({ mentorId, price }: { mentorId: string; price: number | null |
         <p className="text-white font-semibold mb-0.5">Ready to start?</p>
         <p className="text-white/40 text-sm">
           Take the first step toward your goals 🚀
+          {price != null && <span className="text-white/30"> · {price}€ / session</span>}
         </p>
       </div>
       <Link
-        href={bookHref}
+        href={`/book/${mentorId}`}
         className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
         style={{ background: "#7C3AED" }}
       >
@@ -359,7 +484,7 @@ export default function MentorProfilePage() {
         )}
 
         {/* ── Book CTA ────────────────────────────────────────────────── */}
-        <BookCTA mentorId={id} price={mentor.session_price} />
+        <BookCTA mentorId={id} price={mentor.session_price} mentorScore={mentor.mentor_score} />
 
       </div>
     </div>
