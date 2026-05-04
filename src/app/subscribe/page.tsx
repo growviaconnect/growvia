@@ -63,6 +63,7 @@ export default function SubscribePage() {
   const [currentPlan,     setCurrentPlan]     = useState<string | null>(null);
   const [freeSessionUsed, setFreeSessionUsed] = useState(false);
   const [planLoading,     setPlanLoading]     = useState(false);
+  const [menteeId,        setMenteeId]        = useState<string | null>(null);
 
   useEffect(() => {
     if (!session?.email || session.role !== "mentee") return;
@@ -72,6 +73,7 @@ export default function SubscribePage() {
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setCurrentPlan("free"); setPlanLoading(false); return; }
         const row = menteeRow as { id: string; free_session_used: boolean };
+        setMenteeId(row.id);
         setFreeSessionUsed(row.free_session_used);
         supabase
           .from("mentee_subscriptions")
@@ -98,7 +100,7 @@ export default function SubscribePage() {
       const res = await fetch("/api/subscriptions/create-checkout", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ plan, email: session.email }),
+        body:    JSON.stringify({ plan, email: session.email, ...(menteeId ? { menteeId } : {}) }),
       });
       const data = await res.json() as { url?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
