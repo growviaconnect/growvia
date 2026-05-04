@@ -41,7 +41,7 @@ function BookCTA({ mentorId, price }: { mentorId: string; price: number | null |
       <div>
         <p className="text-white font-semibold mb-0.5">Ready to start?</p>
         <p className="text-white/40 text-sm">
-          {price != null ? `${price}€ per session · No commitment` : "Price on request"}
+          Take the first step toward your goals 🚀
         </p>
       </div>
       <Link
@@ -129,11 +129,13 @@ export default function MentorProfilePage() {
   const expertise = mentor.expertise ?? [];
 
   // Skills from competences map — show keys with truthy values
-  const skills = mentor.competences
-    ? Object.entries(mentor.competences)
-        .filter(([, v]) => !!v)
-        .map(([k]) => k)
-    : [];
+  const rawComp = mentor.competences;
+  const skills =
+    rawComp && typeof rawComp === "object" && !Array.isArray(rawComp)
+      ? Object.entries(rawComp)
+          .filter(([, v]) => !!v)
+          .map(([k]) => k)
+      : [];
 
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
