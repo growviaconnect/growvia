@@ -8,6 +8,7 @@ import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
 
 const PLAN_SCORE_LIMITS: Record<string, number> = {
+  free:     60,
   basic:    75,
   standard: 90,
   premium:  Infinity,
@@ -40,32 +41,38 @@ function BookCTA({ mentorId, price, mentorScore }: {
 }) {
   const session = getUserSession();
 
-  // Subscription + plan state
-  const [subPlan,    setSubPlan]    = useState<string | null>(null);
-  const [subLoading, setSubLoading] = useState(false);
+  const [subPlan,      setSubPlan]      = useState<string | null>(null);
+  const [sessionCount, setSessionCount] = useState<number | null>(null);
+  const [subLoading,   setSubLoading]   = useState(false);
 
   useEffect(() => {
     if (session?.role !== "mentee" || !session.email) return;
     setSubLoading(true);
-    // Look up the mentee row first to get their DB id
     supabase
       .from("mentees")
       .select("id")
       .eq("email", session.email)
       .single()
       .then(({ data: menteeRow }) => {
-        if (!menteeRow) { setSubLoading(false); return; }
-        supabase
-          .from("mentee_subscriptions")
-          .select("plan, status")
-          .eq("mentee_id", (menteeRow as { id: string }).id)
-          .eq("status", "active")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .then(({ data }) => {
-            setSubPlan((data?.[0] as { plan: string } | undefined)?.plan ?? null);
-            setSubLoading(false);
-          });
+        if (!menteeRow) { setSessionCount(0); setSubLoading(false); return; }
+        const menteeId = (menteeRow as { id: string }).id;
+        Promise.all([
+          supabase
+            .from("mentee_subscriptions")
+            .select("plan, status")
+            .eq("mentee_id", menteeId)
+            .eq("status", "active")
+            .order("created_at", { ascending: false })
+            .limit(1),
+          supabase
+            .from("sessions")
+            .select("id", { count: "exact", head: true })
+            .eq("mentee_id", menteeId),
+        ]).then(([subResult, countResult]) => {
+          setSubPlan((subResult.data?.[0] as { plan: string } | undefined)?.plan ?? null);
+          setSessionCount(countResult.count ?? 0);
+          setSubLoading(false);
+        });
       });
   }, [session?.role, session?.email]);
 
@@ -94,7 +101,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
   // Mentor role — no booking
   if (session.role !== "mentee") return null;
 
-  if (subLoading) {
+  if (subLoading || sessionCount === null) {
     return (
       <div
         className="rounded-2xl p-6 border border-white/[0.06] animate-pulse h-24"
@@ -103,17 +110,17 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // No active subscription → gate to /subscribe
-  if (!subPlan) {
+  // No active subscription AND already used free session → upsell
+  if (!subPlan && sessionCount >= 1) {
     return (
       <div
         className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         style={{ background: "rgba(124,58,237,0.06)" }}
       >
         <div>
-          <p className="text-white font-semibold mb-0.5">Subscribe to book sessions</p>
+          <p className="text-white font-semibold mb-0.5">You&apos;ve used your free session!</p>
           <p className="text-white/40 text-sm">
-            A subscription is required. From 4.99€/month — cancel anytime.
+            Subscribe to keep growing 🚀 — from 4.99€/month, cancel anytime.
           </p>
         </div>
         <Link
@@ -127,13 +134,14 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // Score gating: check if mentor is accessible at current plan level
-  const scoreLimit   = PLAN_SCORE_LIMITS[subPlan] ?? 75;
-  const mentorScoreN = mentorScore ?? 0;
-  const scoreBlocked = mentorScoreN > 0 && mentorScoreN > scoreLimit;
+  // Determine effective plan (free tier if no sub + no sessions yet)
+  const effectivePlan = subPlan ?? "free";
+  const scoreLimit    = PLAN_SCORE_LIMITS[effectivePlan] ?? 60;
+  const mentorScoreN  = mentorScore ?? 0;
+  const scoreBlocked  = mentorScoreN > 0 && mentorScoreN > scoreLimit;
 
   if (scoreBlocked) {
-    const requiredPlan = mentorScoreN <= 90 ? "Standard" : "Premium";
+    const requiredPlan = mentorScoreN <= 75 ? "Basic" : mentorScoreN <= 90 ? "Standard" : "Premium";
     return (
       <div
         className="rounded-2xl p-6 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -150,7 +158,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
           className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
           style={{ background: "#7C3AED" }}
         >
-          <Crown className="w-4 h-4" /> Upgrade plan
+          <Crown className="w-4 h-4" /> {subPlan ? "Upgrade plan" : "Choose a plan"}
         </Link>
       </div>
     );
@@ -165,7 +173,9 @@ function BookCTA({ mentorId, price, mentorScore }: {
       <div>
         <p className="text-white font-semibold mb-0.5">Ready to start?</p>
         <p className="text-white/40 text-sm">
-          Take the first step toward your goals 🚀
+          {!subPlan && sessionCount === 0
+            ? "Your first session is free — no subscription needed."
+            : "Take the first step toward your goals 🚀"}
           {price != null && <span className="text-white/30"> · {price}€ / session</span>}
         </p>
       </div>
