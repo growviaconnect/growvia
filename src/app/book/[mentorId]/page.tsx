@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown,
-  Clock, Globe, Loader2, CheckCircle,
+  Clock, Globe, Loader2, Lock,
 } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
@@ -176,31 +176,35 @@ export default function BookingPage() {
   // Time slots for the selected date
   const selectedPeriods = selDate ? periodsForDay(jsDayToAvail(selDate.getDay())) : [];
 
-  // ── Submit
+  // ── Submit → Stripe Checkout
   async function handleSubmit() {
     if (!selDate || !selTime) { setSubmitErr("Please pick a date and time."); return; }
     if (!session?.email) { router.push(`/auth/register?redirect=/book/${mentorId}`); return; }
+    if (sessionPrice == null) { setSubmitErr("Session price is not available."); return; }
 
     setSubmitting(true);
     setSubmitErr(null);
 
     try {
-      const res = await fetch("/api/sessions/create", {
+      const res = await fetch("/api/payments/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mentorId,
-          menteeEmail: session.email,
+          menteeEmail:     session.email,
+          mentorName:      mentor?.nom ?? "",
           topic,
-          date: toDateKey(selDate),
-          time: selTime,
+          date:            toDateKey(selDate),
+          time:            selTime,
           language,
           durationMinutes: duration,
+          price:           sessionPrice,
+          durLabel,
         }),
       });
-      const json = (await res.json()) as { success?: boolean; error?: string };
+      const json = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
-      router.push(`/book/${mentorId}/confirmation`);
+      if (json.url) window.location.href = json.url;
     } catch (err) {
       setSubmitErr(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
@@ -578,17 +582,6 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* Payment note */}
-              <div
-                className="rounded-lg px-3 py-2 mb-5 flex items-start gap-2"
-                style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)" }}
-              >
-                <span className="text-amber-400 text-xs mt-0.5">💳</span>
-                <p className="text-xs text-amber-300/70 leading-relaxed">
-                  Payment coming soon — submitting this request is free.
-                </p>
-              </div>
-
               {/* Error */}
               {submitErr && (
                 <div
@@ -610,8 +603,8 @@ export default function BookingPage() {
                   <><Loader2 className="w-4 h-4 animate-spin" /> Sending request…</>
                 ) : (
                   <>
-                    <CheckCircle className="w-4 h-4" />
-                    Request &amp; Pay {sessionPrice != null ? `${sessionPrice}€` : ""}
+                    <Lock className="w-4 h-4" />
+                    Pay {sessionPrice != null ? `${sessionPrice}€` : ""} securely
                   </>
                 )}
               </button>
@@ -623,7 +616,7 @@ export default function BookingPage() {
               )}
 
               <p className="text-xs text-white/25 text-center mt-3 leading-relaxed">
-                No charge until the mentor confirms. Cancel anytime before confirmation.
+                Secure payment via Stripe. You&apos;ll be notified once the mentor confirms.
               </p>
             </Card>
           </div>

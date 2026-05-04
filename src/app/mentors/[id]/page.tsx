@@ -128,15 +128,26 @@ export default function MentorProfilePage() {
   const sectors   = mentor.secteurs ?? [];
   const expertise = mentor.expertise ?? [];
 
-  // Skills from competences map — show keys with truthy values
-  const rawComp = mentor.competences;
-  const skills =
-    rawComp && typeof rawComp === "object" && !Array.isArray(rawComp)
-      ? Object.entries(rawComp)
-          .filter(([, v]) => !!v)
-          .map(([k]) => k)
-      : [];
-
+  // competences is stored as CompetenceEntry[] = [{ name, rating }]
+  // Handle all shapes defensively: array of objects, plain object, comma-string, null.
+  const rawComp = mentor.competences as unknown;
+  const skills: string[] = (() => {
+    if (!rawComp) return [];
+    if (Array.isArray(rawComp)) {
+      // Normal format: [{ name: "Leadership", rating: 3 }, …]
+      return (rawComp as unknown[])
+        .map(c => (c && typeof c === "object" && "name" in c ? (c as { name: string }).name : null))
+        .filter((n): n is string => typeof n === "string" && n.length > 0);
+    }
+    if (typeof rawComp === "string") {
+      return rawComp.split(",").map(s => s.trim()).filter(Boolean);
+    }
+    if (typeof rawComp === "object") {
+      // Legacy: { skill: rating } map — use keys where value is truthy
+      return Object.entries(rawComp).filter(([, v]) => !!v).map(([k]) => k);
+    }
+    return [];
+  })();
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
 
