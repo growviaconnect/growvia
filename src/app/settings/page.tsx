@@ -229,6 +229,12 @@ export default function SettingsPage() {
   const [pauseSaving, setPauseSaving]       = useState(false);
   const [mentorBalance, setMentorBalance]   = useState(0);
 
+  /* ── Subscription (mentee) ─────────────────────────────────── */
+  type SubRow = { plan: string; status: string; current_period_end: string | null; stripe_customer_id: string | null };
+  const [subData,     setSubData]     = useState<SubRow | null>(null);
+  const [subLoading,  setSubLoading]  = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+
   /* ── Account deletion ───────────────────────────────────────── */
   const [deleteStep,      setDeleteStep]      = useState<0|1|2>(0);
   const [deleteEmail,     setDeleteEmail]     = useState("");
@@ -256,7 +262,28 @@ export default function SettingsPage() {
             }
           } catch { /* silent */ } finally { setMentorIdLoaded(true); }
         })();
-      } else { setMentorIdLoaded(true); }
+      } else {
+        setMentorIdLoaded(true);
+        // Load subscription data for mentees
+        if (s.role === "mentee") {
+          setSubLoading(true);
+          (async () => {
+            try {
+              const { data: menteeRow } = await supabase.from("mentees").select("id").eq("email", s.email).single();
+              if (menteeRow?.id) {
+                const { data: sub } = await supabase
+                  .from("mentee_subscriptions")
+                  .select("plan, status, current_period_end, stripe_customer_id")
+                  .eq("mentee_id", (menteeRow as { id: string }).id)
+                  .order("created_at", { ascending: false })
+                  .limit(1)
+                  .single();
+                if (sub) setSubData(sub as SubRow);
+              }
+            } catch { /* no sub */ } finally { setSubLoading(false); }
+          })();
+        }
+      }
     }
   }, []);
 
@@ -363,14 +390,21 @@ export default function SettingsPage() {
     }
   }
 
-  /* ── Cancel subscription ────────────────────────────────────── */
-  function cancelSubscription() {
-    if (!session) return;
-    const updated = { ...session, plan: "free" as const };
-    setUserSession(updated);
-    setSession(updated);
-    setCancelConfirm(false);
-    showMsg("Abonnement résilié. Vous êtes maintenant sur le plan Gratuit.");
+  /* ── Open Stripe customer portal ───────────────────────────── */
+  async function openPortal() {
+    if (!session?.email) return;
+    setPortalLoading(true);
+    try {
+      const res  = await fetch("/api/subscriptions/portal", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session.email }),
+      });
+      const json = await res.json() as { url?: string; error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      if (json.url) window.location.href = json.url;
+    } catch (err) {
+      showMsg(err instanceof Error ? err.message : "Could not open portal.", false);
+    } finally { setPortalLoading(false); }
   }
 
   /* ── Pause bookings ─────────────────────────────────────────── */
@@ -493,21 +527,20 @@ export default function SettingsPage() {
           <div className="rounded-2xl p-8 w-full max-w-sm text-center"
             style={{ background: "#1A1226", border: `1px solid rgba(239,68,68,0.25)` }}>
             <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-white mb-2">Résilier l&apos;abonnement ?</h3>
+            <h3 className="text-lg font-bold text-white mb-2">Cancel subscription?</h3>
             <p className="text-sm mb-6" style={{ color: T.muted }}>
-              Votre accès au plan <strong className="text-white">Plan {currentPlanData.label}</strong> sera supprimé à la fin de la période en cours.
+              To cancel, we&apos;ll open the Stripe portal where you can manage or cancel your subscription.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setCancelConfirm(false)}
                 className="flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors"
-                style={{ border: `1px solid ${T.faint}`, color: T.muted }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; }}>
-                Annuler
+                style={{ border: `1px solid ${T.faint}`, color: T.muted }}>
+                Go back
               </button>
-              <button onClick={cancelSubscription}
-                className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 text-sm transition-colors">
-                Confirmer
+              <button onClick={() => { setCancelConfirm(false); openPortal(); }}
+                disabled={portalLoading}
+                className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 text-sm transition-colors disabled:opacity-60">
+                Open portal
               </button>
             </div>
           </div>
@@ -1101,151 +1134,93 @@ export default function SettingsPage() {
           {/* ══ SUBSCRIPTION ══════════════════════════════════════ */}
           {tab === "subscription" && (
             <div className="space-y-4">
-
-              {/* ── Current plan card ─────────────────────────────── */}
-              <div className="rounded-2xl px-6 py-6"
-                style={{ background: "rgba(157,141,241,0.06)", border: "1px solid rgba(157,141,241,0.30)" }}>
-
-                <p className="text-[10px] font-bold uppercase tracking-[1.4px] mb-5" style={{ color: T.sub }}>
-                  Mon abonnement
-                </p>
-
-                {/* Plan header row */}
-                <div className="flex items-start justify-between gap-4 mb-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}>
-                      <Crown className="w-5 h-5" style={{ color: T.purpleL }} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-white text-base">Plan {currentPlanData.label}</p>
-                      <p className="text-xs mt-0.5" style={{ color: T.muted }}>{currentPlanData.priceLabel}</p>
-                    </div>
-                  </div>
-                  {/* Actif badge with pulsing dot */}
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full flex-shrink-0"
-                    style={{ background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.25)" }}>
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ background: "#4ade80", animation: "pulseDot 2s ease-in-out infinite" }} />
-                    <span className="text-xs font-semibold" style={{ color: "#4ade80" }}>Actif</span>
-                  </div>
+              {subLoading ? (
+                <div className="rounded-2xl p-10 flex items-center justify-center"
+                  style={{ background: T.card, border: `1px solid ${T.cardBorder}` }}>
+                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: T.purpleL }} />
                 </div>
+              ) : subData && subData.status === "active" ? (
+                <>
+                  {/* ── Active subscription card ─────────────────── */}
+                  <div className="rounded-2xl px-6 py-6"
+                    style={{ background: "rgba(157,141,241,0.06)", border: "1px solid rgba(157,141,241,0.30)" }}>
 
-                {/* Features */}
-                <div className="space-y-2 mb-6">
-                  {currentPlanData.features.map(f => (
-                    <div key={f} className="flex items-center gap-2.5 text-sm" style={{ color: T.muted }}>
-                      <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: T.purpleL }} />
-                      {f}
-                    </div>
-                  ))}
-                </div>
+                    <p className="text-[10px] font-bold uppercase tracking-[1.4px] mb-5" style={{ color: T.sub }}>
+                      My subscription
+                    </p>
 
-                {/* CTA */}
-                <div className="space-y-2.5">
-                  {planKey === "free" ? (
-                    <Link href="/pricing"
-                      className="flex items-center justify-center gap-2 w-full text-white font-bold py-3.5 rounded-xl text-sm transition-colors"
-                      style={{ background: T.purple }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = T.purple; }}>
-                      <Crown className="w-4 h-4" />
-                      Choisir un abonnement
-                    </Link>
-                  ) : (
-                    <>
-                      <Link href="/pricing"
-                        className="flex items-center justify-center gap-2 w-full font-semibold py-3.5 rounded-xl text-sm transition-colors"
-                        style={{ border: "1px solid rgba(157,141,241,0.35)", color: T.purpleL }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(157,141,241,0.08)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; }}>
-                        Gérer mon abonnement
-                      </Link>
-                      <button onClick={() => setCancelConfirm(true)}
-                        className="w-full font-semibold py-3 rounded-xl text-sm transition-colors"
-                        style={{ border: "1px solid rgba(239,68,68,0.2)", color: "rgba(248,113,113,0.7)" }}
-                        onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.06)";
-                          (e.currentTarget as HTMLElement).style.color = "#f87171";
-                        }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.background = "";
-                          (e.currentTarget as HTMLElement).style.color = "rgba(248,113,113,0.7)";
-                        }}>
-                        Résilier mon abonnement
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* ── Other plans ───────────────────────────────────── */}
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[1.4px] mb-3 px-1" style={{ color: T.sub }}>
-                  Changer de plan
-                </p>
-                <div className="space-y-3">
-                  {otherPlans.map((plan, idx) => {
-                    const isUpgrade = plan.price > currentPlanData.price;
-                    return (
-                      <div
-                        key={plan.key}
-                        className="plan-card-hover relative rounded-[14px] px-5 py-5"
-                        style={{
-                          background: "rgba(255,255,255,0.02)",
-                          border: "1px solid rgba(157,141,241,0.12)",
-                          animation: `fadeUp 0.4s ease ${0.05 + idx * 0.06}s both`,
-                        }}
-                      >
-                        {/* RECOMMANDÉ badge */}
-                        {plan.recommended && (
-                          <span className="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
-                            style={{ background: "rgba(124,58,237,0.18)", color: T.purpleL, border: "1px solid rgba(124,58,237,0.30)" }}>
-                            Recommandé
-                          </span>
-                        )}
-
-                        {/* Plan name + price */}
-                        <div className="flex items-baseline gap-2 mb-0.5">
-                          <p className="font-bold text-white text-sm">{plan.label}</p>
-                          <p className="text-xs" style={{ color: T.muted }}>{plan.priceLabel}</p>
+                    {/* Plan row */}
+                    <div className="flex items-start justify-between gap-4 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}>
+                          <Crown className="w-5 h-5" style={{ color: T.purpleL }} />
                         </div>
-
-                        {/* Features */}
-                        <div className="space-y-1.5 mt-3 mb-4">
-                          {plan.features.slice(0, 4).map(f => (
-                            <div key={f} className="flex items-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-                              <Check className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(157,141,241,0.6)" }} />
-                              {f}
-                            </div>
-                          ))}
+                        <div>
+                          <p className="font-bold text-white text-base capitalize">
+                            {subData.plan} plan
+                          </p>
+                          {subData.current_period_end && (
+                            <p className="text-xs mt-0.5" style={{ color: T.muted }}>
+                              Renews {new Date(subData.current_period_end).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                            </p>
+                          )}
                         </div>
-
-                        {/* CTA */}
-                        <Link
-                          href="/pricing"
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors"
-                          style={isUpgrade
-                            ? { background: T.purple, color: "#fff" }
-                            : { border: `1px solid ${T.faint}`, color: T.muted }
-                          }
-                          onMouseEnter={e => {
-                            if (isUpgrade) (e.currentTarget as HTMLElement).style.background = "#6D28D9";
-                            else (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.2)";
-                          }}
-                          onMouseLeave={e => {
-                            if (isUpgrade) (e.currentTarget as HTMLElement).style.background = T.purple;
-                            else (e.currentTarget as HTMLElement).style.borderColor = T.faint;
-                          }}
-                        >
-                          Passer au {plan.label} →{isUpgrade && <span className="font-normal opacity-70 ml-1">{plan.priceLabel}</span>}
-                        </Link>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full flex-shrink-0"
+                        style={{ background: "rgba(74,222,128,0.10)", border: "1px solid rgba(74,222,128,0.25)" }}>
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={{ background: "#4ade80", animation: "pulseDot 2s ease-in-out infinite" }} />
+                        <span className="text-xs font-semibold" style={{ color: "#4ade80" }}>Active</span>
+                      </div>
+                    </div>
 
+                    {/* Portal buttons */}
+                    <div className="space-y-2.5">
+                      <button
+                        onClick={openPortal}
+                        disabled={portalLoading}
+                        className="flex items-center justify-center gap-2 w-full font-semibold py-3.5 rounded-xl text-sm transition-colors disabled:opacity-60"
+                        style={{ background: T.purple, color: "#fff" }}
+                      >
+                        {portalLoading
+                          ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening…</>
+                          : <><CreditCard className="w-4 h-4" /> Manage subscription</>
+                        }
+                      </button>
+                      <button
+                        onClick={openPortal}
+                        disabled={portalLoading}
+                        className="flex items-center justify-center gap-2 w-full font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-60"
+                        style={{ border: "1px solid rgba(157,141,241,0.25)", color: T.muted }}
+                      >
+                        Update payment method
+                      </button>
+                    </div>
+
+                    <p className="text-xs mt-3 text-center" style={{ color: "rgba(255,255,255,0.2)" }}>
+                      Cancel anytime via the Stripe portal
+                    </p>
+                  </div>
+                </>
+              ) : (
+                /* ── No active subscription ──────────────────────── */
+                <div className="rounded-2xl px-6 py-6 text-center"
+                  style={{ background: T.card, border: `1px solid ${T.cardBorder}` }}>
+                  <Crown className="w-8 h-8 mx-auto mb-3" style={{ color: T.purpleL }} />
+                  <p className="font-bold text-white mb-1">No active subscription</p>
+                  <p className="text-sm mb-5" style={{ color: T.muted }}>
+                    Subscribe to book sessions with mentors. From 4.99€/month.
+                  </p>
+                  <Link
+                    href="/subscribe"
+                    className="inline-flex items-center gap-2 font-bold text-sm text-white px-6 py-3 rounded-xl"
+                    style={{ background: T.purple }}
+                  >
+                    <Crown className="w-4 h-4" /> Choose a plan
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

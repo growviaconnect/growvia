@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, ChevronDown,
-  Clock, Globe, Loader2, Lock,
+  Clock, Globe, Loader2, Send,
 } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
@@ -113,8 +113,10 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitErr,  setSubmitErr]  = useState<string | null>(null);
 
-  // ── Auth
+  // ── Auth + subscription gate
   const session = getUserSession();
+  const [subChecked, setSubChecked] = useState(false);
+  const [hasSub,     setHasSub]     = useState(false);
 
   useEffect(() => {
     if (!mentorId) return;
@@ -131,6 +133,27 @@ export default function BookingPage() {
       setLoading(false);
     });
   }, [mentorId]);
+
+  // ── Subscription gate: redirect to /subscribe if no active sub
+  useEffect(() => {
+    if (!session?.email || session.role !== "mentee") { setSubChecked(true); return; }
+    supabase
+      .from("mentees").select("id").eq("email", session.email).single()
+      .then(({ data: menteeRow }) => {
+        if (!menteeRow) { setSubChecked(true); return; }
+        supabase
+          .from("mentee_subscriptions")
+          .select("id")
+          .eq("mentee_id", (menteeRow as { id: string }).id)
+          .eq("status", "active")
+          .limit(1)
+          .then(({ data }) => {
+            setHasSub((data?.length ?? 0) > 0);
+            setSubChecked(true);
+          });
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.email]);
 
   // Available day_of_week set
   const availDaySet = useMemo(() => new Set(avail.map(a => a.day_of_week)), [avail]);
@@ -176,35 +199,33 @@ export default function BookingPage() {
   // Time slots for the selected date
   const selectedPeriods = selDate ? periodsForDay(jsDayToAvail(selDate.getDay())) : [];
 
-  // ── Submit → Stripe Checkout
+  // ── Submit → create session request (payment charged when mentor accepts)
   async function handleSubmit() {
     if (!selDate || !selTime) { setSubmitErr("Please pick a date and time."); return; }
     if (!session?.email) { router.push(`/auth/register?redirect=/book/${mentorId}`); return; }
-    if (sessionPrice == null) { setSubmitErr("Session price is not available."); return; }
+    if (!hasSub)          { router.push("/subscribe"); return; }
 
     setSubmitting(true);
     setSubmitErr(null);
 
     try {
-      const res = await fetch("/api/payments/create-checkout", {
+      const res = await fetch("/api/sessions/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mentorId,
           menteeEmail:     session.email,
-          mentorName:      mentor?.nom ?? "",
           topic,
           date:            toDateKey(selDate),
           time:            selTime,
           language,
           durationMinutes: duration,
-          price:           sessionPrice,
-          durLabel,
+          priceCents:      sessionPrice != null ? Math.round(sessionPrice * 100) : null,
         }),
       });
-      const json = (await res.json()) as { url?: string; error?: string };
+      const json = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
-      if (json.url) window.location.href = json.url;
+      router.push(`/book/${mentorId}/confirmation`);
     } catch (err) {
       setSubmitErr(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
@@ -225,6 +246,23 @@ export default function BookingPage() {
         <p className="text-white/50 text-sm">Mentor not found.</p>
         <Link href="/mentors" className="text-[#A78BFA] hover:text-white text-sm transition-colors">
           ← Back to mentors
+        </Link>
+      </div>
+    );
+  }
+
+  // Subscription gate — redirect only after check is complete (avoids flash)
+  if (subChecked && !hasSub && session?.role === "mentee") {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-white font-semibold text-lg">A subscription is required to book sessions.</p>
+        <p className="text-white/40 text-sm max-w-xs">Subscribe from 4.99€/month. Your card is saved and sessions are charged automatically when confirmed.</p>
+        <Link
+          href="/subscribe"
+          className="mt-2 px-6 py-3 rounded-xl text-sm font-bold text-white"
+          style={{ background: "#7C3AED" }}
+        >
+          View plans →
         </Link>
       </div>
     );
@@ -603,8 +641,8 @@ export default function BookingPage() {
                   <><Loader2 className="w-4 h-4 animate-spin" /> Sending request…</>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4" />
-                    Pay {sessionPrice != null ? `${sessionPrice}€` : ""} securely
+                    <Send className="w-4 h-4" />
+                    Request session{sessionPrice != null ? ` · ${sessionPrice}€` : ""}
                   </>
                 )}
               </button>
@@ -616,7 +654,7 @@ export default function BookingPage() {
               )}
 
               <p className="text-xs text-white/25 text-center mt-3 leading-relaxed">
-                Secure payment via Stripe. You&apos;ll be notified once the mentor confirms.
+                No charge now. Your saved card is billed when the mentor confirms.
               </p>
             </Card>
           </div>
