@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
 
-// Temporary endpoint — DELETE after confirming env vars on Vercel
-// Visit /api/debug/env to see which Supabase/Resend variables are present
 export async function GET() {
-  function present(key: string) {
+  function check(key: string) {
     const v = process.env[key];
-    if (!v) return "❌ missing";
-    return `✅ set (starts with: ${v.slice(0, 12)}…)`;
+    if (!v || v.includes("placeholder")) return "❌ missing";
+    return `✅ ${v.slice(0, 14)}…`;
   }
 
-  return NextResponse.json({
-    NEXT_PUBLIC_SUPABASE_URL:    present("NEXT_PUBLIC_SUPABASE_URL"),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: present("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    SUPABASE_SERVICE_ROLE_KEY:   present("SUPABASE_SERVICE_ROLE_KEY"),
-    SUPABASE_SECRET_KEY:         present("SUPABASE_SECRET_KEY"),
-    RESEND_API_KEY:              present("RESEND_API_KEY"),
-    STRIPE_SECRET_KEY:           present("STRIPE_SECRET_KEY"),
-  });
+  const vars = {
+    // Supabase
+    NEXT_PUBLIC_SUPABASE_URL:        check("NEXT_PUBLIC_SUPABASE_URL"),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY:   check("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    SUPABASE_SERVICE_ROLE_KEY:       check("SUPABASE_SERVICE_ROLE_KEY"),
+    // Stripe core
+    STRIPE_SECRET_KEY:               check("STRIPE_SECRET_KEY"),
+    STRIPE_WEBHOOK_SECRET:           check("STRIPE_WEBHOOK_SECRET"),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: check("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"),
+    // Stripe price IDs
+    STRIPE_BASIC_PRICE_ID:           check("STRIPE_BASIC_PRICE_ID"),
+    STRIPE_STANDARD_PRICE_ID:        check("STRIPE_STANDARD_PRICE_ID"),
+    STRIPE_PREMIUM_PRICE_ID:         check("STRIPE_PREMIUM_PRICE_ID"),
+    // Email
+    RESEND_API_KEY:                  check("RESEND_API_KEY"),
+    // Google Meet
+    GOOGLE_SERVICE_ACCOUNT_JSON:     check("GOOGLE_SERVICE_ACCOUNT_JSON"),
+    // AI
+    ANTHROPIC_API_KEY:               check("ANTHROPIC_API_KEY"),
+  };
+
+  const missing = Object.entries(vars).filter(([, v]) => v.startsWith("❌")).map(([k]) => k);
+  return NextResponse.json({ status: missing.length === 0 ? "all good ✅" : `${missing.length} missing ❌`, vars });
 }
