@@ -8,21 +8,24 @@ export async function POST(req: NextRequest) {
   const anonKey     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   let mentorId: string, menteeEmail: string, topic: string,
-      date: string, time: string, language: string, durationMinutes: number, priceCents: number | null;
+      date: string, time: string, language: string, durationMinutes: number, priceCents: number | null,
+      isFreeSession: boolean;
 
   try {
     const body = (await req.json()) as {
       mentorId: string; menteeEmail: string; topic: string;
-      date: string; time: string; language?: string; durationMinutes?: number; priceCents?: number | null;
+      date: string; time: string; language?: string; durationMinutes?: number;
+      priceCents?: number | null; isFreeSession?: boolean;
     };
-    mentorId        = (body.mentorId    ?? "").trim();
-    menteeEmail     = (body.menteeEmail ?? "").trim();
-    topic           = (body.topic       ?? "").trim();
-    date            = (body.date        ?? "").trim();
-    time            = (body.time        ?? "").trim();
-    language        = (body.language    ?? "").trim();
+    mentorId       = (body.mentorId    ?? "").trim();
+    menteeEmail    = (body.menteeEmail ?? "").trim();
+    topic          = (body.topic       ?? "").trim();
+    date           = (body.date        ?? "").trim();
+    time           = (body.time        ?? "").trim();
+    language       = (body.language    ?? "").trim();
     durationMinutes = body.durationMinutes ?? 60;
-    priceCents      = body.priceCents ?? null;
+    priceCents     = body.priceCents ?? null;
+    isFreeSession  = body.isFreeSession ?? false;
     if (!mentorId || !menteeEmail || !date || !time) throw new Error("missing fields");
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
@@ -32,15 +35,20 @@ export async function POST(req: NextRequest) {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // Resolve mentee DB id
+  // Resolve mentee DB id + free_session_used flag
   const { data: menteeRow } = await client
     .from("mentees")
-    .select("id, nom")
+    .select("id, nom, free_session_used")
     .eq("email", menteeEmail)
-    .single() as { data: { id: string; nom: string } | null };
+    .single() as { data: { id: string; nom: string; free_session_used: boolean } | null };
 
   if (!menteeRow) {
     return NextResponse.json({ error: "Mentee account not found" }, { status: 404 });
+  }
+
+  // Guard the free-session path: reject if they've already used it
+  if (isFreeSession && menteeRow.free_session_used) {
+    return NextResponse.json({ error: "Free session already used" }, { status: 403 });
   }
 
   // Resolve mentor email and name
@@ -54,10 +62,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Mentor not found" }, { status: 404 });
   }
 
-  // Build the combined datetime ISO string for connexions
   const dateTimeIso = `${date}T${time}:00`;
 
-  // Insert into sessions table
+  // Insert session
   const { data: sessionRow, error: sessionErr } = await client
     .from("sessions")
     .insert({
@@ -69,7 +76,7 @@ export async function POST(req: NextRequest) {
       time,
       language:         language || null,
       duration_minutes: durationMinutes,
-      price_cents:      priceCents,
+      price_cents:      isFreeSession ? 0 : priceCents,
       status:           "pending",
     })
     .select("id")
@@ -80,17 +87,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
   }
 
-  // Also insert into connexions so the dashboard can display it
-  await client
-    .from("connexions")
-    .insert({
-      mentor_id: mentorId,
-      mentee_id: menteeRow.id,
-      statut:    "pending",
-      date:      dateTimeIso,
-    });
+  // Mark free session as used (atomically after successful insert)
+  if (isFreeSession) {
+    await client.from("mentees").update({ free_session_used: true }).eq("id", menteeRow.id);
+  }
 
-  // Send booking confirmation emails (to mentor + mentee)
+  // Also insert into connexions so the dashboard can display it
+  await client.from("connexions").insert({
+    mentor_id: mentorId,
+    mentee_id: menteeRow.id,
+    statut:    "pending",
+    date:      dateTimeIso,
+  });
+
+  // Send booking confirmation emails
   sendBookingConfirmation({
     mentorEmail: mentorRow.email,
     mentorNom:   mentorRow.nom,

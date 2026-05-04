@@ -41,38 +41,34 @@ function BookCTA({ mentorId, price, mentorScore }: {
 }) {
   const session = getUserSession();
 
-  const [subPlan,      setSubPlan]      = useState<string | null>(null);
-  const [sessionCount, setSessionCount] = useState<number | null>(null);
-  const [subLoading,   setSubLoading]   = useState(false);
+  // null = still loading
+  const [subPlan,         setSubPlan]         = useState<string | null>(null);
+  const [freeSessionUsed, setFreeSessionUsed] = useState<boolean | null>(null);
+  const [subLoading,      setSubLoading]      = useState(false);
 
   useEffect(() => {
     if (session?.role !== "mentee" || !session.email) return;
     setSubLoading(true);
     supabase
       .from("mentees")
-      .select("id")
+      .select("id, free_session_used")
       .eq("email", session.email)
       .single()
       .then(({ data: menteeRow }) => {
-        if (!menteeRow) { setSessionCount(0); setSubLoading(false); return; }
-        const menteeId = (menteeRow as { id: string }).id;
-        Promise.all([
-          supabase
-            .from("mentee_subscriptions")
-            .select("plan, status")
-            .eq("mentee_id", menteeId)
-            .eq("status", "active")
-            .order("created_at", { ascending: false })
-            .limit(1),
-          supabase
-            .from("sessions")
-            .select("id", { count: "exact", head: true })
-            .eq("mentee_id", menteeId),
-        ]).then(([subResult, countResult]) => {
-          setSubPlan((subResult.data?.[0] as { plan: string } | undefined)?.plan ?? null);
-          setSessionCount(countResult.count ?? 0);
-          setSubLoading(false);
-        });
+        if (!menteeRow) { setFreeSessionUsed(true); setSubLoading(false); return; }
+        const row = menteeRow as { id: string; free_session_used: boolean };
+        setFreeSessionUsed(row.free_session_used);
+        supabase
+          .from("mentee_subscriptions")
+          .select("plan, status")
+          .eq("mentee_id", row.id)
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .then(({ data }) => {
+            setSubPlan((data?.[0] as { plan: string } | undefined)?.plan ?? null);
+            setSubLoading(false);
+          });
       });
   }, [session?.role, session?.email]);
 
@@ -98,10 +94,9 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // Mentor role — no booking
   if (session.role !== "mentee") return null;
 
-  if (subLoading || sessionCount === null) {
+  if (subLoading || freeSessionUsed === null) {
     return (
       <div
         className="rounded-2xl p-6 border border-white/[0.06] animate-pulse h-24"
@@ -110,8 +105,8 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // No active subscription AND already used free session → upsell
-  if (!subPlan && sessionCount >= 1) {
+  // Free session used + no active subscription → upsell
+  if (freeSessionUsed && !subPlan) {
     return (
       <div
         className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -134,7 +129,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // Determine effective plan (free tier if no sub + no sessions yet)
+  // Score gating
   const effectivePlan = subPlan ?? "free";
   const scoreLimit    = PLAN_SCORE_LIMITS[effectivePlan] ?? 60;
   const mentorScoreN  = mentorScore ?? 0;
@@ -164,7 +159,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // All good — show book button
+  // All clear — book button
   return (
     <div
       className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -173,10 +168,10 @@ function BookCTA({ mentorId, price, mentorScore }: {
       <div>
         <p className="text-white font-semibold mb-0.5">Ready to start?</p>
         <p className="text-white/40 text-sm">
-          {!subPlan && sessionCount === 0
-            ? "Your first session is free — no subscription needed."
+          {!freeSessionUsed && !subPlan
+            ? "🎁 Your first session is free — no subscription needed."
             : "Take the first step toward your goals 🚀"}
-          {price != null && <span className="text-white/30"> · {price}€ / session</span>}
+          {price != null && subPlan && <span className="text-white/30"> · {price}€ / session</span>}
         </p>
       </div>
       <Link

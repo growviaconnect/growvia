@@ -58,27 +58,30 @@ const PAID_PLANS = [
 export default function SubscribePage() {
   const router  = useRouter();
   const session = getUserSession();
-  const [loading,     setLoading]     = useState<string | null>(null);
-  const [error,       setError]       = useState<string | null>(null);
-  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
-  const [planLoading, setPlanLoading] = useState(false);
+  const [loading,         setLoading]         = useState<string | null>(null);
+  const [error,           setError]           = useState<string | null>(null);
+  const [currentPlan,     setCurrentPlan]     = useState<string | null>(null);
+  const [freeSessionUsed, setFreeSessionUsed] = useState(false);
+  const [planLoading,     setPlanLoading]     = useState(false);
 
   useEffect(() => {
     if (!session?.email || session.role !== "mentee") return;
     setPlanLoading(true);
     supabase
-      .from("mentees").select("id").eq("email", session.email).single()
+      .from("mentees").select("id, free_session_used").eq("email", session.email).single()
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setCurrentPlan("free"); setPlanLoading(false); return; }
+        const row = menteeRow as { id: string; free_session_used: boolean };
+        setFreeSessionUsed(row.free_session_used);
         supabase
           .from("mentee_subscriptions")
           .select("plan, status")
-          .eq("mentee_id", (menteeRow as { id: string }).id)
+          .eq("mentee_id", row.id)
           .eq("status", "active")
           .order("created_at", { ascending: false })
           .limit(1)
           .then(({ data }) => {
-            setCurrentPlan((data?.[0] as { plan: string } | undefined)?.plan ?? "free");
+            setCurrentPlan((data?.[0] as { plan: string } | undefined)?.plan ?? (row.free_session_used ? null : "free"));
             setPlanLoading(false);
           });
       });
@@ -142,9 +145,10 @@ export default function SubscribePage() {
         </div>
 
         {/* Plan cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+        <div className={`grid grid-cols-1 gap-5 mb-10 ${freeSessionUsed ? "sm:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4"}`}>
 
-          {/* ── FREE card ── */}
+          {/* ── FREE card — only shown while free session is still available ── */}
+          {!freeSessionUsed && (
           <div
             className="relative rounded-2xl p-6 flex flex-col"
             style={{
@@ -195,6 +199,7 @@ export default function SubscribePage() {
               Start for free →
             </button>
           </div>
+          )}
 
           {/* ── Paid plan cards ── */}
           {PAID_PLANS.map(plan => (
