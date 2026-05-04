@@ -326,6 +326,7 @@ function DashboardContent() {
   const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack]       = useState(false);
   const [hasUsedFreeMatch, setHasUsedFreeMatch] = useState(false);
+  const [freeSessionUsed, setFreeSessionUsed]   = useState(false);
   const [menteeDbId, setMenteeDbId]         = useState<string | null>(null);
   const [menteeProfile, setMenteeProfile]   = useState<MenteeMatchProfile | null>(null);
   const [matches, setMatches]               = useState<MatchResult[]>([]);
@@ -463,7 +464,7 @@ function DashboardContent() {
         const table = us.role === "mentor" ? "mentors" : "mentees";
         const { data: profile } = await supabase
           .from(table)
-          .select("id, statut, onboarding_completed, has_used_free_ai_match, field, interests, main_goal")
+          .select("id, statut, onboarding_completed, has_used_free_ai_match, free_session_used, field, interests, main_goal")
           .eq("email", us.email)
           .single();
 
@@ -483,6 +484,7 @@ function DashboardContent() {
         if (us.role === "mentee" && profile) {
           setMenteeDbId(profile.id);
           setHasUsedFreeMatch(profile.has_used_free_ai_match ?? false);
+          setFreeSessionUsed(profile.free_session_used ?? false);
           setMenteeProfile({
             field: profile.field ?? null,
             interests: profile.interests ?? null,
@@ -1029,6 +1031,27 @@ function DashboardContent() {
                           </Link>
                         }
                       />
+                    )}
+
+                    {/* Free discovery session banner */}
+                    {!freeSessionUsed && (
+                      <div
+                        className="rounded-2xl p-5 border border-emerald-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        style={{ background: "rgba(16,185,129,0.06)" }}
+                      >
+                        <div>
+                          <p className="text-white font-semibold mb-0.5">🎁 You have 1 free discovery session!</p>
+                          <p className="text-white/45 text-sm">
+                            Book your first session with any mentor — completely free, no subscription needed.
+                          </p>
+                        </div>
+                        <Link
+                          href="/explore"
+                          className="flex-shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                          Find a mentor →
+                        </Link>
+                      </div>
                     )}
 
                     {user?.plan === "free" && (

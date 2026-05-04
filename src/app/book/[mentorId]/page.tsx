@@ -115,9 +115,9 @@ export default function BookingPage() {
 
   // ── Auth + subscription gate
   const session = getUserSession();
-  const [subChecked,    setSubChecked]    = useState(false);
-  const [hasSub,        setHasSub]        = useState(false);
-  const [sessionCount,  setSessionCount]  = useState(0);
+  const [subChecked,      setSubChecked]      = useState(false);
+  const [hasSub,          setHasSub]          = useState(false);
+  const [freeSessionUsed, setFreeSessionUsed] = useState(true); // pessimistic default
 
   useEffect(() => {
     if (!mentorId) return;
@@ -135,30 +135,25 @@ export default function BookingPage() {
     });
   }, [mentorId]);
 
-  // ── Subscription + session count gate
+  // ── Subscription + free-session gate
   useEffect(() => {
     if (!session?.email || session.role !== "mentee") { setSubChecked(true); return; }
     supabase
-      .from("mentees").select("id").eq("email", session.email).single()
+      .from("mentees").select("id, free_session_used").eq("email", session.email).single()
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setSubChecked(true); return; }
-        const menteeId = (menteeRow as { id: string }).id;
-        Promise.all([
-          supabase
-            .from("mentee_subscriptions")
-            .select("id")
-            .eq("mentee_id", menteeId)
-            .eq("status", "active")
-            .limit(1),
-          supabase
-            .from("sessions")
-            .select("id", { count: "exact", head: true })
-            .eq("mentee_id", menteeId),
-        ]).then(([subResult, countResult]) => {
-          setHasSub((subResult.data?.length ?? 0) > 0);
-          setSessionCount(countResult.count ?? 0);
-          setSubChecked(true);
-        });
+        const row = menteeRow as { id: string; free_session_used: boolean };
+        setFreeSessionUsed(row.free_session_used);
+        supabase
+          .from("mentee_subscriptions")
+          .select("id")
+          .eq("mentee_id", row.id)
+          .eq("status", "active")
+          .limit(1)
+          .then(({ data }) => {
+            setHasSub((data?.length ?? 0) > 0);
+            setSubChecked(true);
+          });
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.email]);
@@ -211,10 +206,13 @@ export default function BookingPage() {
   async function handleSubmit() {
     if (!selDate || !selTime) { setSubmitErr("Please pick a date and time."); return; }
     if (!session?.email) { router.push(`/auth/register?redirect=/book/${mentorId}`); return; }
-    if (!hasSub && sessionCount >= 1) { router.push("/subscribe"); return; }
+    // Must have either a free session available OR an active subscription
+    if (freeSessionUsed && !hasSub) { router.push("/subscribe"); return; }
 
     setSubmitting(true);
     setSubmitErr(null);
+
+    const isFreeSession = !freeSessionUsed && !hasSub;
 
     try {
       const res = await fetch("/api/sessions/create", {
@@ -228,7 +226,8 @@ export default function BookingPage() {
           time:            selTime,
           language,
           durationMinutes: duration,
-          priceCents:      sessionPrice != null ? Math.round(sessionPrice * 100) : null,
+          priceCents:      isFreeSession ? 0 : (sessionPrice != null ? Math.round(sessionPrice * 100) : null),
+          isFreeSession,
         }),
       });
       const json = (await res.json()) as { success?: boolean; error?: string };
@@ -259,8 +258,8 @@ export default function BookingPage() {
     );
   }
 
-  // Subscription gate — only block when free session already used
-  if (subChecked && !hasSub && sessionCount >= 1 && session?.role === "mentee") {
+  // Gate: block only when free session already used AND no active subscription
+  if (subChecked && freeSessionUsed && !hasSub && session?.role === "mentee") {
     return (
       <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-2xl">🚀</p>
