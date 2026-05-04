@@ -1260,7 +1260,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_cta: 'Postuler à GrowVia',
     founders_reason_label: "Notre raison d'être",
     founders_reason_title: "Deux étudiantes en management qui ont cherché des mentors — et décidé de construire ce qui manquait.",
-    founders_reason_sub: "Parce que la bonne connexion, au bon moment, change tout.",
+    founders_reason_sub: "Parce que personne ne devrait naviguer seul vers son futur.",
     founders_vision_label: 'Notre Vision',
     founders_vision_quote: "Nous croyons que connecter différentes générations crée une nouvelle façon de penser, où la sagesse rencontre l'ambition et où l'expérience accélère la croissance.",
     founders_vision_c1_title: 'Grandir Chaque Jour',
