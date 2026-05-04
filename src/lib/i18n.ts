@@ -33,11 +33,11 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Hero (home page)
     home_badge: 'Early Access · Free for founding members',
-    home_hero_eyebrow: 'Meet the',
+    home_hero_eyebrow: 'Find the',
     home_counter_label: 'active mentors',
     home_hero_title1: 'The mentor who',
     home_hero_title2: 'has been exactly',
-    home_hero_title3: 'where you want to go.',
+    home_hero_title3: "who's been exactly where you want to go.",
     home_hero_sub: 'GrowVia connects students and young professionals with experienced mentors via AI matching, in minutes.',
     home_hero_sub_pre: 'GrowVia connects students and young professionals with experienced mentors via AI matching, ',
     home_hero_sub_typed: 'in minutes.',
@@ -1097,11 +1097,11 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Hero (home page)
     home_badge: 'Accès Anticipé · Gratuit pour les premiers inscrits',
-    home_hero_eyebrow: 'Rencontrez le',
+    home_hero_eyebrow: 'Trouve le',
     home_counter_label: 'mentors actifs',
     home_hero_title1: 'Le mentor qui',
     home_hero_title2: 'a été exactement',
-    home_hero_title3: 'où tu veux aller.',
+    home_hero_title3: 'qui a été exactement là où tu veux aller.',
     home_hero_sub: "GrowVia connecte les étudiants et jeunes pros avec des professionnels expérimentés via un matching IA, en quelques minutes.",
     home_hero_sub_pre: "GrowVia connecte les étudiants et jeunes pros avec des professionnels expérimentés via un matching IA, ",
     home_hero_sub_typed: "en quelques minutes.",
@@ -2161,11 +2161,11 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Hero (home page)
     home_badge: 'Acceso Anticipado · Gratis para los primeros inscritos',
-    home_hero_eyebrow: 'Conoce al',
+    home_hero_eyebrow: 'Encuentra al',
     home_counter_label: 'mentores activos',
     home_hero_title1: 'El mentor que',
     home_hero_title2: 'estuvo exactamente',
-    home_hero_title3: 'donde tú quieres ir.',
+    home_hero_title3: 'que ha estado exactamente donde tú quieres ir.',
     home_hero_sub: 'GrowVia conecta estudiantes y jóvenes profesionales con mentores experimentados mediante matching IA, en minutos.',
     home_hero_sub_pre: 'GrowVia conecta estudiantes y jóvenes profesionales con mentores experimentados mediante matching IA, ',
     home_hero_sub_typed: 'en minutos.',
