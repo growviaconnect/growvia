@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, Crown, Loader2, ArrowLeft, Zap } from "lucide-react";
 import { getUserSession } from "@/lib/session";
+import { supabase } from "@/lib/supabase";
 
-const PLANS = [
+const PAID_PLANS = [
   {
-    key:         "basic",
-    label:       "Basic",
-    price:       "4.99",
-    priceNote:   "/ month",
-    tagline:     "Get started with mentoring",
-    scoreLimit:  75,
+    key:        "basic",
+    label:      "Basic",
+    price:      "4.99",
+    priceNote:  "/ month",
+    tagline:    "Get started with mentoring",
     features: [
       "Access to mentors (score ≤ 75)",
       "2–3 AI matchings per month",
@@ -24,12 +24,11 @@ const PLANS = [
     highlight: false,
   },
   {
-    key:         "standard",
-    label:       "Standard",
-    price:       "9.99",
-    priceNote:   "/ month",
-    tagline:     "Most popular for serious growth",
-    scoreLimit:  90,
+    key:        "standard",
+    label:      "Standard",
+    price:      "9.99",
+    priceNote:  "/ month",
+    tagline:    "Most popular for serious growth",
     features: [
       "Access to mentors (score ≤ 90)",
       "Extended AI matching",
@@ -40,12 +39,11 @@ const PLANS = [
     highlight: true,
   },
   {
-    key:         "premium",
-    label:       "Premium",
-    price:       "14.99",
-    priceNote:   "/ month",
-    tagline:     "Unlimited access, top mentors",
-    scoreLimit:  100,
+    key:        "premium",
+    label:      "Premium",
+    price:      "14.99",
+    priceNote:  "/ month",
+    tagline:    "Unlimited access, top mentors",
     features: [
       "Access to ALL mentors",
       "Unlimited AI matching",
@@ -60,8 +58,31 @@ const PLANS = [
 export default function SubscribePage() {
   const router  = useRouter();
   const session = getUserSession();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error,   setError]   = useState<string | null>(null);
+  const [loading,     setLoading]     = useState<string | null>(null);
+  const [error,       setError]       = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [planLoading, setPlanLoading] = useState(false);
+
+  useEffect(() => {
+    if (!session?.email || session.role !== "mentee") return;
+    setPlanLoading(true);
+    supabase
+      .from("mentees").select("id").eq("email", session.email).single()
+      .then(({ data: menteeRow }) => {
+        if (!menteeRow) { setCurrentPlan("free"); setPlanLoading(false); return; }
+        supabase
+          .from("mentee_subscriptions")
+          .select("plan, status")
+          .eq("mentee_id", (menteeRow as { id: string }).id)
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .then(({ data }) => {
+            setCurrentPlan((data?.[0] as { plan: string } | undefined)?.plan ?? "free");
+            setPlanLoading(false);
+          });
+      });
+  }, [session?.email, session?.role]);
 
   async function handleSubscribe(plan: string) {
     if (!session?.email) {
@@ -85,6 +106,8 @@ export default function SubscribePage() {
     }
   }
 
+  const isCurrent = (key: string) => !planLoading && currentPlan === key;
+
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
       {/* Background glow */}
@@ -93,7 +116,7 @@ export default function SubscribePage() {
         style={{ background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 70%)" }}
       />
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-24">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-24">
 
         {/* Back */}
         <Link
@@ -114,24 +137,91 @@ export default function SubscribePage() {
             <span style={{ color: "#A78BFA" }}>mentor network</span>
           </h1>
           <p className="text-white/50 text-lg max-w-xl mx-auto">
-            Subscribe once and book unlimited sessions at per-session rates. Your card is saved — sessions are charged automatically when the mentor confirms.
+            Start for free, upgrade when you&apos;re ready. Your card is saved on subscription — sessions are charged automatically when the mentor confirms.
           </p>
         </div>
 
         {/* Plan cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-          {PLANS.map(plan => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+
+          {/* ── FREE card ── */}
+          <div
+            className="relative rounded-2xl p-6 flex flex-col"
+            style={{
+              background: "#13111F",
+              border: isCurrent("free")
+                ? "1px solid rgba(124,58,237,0.45)"
+                : "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            {isCurrent("free") && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap"
+                  style={{ background: "#7C3AED", color: "#fff" }}
+                >
+                  Your current plan
+                </span>
+              </div>
+            )}
+
+            <div className="mb-5">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/35 mb-3">Free</p>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-4xl font-extrabold text-white">0€</span>
+                <span className="text-sm text-white/40">/ forever</span>
+              </div>
+              <p className="text-sm text-white/45 mt-1.5">Dip your toes in</p>
+            </div>
+
+            <ul className="space-y-2.5 mb-8 flex-1">
+              {[
+                "1 discovery session",
+                "See some mentors (score ≤ 60)",
+                "1 AI matching max",
+              ].map(f => (
+                <li key={f} className="flex items-start gap-2.5 text-sm text-white/65">
+                  <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#6D5CAE" }} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => router.push("/explore")}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all"
+              style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.35)" }}
+            >
+              Start for free →
+            </button>
+          </div>
+
+          {/* ── Paid plan cards ── */}
+          {PAID_PLANS.map(plan => (
             <div
               key={plan.key}
               className="relative rounded-2xl p-6 flex flex-col transition-all duration-300"
               style={{
-                background:  plan.highlight ? "rgba(124,58,237,0.12)" : "#13111F",
-                border:      plan.highlight
-                  ? "1px solid rgba(124,58,237,0.45)"
-                  : "1px solid rgba(255,255,255,0.07)",
+                background: plan.highlight ? "rgba(124,58,237,0.12)" : "#13111F",
+                border: isCurrent(plan.key)
+                  ? "1px solid rgba(124,58,237,0.6)"
+                  : plan.highlight
+                    ? "1px solid rgba(124,58,237,0.45)"
+                    : "1px solid rgba(255,255,255,0.07)",
               }}
             >
-              {plan.highlight && (
+              {isCurrent(plan.key) && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap"
+                    style={{ background: "#7C3AED", color: "#fff" }}
+                  >
+                    Your current plan
+                  </span>
+                </div>
+              )}
+
+              {plan.highlight && !isCurrent(plan.key) && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span
                     className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full"
@@ -168,17 +258,17 @@ export default function SubscribePage() {
               {/* CTA */}
               <button
                 onClick={() => handleSubscribe(plan.key)}
-                disabled={loading !== null}
+                disabled={loading !== null || isCurrent(plan.key)}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-60"
                 style={{
-                  background: plan.highlight
-                    ? "#7C3AED"
-                    : "rgba(124,58,237,0.25)",
+                  background: plan.highlight ? "#7C3AED" : "rgba(124,58,237,0.25)",
                   border: plan.highlight ? "none" : "1px solid rgba(124,58,237,0.35)",
                 }}
               >
                 {loading === plan.key ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting…</>
+                ) : isCurrent(plan.key) ? (
+                  "Current plan"
                 ) : (
                   `Start ${plan.label}`
                 )}

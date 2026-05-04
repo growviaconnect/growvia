@@ -115,8 +115,9 @@ export default function BookingPage() {
 
   // ── Auth + subscription gate
   const session = getUserSession();
-  const [subChecked, setSubChecked] = useState(false);
-  const [hasSub,     setHasSub]     = useState(false);
+  const [subChecked,    setSubChecked]    = useState(false);
+  const [hasSub,        setHasSub]        = useState(false);
+  const [sessionCount,  setSessionCount]  = useState(0);
 
   useEffect(() => {
     if (!mentorId) return;
@@ -134,23 +135,30 @@ export default function BookingPage() {
     });
   }, [mentorId]);
 
-  // ── Subscription gate: redirect to /subscribe if no active sub
+  // ── Subscription + session count gate
   useEffect(() => {
     if (!session?.email || session.role !== "mentee") { setSubChecked(true); return; }
     supabase
       .from("mentees").select("id").eq("email", session.email).single()
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setSubChecked(true); return; }
-        supabase
-          .from("mentee_subscriptions")
-          .select("id")
-          .eq("mentee_id", (menteeRow as { id: string }).id)
-          .eq("status", "active")
-          .limit(1)
-          .then(({ data }) => {
-            setHasSub((data?.length ?? 0) > 0);
-            setSubChecked(true);
-          });
+        const menteeId = (menteeRow as { id: string }).id;
+        Promise.all([
+          supabase
+            .from("mentee_subscriptions")
+            .select("id")
+            .eq("mentee_id", menteeId)
+            .eq("status", "active")
+            .limit(1),
+          supabase
+            .from("sessions")
+            .select("id", { count: "exact", head: true })
+            .eq("mentee_id", menteeId),
+        ]).then(([subResult, countResult]) => {
+          setHasSub((subResult.data?.length ?? 0) > 0);
+          setSessionCount(countResult.count ?? 0);
+          setSubChecked(true);
+        });
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.email]);
@@ -203,7 +211,7 @@ export default function BookingPage() {
   async function handleSubmit() {
     if (!selDate || !selTime) { setSubmitErr("Please pick a date and time."); return; }
     if (!session?.email) { router.push(`/auth/register?redirect=/book/${mentorId}`); return; }
-    if (!hasSub)          { router.push("/subscribe"); return; }
+    if (!hasSub && sessionCount >= 1) { router.push("/subscribe"); return; }
 
     setSubmitting(true);
     setSubmitErr(null);
@@ -251,18 +259,21 @@ export default function BookingPage() {
     );
   }
 
-  // Subscription gate — redirect only after check is complete (avoids flash)
-  if (subChecked && !hasSub && session?.role === "mentee") {
+  // Subscription gate — only block when free session already used
+  if (subChecked && !hasSub && sessionCount >= 1 && session?.role === "mentee") {
     return (
       <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-white font-semibold text-lg">A subscription is required to book sessions.</p>
-        <p className="text-white/40 text-sm max-w-xs">Subscribe from 4.99€/month. Your card is saved and sessions are charged automatically when confirmed.</p>
+        <p className="text-2xl">🚀</p>
+        <p className="text-white font-semibold text-lg">You&apos;ve used your free session!</p>
+        <p className="text-white/40 text-sm max-w-xs">
+          Subscribe to keep growing — from 4.99€/month. Your card is saved and sessions are charged automatically when the mentor confirms.
+        </p>
         <Link
           href="/subscribe"
           className="mt-2 px-6 py-3 rounded-xl text-sm font-bold text-white"
           style={{ background: "#7C3AED" }}
         >
-          View plans →
+          Choose a plan →
         </Link>
       </div>
     );
