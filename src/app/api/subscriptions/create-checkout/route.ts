@@ -24,12 +24,13 @@ export async function POST(req: NextRequest) {
   const stripe = getStripe();
   if (!stripe) return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
 
-  let plan: string, email: string, menteeId: string;
+  let plan: string, email: string, menteeId: string, redirectUrl: string;
   try {
-    const body = await req.json() as { plan: string; email: string; menteeId?: string };
-    plan     = (body.plan     ?? "").trim().toLowerCase();
-    email    = (body.email    ?? "").trim();
-    menteeId = (body.menteeId ?? "").trim();
+    const body = await req.json() as { plan: string; email: string; menteeId?: string; redirectUrl?: string };
+    plan        = (body.plan        ?? "").trim().toLowerCase();
+    email       = (body.email       ?? "").trim();
+    menteeId    = (body.menteeId    ?? "").trim();
+    redirectUrl = (body.redirectUrl ?? "").trim();
     if (!plan || !email) throw new Error("missing fields");
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
@@ -73,8 +74,8 @@ export async function POST(req: NextRequest) {
     // Save card for future off-session charges (session payments)
     payment_method_collection: "always",
     metadata: { plan, mentee_email: email, ...(menteeId ? { mentee_id: menteeId } : {}) },
-    success_url: `${origin}/subscribe/success?plan=${plan}`,
-    cancel_url:  `${origin}/subscribe`,
+    success_url: `${origin}/subscribe/success?plan=${plan}${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ""}`,
+    cancel_url:  `${origin}/subscribe${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ""}`,
   });
 
   return NextResponse.json({ url: session.url });

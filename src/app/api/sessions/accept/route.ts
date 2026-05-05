@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     .select("id, price_cents, mentee_email")
     .eq("mentor_id", conn.mentor_id)
     .eq("mentee_id", conn.mentee_id)
-    .in("status", ["pending", "paid"])
+    .in("status", ["pending", "rescheduled"])
     .order("created_at", { ascending: false })
     .limit(1)
     .single() as {
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
     await client
       .from("sessions")
       .update({
-        status:             "paid",
+        status:             "confirmed",
         ...(meetLink         ? { meet_link: meetLink }               : {}),
         ...(paymentIntentId  ? { payment_intent_id: paymentIntentId } : {}),
       })
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
     await client
       .from("sessions")
       .update({
-        status:             "paid",
+        status:             "confirmed",
         ...(meetLink         ? { meet_link: meetLink }               : {}),
         ...(paymentIntentId  ? { payment_intent_id: paymentIntentId } : {}),
       })

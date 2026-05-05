@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Check, Crown, Loader2, ArrowLeft, Zap } from "lucide-react";
 import { getUserSession } from "@/lib/session";
@@ -55,9 +55,11 @@ const PAID_PLANS = [
   },
 ] as const;
 
-export default function SubscribePage() {
-  const router  = useRouter();
-  const session = getUserSession();
+function SubscribeContent() {
+  const router      = useRouter();
+  const params      = useSearchParams();
+  const redirectUrl = params.get("redirect") ?? "";
+  const session     = getUserSession();
   const [loading,         setLoading]         = useState<string | null>(null);
   const [error,           setError]           = useState<string | null>(null);
   const [currentPlan,     setCurrentPlan]     = useState<string | null>(null);
@@ -100,7 +102,7 @@ export default function SubscribePage() {
       const res = await fetch("/api/subscriptions/create-checkout", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ plan, email: session.email, ...(menteeId ? { menteeId } : {}) }),
+        body:    JSON.stringify({ plan, email: session.email, ...(menteeId ? { menteeId } : {}), ...(redirectUrl ? { redirectUrl } : {}) }),
       });
       const data = await res.json() as { url?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
@@ -308,5 +310,13 @@ export default function SubscribePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SubscribePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0D0A1A]" />}>
+      <SubscribeContent />
+    </Suspense>
   );
 }

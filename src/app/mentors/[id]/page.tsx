@@ -105,8 +105,9 @@ function BookCTA({ mentorId, price, mentorScore }: {
     );
   }
 
-  // Free session used + no active subscription → upsell
+  // Free session used + no active subscription → upsell (pass redirect so user returns here after subscribing)
   if (freeSessionUsed && !subPlan) {
+    const subscribeUrl = `/subscribe?redirect=/mentors/${mentorId}`;
     return (
       <div
         className="rounded-2xl p-6 border border-[#7C3AED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -119,7 +120,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
           </p>
         </div>
         <Link
-          href="/subscribe"
+          href={subscribeUrl}
           className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
           style={{ background: "#7C3AED" }}
         >
@@ -136,7 +137,8 @@ function BookCTA({ mentorId, price, mentorScore }: {
   const scoreBlocked  = mentorScoreN > 0 && mentorScoreN > scoreLimit;
 
   if (scoreBlocked) {
-    const requiredPlan = mentorScoreN <= 75 ? "Basic" : mentorScoreN <= 90 ? "Standard" : "Premium";
+    const requiredPlan  = mentorScoreN <= 75 ? "Basic" : mentorScoreN <= 90 ? "Standard" : "Premium";
+    const upgradeUrl    = `/subscribe?redirect=/mentors/${mentorId}`;
     return (
       <div
         className="rounded-2xl p-6 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -149,7 +151,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
           </p>
         </div>
         <Link
-          href="/subscribe"
+          href={upgradeUrl}
           className="flex items-center gap-2 text-sm font-semibold text-white px-5 py-3 rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
           style={{ background: "#7C3AED" }}
         >

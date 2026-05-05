@@ -426,3 +426,37 @@ export async function sendPaymentFailedEmail(params: PaymentFailedParams) {
     html:    layout(body),
   });
 }
+
+// ─── 9. Mentor proposes a new session time ────────────────────────────────────
+
+export async function sendProposeNewTime(params: {
+  menteeEmail: string;
+  menteeNom:   string;
+  mentorNom:   string;
+  newDateIso:  string;
+}) {
+  const { menteeEmail, menteeNom, mentorNom, newDateIso } = params;
+  const formattedDate = formatDate(newDateIso);
+  const dashUrl       = `${BASE_URL}/dashboard`;
+
+  const body = `
+    ${badge("#F59E0B", "New time proposed")}
+    <br/><br/>
+    ${h1("Your mentor proposed a new time")}
+    ${p(`Hi ${menteeNom}, <strong>${mentorNom}</strong> has suggested a different time for your session.`)}
+    ${infoBox(highlight("Proposed date & time", formattedDate))}
+    ${p("Go to your dashboard to accept or decline the new time.")}
+    ${btn("View on dashboard →", dashUrl)}
+    <br/>
+    ${p(`If you decline, your session request will be cancelled and you'll be free to book with another mentor.`)}
+  `;
+
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({
+    from:    FROM,
+    to:      menteeEmail,
+    subject: `${mentorNom} proposed a new session time`,
+    html:    layout(body),
+  });
+}

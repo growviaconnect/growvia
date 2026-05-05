@@ -19,7 +19,7 @@ type Tab = "overview" | "sessions" | "saved" | "matching" | "mentees" | "calenda
 type Connexion = {
   id: string;
   date: string;
-  statut: "pending" | "active" | "completed" | "cancelled";
+  statut: "pending" | "active" | "completed" | "cancelled" | "rescheduled";
   meet_link?: string | null;
   mentors: { nom: string; email: string; specialite: string | null } | null;
   mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
@@ -344,6 +344,12 @@ function DashboardContent() {
   const [mentorSessionTab, setMentorSessionTab] = useState<"pending" | "upcoming" | "past">("pending");
   const [actionLoading, setActionLoading]       = useState<string | null>(null);
   const [mentorDbId, setMentorDbId]             = useState<string | null>(null);
+
+  // Propose new time modal state
+  const [proposeModal, setProposeModal]   = useState<string | null>(null); // connexionId
+  const [proposeDate, setProposeDate]     = useState("");
+  const [proposeTime, setProposeTime]     = useState("");
+  const [proposeLoading, setProposeLoading] = useState(false);
 
   // Nav items, defined inside component so they react to lang changes
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
@@ -685,14 +691,15 @@ function DashboardContent() {
 
   // Derived data
   const upcoming = connexions.filter(
-    (c) => ["pending", "active"].includes(c.statut) && new Date(c.date) >= new Date()
+    (c) => ["pending", "active", "rescheduled"].includes(c.statut) && new Date(c.date) >= new Date()
   );
   const past = connexions.filter(
     (c) => c.statut === "completed" || (c.statut !== "cancelled" && new Date(c.date) < new Date())
   );
 
   // Mentor-derived data
-  const mentorPending  = connexions.filter(c => c.statut === "pending");
+  const mentorPending     = connexions.filter(c => c.statut === "pending");
+  const mentorRescheduled = connexions.filter(c => c.statut === "rescheduled");
   const mentorUpcoming = connexions.filter(
     c => c.statut === "active" && new Date(c.date) >= new Date()
   );
@@ -747,6 +754,70 @@ function DashboardContent() {
     }
   }
 
+  async function handleProposeTime() {
+    if (!proposeModal || !proposeDate || !proposeTime) return;
+    setProposeLoading(true);
+    try {
+      const res = await fetch("/api/sessions/modify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: proposeModal, newDate: proposeDate, newTime: proposeTime }),
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+      setConnexions(prev => prev.map(c =>
+        c.id === proposeModal ? { ...c, statut: "rescheduled" as const } : c
+      ));
+      setProposeModal(null);
+    } catch (err) {
+      console.error("[propose-time]", err);
+    } finally {
+      setProposeLoading(false);
+    }
+  }
+
+  async function handleAcceptRetime(connId: string) {
+    setActionLoading(connId);
+    try {
+      const res = await fetch("/api/sessions/accept-retime", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      const json = (await res.json()) as { success?: boolean; meetLink?: string | null; error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      setConnexions(prev => prev.map(c =>
+        c.id === connId ? { ...c, statut: "active" as const, meet_link: json.meetLink ?? null } : c
+      ));
+    } catch (err) {
+      console.error("[accept-retime]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleDeclineRetime(connId: string) {
+    setActionLoading(connId);
+    try {
+      const res = await fetch("/api/sessions/decline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+      setConnexions(prev => prev.filter(c => c.id !== connId));
+    } catch (err) {
+      console.error("[decline-retime]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   const firstName = (user?.nom ?? "").split(" ")[0] || "there";
   const userInitials = initials(user?.nom ?? "?");
 
@@ -760,6 +831,53 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
+
+      {/* ── Propose new time modal ─────────────────────────────────────── */}
+      {proposeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] p-6"
+            style={{ background: "#1a1530" }}>
+            <h2 className="font-bold text-white text-lg mb-1">Propose a new time</h2>
+            <p className="text-white/40 text-sm mb-5">The mentee will receive an email to accept or decline.</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-white/50 mb-1.5">Date</label>
+                <input
+                  type="date"
+                  value={proposeDate}
+                  onChange={e => setProposeDate(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#7C3AED]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-white/50 mb-1.5">Time</label>
+                <input
+                  type="time"
+                  value={proposeTime}
+                  onChange={e => setProposeTime(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#7C3AED]"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setProposeModal(null)}
+                className="flex-1 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleProposeTime}
+                disabled={!proposeDate || !proposeTime || proposeLoading}
+                className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {proposeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Send proposal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-6">
 
@@ -1033,6 +1151,27 @@ function DashboardContent() {
                       />
                     )}
 
+                    {/* Trial-over banner */}
+                    {hasUsedFreeMatch && freeSessionUsed && user?.plan === "free" && (
+                      <div
+                        className="rounded-2xl p-5 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        style={{ background: "rgba(245,158,11,0.06)" }}
+                      >
+                        <div>
+                          <p className="text-white font-semibold mb-0.5">Your free trial is over.</p>
+                          <p className="text-white/45 text-sm">
+                            Subscribe to continue booking sessions and using AI matching.
+                          </p>
+                        </div>
+                        <Link
+                          href="/subscribe"
+                          className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                          Subscribe →
+                        </Link>
+                      </div>
+                    )}
+
                     {/* Free discovery session banner */}
                     {!freeSessionUsed && (
                       <div
@@ -1113,10 +1252,46 @@ function DashboardContent() {
                       ))}
                     </div>
 
-                    {/* Pending requests */}
+                    {/* Pending requests + rescheduled awaiting mentee */}
                     {mentorSessionTab === "pending" && (
-                      mentorPending.length > 0 ? (
-                        <div className="space-y-3">
+                      mentorPending.length > 0 || mentorRescheduled.length > 0 ? (
+                        <div className="space-y-6">
+                          {/* Awaiting mentee acceptance (rescheduled) */}
+                          {mentorRescheduled.length > 0 && (
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Awaiting mentee response</p>
+                              <div className="space-y-3">
+                                {mentorRescheduled.map(c => (
+                                  <Card key={c.id} className="p-5">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                        style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                        {initials(c.mentees?.nom ?? "?")}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</span>
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                            style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
+                                            New time proposed
+                                          </span>
+                                        </div>
+                                        <div className="text-xs text-white/40 mt-0.5">
+                                          {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Card>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* New requests awaiting mentor action */}
+                          {mentorPending.length > 0 && (
+                            <div>
+                              {mentorRescheduled.length > 0 && <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">New requests</p>}
+                              <div className="space-y-3">
                           {mentorPending.map(c => (
                             <Card key={c.id} className="p-5">
                               <div className="flex items-start gap-4">
@@ -1140,7 +1315,9 @@ function DashboardContent() {
                                       {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                                       Decline
                                     </button>
-                                    <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+                                    <button
+                                      onClick={() => { setProposeDate(""); setProposeTime(""); setProposeModal(c.id); }}
+                                      className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
                                       <CalendarRange className="w-3.5 h-3.5" /> Propose new time
                                     </button>
                                   </div>
@@ -1148,6 +1325,9 @@ function DashboardContent() {
                               </div>
                             </Card>
                           ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <EmptyState icon={CalendarCheck} title="No pending requests" desc="New session requests from mentees will appear here." />
@@ -1230,13 +1410,56 @@ function DashboardContent() {
                     )}
                   </>
                 ) : (
-                  /* ── Mentee sessions view (unchanged) ──────────────────── */
+                  /* ── Mentee sessions view ───────────────────────────────── */
                   <>
+                    {/* Rescheduled — awaiting mentee response */}
+                    {upcoming.filter(c => c.statut === "rescheduled").length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">New time proposed</p>
+                        <div className="space-y-3">
+                          {upcoming.filter(c => c.statut === "rescheduled").map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-start gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                  {initials(c.mentors?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="font-semibold text-white text-sm">{c.mentors?.nom ?? "Mentor"}</span>
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                      style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
+                                      New time proposed
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-white/40 mt-0.5 mb-3">
+                                    {c.mentors?.specialite ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button onClick={() => handleAcceptRetime(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                      Accept new time
+                                    </button>
+                                    <button onClick={() => handleDeclineRetime(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                                      Decline
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
-                      {upcoming.length > 0 ? (
+                      {upcoming.filter(c => c.statut !== "rescheduled").length > 0 ? (
                         <div className="space-y-3">
-                          {upcoming.map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
+                          {upcoming.filter(c => c.statut !== "rescheduled").map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
                         </div>
                       ) : (
                         <EmptyState icon={CalendarCheck} title={t("dash_no_sessions")} desc={t("dash_no_sessions_desc")}

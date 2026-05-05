@@ -1,9 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, ArrowRight, Users } from "lucide-react";
-import { Suspense } from "react";
+import { CheckCircle, ArrowRight } from "lucide-react";
 
 const PLAN_LABELS: Record<string, string> = {
   basic:    "Basic",
@@ -12,15 +12,23 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 function SuccessContent() {
-  const params = useSearchParams();
-  const plan   = params.get("plan") ?? "";
-  const label  = PLAN_LABELS[plan] ?? "Premium";
+  const params      = useSearchParams();
+  const router      = useRouter();
+  const plan        = params.get("plan") ?? "";
+  const redirectUrl = params.get("redirect") ?? "";
+  const label       = PLAN_LABELS[plan] ?? "Premium";
+
+  // Auto-redirect back to mentor page after 3 s if a redirect URL was passed
+  useEffect(() => {
+    if (!redirectUrl) return;
+    const timer = setTimeout(() => router.push(redirectUrl), 3000);
+    return () => clearTimeout(timer);
+  }, [redirectUrl, router]);
 
   return (
     <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
 
-        {/* Icon */}
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8"
           style={{ background: "rgba(124,58,237,0.12)", border: "2px solid rgba(124,58,237,0.3)" }}
@@ -35,38 +43,29 @@ function SuccessContent() {
           Your <span className="text-[#A78BFA] font-semibold">{label}</span> subscription is active.
         </p>
         <p className="text-white/35 text-sm mb-10">
-          Your card is saved for session payments — mentors will charge automatically when they confirm.
+          Your card is saved — sessions are charged automatically when a mentor confirms.
         </p>
 
-        {/* Info card */}
-        <div
-          className="rounded-2xl p-6 mb-8 text-left space-y-3"
-          style={{ background: "#13111F", border: "1px solid rgba(255,255,255,0.07)" }}
-        >
-          <div className="flex items-start gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{ background: "rgba(124,58,237,0.12)" }}
+        {redirectUrl ? (
+          <>
+            <p className="text-white/40 text-sm mb-6">Returning to your mentor in a moment…</p>
+            <Link
+              href={redirectUrl}
+              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+              style={{ background: "#7C3AED" }}
             >
-              <Users className="w-4 h-4 text-[#A78BFA]" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-white mb-1">What&apos;s next?</p>
-              <p className="text-sm text-white/50 leading-relaxed">
-                Browse mentors, pick one that fits your goals, and book a session. Your mentor
-                will confirm and a Google Meet link will be sent to both of you.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <Link
-          href="/explore/find-a-mentor"
-          className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-          style={{ background: "#7C3AED" }}
-        >
-          Find a mentor <ArrowRight className="w-4 h-4" />
-        </Link>
+              Book a session now <ArrowRight className="w-4 h-4" />
+            </Link>
+          </>
+        ) : (
+          <Link
+            href="/explore"
+            className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+            style={{ background: "#7C3AED" }}
+          >
+            Find a mentor <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
 
         <Link
           href="/dashboard"
@@ -74,7 +73,6 @@ function SuccessContent() {
         >
           Go to my dashboard
         </Link>
-
       </div>
     </div>
   );
