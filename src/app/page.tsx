@@ -126,11 +126,11 @@ export default function HomePage() {
                   </p>
                   <h1
                     className="font-extrabold text-white leading-[0.82] tracking-tighter whitespace-nowrap"
-                    style={{ fontSize: "clamp(80px, 16vw, 230px)" }}
+                    style={{ fontSize: "clamp(80px, 12vw, 160px)" }}
                   >
                     mentor.
                   </h1>
-                  <p className="text-xl md:text-2xl font-semibold text-white/50 mt-5 leading-snug max-w-sm">
+                  <p className="text-lg md:text-xl font-semibold text-white/50 mt-5 leading-snug max-w-lg">
                     {t("home_hero_title3")}
                   </p>
                 </div>
