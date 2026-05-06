@@ -8,13 +8,13 @@ import { getUserSession, type UserSession } from "@/lib/session";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LangContext";
 import {
-  CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
+  CalendarCheck, Sparkles, User, Clock, Video,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
   Users, CheckCircle, XCircle, CalendarRange,
 } from "lucide-react";
 import AvailabilitySelector from "@/components/AvailabilitySelector";
 
-type Tab = "overview" | "sessions" | "saved" | "matching" | "mentees" | "calendar";
+type Tab = "overview" | "sessions" | "matching" | "mentees" | "calendar";
 
 type Connexion = {
   id: string;
@@ -363,12 +363,10 @@ function DashboardContent() {
       : [
           { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
           { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
-          { id: "saved",    label: t("dash_nav_saved"),    icon: Heart         },
           { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
         ];
   const secondaryNav = [
     { href: "/profile",  label: t("dash_nav_profile"),  icon: User     },
-    ...(user?.role !== "mentor" ? [{ href: "/calendar", label: t("dash_nav_calendar"), icon: CalendarRange }] : []),
     { href: "/settings", label: t("dash_nav_settings"), icon: Settings },
   ];
 
@@ -1469,26 +1467,6 @@ function DashboardContent() {
                     )}
                   </>
                 )}
-              </div>
-            )}
-
-            {/* SAVED MENTORS */}
-            {tab === "saved" && (
-              <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_saved_title")}</h1>
-                <EmptyState
-                  icon={Heart}
-                  title={t("dash_no_saved")}
-                  desc={t("dash_no_saved_desc")}
-                  action={
-                    <Link
-                      href="/explore"
-                      className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                    >
-                      <BookOpen className="w-4 h-4" /> {t("dash_browse_mentors")}
-                    </Link>
-                  }
-                />
               </div>
             )}
 
