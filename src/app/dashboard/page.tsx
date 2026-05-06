@@ -8,7 +8,7 @@ import { getUserSession, type UserSession } from "@/lib/session";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LangContext";
 import {
-  CalendarCheck, Sparkles, User, Clock, Video,
+  CalendarCheck, Heart, Sparkles, User, Clock, Video,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
   Users, CheckCircle, XCircle, CalendarRange,
 } from "lucide-react";
@@ -366,6 +366,7 @@ function DashboardContent() {
           { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
         ];
   const secondaryNav = [
+    ...(user?.role !== "mentor" ? [{ href: "/dashboard/saved-mentors", label: "Saved Mentors", icon: Heart }] : []),
     { href: "/profile",  label: t("dash_nav_profile"),  icon: User     },
     { href: "/settings", label: t("dash_nav_settings"), icon: Settings },
   ];

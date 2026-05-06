@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Sparkles, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import SaveMentorButton from "@/components/SaveMentorButton";
 
 type MentorRow = {
   id: string;
@@ -21,11 +22,18 @@ function initials(name: string) {
 function MentorCard({ mentor }: { mentor: MentorRow }) {
   return (
     <div
-      className="rounded-2xl p-6 border border-white/[0.08] flex flex-col gap-4 hover:border-[#7C3AED]/40 transition-colors duration-300"
+      className="rounded-2xl p-6 border border-white/[0.08] flex flex-col gap-4 hover:border-[#7C3AED]/40 transition-colors duration-300 relative"
       style={{ background: "#13111F" }}
     >
+      {/* Heart save button */}
+      <SaveMentorButton
+        mentorId={mentor.id}
+        size="w-4 h-4"
+        className="absolute top-4 right-4 w-8 h-8"
+      />
+
       {/* Identity */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 pr-10">
         {mentor.photo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mentor.photo_url} alt={mentor.nom} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />

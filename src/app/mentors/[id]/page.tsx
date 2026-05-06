@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare, MapPin, Monitor, Crown } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
+import SaveMentorButton from "@/components/SaveMentorButton";
 
 const PLAN_SCORE_LIMITS: Record<string, number> = {
   free:     60,
@@ -323,6 +324,7 @@ export default function MentorProfilePage() {
                 <p className="text-xs text-white/30 mt-1">{mentor.industry}</p>
               )}
             </div>
+            <SaveMentorButton mentorId={id} size="w-5 h-5" className="w-10 h-10 flex-shrink-0" />
           </div>
 
           {/* Badges — price + seniority only (no score on public view) */}
