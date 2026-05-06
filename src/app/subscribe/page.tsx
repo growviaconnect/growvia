@@ -1,4 +1,5 @@
 "use client";
+// v2 — redesign FR
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
