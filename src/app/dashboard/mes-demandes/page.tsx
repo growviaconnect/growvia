@@ -230,7 +230,7 @@ export default function MesDemandesPage() {
           href="/dashboard"
           className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors mb-6"
         >
-          <ArrowLeft className="w-4 h-4" /> Retour au tableau de bord
+          <ArrowLeft className="w-4 h-4" /> Mon Espace
         </Link>
         <div className="flex items-center gap-3">
           <div
