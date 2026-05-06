@@ -286,6 +286,12 @@ export default function MentorOnboarding() {
       const { data: existing } = await supabase
         .from("mentors").select("*").eq("id", user.id).single();
 
+      // Already completed — never show the form again
+      if (existing?.onboarding_completed === true) {
+        window.location.href = "/dashboard";
+        return;
+      }
+
       if (existing) {
         setS1({
           nom:               existing.nom               ?? metaName,

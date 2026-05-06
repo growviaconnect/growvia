@@ -44,14 +44,16 @@ function LoginContent() {
       setSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
       setAuthCookie();
 
-      // Mentors who haven't completed onboarding go directly to the questionnaire
+      // Mentors who haven't completed onboarding go directly to the questionnaire.
+      // Only redirect when the row was found and onboarding_completed is explicitly
+      // false/null — skip the redirect if the query returns no row (avoid loops).
       if (role === "mentor") {
         const { data: mentorRow } = await supabase
           .from("mentors")
           .select("onboarding_completed")
           .eq("email", user.email!)
           .single();
-        if (!mentorRow?.onboarding_completed) {
+        if (mentorRow && !mentorRow.onboarding_completed) {
           router.replace("/onboarding/mentor");
           return;
         }

@@ -476,8 +476,10 @@ function DashboardContent() {
           .eq("email", us.email)
           .single();
 
-        // Mentors who haven't completed onboarding always go back to the questionnaire
-        if (us.role === "mentor" && !justOnboarded && !profile?.onboarding_completed) {
+        // Only redirect to onboarding when we have a valid profile row that
+        // explicitly lacks onboarding_completed — never redirect on a null result
+        // (which could be an RLS block or network error) to prevent redirect loops.
+        if (us.role === "mentor" && !justOnboarded && profile && !profile.onboarding_completed) {
           router.push("/onboarding/mentor");
           return;
         }
