@@ -692,7 +692,7 @@ export default function SettingsPage() {
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.purpleL; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.muted; }}
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Tableau de bord
+          <ArrowLeft className="w-3.5 h-3.5" /> Mon Espace
         </Link>
 
         {/* ── User card ─────────────────────────────────────────── */}

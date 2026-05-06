@@ -49,7 +49,7 @@ export default function BookingConfirmationPage() {
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
             style={{ background: "#7C3AED" }}
           >
-            Aller à mon tableau de bord <ArrowRight className="w-4 h-4" />
+            Mon Espace <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/mentors"
