@@ -56,17 +56,26 @@ export default function Footer() {
   const hideHeadline = pathname === "/how-it-works";
 
   const navLinks = [
-    { label: t("footer_link_home"),     href: "/" },
-    { label: t("footer_link_founders"), href: "/founders" },
-    { label: t("footer_link_stories"),  href: "/for-schools" },
-    { label: t("footer_link_pricing"),  href: "/pricing" },
+    { label: "Accueil",          href: "/"                },
+    { label: "Explorer",         href: "/explore"         },
+    { label: "Devenir Mentor",   href: "/become-a-mentor" },
+    { label: "Fonctionnement",   href: "/how-it-works"    },
+    { label: "Tarifs",           href: "/pricing"         },
+    { label: "Notre Histoire",   href: "/founders"        },
+  ];
+
+  const platformLinks = [
+    { label: "Trouver un Mentor",     href: "/explore/find-a-mentor"  },
+    { label: "Matching IA",           href: "/ai-smart-matching"      },
+    { label: "Certification Mentor",  href: "/mentor-certification"   },
+    { label: "Pour les Écoles",       href: "/for-schools"            },
   ];
 
   const companyLinks = [
-    { label: t("footer_link_manifesto"), href: "/#manifesto" },
-    { label: t("footer_link_careers"),   href: "/careers" },
-    { label: t("footer_link_contact"),   href: "/contact" },
-    { label: t("footer_link_privacy"),   href: "/legal/privacy" },
+    { label: "FAQ",                        href: "/faq"             },
+    { label: "Sécurité & Confiance",       href: "/safety-trust"   },
+    { label: "Contact",                    href: "/contact"         },
+    { label: "Politique de confidentialité", href: "/legal/privacy" },
   ];
 
   const cities = [
@@ -105,12 +114,12 @@ export default function Footer() {
         {/* ── Links + cities row ─────────────────────────────── */}
         <div className="reveal reveal-delay-1 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
 
-          {/* Left: two nav columns */}
-          <div className="flex gap-12 md:gap-20">
+          {/* Left: three nav columns */}
+          <div className="flex gap-12 md:gap-16">
             {/* NAVIGATION */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                {t("footer_nav_label")}
+                Navigation
               </p>
               <ul className="space-y-3.5">
                 {navLinks.map((l) => (
@@ -126,10 +135,29 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* COMPANY */}
+            {/* PLATEFORME */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                {t("footer_company_label")}
+                Plateforme
+              </p>
+              <ul className="space-y-3.5">
+                {platformLinks.map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href}
+                      className="text-sm text-white/45 hover:text-white transition-colors duration-200"
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* ENTREPRISE */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
+                Entreprise
               </p>
               <ul className="space-y-3.5">
                 {companyLinks.map((l) => (
