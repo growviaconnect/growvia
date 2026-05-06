@@ -366,7 +366,10 @@ function DashboardContent() {
           { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
         ];
   const secondaryNav = [
-    ...(user?.role !== "mentor" ? [{ href: "/dashboard/saved-mentors", label: "Saved Mentors", icon: Heart }] : []),
+    ...(user?.role !== "mentor" ? [
+      { href: "/dashboard/saved-mentors", label: "Saved Mentors", icon: Heart },
+      { href: "/dashboard/mes-demandes",  label: "Mes Demandes",  icon: Clock },
+    ] : []),
     { href: "/profile",  label: t("dash_nav_profile"),  icon: User     },
     { href: "/settings", label: t("dash_nav_settings"), icon: Settings },
   ];

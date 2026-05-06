@@ -18,11 +18,11 @@ export default function BookingConfirmationPage() {
 
         {/* Heading */}
         <h1 className="text-3xl font-extrabold text-white mb-3 tracking-tight">
-          Request sent!
+          Demande envoyée !
         </h1>
         <p className="text-white/50 text-base leading-relaxed mb-8">
-          The mentor will review your request and confirm your session soon.
-          You&apos;ll receive an email once they respond.
+          Le mentor va examiner votre demande et confirmer votre session.
+          Vous recevrez un email dès qu&apos;il répond.
         </p>
 
         {/* Info card */}
@@ -33,10 +33,10 @@ export default function BookingConfirmationPage() {
           <div className="flex items-start gap-3">
             <CalendarCheck className="w-4 h-4 text-[#A78BFA] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-white">What happens next?</p>
+              <p className="text-sm font-semibold text-white">Et maintenant ?</p>
               <p className="text-xs text-white/40 mt-1 leading-relaxed">
-                The mentor typically responds within 24 hours. Once confirmed,
-                you&apos;ll get a Google Meet link by email.
+                Le mentor répond généralement sous 24h. Une fois confirmé,
+                vous recevrez un lien Google Meet par email.
               </p>
             </div>
           </div>
@@ -49,13 +49,13 @@ export default function BookingConfirmationPage() {
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
             style={{ background: "#7C3AED" }}
           >
-            Go to my dashboard <ArrowRight className="w-4 h-4" />
+            Aller à mon tableau de bord <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/mentors"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-white/50 hover:text-white transition-colors border border-white/10 hover:border-white/20"
           >
-            Browse more mentors
+            Explorer d&apos;autres mentors
           </Link>
         </div>
 
