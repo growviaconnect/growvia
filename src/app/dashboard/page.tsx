@@ -294,13 +294,13 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
       {/* Actions */}
       <div className="mt-4 flex gap-2">
         <Link
-          href="/explore"
+          href={`/mentors/${match.id}`}
           className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl border border-white/10 hover:border-[#7C3AED]/50 text-white/55 hover:text-white transition-colors"
         >
           {t("dash_ai_view_profile")}
         </Link>
         <Link
-          href="/explore"
+          href={`/mentors/${match.id}`}
           className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition-colors"
         >
           {t("dash_ai_request")}
@@ -997,7 +997,7 @@ function DashboardContent() {
                         { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
                         { label: t("dash_stat_done"),       value: past.length,          icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
                         { label: t("dash_stat_upcoming"),   value: upcoming.length,      icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                        { label: t("dash_stat_ai"),         value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                        { label: t("dash_stat_ai"),         value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "1" : "0", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
                       ]
                   ).map((stat) => (
                     <Card key={stat.label} className="p-5">
@@ -1193,32 +1193,19 @@ function DashboardContent() {
                       </div>
                     )}
 
-                    {user?.plan === "free" && (
+                    {user?.plan === "free" && !hasUsedFreeMatch && (
                       <div className="rounded-2xl p-6 border border-[#7C3AED]/30"
                         style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}>
-                        {!hasUsedFreeMatch ? (
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div>
-                              <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
-                              <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
-                            </div>
-                            <button onClick={handleStartMatching}
-                              className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
-                              {t("dash_try_now")}
-                            </button>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div>
+                            <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
+                            <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
                           </div>
-                        ) : (
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div>
-                              <div className="font-bold text-white mb-1">{t("dash_unlock_ai")}</div>
-                              <div className="text-white/45 text-sm">{t("dash_unlock_ai_desc")}</div>
-                            </div>
-                            <Link href="/pricing"
-                              className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
-                              {t("dash_upgrade")}
-                            </Link>
-                          </div>
-                        )}
+                          <button onClick={handleStartMatching}
+                            className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+                            {t("dash_try_now")}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </>
