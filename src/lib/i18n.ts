@@ -1095,7 +1095,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_signout: 'Se déconnecter',
     nav_build: "Construire l'avenir",
 
-    // Hero (home page)
+    // Hero (home page) — eyebrow: "TROUVE LE" | h1: "mentor." | sub: line 3
     home_badge: 'Accès Anticipé · Gratuit pour les premiers inscrits',
     home_hero_eyebrow: 'Trouve le',
     home_counter_label: 'mentors actifs',
