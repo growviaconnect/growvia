@@ -83,6 +83,55 @@ export default function HomePage() {
 
   return (
     <>
+      <style>{`
+        @keyframes hero-fade-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes underline-draw {
+          from { width: 0; }
+          to   { width: 100%; }
+        }
+        @keyframes float-dot {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-8px); }
+        }
+        @keyframes fade-in-only {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes shimmer-sweep {
+          0%   { left: -80%; }
+          100% { left: 130%; }
+        }
+        .hero-fade {
+          opacity: 0;
+          animation: hero-fade-up 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .hero-cta-btn {
+          position: relative;
+          overflow: hidden;
+        }
+        .hero-cta-btn::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -80%;
+          width: 55%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+          transform: skewX(-20deg);
+        }
+        .hero-cta-btn:hover::before {
+          animation: shimmer-sweep 0.6s ease-out;
+        }
+        .hero-mentor-link .hero-arrow {
+          display: inline-flex;
+          transition: transform 0.2s ease;
+        }
+        .hero-mentor-link:hover .hero-arrow {
+          transform: translateX(4px);
+        }
+      `}</style>
+
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section ref={heroSectionRef} className="relative min-h-screen flex flex-col overflow-hidden">
 
@@ -112,25 +161,57 @@ export default function HomePage() {
           <div className="w-full max-w-7xl mx-auto px-6 lg:px-8">
             <div className="grid lg:grid-cols-[1fr_380px] gap-16 items-center">
 
-              {/* LEFT — massive bleeding headline */}
-              <div>
-                <p
-                  className="animate-fade-up text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.32em] mb-8"
-                  style={{ animationDelay: "0ms" }}
-                >
-                  {t("home_badge")}
-                </p>
-                <div className="animate-fade-up overflow-visible" style={{ animationDelay: "80ms" }}>
+              {/* LEFT — premium headline */}
+              <div className="relative">
+                {/* Vertical purple accent line */}
+                <div
+                  className="absolute -left-6 top-0 bottom-0 w-px hidden lg:block"
+                  style={{ background: "linear-gradient(to bottom, transparent, rgba(124,58,237,0.5) 30%, rgba(124,58,237,0.5) 70%, transparent)" }}
+                />
+
+                {/* Pill badge */}
+                <div className="hero-fade mb-8" style={{ animationDelay: "0ms" }}>
+                  <span
+                    className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] px-4 py-1.5 rounded-full"
+                    style={{
+                      background: "rgba(124,58,237,0.1)",
+                      border:     "1px solid rgba(124,58,237,0.3)",
+                      color:      "#A78BFA",
+                    }}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full animate-pulse"
+                      style={{ background: "#7C3AED" }}
+                    />
+                    {t("home_badge")}
+                  </span>
+                </div>
+
+                <div className="hero-fade overflow-visible" style={{ animationDelay: "80ms" }}>
                   <p className="text-base md:text-lg font-semibold text-white/35 uppercase tracking-[0.25em] mb-1 leading-none">
                     {t("home_hero_eyebrow")}
                   </p>
-                  <h1
-                    className="font-extrabold text-white leading-[0.82] tracking-tighter whitespace-nowrap"
-                    style={{ fontSize: "clamp(80px, 12vw, 160px)" }}
-                  >
-                    mentor.
-                  </h1>
-                  <p className="text-lg md:text-xl font-semibold text-white/50 mt-5 leading-snug max-w-lg">
+
+                  {/* Main headline */}
+                  <div className="relative inline-block">
+                    <h1
+                      className="font-extrabold text-white leading-[0.82] tracking-tighter"
+                      style={{ fontSize: "clamp(64px, 9vw, 120px)" }}
+                    >
+                      mentor<span style={{ color: "#7c6af5" }}>.</span>
+                    </h1>
+                    {/* Animated underline */}
+                    <div
+                      className="absolute -bottom-1 left-0 h-[2px] rounded-full"
+                      style={{
+                        background: "linear-gradient(90deg, #7C3AED, #A78BFA)",
+                        animation:  "underline-draw 1s cubic-bezier(0.22,1,0.36,1) 0.4s both",
+                        width:      0,
+                      }}
+                    />
+                  </div>
+
+                  <p className="text-lg md:text-xl font-semibold text-white/50 mt-6 leading-snug max-w-lg">
                     {t("home_hero_title3")}
                   </p>
                 </div>
@@ -165,7 +246,7 @@ export default function HomePage() {
                 <div className="flex flex-col gap-3">
                   <Link
                     href="/auth/register"
-                    className="inline-flex items-center justify-center gap-2.5 text-white font-semibold px-7 py-4 rounded-lg transition-colors text-sm"
+                    className="hero-cta-btn inline-flex items-center justify-center gap-2.5 text-white font-semibold px-7 py-4 rounded-lg transition-colors text-sm"
                     style={{ background: "#7C3AED" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
@@ -174,9 +255,9 @@ export default function HomePage() {
                   </Link>
                   <Link
                     href="/become-a-mentor"
-                    className="inline-flex items-center justify-center gap-2 text-white/35 hover:text-white/70 font-medium py-2 transition-colors text-sm"
+                    className="hero-mentor-link inline-flex items-center justify-center gap-2 text-white/35 hover:text-white/70 font-medium py-2 transition-colors text-sm"
                   >
-                    {t("home_watch_film")} <ArrowRight className="w-3.5 h-3.5" />
+                    {t("home_watch_film")} <span className="hero-arrow"><ArrowRight className="w-3.5 h-3.5" /></span>
                   </Link>
                 </div>
               </div>
