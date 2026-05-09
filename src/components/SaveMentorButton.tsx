@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
+import { useLang } from "@/contexts/LangContext";
 
 interface Props {
   mentorId: string;
@@ -19,6 +20,7 @@ interface Props {
 export default function SaveMentorButton({ mentorId, size = "w-4 h-4", className = "", onToggle }: Props) {
   const router  = useRouter();
   const session = getUserSession();
+  const { t }   = useLang();
 
   const [saved,   setSaved]   = useState(false);
   const [loading, setLoading] = useState(false);
@@ -74,8 +76,8 @@ export default function SaveMentorButton({ mentorId, size = "w-4 h-4", className
     <button
       onClick={toggle}
       disabled={loading}
-      aria-label={isSaved ? "Remove from saved" : "Save mentor"}
-      title={isSaved ? "Remove from saved" : "Save mentor"}
+      aria-label={isSaved ? t("btn_remove_saved_mentor") : t("btn_save_mentor")}
+      title={isSaved ? t("btn_remove_saved_mentor") : t("btn_save_mentor")}
       className={`flex items-center justify-center rounded-xl border transition-all duration-200 disabled:opacity-50 ${
         isSaved
           ? "bg-[#7C3AED]/15 border-[#7C3AED]/40 hover:bg-red-500/10 hover:border-red-500/30"

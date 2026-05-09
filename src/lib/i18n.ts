@@ -1071,6 +1071,23 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_filter_cancelled: 'Cancelled',
     cal_months: 'January,February,March,April,May,June,July,August,September,October,November,December',
     cal_days: 'M,T,W,T,F,S,S',
+
+    // Schools — missing keys used in code
+    schools_form_eyebrow: 'Free Demo',
+    schools_why_label: 'Why GrowVia',
+
+    // Testimonials section UI strings
+    testimonials_section_label: "What they say",
+    testimonials_scroll_hint: 'Scroll to discover their stories →',
+    testimonials_gallery_aria: 'Testimonials gallery',
+    testimonials_headline: 'Voices,that,matter.',
+
+    // Save mentor button accessibility
+    btn_save_mentor: 'Save mentor',
+    btn_remove_saved_mentor: 'Remove from saved',
+
+    // Language switcher accessibility
+    nav_lang_toggle: 'Change language',
   },
 
   fr: {
@@ -1297,11 +1314,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_cta_contact: 'Nous contacter',
     founders_founder1_bio: "Luna a vécu de première main la confusion du choix d'un parcours professionnel après ses études. Incapable de trouver des mentors qui comprenaient vraiment son chemin, elle a décidé de créer la plateforme qu'elle aurait aimé avoir.",
     founders_founder2_bio: "Yasmine apporte une profonde passion pour le design centré sur l'humain et la construction de communautés. Ayant travaillé dans plusieurs pays et secteurs, elle comprend les complexités du marché du travail mondial.",
-    founders_value1_title: 'Grow Every Day',
+    founders_value1_title: 'Grandir Chaque Jour',
     founders_value1_desc: "Engagez-vous dans un développement personnel et professionnel continu. Le progrès, même petit, est la seule direction.",
-    founders_value2_title: 'Embrace Change',
+    founders_value2_title: 'Accueillir le Changement',
     founders_value2_desc: "Adaptez-vous aux défis et conduisez activement le progrès. Le meilleur chemin n'est rarement le plus évident.",
-    founders_value3_title: 'Build Trust',
+    founders_value3_title: 'Bâtir la Confiance',
     founders_value3_desc: "Cultivez des relations honnêtes et transparentes qui créent un impact réel. La confiance est le fondement de chaque grande connexion de mentorat.",
     founders_testimonial_mentee: 'MENTORÉ',
     aria_stars: '5 étoiles sur 5',
@@ -2135,6 +2152,23 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_filter_cancelled: 'Annulées',
     cal_months: 'Janvier,Février,Mars,Avril,Mai,Juin,Juillet,Août,Septembre,Octobre,Novembre,Décembre',
     cal_days: 'L,M,M,J,V,S,D',
+
+    // Schools — clés manquantes utilisées dans le code
+    schools_form_eyebrow: 'Démo Gratuite',
+    schools_why_label: 'Pourquoi GrowVia',
+
+    // Strings UI de la section témoignages
+    testimonials_section_label: "Ce qu'ils en disent",
+    testimonials_scroll_hint: 'Faites défiler pour découvrir leurs histoires →',
+    testimonials_gallery_aria: 'Galerie de témoignages',
+    testimonials_headline: 'Des,voix,qui,comptent.',
+
+    // Bouton sauvegarder mentor (accessibilité)
+    btn_save_mentor: 'Sauvegarder le mentor',
+    btn_remove_saved_mentor: 'Retirer des sauvegardés',
+
+    // Sélecteur de langue (accessibilité)
+    nav_lang_toggle: 'Changer de langue',
   },
 
   es: {
@@ -2155,7 +2189,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_for_schools: 'Asociación',
     nav_im_mentor: 'Soy mentor',
     nav_find_mentor: 'Encontrar un mentor',
-    nav_dashboard: 'Panel',
+    nav_dashboard: 'Mi Espacio',
     nav_signout: 'Cerrar sesión',
     nav_build: 'Construir el futuro',
 
@@ -2435,11 +2469,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_cta_contact: 'Contáctanos',
     founders_founder1_bio: 'Luna experimentó de primera mano la confusión de elegir un camino profesional después de graduarse. Sin poder encontrar mentores que realmente entendieran su trayectoria, decidió construir la plataforma que deseaba que hubiera existido.',
     founders_founder2_bio: 'Yasmine aporta una profunda pasión por el diseño centrado en el ser humano y la construcción de comunidades. Habiendo trabajado en múltiples países e industrias, entiende las complejidades de navegar un mercado laboral global.',
-    founders_value1_title: 'Grow Every Day',
+    founders_value1_title: 'Crecer Cada Día',
     founders_value1_desc: 'Comprométete con el desarrollo personal y profesional continuo. El progreso, aunque pequeño, es la única dirección.',
-    founders_value2_title: 'Embrace Change',
+    founders_value2_title: 'Abrazar el Cambio',
     founders_value2_desc: 'Adáptate a los desafíos y conduce activamente el progreso. El mejor camino rara vez es el más obvio.',
-    founders_value3_title: 'Build Trust',
+    founders_value3_title: 'Construir Confianza',
     founders_value3_desc: 'Cultiva relaciones honestas y transparentes que generen un impacto real. La confianza es el fundamento de cada gran conexión de mentoría.',
     founders_testimonial_mentee: 'APRENDIZ',
     aria_stars: '5 estrellas de 5',
@@ -3175,7 +3209,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_q_find: 'Encontrar Mis Coincidencias',
 
     // Calendar page
-    cal_back: '← Panel de control',
+    cal_back: '← Mi Espacio',
     cal_title: 'Mi Calendario',
     cal_sub: 'Gestiona tus sesiones de mentoría',
     cal_section_upcoming: 'PRÓXIMAS',
@@ -3199,5 +3233,22 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_filter_cancelled: 'Canceladas',
     cal_months: 'Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre',
     cal_days: 'L,M,X,J,V,S,D',
+
+    // Schools — claves faltantes usadas en el código
+    schools_form_eyebrow: 'Demo Gratuita',
+    schools_why_label: 'Por qué GrowVia',
+
+    // Strings UI de la sección de testimonios
+    testimonials_section_label: 'Lo que dicen',
+    testimonials_scroll_hint: 'Desplázate para descubrir sus historias →',
+    testimonials_gallery_aria: 'Galería de testimonios',
+    testimonials_headline: 'Voces,que,importan.',
+
+    // Botón guardar mentor (accesibilidad)
+    btn_save_mentor: 'Guardar mentor',
+    btn_remove_saved_mentor: 'Eliminar de guardados',
+
+    // Selector de idioma (accesibilidad)
+    nav_lang_toggle: 'Cambiar idioma',
   },
 };

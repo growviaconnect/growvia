@@ -19,10 +19,20 @@ export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Locale>("fr");
 
   useEffect(() => {
+    // Priority 1: user's saved preference
     const saved = localStorage.getItem("gv_lang") as Locale | null;
     if (saved && locales.includes(saved)) {
       setLangState(saved);
+      return;
     }
+    // Priority 2: browser language (navigator.language)
+    const browserLang = (navigator.language ?? "").slice(0, 2) as Locale;
+    if (locales.includes(browserLang)) {
+      setLangState(browserLang);
+      return;
+    }
+    // Priority 3: fallback to French (default)
+    // (already set to "fr" in useState)
   }, []);
 
   function setLang(l: Locale) {
