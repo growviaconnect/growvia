@@ -46,6 +46,26 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading, 'Plus Jakarta Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ── CJK typography — Noto Sans SC for Mandarin ─────────────── */
+html[lang='zh'] body,
+html[lang='zh'] h1,
+html[lang='zh'] h2,
+html[lang='zh'] h3,
+html[lang='zh'] h4,
+html[lang='zh'] h5,
+html[lang='zh'] h6,
+html[lang='zh'] p,
+html[lang='zh'] span,
+html[lang='zh'] a,
+html[lang='zh'] button,
+html[lang='zh'] input,
+html[lang='zh'] textarea,
+html[lang='zh'] select,
+html[lang='zh'] label {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  letter-spacing: 0.02em;
+}
+
 /* ── Dark card surface — glassmorphism ───────────────────────── */
 .card-dark {
   backdrop-filter: blur(40px) saturate(180%);
