@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import TestimonialsStarCanvas from "./TestimonialsStarCanvas";
+import { useLang } from "@/contexts/LangContext";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const serif: React.CSSProperties = {
@@ -15,7 +16,7 @@ const CARD_W  = 340;
 const CARD_H  = 520;
 const GAP     = 260;
 const PHOTO_H = Math.round(CARD_H * 0.55); // 286px
-const HEADLINE = ["Des", "voix", "qui", "comptent."];
+// Headline words come from the "testimonials_headline" i18n key (comma-separated)
 
 const TESTIMONIALS = [
   { type: "MENTORÉE", quote: "GrowVia ne m'a pas seulement connectée à un mentor. Ça a changé ma façon de voir mon potentiel.", name: "Sarah Chen",     role: "Product Manager · Stripe",       gender: "women", portrait: 44 },
@@ -93,6 +94,7 @@ function GalleryCard({ item, isActive, mobile = false }: { item: T; isActive: bo
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function TestimonialsSection() {
+  const { t } = useLang();
   const sectionRef   = useRef<HTMLElement>(null);
   const trackRef     = useRef<HTMLDivElement>(null);
   const fillRef      = useRef<HTMLDivElement>(null);
@@ -229,28 +231,33 @@ export default function TestimonialsSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-16 lg:pt-32 lg:pb-20">
         <div ref={headerRef} className="path-header">
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7C3AED] mb-5">
-            CE QU&apos;ILS EN DISENT
+            {t("testimonials_section_label")}
           </p>
-          <h2
-            className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-white tracking-tight leading-[1.05]"
-            aria-label="Des voix qui comptent."
-          >
-            {HEADLINE.map((word, i) => (
-              <span
-                key={i}
-                className="inline-block overflow-hidden align-bottom"
-                style={{ marginRight: i < HEADLINE.length - 1 ? "0.28em" : 0 }}
+          {(() => {
+            const headline = t("testimonials_headline").split(",");
+            return (
+              <h2
+                className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-white tracking-tight leading-[1.05]"
+                aria-label={t("testimonials_headline").replace(/,/g, " ")}
               >
-                <span className="path-headline-word block" style={{ transitionDelay: `${i * 0.09}s` }}>
-                  {i === HEADLINE.length - 1
-                    ? <span style={serif}>{word}</span>
-                    : word}
-                </span>
-              </span>
-            ))}
-          </h2>
+                {headline.map((word, i) => (
+                  <span
+                    key={i}
+                    className="inline-block overflow-hidden align-bottom"
+                    style={{ marginRight: i < headline.length - 1 ? "0.28em" : 0 }}
+                  >
+                    <span className="path-headline-word block" style={{ transitionDelay: `${i * 0.09}s` }}>
+                      {i === headline.length - 1
+                        ? <span style={serif}>{word}</span>
+                        : word}
+                    </span>
+                  </span>
+                ))}
+              </h2>
+            );
+          })()}
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", fontStyle: "italic", marginTop: 16 }}>
-            Faites défiler pour découvrir leurs histoires →
+            {t("testimonials_scroll_hint")}
           </p>
         </div>
       </div>
@@ -260,7 +267,7 @@ export default function TestimonialsSection() {
         <section
           ref={sectionRef}
           style={{ height: `${N * 120}vh` }}
-          aria-label="Galerie de témoignages"
+          aria-label={t("testimonials_gallery_aria")}
         >
           <div
             style={{

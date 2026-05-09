@@ -6,7 +6,7 @@ import { locales, localeNames, type Locale } from "@/lib/i18n";
 import { ChevronDown } from "lucide-react";
 
 export default function LangSwitcher() {
-  const { lang, setLang } = useLang();
+  const { lang, setLang, t } = useLang();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -25,7 +25,7 @@ export default function LangSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 text-sm font-medium text-white/50 hover:text-white transition-colors duration-200 px-2 py-1 rounded-md hover:bg-white/5"
-        aria-label="Change language"
+        aria-label={t("nav_lang_toggle")}
       >
         <span className="text-base leading-none">🌐</span>
         <span className="text-xs uppercase tracking-wide">{lang}</span>
