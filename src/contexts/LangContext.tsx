@@ -35,6 +35,11 @@ export function LangProvider({ children }: { children: ReactNode }) {
     // (already set to "fr" in useState)
   }, []);
 
+  // Sync <html lang="..."> so CSS can target CJK font via html[lang='zh']
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   function setLang(l: Locale) {
     setLangState(l);
     localStorage.setItem("gv_lang", l);
