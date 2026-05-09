@@ -11,7 +11,6 @@ import ForYouSection from "@/components/ForYouSection";
 import LogoTicker from "@/components/LogoTicker";
 import MentorsSection from "@/components/MentorsSection";
 import HeroParticles from "@/components/HeroParticles";
-import SessionsGallery from "@/components/SessionsGallery";
 import { useLang } from "@/contexts/LangContext";
 
 const HERO_SECTORS = [
@@ -287,9 +286,6 @@ export default function HomePage() {
 
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
-
-      {/* ── SESSIONS GALLERY ─────────────────────────────────────── */}
-      <SessionsGallery />
 
       {/* ── STATS ────────────────────────────────────────────────── */}
       <StatsSection />
