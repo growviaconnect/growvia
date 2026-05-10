@@ -7022,6 +7022,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_lang_toggle: 'تغيير اللغة',
   },
 
+  // Arabic dialects — fall back to MSA (ar) via LangContext fallback chain
+  'ar-EG': {},
+  'ar-LB': {},
+  'ar-SA': {},
+  'ar-MA': {},
+
   zh: {
     // Nav
     nav_who: '关于我们',
