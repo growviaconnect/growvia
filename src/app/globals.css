@@ -66,6 +66,60 @@ html[lang='zh'] label {
   letter-spacing: 0.02em;
 }
 
+/* ── Arabic typography — Noto Sans Arabic + RTL layout ──────── */
+[lang^='ar'] body,
+[lang^='ar'] h1,
+[lang^='ar'] h2,
+[lang^='ar'] h3,
+[lang^='ar'] h4,
+[lang^='ar'] h5,
+[lang^='ar'] h6,
+[lang^='ar'] p,
+[lang^='ar'] span,
+[lang^='ar'] a,
+[lang^='ar'] button,
+[lang^='ar'] input,
+[lang^='ar'] textarea,
+[lang^='ar'] select,
+[lang^='ar'] label {
+  font-family: 'Noto Sans Arabic', 'Geeza Pro', 'Arabic Typesetting', sans-serif;
+  letter-spacing: 0;
+  word-spacing: 0.05em;
+}
+
+/* RTL layout corrections ---------------------------------------- */
+[dir='rtl'] body { text-align: right; }
+
+/* Inputs */
+[dir='rtl'] input,
+[dir='rtl'] textarea,
+[dir='rtl'] select { text-align: right; direction: rtl; }
+
+/* Flex rows that shouldn't auto-reverse (arrows, icons on correct side) */
+[dir='rtl'] .hero-fade { direction: rtl; }
+
+/* Vertical accent line: left → right */
+[dir='rtl'] .-left-6 { left: auto; right: -1.5rem; }
+[dir='rtl'] .border-l { border-left: none; border-right-width: 1px; }
+[dir='rtl'] .border-r { border-right: none; border-left-width: 1px; }
+
+/* Padding/margin directional overrides — most important utilities */
+[dir='rtl'] .pl-16 { padding-left: 0; padding-right: 4rem; }
+[dir='rtl'] .pl-4  { padding-left: 0; padding-right: 1rem; }
+[dir='rtl'] .pl-6  { padding-left: 0; padding-right: 1.5rem; }
+[dir='rtl'] .pr-4  { padding-right: 0; padding-left: 1rem; }
+[dir='rtl'] .pr-6  { padding-right: 0; padding-left: 1.5rem; }
+[dir='rtl'] .ml-auto { margin-left: 0; margin-right: auto; }
+[dir='rtl'] .mr-auto { margin-right: 0; margin-left: auto; }
+[dir='rtl'] .-left-6 { left: auto; right: -1.5rem; }
+
+/* Rounded corners */
+[dir='rtl'] .rounded-l-xl { border-radius: 0 0.75rem 0.75rem 0; }
+[dir='rtl'] .rounded-r-xl { border-radius: 0.75rem 0 0 0.75rem; }
+
+/* ticker animation (keep LTR direction for sector names) */
+[dir='rtl'] .animate-ticker { direction: ltr; }
+
 /* ── Dark card surface — glassmorphism ───────────────────────── */
 .card-dark {
   backdrop-filter: blur(40px) saturate(180%);
