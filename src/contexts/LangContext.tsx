@@ -7,13 +7,17 @@ interface LangContextValue {
   lang: Locale;
   setLang: (l: Locale) => void;
   t: (key: string) => string;
+  isRTL: boolean;
 }
 
 const LangContext = createContext<LangContextValue>({
   lang: "fr",
   setLang: () => {},
   t: (k) => k,
+  isRTL: false,
 });
+
+function isArabic(l: Locale) { return l === 'ar' || l.startsWith('ar-'); }
 
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Locale>("fr");
@@ -25,19 +29,18 @@ export function LangProvider({ children }: { children: ReactNode }) {
       setLangState(saved);
       return;
     }
-    // Priority 2: browser language (navigator.language)
-    const browserLang = (navigator.language ?? "").slice(0, 2) as Locale;
-    if (locales.includes(browserLang)) {
-      setLangState(browserLang);
-      return;
-    }
-    // Priority 3: fallback to French (default)
-    // (already set to "fr" in useState)
+    // Priority 2: browser language — check full tag first (e.g. 'ar-EG'), then base
+    const navLang = navigator.language ?? "";
+    if (locales.includes(navLang as Locale)) { setLangState(navLang as Locale); return; }
+    const base = navLang.slice(0, 2) as Locale;
+    if (locales.includes(base)) { setLangState(base); return; }
+    // Priority 3: fallback to French
   }, []);
 
-  // Sync <html lang="..."> so CSS can target CJK font via html[lang='zh']
+  // Sync <html lang> + dir attributes for i18n and RTL support
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = isArabic(lang) ? 'rtl' : 'ltr';
   }, [lang]);
 
   function setLang(l: Locale) {
@@ -46,10 +49,21 @@ export function LangProvider({ children }: { children: ReactNode }) {
   }
 
   function t(key: string): string {
-    return translations[lang]?.[key] ?? translations["en"]?.[key] ?? key;
+    // Fallback chain: dialect → MSA (ar) → English → key
+    const base: Locale = lang.startsWith('ar-') ? 'ar' : lang;
+    return (
+      translations[lang]?.[key] ??
+      (base !== lang ? translations[base]?.[key] : undefined) ??
+      translations["en"]?.[key] ??
+      key
+    );
   }
 
-  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
+  return (
+    <LangContext.Provider value={{ lang, setLang, t, isRTL: isArabic(lang) }}>
+      {children}
+    </LangContext.Provider>
+  );
 }
 
 export function useLang() {
