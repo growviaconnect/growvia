@@ -66,6 +66,26 @@ html[lang='zh'] label {
   letter-spacing: 0.02em;
 }
 
+/* ── Russian / Cyrillic typography — Noto Sans (cyrillic subset) ── */
+html[lang='ru'] body,
+html[lang='ru'] h1,
+html[lang='ru'] h2,
+html[lang='ru'] h3,
+html[lang='ru'] h4,
+html[lang='ru'] h5,
+html[lang='ru'] h6,
+html[lang='ru'] p,
+html[lang='ru'] span,
+html[lang='ru'] a,
+html[lang='ru'] button,
+html[lang='ru'] input,
+html[lang='ru'] textarea,
+html[lang='ru'] select,
+html[lang='ru'] label {
+  font-family: 'Noto Sans', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.01em;
+}
+
 /* ── Arabic typography — Noto Sans Arabic + RTL layout ──────── */
 [lang^='ar'] body,
 [lang^='ar'] h1,
