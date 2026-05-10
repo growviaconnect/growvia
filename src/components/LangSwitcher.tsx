@@ -84,14 +84,11 @@ export default function LangSwitcher() {
             </button>
           ))}
 
-          {/* Divider before Arabic group */}
-          <div className="border-t border-white/[0.07] my-1" />
-
           {/* Arabic parent row */}
           <div className="relative">
             <button
               onClick={() => setArabicOpen(!arabicOpen)}
-              className="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm transition-colors duration-150"
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-left"
               style={itemStyle(isArabicActive)}
               onMouseEnter={(e) => {
                 if (!isArabicActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
@@ -100,12 +97,9 @@ export default function LangSwitcher() {
                 if (!isArabicActive) (e.currentTarget as HTMLElement).style.background = arabicOpen ? "rgba(255,255,255,0.03)" : "transparent";
               }}
             >
-              <span className="flex items-center gap-2">
-                <span>🌍</span>
-                <span style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>العربية</span>
-              </span>
+              <span style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>العربية</span>
               <ChevronLeft
-                className="w-3 h-3 opacity-50 transition-transform duration-200"
+                className="w-3 h-3 opacity-50 transition-transform duration-200 ml-auto"
                 style={{ transform: arabicOpen ? "rotate(-90deg)" : "rotate(0deg)" }}
               />
             </button>
