@@ -66,6 +66,43 @@ html[lang='zh'] label {
   letter-spacing: 0.02em;
 }
 
+/* ── Japanese typography — Noto Sans JP + palt + generous line-height ── */
+html[lang='ja'] body,
+html[lang='ja'] h1,
+html[lang='ja'] h2,
+html[lang='ja'] h3,
+html[lang='ja'] h4,
+html[lang='ja'] h5,
+html[lang='ja'] h6,
+html[lang='ja'] p,
+html[lang='ja'] span,
+html[lang='ja'] a,
+html[lang='ja'] button,
+html[lang='ja'] input,
+html[lang='ja'] textarea,
+html[lang='ja'] select,
+html[lang='ja'] label {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.04em;
+}
+
+html[lang='ja'] body,
+html[lang='ja'] p,
+html[lang='ja'] li,
+html[lang='ja'] td,
+html[lang='ja'] th,
+html[lang='ja'] label,
+html[lang='ja'] span {
+  line-height: 1.8;
+}
+
+html[lang='ja'] h1,
+html[lang='ja'] h2,
+html[lang='ja'] h3 {
+  line-height: 1.5;
+}
+
 /* ── Russian / Cyrillic typography — Noto Sans (cyrillic subset) ── */
 html[lang='ru'] body,
 html[lang='ru'] h1,
