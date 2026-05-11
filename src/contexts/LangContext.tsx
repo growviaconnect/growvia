@@ -49,8 +49,8 @@ export function LangProvider({ children }: { children: ReactNode }) {
   }
 
   function t(key: string): string {
-    // Fallback chain: dialect → MSA (ar) → English → key
-    const base: Locale = lang.startsWith('ar-') ? 'ar' : lang;
+    // Fallback chain: dialect → parent → English → key
+    const base: Locale = lang === 'pt-BR' ? 'pt' : lang.startsWith('ar-') ? 'ar' : lang;
     return (
       translations[lang]?.[key] ??
       (base !== lang ? translations[base]?.[key] : undefined) ??
