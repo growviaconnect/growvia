@@ -2,16 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useLang } from "@/contexts/LangContext";
-import { locales, localeNames, arabicLocales, arabicFlags, type Locale } from "@/lib/i18n";
+import { locales, localeNames, arabicLocales, arabicFlags, portugueseLocales, portugueseFlags, type Locale } from "@/lib/i18n";
 import { ChevronDown, ChevronLeft } from "lucide-react";
 
-/** Locales that appear at the top level (everything except Arabic dialects) */
-const topLevelLocales = locales.filter(l => !arabicLocales.includes(l));
+/** Locales that appear at the top level (Arabic dialects and pt-BR are in submenus) */
+const topLevelLocales = locales.filter(l => !arabicLocales.includes(l) && l !== 'pt-BR');
 
 export default function LangSwitcher() {
   const { lang, setLang, t } = useLang();
-  const [open, setOpen]           = useState(false);
+  const [open, setOpen]             = useState(false);
   const [arabicOpen, setArabicOpen] = useState(false);
+  const [ptOpen, setPtOpen]         = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function LangSwitcher() {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
         setArabicOpen(false);
+        setPtOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -26,6 +28,7 @@ export default function LangSwitcher() {
   }, []);
 
   const isArabicActive = arabicLocales.includes(lang);
+  const isPortugueseActive = portugueseLocales.includes(lang);
 
   const itemStyle = (active: boolean): React.CSSProperties => ({
     color: active ? "#A78BFA" : "rgba(255,255,255,0.55)",
@@ -36,6 +39,7 @@ export default function LangSwitcher() {
     setLang(l);
     setOpen(false);
     setArabicOpen(false);
+    setPtOpen(false);
   }
 
   return (
@@ -48,7 +52,7 @@ export default function LangSwitcher() {
       >
         <span className="text-base leading-none">🌐</span>
         <span className="text-xs uppercase tracking-wide">
-          {isArabicActive ? 'AR' : lang.toUpperCase().slice(0, 2)}
+          {isArabicActive ? 'AR' : isPortugueseActive ? 'PT' : lang.toUpperCase().slice(0, 2)}
         </span>
         <ChevronDown
           className="w-3 h-3 transition-transform duration-200"
@@ -66,23 +70,77 @@ export default function LangSwitcher() {
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           }}
         >
-          {/* Non-Arabic locales */}
-          {topLevelLocales.map((locale) => (
-            <button
-              key={locale}
-              onClick={() => selectLocale(locale)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-left"
-              style={itemStyle(locale === lang)}
-              onMouseEnter={(e) => {
-                if (locale !== lang) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-              }}
-              onMouseLeave={(e) => {
-                if (locale !== lang) (e.currentTarget as HTMLElement).style.background = "transparent";
-              }}
-            >
-              <span>{localeNames[locale]}</span>
-            </button>
-          ))}
+          {/* Top-level locales (pt renders as a parent with submenu) */}
+          {topLevelLocales.map((locale) => {
+            if (locale === 'pt') {
+              return (
+                <div key="pt" className="relative">
+                  <button
+                    onClick={() => setPtOpen(!ptOpen)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-left"
+                    style={itemStyle(isPortugueseActive)}
+                    onMouseEnter={(e) => {
+                      if (!isPortugueseActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isPortugueseActive) (e.currentTarget as HTMLElement).style.background = ptOpen ? "rgba(255,255,255,0.03)" : "transparent";
+                    }}
+                  >
+                    <span>Português</span>
+                    <ChevronLeft
+                      className="w-3 h-3 opacity-50 transition-transform duration-200 ml-auto"
+                      style={{ transform: ptOpen ? "rotate(-90deg)" : "rotate(0deg)" }}
+                    />
+                  </button>
+
+                  {/* Portuguese sub-menu — inline expand */}
+                  {ptOpen && (
+                    <div
+                      className="overflow-hidden"
+                      style={{
+                        background: "rgba(0,0,0,0.25)",
+                        borderTop: "1px solid rgba(124,58,237,0.12)",
+                      }}
+                    >
+                      {portugueseLocales.map((ptLocale) => (
+                        <button
+                          key={ptLocale}
+                          onClick={() => selectLocale(ptLocale)}
+                          className="w-full flex items-center gap-3 px-5 py-2 text-sm transition-colors duration-150 text-left"
+                          style={itemStyle(ptLocale === lang)}
+                          onMouseEnter={(e) => {
+                            if (ptLocale !== lang) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (ptLocale !== lang) (e.currentTarget as HTMLElement).style.background = "transparent";
+                          }}
+                        >
+                          <span>{portugueseFlags[ptLocale]}</span>
+                          <span>{localeNames[ptLocale]}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <button
+                key={locale}
+                onClick={() => selectLocale(locale)}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-left"
+                style={itemStyle(locale === lang)}
+                onMouseEnter={(e) => {
+                  if (locale !== lang) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+                }}
+                onMouseLeave={(e) => {
+                  if (locale !== lang) (e.currentTarget as HTMLElement).style.background = "transparent";
+                }}
+              >
+                <span>{localeNames[locale]}</span>
+              </button>
+            );
+          })}
 
           {/* Arabic parent row */}
           <div className="relative">
