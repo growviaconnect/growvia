@@ -103,6 +103,43 @@ html[lang='ja'] h3 {
   line-height: 1.5;
 }
 
+/* ── Korean / Hangul typography — Noto Sans KR + word-break ──────── */
+html[lang='ko'] body,
+html[lang='ko'] h1,
+html[lang='ko'] h2,
+html[lang='ko'] h3,
+html[lang='ko'] h4,
+html[lang='ko'] h5,
+html[lang='ko'] h6,
+html[lang='ko'] p,
+html[lang='ko'] span,
+html[lang='ko'] a,
+html[lang='ko'] button,
+html[lang='ko'] input,
+html[lang='ko'] textarea,
+html[lang='ko'] select,
+html[lang='ko'] label {
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+  word-break: keep-all;
+  letter-spacing: -0.01em;
+}
+
+html[lang='ko'] body,
+html[lang='ko'] p,
+html[lang='ko'] li,
+html[lang='ko'] td,
+html[lang='ko'] th,
+html[lang='ko'] label,
+html[lang='ko'] span {
+  line-height: 1.8;
+}
+
+html[lang='ko'] h1,
+html[lang='ko'] h2,
+html[lang='ko'] h3 {
+  line-height: 1.5;
+}
+
 /* ── Russian / Cyrillic typography — Noto Sans (cyrillic subset) ── */
 html[lang='ru'] body,
 html[lang='ru'] h1,
