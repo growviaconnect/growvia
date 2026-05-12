@@ -179,6 +179,25 @@ html[lang='nl'] label {
   word-break: break-word;
 }
 
+/* ── Polish typography — overflow-wrap for long compound words ── */
+html[lang='pl'] h1,
+html[lang='pl'] h2,
+html[lang='pl'] h3,
+html[lang='pl'] h4,
+html[lang='pl'] h5,
+html[lang='pl'] h6,
+html[lang='pl'] p,
+html[lang='pl'] span,
+html[lang='pl'] a,
+html[lang='pl'] button,
+html[lang='pl'] li,
+html[lang='pl'] td,
+html[lang='pl'] th,
+html[lang='pl'] label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* ── Arabic typography — Noto Sans Arabic + RTL layout ──────── */
 [lang^='ar'] body,
 [lang^='ar'] h1,
