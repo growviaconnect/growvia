@@ -160,6 +160,25 @@ html[lang='ru'] label {
   letter-spacing: 0.01em;
 }
 
+/* ── Dutch typography — overflow-wrap for long compound words ── */
+html[lang='nl'] h1,
+html[lang='nl'] h2,
+html[lang='nl'] h3,
+html[lang='nl'] h4,
+html[lang='nl'] h5,
+html[lang='nl'] h6,
+html[lang='nl'] p,
+html[lang='nl'] span,
+html[lang='nl'] a,
+html[lang='nl'] button,
+html[lang='nl'] li,
+html[lang='nl'] td,
+html[lang='nl'] th,
+html[lang='nl'] label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* ── Arabic typography — Noto Sans Arabic + RTL layout ──────── */
 [lang^='ar'] body,
 [lang^='ar'] h1,
