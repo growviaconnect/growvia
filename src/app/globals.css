@@ -179,6 +179,25 @@ html[lang='nl'] label {
   word-break: break-word;
 }
 
+/* ── Turkish typography — overflow-wrap for agglutinative long words ── */
+html[lang='tr'] h1,
+html[lang='tr'] h2,
+html[lang='tr'] h3,
+html[lang='tr'] h4,
+html[lang='tr'] h5,
+html[lang='tr'] h6,
+html[lang='tr'] p,
+html[lang='tr'] span,
+html[lang='tr'] a,
+html[lang='tr'] button,
+html[lang='tr'] li,
+html[lang='tr'] td,
+html[lang='tr'] th,
+html[lang='tr'] label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* ── Polish typography — overflow-wrap for long compound words ── */
 html[lang='pl'] h1,
 html[lang='pl'] h2,
