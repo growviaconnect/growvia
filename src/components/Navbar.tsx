@@ -75,14 +75,6 @@ export default function Navbar() {
 
             {/* Nav links, desktop only */}
             <div className="hidden lg:flex items-center gap-6">
-              {pathname !== "/" && (
-                <Link
-                  href="/"
-                  className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
-                >
-                  {t("nav_home")}
-                </Link>
-              )}
               {navLinks.map((l) => (
                 <Link
                   key={l.href}
@@ -188,15 +180,6 @@ export default function Navbar() {
 
           {/* Nav links */}
           <div className="space-y-0.5 mb-5">
-            {pathname !== "/" && (
-              <Link
-                href="/"
-                onClick={() => setMenuOpen(false)}
-                className="block py-3 text-base font-medium text-white/60 hover:text-white transition-colors border-b border-white/[0.04]"
-              >
-                {t("nav_home")}
-              </Link>
-            )}
             {navLinks.map((l) => (
               <Link
                 key={l.href}
