@@ -147,10 +147,6 @@ export default function HomePage() {
           />
           <div
             className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 80% 60% at 30% 50%, rgba(124,58,237,0.18) 0%, transparent 70%)" }}
-          />
-          <div
-            className="absolute inset-0"
             style={{ background: "linear-gradient(to bottom, rgba(13,10,26,0.5) 0%, transparent 30%, transparent 70%, #0D0A1A 100%)" }}
           />
           <HeroParticles />
