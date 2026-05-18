@@ -166,12 +166,19 @@ export default function HomePage() {
                 />
 
                 <div className="hero-fade overflow-visible" style={{ animationDelay: "80ms" }}>
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 bg-white/[0.07] border border-white/[0.12] text-white/60 text-[10px] font-bold px-3 py-1.5 rounded-full mb-6 uppercase tracking-[0.2em]">
+                    {t("home_badge")}
+                  </div>
+
                   {/* Main headline */}
                   <h1
-                    className="font-extrabold text-white leading-tight tracking-tighter"
-                    style={{ fontSize: "clamp(32px, 5vw, 60px)" }}
+                    className="font-extrabold text-white tracking-tighter"
+                    style={{ fontSize: "clamp(36px, 5.5vw, 68px)", lineHeight: 1.08 }}
                   >
-                    {t("home_hero_title1")}
+                    {t("home_hero_line1")}<br />
+                    {t("home_hero_line2")}<br />
+                    {t("home_hero_line3")}
                   </h1>
 
                   <p className="text-lg md:text-xl font-semibold text-white/50 mt-6 leading-snug max-w-lg">

@@ -69,9 +69,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_build: 'Build the future',
 
     // Hero (home page)
-    home_badge: 'Early Access · Free for founding members',
+    home_badge: 'Early Access',
     home_hero_eyebrow: 'Find the',
     home_counter_label: 'active mentors',
+    home_hero_line1: 'Build wealth',
+    home_hero_line2: 'Live free',
+    home_hero_line3: 'Do what you love',
     home_hero_title1: 'Build wealth. Live free. Do what you love.',
     home_hero_title2: 'has been exactly',
     home_hero_title3: "Learn from those who've already made it.",
@@ -1150,9 +1153,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_build: "Construire l'avenir",
 
     // Hero (home page) — eyebrow: "TROUVE LE" | h1: "mentor." | sub: line 3
-    home_badge: 'Accès Anticipé · Gratuit pour les premiers inscrits',
+    home_badge: 'Accès Anticipé',
     home_hero_eyebrow: 'Trouve le',
     home_counter_label: 'mentors actifs',
+    home_hero_line1: 'Construis ta richesse',
+    home_hero_line2: 'Vis libre',
+    home_hero_line3: 'Fais ce que tu aimes',
     home_hero_title1: 'Construis ta richesse. Vis libre. Fais ce que tu aimes.',
     home_hero_title2: 'a été exactement',
     home_hero_title3: "Apprends de ceux qui y sont déjà.",
