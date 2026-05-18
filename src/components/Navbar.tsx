@@ -40,8 +40,8 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { href: "/explore",     label: t("nav_explore") },
-    { href: "/for-schools", label: t("nav_for_schools") },
+    { href: "/founders", label: t("nav_founders") },
+    { href: "/explore",  label: t("nav_explore") },
   ];
 
   return (
