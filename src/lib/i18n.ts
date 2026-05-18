@@ -228,6 +228,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Safety & Trust',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Contact',
+    explore_link_who: 'Who Is It For?',
 
     // Founders page
     founders_label: 'Founders · GrowVia',
@@ -1312,6 +1313,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Sécurité & Confiance',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Contact',
+    explore_link_who: 'Pour qui ?',
 
     // Founders page
     founders_label: 'Fondatrices · GrowVia',

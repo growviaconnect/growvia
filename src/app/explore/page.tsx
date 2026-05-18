@@ -246,11 +246,9 @@ export default function ExplorePage() {
       title: t("explore_title_platform"),
       image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
       links: [
-        { label: t("explore_link_testimonials"), href: "/testimonials" },
-        { label: t("explore_link_how"),          href: "/how-it-works" },
-        { label: t("explore_link_pricing"),      href: "/pricing" },
-        { label: t("explore_link_profile"),      href: "/dashboard" },
-        { label: t("explore_link_founders"),     href: "/founders" },
+        { label: t("explore_link_who"),     href: "/who-is-it-for" },
+        { label: t("explore_link_how"),     href: "/how-it-works" },
+        { label: t("explore_link_pricing"), href: "/pricing" },
       ],
     },
     {
@@ -261,6 +259,7 @@ export default function ExplorePage() {
       links: [
         { label: t("explore_link_find_mentors"), href: "/explore/find-a-mentor" },
         { label: t("explore_link_ai"),           href: "/ai-smart-matching" },
+        { label: t("explore_link_profile"),      href: "/dashboard" },
       ],
     },
     {
@@ -271,6 +270,7 @@ export default function ExplorePage() {
       links: [
         { label: t("explore_link_become_mentor"), href: "/become-a-mentor" },
         { label: t("explore_link_certification"), href: "/mentor-certification" },
+        { label: t("explore_link_profile"),       href: "/dashboard" },
       ],
     },
     {
@@ -279,9 +279,10 @@ export default function ExplorePage() {
       title: t("explore_title_support"),
       image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
       links: [
-        { label: t("explore_link_faq"),     href: "/faq" },
-        { label: t("explore_link_safety"),  href: "/safety-trust" },
-        { label: t("explore_link_contact"), href: "/contact" },
+        { label: t("explore_link_testimonials"), href: "/testimonials" },
+        { label: t("explore_link_faq"),          href: "/faq" },
+        { label: t("explore_link_safety"),       href: "/safety-trust" },
+        { label: t("explore_link_contact"),      href: "/contact" },
       ],
     },
   ];
