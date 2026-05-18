@@ -15,8 +15,9 @@ import { useLang } from "@/contexts/LangContext";
 
 const HERO_SECTORS = [
   "Finance", "Tech", "Marketing", "Consulting", "Design", "RH",
-  "Stratégie", "Product", "Startups", "Growth", "Sales", "Data",
+  "Strategy", "Product", "Startups", "Growth", "Sales", "Data",
   "Legal", "Venture Capital", "Real Estate", "Management",
+  "Art", "Medicine", "Law", "Studies Discovery",
 ];
 
 const ACCENT = "#A78BFA";
