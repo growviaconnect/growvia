@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { useParallax } from "@/hooks/useParallax";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
@@ -36,8 +35,6 @@ export default function HomePage() {
   const { t } = useLang();
 
   const heroSectionRef = useRef<HTMLElement>(null);
-  const heroImgRef     = useRef<HTMLImageElement>(null);
-  useParallax(heroImgRef, heroSectionRef);
 
   const [mentorCount, setMentorCount] = useState(0);
   useEffect(() => {
@@ -137,14 +134,19 @@ export default function HomePage() {
 
         {/* Background */}
         <div className="absolute inset-0">
-          <img
-            ref={heroImgRef}
-            src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
-            alt=""
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
             aria-hidden="true"
             className="w-full h-full object-cover object-center"
-            style={{ filter: "brightness(0.25) saturate(0.4)" }}
-          />
+            style={{ filter: "brightness(0.28) saturate(0.5)" }}
+            poster="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
+          >
+            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+          </video>
           <div
             className="absolute inset-0"
             style={{ background: "linear-gradient(to bottom, rgba(13,10,26,0.5) 0%, transparent 30%, transparent 70%, #0D0A1A 100%)" }}
