@@ -1,24 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import VideoCard from "@/components/VideoCard";
 import VideoModal from "@/components/VideoModal";
+import AnimatedHeroBg from "@/components/AnimatedHeroBg";
 import type { VideoItem } from "@/lib/video-data";
 import { VIDEOS, DOMAIN_COLORS } from "@/lib/video-data";
 
 const ALL_DOMAINS = ["All", ...Array.from(new Set(VIDEOS.map(v => v.domain)))];
-
-// 5-column masonry for the full page gallery
-const PAGE_COLS: VideoItem[][] = [
-  [VIDEOS[0], VIDEOS[5], VIDEOS[9]],
-  [VIDEOS[1], VIDEOS[4]],
-  [VIDEOS[2], VIDEOS[7]],
-  [VIDEOS[3], VIDEOS[6]],
-  [VIDEOS[8], VIDEOS[2].id !== VIDEOS[9].id ? VIDEOS[9] : VIDEOS[0]],
-];
-const PAGE_OFFSETS = [0, 56, 28, 72, 44];
 
 export default function WhoIsItForPage() {
   const [active, setActive] = useState("All");
@@ -32,23 +22,21 @@ export default function WhoIsItForPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#0D0A1A]">
+      <div className="relative min-h-screen bg-[#0D0A1A] overflow-x-hidden">
+
+        {/* Animated background — covers entire page */}
+        <AnimatedHeroBg className="fixed" />
+
+        {/* Subtle top vignette */}
+        <div
+          className="fixed inset-x-0 top-0 h-32 pointer-events-none z-[1]"
+          style={{ background: "linear-gradient(to bottom, #0D0A1A 0%, transparent 100%)" }}
+          aria-hidden="true"
+        />
 
         {/* Header */}
-        <section
-          className="pt-28 pb-16 px-4 text-center"
-          style={{
-            background: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 70%), #0D0A1A",
-          }}
-        >
+        <section className="relative z-10 pt-32 pb-16 px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm transition-colors mb-8"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back to home
-            </Link>
-
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white text-xs font-semibold px-4 py-2 rounded-full mb-6 uppercase tracking-[0.15em]">
               <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
               Who is it for?
@@ -68,7 +56,7 @@ export default function WhoIsItForPage() {
         </section>
 
         {/* Domain filter */}
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 mb-10">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 mb-10">
           <div className="flex flex-wrap gap-2 justify-center">
             {ALL_DOMAINS.map(domain => (
               <button
@@ -92,8 +80,7 @@ export default function WhoIsItForPage() {
         </div>
 
         {/* Gallery */}
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 pb-24">
-
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 pb-24">
           {filtered.length === 0 ? (
             <p className="text-white/30 text-center py-20">No videos for this domain yet.</p>
           ) : (
