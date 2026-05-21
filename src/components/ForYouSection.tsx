@@ -77,7 +77,7 @@ export default function ForYouSection() {
 
           {/* Mobile: flat 2-column grid */}
           <div className="grid grid-cols-2 gap-3 lg:hidden">
-            {VIDEOS.slice(0, 6).map(v => (
+            {VIDEOS.slice(0, 8).map(v => (
               <VideoCard key={v.id} item={v} onPlay={() => setModal(v)} />
             ))}
           </div>
