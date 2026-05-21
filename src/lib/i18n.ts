@@ -2242,6 +2242,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Acceso Anticipado · Gratis para los primeros inscritos',
     home_hero_eyebrow: 'Encuentra al',
     home_counter_label: 'mentores activos',
+    home_hero_line1: 'Construye riqueza',
+    home_hero_line2: 'Vive libre',
+    home_hero_line3: 'Haz lo que amas',
     home_hero_title1: 'El mentor que',
     home_hero_title2: 'estuvo exactamente',
     home_hero_title3: 'que ha estado exactamente donde tú quieres ir.',
@@ -2469,6 +2472,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Seguridad y Confianza',
     explore_link_faq: 'Preguntas',
     explore_link_contact: 'Contacto',
+    explore_link_who: '¿Para quién es?',
 
     // Founders page
     founders_label: 'Fundadores · GrowVia',
@@ -3323,6 +3327,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Frühzeitiger Zugang · Kostenlos für Gründungsmitglieder',
     home_hero_eyebrow: 'Finde den',
     home_counter_label: 'aktive Mentoren',
+    home_hero_line1: 'Baue Wohlstand auf',
+    home_hero_line2: 'Lebe frei',
+    home_hero_line3: 'Tu, was du liebst',
     home_hero_title1: 'Der Mentor, der',
     home_hero_title2: 'genau dort war,',
     home_hero_title3: 'der genau dort war, wo du hinwillst.',
@@ -3476,6 +3483,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Sicherheit & Vertrauen',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Kontakt',
+    explore_link_who: 'Für wen ist es?',
 
     // Founders page
     founders_label: 'Gründerinnen · GrowVia',
@@ -4404,6 +4412,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Acesso Antecipado · Gratuito para os primeiros membros',
     home_hero_eyebrow: 'Encontra o',
     home_counter_label: 'mentores activos',
+    home_hero_line1: 'Constrói riqueza',
+    home_hero_line2: 'Vive livre',
+    home_hero_line3: 'Faz o que amas',
     home_hero_title1: 'O mentor que',
     home_hero_title2: 'esteve exactamente',
     home_hero_title3: 'que esteve exactamente onde queres chegar.',
@@ -4557,6 +4568,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Segurança e Confiança',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Contacto',
+    explore_link_who: 'Para quem é?',
 
     // Founders page
     founders_label: 'Fundadoras · GrowVia',
@@ -5485,6 +5497,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Acesso Antecipado · Gratuito para os primeiros membros',
     home_hero_eyebrow: 'Encontre o',
     home_counter_label: 'mentores ativos',
+    home_hero_line1: 'Construa riqueza',
+    home_hero_line2: 'Viva livre',
+    home_hero_line3: 'Faça o que ama',
     home_hero_title1: 'O mentor que',
     home_hero_title2: 'esteve exatamente',
     home_hero_title3: 'que esteve exatamente onde você quer chegar.',
@@ -5638,6 +5653,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Segurança e Confiança',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Contato',
+    explore_link_who: 'Para quem é?',
 
     // Founders page
     founders_label: 'Fundadoras · GrowVia',
@@ -6566,6 +6582,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Accesso Anticipato · Gratuito per i primi iscritti',
     home_hero_eyebrow: 'Trova il',
     home_counter_label: 'mentor attivi',
+    home_hero_line1: 'Costruisci ricchezza',
+    home_hero_line2: 'Vivi libero',
+    home_hero_line3: 'Fai ciò che ami',
     home_hero_title1: 'Il mentor che',
     home_hero_title2: 'è stato esattamente',
     home_hero_title3: 'che è stato esattamente dove vuoi arrivare.',
@@ -6719,6 +6738,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Sicurezza e Fiducia',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Contatto',
+    explore_link_who: 'Per chi è?',
 
     // Founders page
     founders_label: 'Fondatrici · GrowVia',
@@ -7647,6 +7667,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: '早期アクセス · 創設メンバーは無料',
     home_hero_eyebrow: '見つけよう',
     home_counter_label: '人のアクティブメンター',
+    home_hero_line1: '富を築け',
+    home_hero_line2: '自由に生きろ',
+    home_hero_line3: '愛することをやれ',
     home_hero_title1: 'あなたが目指す場所を',
     home_hero_title2: '歩んできた',
     home_hero_title3: 'あなたが目指す場所を歩んできたメンターと。',
@@ -7800,6 +7823,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: '安全性と信頼',
     explore_link_faq: 'よくある質問',
     explore_link_contact: 'お問い合わせ',
+    explore_link_who: '誰のために？',
 
     // Founders page
     founders_label: '創設者 · GrowVia',
@@ -8728,6 +8752,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: '얼리 액세스 · 창립 멤버 무료',
     home_hero_eyebrow: '찾으세요',
     home_counter_label: '명의 활동 멘토',
+    home_hero_line1: '부를 쌓아라',
+    home_hero_line2: '자유롭게 살아라',
+    home_hero_line3: '좋아하는 일을 해라',
     home_hero_title1: '나와 똑같은 길을',
     home_hero_title2: '걸어온',
     home_hero_title3: '당신이 가고 싶은 곳을 이미 경험한 멘토를 만나세요.',
@@ -8881,6 +8908,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: '안전 및 신뢰',
     explore_link_faq: '자주 묻는 질문',
     explore_link_contact: '문의하기',
+    explore_link_who: '누구를 위한 건가요?',
 
     // Founders page
     founders_label: '창립자 · GrowVia',
@@ -9809,6 +9837,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Ранний доступ · Бесплатно для первых участников',
     home_hero_eyebrow: 'Найди',
     home_counter_label: 'активных менторов',
+    home_hero_line1: 'Строй благосостояние',
+    home_hero_line2: 'Живи свободно',
+    home_hero_line3: 'Делай то, что любишь',
     home_hero_title1: 'Ментора, который',
     home_hero_title2: 'прошёл именно',
     home_hero_title3: 'который прошёл именно тот путь, куда ты стремишься.',
@@ -9962,6 +9993,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Безопасность и доверие',
     explore_link_faq: 'Вопросы и ответы',
     explore_link_contact: 'Контакты',
+    explore_link_who: 'Для кого?',
 
     // Founders page
     founders_label: 'Основатели · GrowVia',
@@ -10874,6 +10906,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'وصول مبكر · مجاني للأعضاء المؤسسين',
     home_hero_eyebrow: 'اعثر على',
     home_counter_label: 'مرشد نشط',
+    home_hero_line1: 'ابنِ ثروتك',
+    home_hero_line2: 'عِش حرًّا',
+    home_hero_line3: 'افعل ما تحب',
     home_hero_title1: 'المرشد الذي',
     home_hero_title2: 'سلك طريقك',
     home_hero_title3: 'الذي سلك طريقك تمامًا إلى حيث تريد الذهاب.',
@@ -10951,6 +10986,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_become_mentor: 'كن مرشدًا', explore_link_certification: 'شهادة المرشد',
     explore_badge_support: 'الدعم', explore_title_support: 'نحن هنا من أجلك',
     explore_link_safety: 'الأمان والثقة', explore_link_faq: 'الأسئلة الشائعة', explore_link_contact: 'تواصل معنا',
+    explore_link_who: 'لمن هذا؟',
     founders_label: 'المؤسسون · GrowVia',
     founders_hero_title: 'نُسرّع أفضل المسارات المهنية في العالم بالإرشاد والشبكة والخبرة.',
     founders_hero_sub: 'تربط GrowVia المهنيين الطموحين بمرشدين من الطراز العالمي عبر الذكاء الاصطناعي في دقائق لا أشهر.',
@@ -11402,6 +11438,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: '抢先体验 · 创始会员免费',
     home_hero_eyebrow: '找到',
     home_counter_label: '位活跃导师',
+    home_hero_line1: '积累财富',
+    home_hero_line2: '自由生活',
+    home_hero_line3: '做你热爱的事',
     home_hero_title1: '那位曾经',
     home_hero_title2: '走过你想去',
     home_hero_title3: '曾经走过你想去之路的导师。',
@@ -11555,6 +11594,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: '安全与信任',
     explore_link_faq: '常见问题',
     explore_link_contact: '联系我们',
+    explore_link_who: '这是为谁？',
 
     // Founders page
     founders_label: '创始人 · GrowVia',
@@ -12483,6 +12523,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Vroege Toegang · Gratis voor founding members',
     home_hero_eyebrow: 'Vind de',
     home_counter_label: 'actieve mentoren',
+    home_hero_line1: 'Bouw welvaart op',
+    home_hero_line2: 'Leef vrij',
+    home_hero_line3: 'Doe wat je liefhebt',
     home_hero_title1: 'De mentor die',
     home_hero_title2: 'precies dezelfde weg',
     home_hero_title3: 'die precies dezelfde weg heeft afgelegd als jij.',
@@ -12636,6 +12679,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Veiligheid & Vertrouwen',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Contact',
+    explore_link_who: 'Voor wie is het?',
 
     // Founders page
     founders_label: 'Oprichters · GrowVia',
@@ -13564,6 +13608,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Wczesny Dostęp · Bezpłatnie dla pierwszych członków',
     home_hero_eyebrow: 'Znajdź',
     home_counter_label: 'aktywnych mentorów',
+    home_hero_line1: 'Buduj dobrobyt',
+    home_hero_line2: 'Żyj wolno',
+    home_hero_line3: 'Rób to, co kochasz',
     home_hero_title1: 'Mentora, który',
     home_hero_title2: 'był dokładnie',
     home_hero_title3: 'który był dokładnie tam, gdzie chcesz dotrzeć.',
@@ -13717,6 +13764,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Bezpieczeństwo i Zaufanie',
     explore_link_faq: 'FAQ',
     explore_link_contact: 'Kontakt',
+    explore_link_who: 'Dla kogo?',
 
     // Founders page
     founders_label: 'Założycielki · GrowVia',
@@ -14645,6 +14693,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     home_badge: 'Erken Erişim · Kurucu üyelere ücretsiz',
     home_hero_eyebrow: 'Bul',
     home_counter_label: 'aktif mentor',
+    home_hero_line1: 'Servet inşa et',
+    home_hero_line2: 'Özgür yaşa',
+    home_hero_line3: 'Sevdiğini yap',
     home_hero_title1: 'Tam olarak',
     home_hero_title2: 'gitmek istediğin yerde',
     home_hero_title3: 'Tam olarak gitmek istediğin yerde olmuş mentoru bul.',
@@ -14798,6 +14849,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     explore_link_safety: 'Güvenlik & Güven',
     explore_link_faq: 'SSS',
     explore_link_contact: 'İletişim',
+    explore_link_who: 'Bu kimin için?',
 
     // Founders page
     founders_label: 'Kurucular · GrowVia',
