@@ -138,7 +138,7 @@ export default function HowItWorksPage() {
       {/* ── CARD STACK — desktop ──────────────────────────────────────── */}
       {!isMobile ? (
         <section
-          aria-label="Étapes — comment ça marche"
+          aria-label="Étapes : comment ça marche"
           style={{
             background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(124,58,237,0.04) 0%, transparent 70%)",
           }}

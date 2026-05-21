@@ -369,7 +369,7 @@ function SubscribeContent() {
               }}
             >
               Commencez gratuitement, évoluez quand vous êtes prêt.
-              Votre carte est enregistrée à l&apos;abonnement — les sessions sont débitées
+              Votre carte est enregistrée à l&apos;abonnement, les sessions sont débitées
               automatiquement à la confirmation du mentor.
             </p>
           </div>

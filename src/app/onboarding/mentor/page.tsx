@@ -595,7 +595,7 @@ export default function MentorOnboarding() {
         // any cached React state from this component.
         window.location.href = "/dashboard?onboarded=1";
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Save failed — please try again.";
+        const msg = err instanceof Error ? err.message : "Save failed, please try again.";
         console.error("[handleSavePrice] error:", msg);
         setScoringError(msg);
         setSavingPrice(false);

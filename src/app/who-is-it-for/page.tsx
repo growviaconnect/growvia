@@ -50,7 +50,7 @@ export default function WhoIsItForPage() {
               <span style={{ color: "#A78BFA" }}>every path</span>
             </h1>
             <p className="text-white/50 text-lg leading-relaxed max-w-xl mx-auto">
-              Mentors and mentees from every field — sharing what changed for them.
+              Mentors and mentees from every field, sharing what changed for them.
             </p>
           </div>
         </section>

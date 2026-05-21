@@ -43,7 +43,7 @@ function SuccessContent() {
           Your <span className="text-[#A78BFA] font-semibold">{label}</span> subscription is active.
         </p>
         <p className="text-white/35 text-sm mb-10">
-          Your card is saved — sessions are charged automatically when a mentor confirms.
+          Your card is saved, sessions are charged automatically when a mentor confirms.
         </p>
 
         {redirectUrl ? (

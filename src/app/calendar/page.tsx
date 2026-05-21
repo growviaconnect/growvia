@@ -224,7 +224,7 @@ export default function CalendarPage() {
                     ? t("cal_alert_less1h")
                     : `${alertHrs} ${alertHrs > 1 ? t("cal_alert_hours") : t("cal_alert_hour")}`}
                 </strong>{" "}
-                — {alertSession.mentor}
+                · {alertSession.mentor}
               </span>
             </div>
             <a
