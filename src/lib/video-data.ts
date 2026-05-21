@@ -11,12 +11,14 @@ export type VideoItem = {
 };
 
 export const DOMAIN_COLORS: Record<string, string> = {
-  Startups: "#7C3AED",
-  Tech:     "#2563EB",
-  Medicine: "#059669",
-  Law:      "#B45309",
-  Art:      "#DB2777",
-  Finance:  "#0891B2",
+  Startups:    "#7C3AED",
+  Tech:        "#2563EB",
+  Medicine:    "#059669",
+  Law:         "#B45309",
+  Art:         "#DB2777",
+  Finance:     "#0891B2",
+  Consulting:  "#0D9488",
+  Real Estate: "#C2410C",
 };
 
 export const VIDEOS: VideoItem[] = [
@@ -96,13 +98,36 @@ export const VIDEOS: VideoItem[] = [
     poster: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=600&q=80",
     tall: true,
   },
+  {
+    id: "v11", domain: "Consulting",
+    name: "Emma R.", role: "Strategy Consultant",
+    quote: "Made partner at 29, here's the blueprint",
+    src: "https://videos.pexels.com/video-files/7988194/7988194-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80",
+    tall: true,
+  },
+  {
+    id: "v12", domain: "Real Estate",
+    name: "Omar S.", role: "Property Developer",
+    quote: "First deal at 24 with no capital of my own",
+    src: "https://videos.pexels.com/video-files/7578043/7578043-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+  },
+  {
+    id: "v13", domain: "Consulting",
+    name: "Rania M.", role: "Data Scientist",
+    quote: "From Excel to machine learning in 12 months",
+    src: "https://videos.pexels.com/video-files/5699165/5699165-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80",
+    tall: true,
+  },
 ];
 
 // Desktop 4-column layout assignments and vertical stagger offsets
 export const GALLERY_COLS: VideoItem[][] = [
-  [VIDEOS[0], VIDEOS[7]],
-  [VIDEOS[1], VIDEOS[6]],
+  [VIDEOS[0], VIDEOS[7], VIDEOS[10]],
+  [VIDEOS[1], VIDEOS[6], VIDEOS[11]],
   [VIDEOS[2], VIDEOS[5], VIDEOS[8]],
-  [VIDEOS[3], VIDEOS[4], VIDEOS[9]],
+  [VIDEOS[3], VIDEOS[4], VIDEOS[9], VIDEOS[12]],
 ];
 export const COL_OFFSETS = [0, 48, 24, 72];
