@@ -113,14 +113,6 @@ export const VIDEOS: VideoItem[] = [
     src: "https://videos.pexels.com/video-files/7578043/7578043-hd_1280_720_25fps.mp4",
     poster: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
   },
-  {
-    id: "v13", domain: "Consulting",
-    name: "Rania M.", role: "Data Scientist",
-    quote: "From Excel to machine learning in 12 months",
-    src: "https://videos.pexels.com/video-files/5699165/5699165-hd_1280_720_25fps.mp4",
-    poster: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80",
-    tall: true,
-  },
 ];
 
 // Desktop 4-column layout assignments and vertical stagger offsets
@@ -128,6 +120,6 @@ export const GALLERY_COLS: VideoItem[][] = [
   [VIDEOS[0], VIDEOS[7], VIDEOS[10]],
   [VIDEOS[1], VIDEOS[6], VIDEOS[11]],
   [VIDEOS[2], VIDEOS[5], VIDEOS[8]],
-  [VIDEOS[3], VIDEOS[4], VIDEOS[9], VIDEOS[12]],
+  [VIDEOS[3], VIDEOS[4], VIDEOS[9]],
 ];
 export const COL_OFFSETS = [0, 48, 24, 72];
