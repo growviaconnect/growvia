@@ -18,7 +18,7 @@ export const DOMAIN_COLORS: Record<string, string> = {
   Art:         "#DB2777",
   Finance:     "#0891B2",
   Consulting:  "#0D9488",
-  Real Estate: "#C2410C",
+  "Real Estate": "#C2410C",
 };
 
 export const VIDEOS: VideoItem[] = [
