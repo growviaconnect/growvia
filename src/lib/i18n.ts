@@ -236,7 +236,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia connects ambitious professionals with world-class mentors through AI, in minutes, not months.',
     founders_hero_cta: 'Apply to GrowVia',
     founders_reason_label: 'Our Reason For Being',
-    founders_reason_title: 'Two management students who looked for mentors, and decided to build what was missing.',
+    founders_reason_title: 'Two management students who looked for mentors and decided to build what was missing.',
     founders_reason_sub: 'Because the right connection, at the right moment, changes everything.',
     founders_vision_label: 'Our Vision',
     founders_vision_quote: 'We believe that connecting different generations creates a new way of thinking, where wisdom meets ambition, and experience accelerates growth.',
