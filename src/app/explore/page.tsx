@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
+import { getUserSession } from "@/lib/session";
 
 // ── Resting positions — straight, tilt only during drag ───────────────────────
 const DECK = [
@@ -35,6 +37,33 @@ const DRAG_THRESHOLD  = 8;     // px — min movement before tap becomes a drag
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ExplorePage() {
   const { t } = useLang();
+  const router = useRouter();
+
+  // Role-gated "My Space" toast
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const roleErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showRoleError(msg: string) {
+    if (roleErrorTimer.current) clearTimeout(roleErrorTimer.current);
+    setRoleError(msg);
+    roleErrorTimer.current = setTimeout(() => setRoleError(null), 4000);
+  }
+
+  function handleMySpace(requiredRole: "mentee" | "mentor") {
+    const session = getUserSession();
+    if (!session) {
+      router.push("/auth/register");
+      return;
+    }
+    if (session.role !== requiredRole) {
+      const label = requiredRole === "mentee" ? "mentee" : "mentor";
+      showRoleError(
+        `This space is for ${label}s only. ${session.role === "mentor" ? "Your mentor dashboard is in the Mentors card." : "Your mentee dashboard is in the Mentees card."}`
+      );
+      return;
+    }
+    router.push("/dashboard");
+  }
 
   // Card state
   const [current,       setCurrent]       = useState(0);
@@ -239,7 +268,13 @@ export default function ExplorePage() {
 
   // ── Card data ─────────────────────────────────────────────────────────────
   // Order: 1. Plateforme  2. Mentorés  3. Mentors  4. Support
-  const CARDS = [
+  const CARDS: {
+    id: string;
+    badge: string;
+    title: string;
+    image: string;
+    links: { label: string; href: string; requiredRole?: "mentee" | "mentor" }[];
+  }[] = [
     {
       id: "platform",
       badge: t("explore_badge_platform"),
@@ -259,7 +294,7 @@ export default function ExplorePage() {
       links: [
         { label: t("explore_link_find_mentors"), href: "/explore/find-a-mentor" },
         { label: t("explore_link_ai"),           href: "/ai-smart-matching" },
-        { label: t("explore_link_profile"),      href: "/dashboard" },
+        { label: t("explore_link_profile"),      href: "/dashboard", requiredRole: "mentee" },
       ],
     },
     {
@@ -270,7 +305,7 @@ export default function ExplorePage() {
       links: [
         { label: t("explore_link_become_mentor"), href: "/become-a-mentor" },
         { label: t("explore_link_certification"), href: "/mentor-certification" },
-        { label: t("explore_link_profile"),       href: "/dashboard" },
+        { label: t("explore_link_profile"),       href: "/dashboard", requiredRole: "mentor" },
       ],
     },
     {
@@ -411,6 +446,10 @@ export default function ExplorePage() {
           0%, 100% { transform: scale(1);    }
           50%      { transform: scale(1.03); }
         }
+        @keyframes fade-in-only {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0);   }
+        }
       `}</style>
 
       <div
@@ -487,16 +526,30 @@ export default function ExplorePage() {
                       </h2>
                       <div className="divide-y divide-white/5">
                         {card.links.map((link) => (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            className="flex items-center justify-between py-2.5 text-sm text-white/55 hover:text-white transition-colors duration-200 group"
-                          >
-                            <span>{link.label}</span>
-                            <span className="text-[#7C3AED] text-xs group-hover:translate-x-0.5 transition-transform duration-200">
-                              →
-                            </span>
-                          </Link>
+                          link.requiredRole ? (
+                            <button
+                              key={link.href}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleMySpace(link.requiredRole!); }}
+                              className="w-full flex items-center justify-between py-2.5 text-sm text-white/55 hover:text-white transition-colors duration-200 group"
+                            >
+                              <span>{link.label}</span>
+                              <span className="text-[#7C3AED] text-xs group-hover:translate-x-0.5 transition-transform duration-200">
+                                →
+                              </span>
+                            </button>
+                          ) : (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="flex items-center justify-between py-2.5 text-sm text-white/55 hover:text-white transition-colors duration-200 group"
+                            >
+                              <span>{link.label}</span>
+                              <span className="text-[#7C3AED] text-xs group-hover:translate-x-0.5 transition-transform duration-200">
+                                →
+                              </span>
+                            </Link>
+                          )
                         ))}
                       </div>
                     </div>
@@ -507,8 +560,31 @@ export default function ExplorePage() {
           })}
         </div>
 
+        {/* Role-access error toast */}
+        <div
+          aria-live="polite"
+          className="mt-6 flex items-center justify-center"
+          style={{ minHeight: 40 }}
+        >
+          {roleError && (
+            <div
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm"
+              style={{
+                background: "rgba(239,68,68,0.12)",
+                border: "1px solid rgba(239,68,68,0.3)",
+                color: "rgba(252,165,165,1)",
+                maxWidth: 340,
+                animation: "fade-in-only 0.2s ease",
+              }}
+            >
+              <span style={{ fontSize: 16 }}>🔒</span>
+              <span>{roleError}</span>
+            </div>
+          )}
+        </div>
+
         {/* Navigation */}
-        <div className="flex flex-col items-center gap-5 mt-14">
+        <div className="flex flex-col items-center gap-5 mt-6">
           <div className="flex items-center gap-6">
             <button
               onClick={goPrev}
