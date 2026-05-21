@@ -1185,7 +1185,7 @@ function DashboardContent() {
                         <div>
                           <p className="text-white font-semibold mb-0.5">🎁 You have 1 free discovery session!</p>
                           <p className="text-white/45 text-sm">
-                            Book your first session with any mentor — completely free, no subscription needed.
+                            Book your first session with any mentor, completely free, no subscription needed.
                           </p>
                         </div>
                         <Link

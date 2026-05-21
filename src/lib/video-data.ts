@@ -69,7 +69,7 @@ export const VIDEOS: VideoItem[] = [
   {
     id: "v7", domain: "Tech",
     name: "Priya S.", role: "Product Manager",
-    quote: "PM at a top startup — no CS degree needed",
+    quote: "PM at a top startup, no CS degree needed",
     src: "https://videos.pexels.com/video-files/5748868/5748868-hd_1280_720_25fps.mp4",
     poster: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80",
     tall: true,
@@ -77,7 +77,7 @@ export const VIDEOS: VideoItem[] = [
   {
     id: "v8", domain: "Startups",
     name: "Tom B.", role: "Serial Entrepreneur",
-    quote: "3 exits before 35 — here's how",
+    quote: "3 exits before 35, here's how",
     src: "https://videos.pexels.com/video-files/3195777/3195777-hd_1280_720_25fps.mp4",
     poster: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=600&q=80",
   },

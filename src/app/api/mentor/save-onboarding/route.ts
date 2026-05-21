@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   if (data.onboarding_completed === true && !row.onboarding_completed) {
     return NextResponse.json(
-      { error: "onboarding_completed was not saved — mentor row may not exist yet" },
+      { error: "onboarding_completed was not saved, mentor row may not exist yet" },
       { status: 422 },
     );
   }

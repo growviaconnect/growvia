@@ -556,7 +556,7 @@ export default function SettingsPage() {
               style={{ background: "rgba(239,68,68,0.12)" }}>
               <AlertTriangle className="w-7 h-7 text-red-500" />
             </div>
-            <h3 className="text-xl font-bold text-white text-center mb-4">Attention — Action irréversible</h3>
+            <h3 className="text-xl font-bold text-white text-center mb-4">Attention : Action irréversible</h3>
 
             {/* Mentor: pending balance warning */}
             {session.role === "mentor" && mentorBalance > 0 && (

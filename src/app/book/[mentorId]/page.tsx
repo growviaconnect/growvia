@@ -265,7 +265,7 @@ export default function BookingPage() {
         <p className="text-2xl">🚀</p>
         <p className="text-white font-semibold text-lg">You&apos;ve used your free session!</p>
         <p className="text-white/40 text-sm max-w-xs">
-          Subscribe to keep growing — from 4.99€/month. Your card is saved and sessions are charged automatically when the mentor confirms.
+          Subscribe to keep growing, from 4.99€/month. Your card is saved and sessions are charged automatically when the mentor confirms.
         </p>
         <Link
           href="/subscribe"

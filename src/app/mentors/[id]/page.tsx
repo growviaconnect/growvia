@@ -117,7 +117,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
         <div>
           <p className="text-white font-semibold mb-0.5">You&apos;ve used your free session!</p>
           <p className="text-white/40 text-sm">
-            Subscribe to keep growing 🚀 — from 4.99€/month, cancel anytime.
+            Subscribe to keep growing 🚀, from 4.99€/month, cancel anytime.
           </p>
         </div>
         <Link
@@ -172,7 +172,7 @@ function BookCTA({ mentorId, price, mentorScore }: {
         <p className="text-white font-semibold mb-0.5">Ready to start?</p>
         <p className="text-white/40 text-sm">
           {!freeSessionUsed && !subPlan
-            ? "🎁 Your first session is free — no subscription needed."
+            ? "🎁 Your first session is free, no subscription needed."
             : "Take the first step toward your goals 🚀"}
           {price != null && subPlan && <span className="text-white/30"> · {price}€ / session</span>}
         </p>

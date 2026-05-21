@@ -2,10 +2,10 @@ export type Locale = 'en' | 'fr' | 'es' | 'de' | 'nl' | 'pl' | 'tr' | 'pt' | 'pt
 
 export const locales: Locale[] = ['en', 'fr', 'es', 'de', 'nl', 'pl', 'tr', 'pt', 'pt-BR', 'it', 'zh', 'ar', 'ar-EG', 'ar-LB', 'ar-SA', 'ar-MA', 'ru', 'ja', 'ko'];
 
-/** Arabic dialect locales — shown as a sub-menu in the LangSwitcher */
+/** Arabic dialect locales, shown as a sub-menu in the LangSwitcher */
 export const arabicLocales: Locale[] = ['ar', 'ar-EG', 'ar-LB', 'ar-SA', 'ar-MA'];
 
-/** Portuguese variant locales — shown as a sub-menu in the LangSwitcher */
+/** Portuguese variant locales, shown as a sub-menu in the LangSwitcher */
 export const portugueseLocales: Locale[] = ['pt', 'pt-BR'];
 
 export const localeNames: Record<Locale, string> = {
@@ -236,7 +236,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia connects ambitious professionals with world-class mentors through AI, in minutes, not months.',
     founders_hero_cta: 'Apply to GrowVia',
     founders_reason_label: 'Our Reason For Being',
-    founders_reason_title: 'Two management students who looked for mentors — and decided to build what was missing.',
+    founders_reason_title: 'Two management students who looked for mentors, and decided to build what was missing.',
     founders_reason_sub: 'Because the right connection, at the right moment, changes everything.',
     founders_vision_label: 'Our Vision',
     founders_vision_quote: 'We believe that connecting different generations creates a new way of thinking, where wisdom meets ambition, and experience accelerates growth.',
@@ -1113,7 +1113,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'January,February,March,April,May,June,July,August,September,October,November,December',
     cal_days: 'M,T,W,T,F,S,S',
 
-    // Schools — missing keys used in code
+    // Schools, missing keys used in code
     schools_form_eyebrow: 'Free Demo',
     schools_why_label: 'Why GrowVia',
 
@@ -1153,7 +1153,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_signout: 'Se déconnecter',
     nav_build: "Construire l'avenir",
 
-    // Hero (home page) — eyebrow: "TROUVE LE" | h1: "mentor." | sub: line 3
+    // Hero (home page), eyebrow: "TROUVE LE" | h1: "mentor." | sub: line 3
     home_badge: 'Accès Anticipé',
     home_hero_eyebrow: 'Trouve le',
     home_counter_label: 'mentors actifs',
@@ -1321,7 +1321,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: "GrowVia connecte des professionnels ambitieux avec des mentors de classe mondiale via l'IA, en quelques minutes, pas en plusieurs mois.",
     founders_hero_cta: 'Postuler à GrowVia',
     founders_reason_label: "Notre raison d'être",
-    founders_reason_title: "Deux étudiantes en management qui ont cherché des mentors — et décidé de construire ce qui manquait.",
+    founders_reason_title: "Deux étudiantes en management qui ont cherché des mentors, et décidé de construire ce qui manquait.",
     founders_reason_sub: "Parce que personne ne devrait naviguer seul vers son futur.",
     founders_vision_label: 'Notre Vision',
     founders_vision_quote: "Nous croyons que connecter différentes générations crée une nouvelle façon de penser, où la sagesse rencontre l'ambition et où l'expérience accélère la croissance.",
@@ -2198,7 +2198,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Janvier,Février,Mars,Avril,Mai,Juin,Juillet,Août,Septembre,Octobre,Novembre,Décembre',
     cal_days: 'L,M,M,J,V,S,D',
 
-    // Schools — clés manquantes utilisées dans le code
+    // Schools, clés manquantes utilisées dans le code
     schools_form_eyebrow: 'Démo Gratuite',
     schools_why_label: 'Pourquoi GrowVia',
 
@@ -2476,7 +2476,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia conecta profesionales ambiciosos con mentores de clase mundial mediante IA, en minutos, no en meses.',
     founders_hero_cta: 'Postularse a GrowVia',
     founders_reason_label: 'Nuestra Razón de Ser',
-    founders_reason_title: 'Dos estudiantes de gestión que buscaron mentores — y decidieron construir lo que faltaba.',
+    founders_reason_title: 'Dos estudiantes de gestión que buscaron mentores, y decidieron construir lo que faltaba.',
     founders_reason_sub: 'Porque la conexión correcta, en el momento correcto, lo cambia todo.',
     founders_vision_label: 'Nuestra Visión',
     founders_vision_quote: 'Creemos que conectar diferentes generaciones crea una nueva forma de pensar, donde la sabiduría se encuentra con la ambición y la experiencia acelera el crecimiento.',
@@ -3279,7 +3279,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Enero,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre',
     cal_days: 'L,M,X,J,V,S,D',
 
-    // Schools — claves faltantes usadas en el código
+    // Schools, claves faltantes usadas en el código
     schools_form_eyebrow: 'Demo Gratuita',
     schools_why_label: 'Por qué GrowVia',
 
@@ -4360,7 +4360,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember',
     cal_days: 'Mo,Di,Mi,Do,Fr,Sa,So',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Kostenlose Demo',
     schools_why_label: 'Warum GrowVia',
 
@@ -4433,7 +4433,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: 'Em 3 passos, estás a caminho.',
     steps_sub: 'Sem formulários intermináveis. Sem esperas. Apenas o mentor certo.',
     steps_1_title: 'Descreves o teu objetivo',
-    steps_1_desc: 'Carreira, reconversão, empreendedorismo, estágio — diz-nos onde queres chegar.',
+    steps_1_desc: 'Carreira, reconversão, empreendedorismo, estágio, diz-nos onde queres chegar.',
     steps_2_title: 'A IA encontra o teu match perfeito',
     steps_2_desc: 'O nosso algoritmo analisa experiência, sector e estilo de mentoria para um match à medida.',
     steps_3_title: 'Reservas a tua primeira sessão',
@@ -4485,7 +4485,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_title_pre: 'Por detrás de cada grande carreira há alguém que estendeu a',
     stats_title_hl: 'mão.',
     stats_title_post: '',
-    stats_sub: 'A nossa rede de mentores reúne profissionais de topo que escolheram estender a sua — porque nunca esqueceram a mão que um dia lhes foi estendida.',
+    stats_sub: 'A nossa rede de mentores reúne profissionais de topo que escolheram estender a sua, porque nunca esqueceram a mão que um dia lhes foi estendida.',
     stats_badge_mentors: 'Mentores',
     stats_desc_mentors: 'Mentores Especialistas',
     stats_badge_mentees: 'Mentees',
@@ -4564,7 +4564,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'A GrowVia liga profissionais ambiciosos a mentores de excelência através da IA, em minutos, não em meses.',
     founders_hero_cta: 'Candidatar-me à GrowVia',
     founders_reason_label: 'A nossa razão de ser',
-    founders_reason_title: 'Duas estudantes de gestão que procuraram mentores — e decidiram construir o que faltava.',
+    founders_reason_title: 'Duas estudantes de gestão que procuraram mentores, e decidiram construir o que faltava.',
     founders_reason_sub: 'Porque a ligação certa, no momento certo, muda tudo.',
     founders_vision_label: 'A nossa Visão',
     founders_vision_quote: 'Acreditamos que ligar diferentes gerações cria uma nova forma de pensar, onde a sabedoria encontra a ambição e a experiência acelera o crescimento.',
@@ -4793,7 +4793,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     pricing_mentor_label: 'Para mentores',
     pricing_mentor_join: 'Juntar-se à GrowVia como mentor é gratuito',
     pricing_mentor_title: 'Só pagas quando ganhas.',
-    pricing_mentor_sub: 'Sem taxas de configuração. Sem subscrição mensal. Sem risco. A GrowVia cobra uma comissão apenas quando um mentee paga por uma sessão — todo o resto é gratuito.',
+    pricing_mentor_sub: 'Sem taxas de configuração. Sem subscrição mensal. Sem risco. A GrowVia cobra uma comissão apenas quando um mentee paga por uma sessão, todo o resto é gratuito.',
     pricing_mentor_p1: 'Tu defines os teus próprios preços',
     pricing_mentor_p2: 'Tu escolhes a tua disponibilidade',
     pricing_mentor_p3: 'A GrowVia cobra 20% de comissão por sessão apenas quando ganhas',
@@ -4833,7 +4833,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_value3_title: 'Acessível a Todos',
     wwa_value3_desc: 'A orientação de carreira não deve ser um privilégio. Trabalhamos para tornar a mentoria de qualidade acessível a estudantes e profissionais em todo o lado.',
     wwa_value4_title: 'Crescimento Contínuo',
-    wwa_value4_desc: 'Acreditamos na aprendizagem ao longo da vida para todos na plataforma — mentores e mentees.',
+    wwa_value4_desc: 'Acreditamos na aprendizagem ao longo da vida para todos na plataforma, mentores e mentees.',
     wwa_cta_title: 'Junta-te a nós nesta jornada',
     wwa_cta_sub: 'Quer queiras crescer ou retribuir, há um lugar para ti na GrowVia.',
     wwa_cta_start: 'Começar',
@@ -4920,9 +4920,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Become a Mentor / Register form
     bam_label: 'Para Mentores',
     bam_title: 'Transforma a tua experiência no avanço de alguém.',
-    bam_sub: 'A tua carreira demorou anos a construir. A GrowVia permite-te transformar esse expertise em impacto real — no teu horário, sem qualquer sobrecarga.',
+    bam_sub: 'A tua carreira demorou anos a construir. A GrowVia permite-te transformar esse expertise em impacto real, no teu horário, sem qualquer sobrecarga.',
     bam_b1_title: 'Geração de leads em piloto automático',
-    bam_b1_desc: 'Mentees qualificados chegam até ti — sem prospeção a frio.',
+    bam_b1_desc: 'Mentees qualificados chegam até ti, sem prospeção a frio.',
     bam_b2_title: 'Zero administração',
     bam_b2_desc: 'Nós tratamos do agendamento, pagamentos e registo de sessões.',
     bam_b3_title: 'O teu legado, estruturado',
@@ -4986,7 +4986,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_badge: 'Funcionalidade Premium',
     ai_title1: 'IA',
     ai_title2: 'Smart Matching',
-    ai_sub: 'Para de adivinhar. A nossa IA analisa os teus objetivos, personalidade e experiência para recomendar os mentores mais adequados — com uma pontuação de compatibilidade para cada match.',
+    ai_sub: 'Para de adivinhar. A nossa IA analisa os teus objetivos, personalidade e experiência para recomendar os mentores mais adequados, com uma pontuação de compatibilidade para cada match.',
     ai_section_title: 'Encontrar o mentor certo é a parte mais difícil',
     ai_section_p1: 'A maioria das pessoas escolhe um mentor com base no cargo ou nos anos de experiência. Mas os mentores que realmente ajudam são os que compreendem a tua situação específica, objetivos e personalidade.',
     ai_section_p2: 'O Matching IA da GrowVia vai mais fundo. Considera o que queres alcançar, como aprendes e que estilo de orientação funciona melhor para ti.',
@@ -5013,7 +5013,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: 'Recebe os teus top matches',
     ai_s3_desc: 'Recebes uma lista ordenada de mentores compatíveis com uma pontuação percentual para cada um.',
     ai_s4_label: 'Aceitar ou explorar',
-    ai_s4_desc: 'Aceita directamente a recomendação da IA ou explora mentores manualmente — a tua escolha.',
+    ai_s4_desc: 'Aceita directamente a recomendação da IA ou explora mentores manualmente, a tua escolha.',
     ai_disc_label: 'Sessão de Descoberta',
     ai_disc_ai: '1 match IA incluído · Sessão de 15–20 min',
     ai_disc_f1: 'Um Smart Match IA incluído',
@@ -5202,13 +5202,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_badge: 'Para mentores',
     mentor_title_1: 'Transforma a tua experiência no',
     mentor_title_hl: 'avanço de alguém',
-    mentor_sub: 'A tua carreira demorou anos a construir. A GrowVia permite-te transformar esse expertise em impacto real — no teu horário, sem qualquer sobrecarga.',
+    mentor_sub: 'A tua carreira demorou anos a construir. A GrowVia permite-te transformar esse expertise em impacto real, no teu horário, sem qualquer sobrecarga.',
     mentor_b1_title: 'Geração de leads em piloto automático',
-    mentor_b1_desc: 'Mentees qualificados chegam até ti — sem prospeção a frio, sem autopromoção. A GrowVia traz as pessoas certas ao teu perfil.',
+    mentor_b1_desc: 'Mentees qualificados chegam até ti, sem prospeção a frio, sem autopromoção. A GrowVia traz as pessoas certas ao teu perfil.',
     mentor_b2_title: 'Zero administração',
     mentor_b2_desc: 'A GrowVia trata do agendamento, pagamentos e registo de sessões. Tu focas-te inteiramente no mentee à tua frente.',
     mentor_b3_title: 'O teu legado, estruturado',
-    mentor_b3_desc: 'Acompanha o progresso dos mentees ao longo do tempo e ganha o teu crachá de Mentor Certificado — uma marca de confiança visível para cada mentee na plataforma.',
+    mentor_b3_desc: 'Acompanha o progresso dos mentees ao longo do tempo e ganha o teu crachá de Mentor Certificado, uma marca de confiança visível para cada mentee na plataforma.',
     mentor_apply: 'Candidatar-me como mentor',
     mentor_apply_sub: 'Revisão manual · Ganha o teu crachá de Mentor Certificado',
 
@@ -5229,7 +5229,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'Estamos apenas a começar',
     success_title: 'Sê a nossa primeira história de sucesso',
-    success_sub: 'A GrowVia está a lançar agora. Estamos a integrar os nossos primeiros mentores e mentees. Regista-te hoje e ajuda a moldar a plataforma — a tua história pode ser a que inspira milhares.',
+    success_sub: 'A GrowVia está a lançar agora. Estamos a integrar os nossos primeiros mentores e mentees. Regista-te hoje e ajuda a moldar a plataforma, a tua história pode ser a que inspira milhares.',
     success_cta_find: 'Encontrar o meu mentor',
     success_cta_apply: 'Candidatar-me como mentor',
 
@@ -5280,7 +5280,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_t1_quote: 'A GrowVia não me ligou apenas a um mentor. Mudou a forma como vejo o meu potencial.',
     founders_t2_quote: 'Ver o meu mentee conseguir o emprego dos seus sonhos lembrou-me porque a experiência existe para ser partilhada. A GrowVia torna isso genuinamente sem esforço.',
     founders_t3_quote: 'O matching IA foi surpreendente. O meu mentor tinha enfrentado exactamente a mesma encruzilhada em que eu estava.',
-    founders_t4_quote: 'Tinha a direcção, mas não a confiança. A GrowVia deu-me as duas — na minha primeira sessão.',
+    founders_t4_quote: 'Tinha a direcção, mas não a confiança. A GrowVia deu-me as duas, na minha primeira sessão.',
     founders_t5_quote: 'A minha agenda está cheia, mas a GrowVia torna o acto de retribuir genuinamente sem fricção. Zero sobrecarga, impacto máximo.',
     founders_t6_quote: 'Juntei-me à GrowVia para retribuir. Acabei por aprender tanto quanto ensinei.',
     founders_stat1_quote: 'Três sessões depois, tinha um plano claro de cinco anos. Nada chegou perto.',
@@ -5336,7 +5336,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: 'Sem sessões próximas',
     dash_no_upcoming_desc: 'Reserva uma sessão com um mentor para começares a tua jornada.',
     dash_free_ai_title: 'Experimenta o Matching IA gratuitamente',
-    dash_free_ai_desc: 'Tens 1 match IA gratuito — deixa o nosso motor encontrar o teu mentor perfeito.',
+    dash_free_ai_desc: 'Tens 1 match IA gratuito, deixa o nosso motor encontrar o teu mentor perfeito.',
     dash_try_now: 'Experimentar agora',
     dash_unlock_ai: 'Desbloquear matching IA ilimitado',
     dash_unlock_ai_desc: 'Subscreve a partir de 4,99€/mês e obtém acesso total + matches IA ilimitados.',
@@ -5379,7 +5379,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: 'Diz-nos o que precisas',
-    dash_q_subtitle: 'Algumas questões rápidas — o teu match executa quando clicas em Encontrar os Meus Matches',
+    dash_q_subtitle: 'Algumas questões rápidas, o teu match executa quando clicas em Encontrar os Meus Matches',
     dash_q_goal_label: 'Qual é o teu objetivo principal?',
     dash_q_select_all: '(selecciona tudo o que se aplica)',
     dash_q_goal1: 'Crescimento de carreira',
@@ -5441,7 +5441,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Janeiro,Fevereiro,Março,Abril,Maio,Junho,Julho,Agosto,Setembro,Outubro,Novembro,Dezembro',
     cal_days: 'Seg,Ter,Qua,Qui,Sex,Sáb,Dom',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Demo Gratuita',
     schools_why_label: 'Porquê a GrowVia',
 
@@ -5514,7 +5514,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: 'Em 3 passos, você está a caminho.',
     steps_sub: 'Sem formulários intermináveis. Sem esperas. Apenas o mentor certo.',
     steps_1_title: 'Você descreve seu objetivo',
-    steps_1_desc: 'Carreira, reconversão, empreendedorismo, estágio — diga-nos onde quer chegar.',
+    steps_1_desc: 'Carreira, reconversão, empreendedorismo, estágio, diga-nos onde quer chegar.',
     steps_2_title: 'A IA encontra seu match perfeito',
     steps_2_desc: 'Nosso algoritmo analisa experiência, setor e estilo de mentoria para um match personalizado.',
     steps_3_title: 'Você agenda sua primeira sessão',
@@ -5566,7 +5566,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_title_pre: 'Por trás de cada grande carreira há alguém que estendeu a',
     stats_title_hl: 'mão.',
     stats_title_post: '',
-    stats_sub: 'Nossa rede de mentores reúne profissionais de ponta que escolheram estender a sua — porque nunca esqueceram a mão que um dia lhes foi estendida.',
+    stats_sub: 'Nossa rede de mentores reúne profissionais de ponta que escolheram estender a sua, porque nunca esqueceram a mão que um dia lhes foi estendida.',
     stats_badge_mentors: 'Mentores',
     stats_desc_mentors: 'Mentores Especialistas',
     stats_badge_mentees: 'Mentees',
@@ -5645,7 +5645,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'A GrowVia conecta profissionais ambiciosos a mentores de excelência por meio da IA, em minutos, não em meses.',
     founders_hero_cta: 'Candidatar-me à GrowVia',
     founders_reason_label: 'Nossa razão de ser',
-    founders_reason_title: 'Duas estudantes de gestão que buscaram mentores — e decidiram construir o que faltava.',
+    founders_reason_title: 'Duas estudantes de gestão que buscaram mentores, e decidiram construir o que faltava.',
     founders_reason_sub: 'Porque a conexão certa, no momento certo, muda tudo.',
     founders_vision_label: 'Nossa Visão',
     founders_vision_quote: 'Acreditamos que conectar diferentes gerações cria uma nova forma de pensar, onde a sabedoria encontra a ambição e a experiência acelera o crescimento.',
@@ -5874,7 +5874,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     pricing_mentor_label: 'Para mentores',
     pricing_mentor_join: 'Entrar na GrowVia como mentor é gratuito',
     pricing_mentor_title: 'Você só paga quando ganha.',
-    pricing_mentor_sub: 'Sem taxas de configuração. Sem assinatura mensal. Sem risco. A GrowVia cobra uma comissão apenas quando um mentee paga por uma sessão — todo o resto é gratuito.',
+    pricing_mentor_sub: 'Sem taxas de configuração. Sem assinatura mensal. Sem risco. A GrowVia cobra uma comissão apenas quando um mentee paga por uma sessão, todo o resto é gratuito.',
     pricing_mentor_p1: 'Você define seus próprios preços',
     pricing_mentor_p2: 'Você escolhe sua disponibilidade',
     pricing_mentor_p3: 'A GrowVia cobra 20% de comissão por sessão apenas quando você ganha',
@@ -5914,7 +5914,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_value3_title: 'Acessível a Todos',
     wwa_value3_desc: 'A orientação de carreira não deve ser um privilégio. Trabalhamos para tornar a mentoria de qualidade acessível a estudantes e profissionais em todo lugar.',
     wwa_value4_title: 'Crescimento Contínuo',
-    wwa_value4_desc: 'Acreditamos na aprendizagem ao longo da vida para todos na plataforma — mentores e mentees.',
+    wwa_value4_desc: 'Acreditamos na aprendizagem ao longo da vida para todos na plataforma, mentores e mentees.',
     wwa_cta_title: 'Junte-se a nós nessa jornada',
     wwa_cta_sub: 'Seja para crescer ou para retribuir, há um lugar para você na GrowVia.',
     wwa_cta_start: 'Começar',
@@ -6001,9 +6001,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Become a Mentor / Register form
     bam_label: 'Para Mentores',
     bam_title: 'Transforme sua experiência no avanço de alguém.',
-    bam_sub: 'Sua carreira levou anos para ser construída. A GrowVia permite que você transforme esse expertise em impacto real — no seu horário, sem nenhuma sobrecarga.',
+    bam_sub: 'Sua carreira levou anos para ser construída. A GrowVia permite que você transforme esse expertise em impacto real, no seu horário, sem nenhuma sobrecarga.',
     bam_b1_title: 'Geração de leads no piloto automático',
-    bam_b1_desc: 'Mentees qualificados chegam até você — sem prospecção a frio.',
+    bam_b1_desc: 'Mentees qualificados chegam até você, sem prospecção a frio.',
     bam_b2_title: 'Zero burocracia',
     bam_b2_desc: 'Cuidamos do agendamento, pagamentos e registro de sessões.',
     bam_b3_title: 'Seu legado, estruturado',
@@ -6067,7 +6067,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_badge: 'Funcionalidade Premium',
     ai_title1: 'IA',
     ai_title2: 'Smart Matching',
-    ai_sub: 'Pare de adivinhar. Nossa IA analisa seus objetivos, personalidade e experiência para recomendar os mentores mais adequados — com uma pontuação de compatibilidade para cada match.',
+    ai_sub: 'Pare de adivinhar. Nossa IA analisa seus objetivos, personalidade e experiência para recomendar os mentores mais adequados, com uma pontuação de compatibilidade para cada match.',
     ai_section_title: 'Encontrar o mentor certo é a parte mais difícil',
     ai_section_p1: 'A maioria das pessoas escolhe um mentor com base no cargo ou nos anos de experiência. Mas os mentores que realmente ajudam são os que compreendem sua situação específica, objetivos e personalidade.',
     ai_section_p2: 'O Matching IA da GrowVia vai mais fundo. Considera o que você quer alcançar, como aprende e que estilo de orientação funciona melhor para você.',
@@ -6094,7 +6094,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: 'Receba seus top matches',
     ai_s3_desc: 'Você recebe uma lista ordenada de mentores compatíveis com uma pontuação percentual para cada um.',
     ai_s4_label: 'Aceitar ou explorar',
-    ai_s4_desc: 'Aceite diretamente a recomendação da IA ou explore mentores manualmente — sua escolha.',
+    ai_s4_desc: 'Aceite diretamente a recomendação da IA ou explore mentores manualmente, sua escolha.',
     ai_disc_label: 'Sessão de Descoberta',
     ai_disc_ai: '1 match IA incluído · Sessão de 15–20 min',
     ai_disc_f1: 'Um Smart Match IA incluído',
@@ -6283,13 +6283,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_badge: 'Para mentores',
     mentor_title_1: 'Transforme sua experiência no',
     mentor_title_hl: 'avanço de alguém',
-    mentor_sub: 'Sua carreira levou anos para ser construída. A GrowVia permite que você transforme esse expertise em impacto real — no seu horário, sem nenhuma sobrecarga.',
+    mentor_sub: 'Sua carreira levou anos para ser construída. A GrowVia permite que você transforme esse expertise em impacto real, no seu horário, sem nenhuma sobrecarga.',
     mentor_b1_title: 'Geração de leads no piloto automático',
-    mentor_b1_desc: 'Mentees qualificados chegam até você — sem prospecção a frio, sem autopromoção. A GrowVia traz as pessoas certas ao seu perfil.',
+    mentor_b1_desc: 'Mentees qualificados chegam até você, sem prospecção a frio, sem autopromoção. A GrowVia traz as pessoas certas ao seu perfil.',
     mentor_b2_title: 'Zero burocracia',
     mentor_b2_desc: 'A GrowVia cuida do agendamento, pagamentos e registro de sessões. Você se concentra totalmente no mentee à sua frente.',
     mentor_b3_title: 'Seu legado, estruturado',
-    mentor_b3_desc: 'Acompanhe o progresso dos mentees ao longo do tempo e ganhe seu crachá de Mentor Certificado — uma marca de confiança visível para cada mentee na plataforma.',
+    mentor_b3_desc: 'Acompanhe o progresso dos mentees ao longo do tempo e ganhe seu crachá de Mentor Certificado, uma marca de confiança visível para cada mentee na plataforma.',
     mentor_apply: 'Candidatar-me como mentor',
     mentor_apply_sub: 'Revisão manual · Ganhe seu crachá de Mentor Certificado',
 
@@ -6310,7 +6310,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'Estamos apenas começando',
     success_title: 'Seja nossa primeira história de sucesso',
-    success_sub: 'A GrowVia está lançando agora. Estamos integrando nossos primeiros mentores e mentees. Cadastre-se hoje e ajude a moldar a plataforma — sua história pode ser a que inspira milhares.',
+    success_sub: 'A GrowVia está lançando agora. Estamos integrando nossos primeiros mentores e mentees. Cadastre-se hoje e ajude a moldar a plataforma, sua história pode ser a que inspira milhares.',
     success_cta_find: 'Encontrar meu mentor',
     success_cta_apply: 'Candidatar-me como mentor',
 
@@ -6361,7 +6361,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_t1_quote: 'A GrowVia não me conectou apenas a um mentor. Mudou a forma como vejo meu potencial.',
     founders_t2_quote: 'Ver meu mentee conseguir o emprego dos seus sonhos me lembrou por que a experiência existe para ser compartilhada. A GrowVia torna isso genuinamente sem esforço.',
     founders_t3_quote: 'O matching IA foi surpreendente. Meu mentor tinha enfrentado exatamente a mesma encruzilhada em que eu estava.',
-    founders_t4_quote: 'Tinha a direção, mas não a confiança. A GrowVia me deu as duas — na minha primeira sessão.',
+    founders_t4_quote: 'Tinha a direção, mas não a confiança. A GrowVia me deu as duas, na minha primeira sessão.',
     founders_t5_quote: 'Minha agenda está cheia, mas a GrowVia torna o ato de retribuir genuinamente sem fricção. Zero sobrecarga, impacto máximo.',
     founders_t6_quote: 'Entrei na GrowVia para retribuir. Acabei aprendendo tanto quanto ensinei.',
     founders_stat1_quote: 'Três sessões depois, tinha um plano claro de cinco anos. Nada chegou perto.',
@@ -6417,7 +6417,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: 'Sem sessões próximas',
     dash_no_upcoming_desc: 'Agende uma sessão com um mentor para começar sua jornada.',
     dash_free_ai_title: 'Experimente o Matching IA gratuitamente',
-    dash_free_ai_desc: 'Você tem 1 match IA gratuito — deixe nosso motor encontrar seu mentor perfeito.',
+    dash_free_ai_desc: 'Você tem 1 match IA gratuito, deixe nosso motor encontrar seu mentor perfeito.',
     dash_try_now: 'Experimentar agora',
     dash_unlock_ai: 'Desbloquear matching IA ilimitado',
     dash_unlock_ai_desc: 'Assine a partir de 4,99€/mês e obtenha acesso total + matches IA ilimitados.',
@@ -6460,7 +6460,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: 'Diga-nos o que você precisa',
-    dash_q_subtitle: 'Algumas perguntas rápidas — seu match executa quando você clica em Encontrar Meus Matches',
+    dash_q_subtitle: 'Algumas perguntas rápidas, seu match executa quando você clica em Encontrar Meus Matches',
     dash_q_goal_label: 'Qual é seu objetivo principal?',
     dash_q_select_all: '(selecione tudo que se aplica)',
     dash_q_goal1: 'Crescimento de carreira',
@@ -6522,7 +6522,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Janeiro,Fevereiro,Março,Abril,Maio,Junho,Julho,Agosto,Setembro,Outubro,Novembro,Dezembro',
     cal_days: 'Seg,Ter,Qua,Qui,Sex,Sáb,Dom',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Demo Gratuita',
     schools_why_label: 'Por que a GrowVia',
 
@@ -6726,7 +6726,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia mette in contatto professionisti ambiziosi con mentor di livello mondiale tramite AI, in minuti, non mesi.',
     founders_hero_cta: 'Candidati a GrowVia',
     founders_reason_label: 'La nostra ragione di essere',
-    founders_reason_title: 'Due studentesse di management che cercavano mentor — e hanno deciso di costruire ciò che mancava.',
+    founders_reason_title: 'Due studentesse di management che cercavano mentor, e hanno deciso di costruire ciò che mancava.',
     founders_reason_sub: "Perché la connessione giusta, al momento giusto, cambia tutto.",
     founders_vision_label: 'La nostra visione',
     founders_vision_quote: 'Crediamo che connettere generazioni diverse crei un nuovo modo di pensare, dove la saggezza incontra l\'ambizione e l\'esperienza accelera la crescita.',
@@ -7603,7 +7603,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Gennaio,Febbraio,Marzo,Aprile,Maggio,Giugno,Luglio,Agosto,Settembre,Ottobre,Novembre,Dicembre',
     cal_days: 'L,M,M,G,V,S,D',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Demo Gratuita',
     schools_why_label: 'Perché GrowVia',
 
@@ -7676,7 +7676,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: '3ステップでスタート。',
     steps_sub: '長いフォームなし。待ち時間なし。最適なメンターだけ。',
     steps_1_title: '目標を入力',
-    steps_1_desc: 'キャリア、転職、起業、インターン — 目指す場所を教えてください。',
+    steps_1_desc: 'キャリア、転職、起業、インターン, 目指す場所を教えてください。',
     steps_2_title: 'AIが最適マッチを見つける',
     steps_2_desc: 'アルゴリズムが経験・業界・メンタリングスタイルを分析し、あなたに最適なマッチを提案します。',
     steps_3_title: '最初のセッションを予約',
@@ -8174,7 +8174,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     bam_review_label: '手動審査',
     bam_badge_label: '認定メンターバッジを取得',
     bam_form_title: 'アカウントを作成',
-    bam_form_sub: 'GrowViaに参加 — クレジットカード不要。',
+    bam_form_sub: 'GrowViaに参加, クレジットカード不要。',
     bam_step1_title: '参加区分を選択...',
     bam_role_mentee_label: 'メンターを探したい',
     bam_role_mentee_desc: 'キャリアガイダンスと明確な方向性を得る',
@@ -8256,7 +8256,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: 'トップマッチを受け取る',
     ai_s3_desc: '各メンターの相性率付きランク付きリストを受け取ります。',
     ai_s4_label: '承認または閲覧',
-    ai_s4_desc: 'AIの推薦を直接承認するか、手動でメンターを閲覧するか — あなたが選びます。',
+    ai_s4_desc: 'AIの推薦を直接承認するか、手動でメンターを閲覧するか, あなたが選びます。',
     ai_disc_label: '体験セッション',
     ai_disc_ai: 'AIマッチング1回含む · 15〜20分セッション',
     ai_disc_f1: 'AIスマートマッチング1回含む',
@@ -8341,7 +8341,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     safety_d2: 'プラットフォームの運営に必要なデータのみ収集します',
     safety_d3: 'いつでもデータの削除を要求できます',
     safety_d4: 'データを第三者に売却・共有することはありません',
-    safety_d5: 'すべての決済はStripeを通じて処理 — カードデータは私たちのサーバーに保存されません',
+    safety_d5: 'すべての決済はStripeを通じて処理, カードデータは私たちのサーバーに保存されません',
     safety_d6: 'Cookieはプラットフォームの基本機能にのみ使用されます',
     safety_privacy_link: 'プライバシーポリシー全文を読む',
     safety_concern_title: '安全に関する懸念がありますか？',
@@ -8390,7 +8390,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Register page
     reg_title: 'アカウントを作成',
-    reg_sub: 'GrowViaに参加 — クレジットカード不要。',
+    reg_sub: 'GrowViaに参加, クレジットカード不要。',
     reg_full_name: 'フルネーム',
     reg_email: 'メールアドレス',
     reg_password: 'パスワード',
@@ -8451,7 +8451,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_b2_title: '管理作業ゼロ',
     mentor_b2_desc: 'GrowViaがスケジュール・決済・セッション管理を担当。あなたは目の前のメンティーに完全集中できます。',
     mentor_b3_title: 'あなたのレガシーを体系化',
-    mentor_b3_desc: 'メンティーの進捗を追跡し、認定メンターバッジを獲得 — プラットフォームのすべてのメンティーに見える信頼の証。',
+    mentor_b3_desc: 'メンティーの進捗を追跡し、認定メンターバッジを獲得, プラットフォームのすべてのメンティーに見える信頼の証。',
     mentor_apply: 'メンターとして申請',
     mentor_apply_sub: '手動審査 · 認定メンターバッジを取得',
 
@@ -8472,7 +8472,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'まだ始まったばかり',
     success_title: '私たちの最初の成功事例になる',
-    success_sub: 'GrowViaは今まさに始まっています。最初のメンターとメンティーを採用中です。今日サインアップしてプラットフォームの形成を助けてください — あなたのストーリーが数千人を奮起させるかもしれません。',
+    success_sub: 'GrowViaは今まさに始まっています。最初のメンターとメンティーを採用中です。今日サインアップしてプラットフォームの形成を助けてください, あなたのストーリーが数千人を奮起させるかもしれません。',
     success_cta_find: 'メンターを探す',
     success_cta_apply: 'メンターとして申請',
 
@@ -8521,7 +8521,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Founders, testimonial quotes
     founders_t1_quote: 'GrowViaは単にメンターを紹介してくれただけではありません。私の可能性の見方を完全に変えてくれました。',
-    founders_t2_quote: 'メンティーが夢の仕事を得た時、経験は共有すべきだと改めて思いました。GrowViaはそれを本当に楽にしてくれます — スケジュール調整も管理作業も不要。',
+    founders_t2_quote: 'メンティーが夢の仕事を得た時、経験は共有すべきだと改めて思いました。GrowViaはそれを本当に楽にしてくれます, スケジュール調整も管理作業も不要。',
     founders_t3_quote: 'AIマッチングは不思議なくらい正確でした。メンターは私が立っていたまさに同じ岐路に立っていたんです。',
     founders_t4_quote: '方向性はあったけど、自信がありませんでした。GrowViaは最初のセッションで両方を与えてくれました。',
     founders_t5_quote: 'スケジュールは詰まっていますが、GrowViaは他者への貢献を本当に楽にしてくれます。管理作業ゼロで、誰かの人生への最大のインパクト。',
@@ -8684,7 +8684,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: '1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月',
     cal_days: '月,火,水,木,金,土,日',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: '無料デモ',
     schools_why_label: 'GrowViaを選ぶ理由',
 
@@ -8757,7 +8757,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: '3단계로 시작하세요.',
     steps_sub: '긴 양식도, 기다림도 없습니다. 딱 맞는 멘토만 있습니다.',
     steps_1_title: '목표를 알려주세요',
-    steps_1_desc: '커리어, 직종 전환, 창업, 인턴십 — 어디로 가고 싶은지 말해주세요.',
+    steps_1_desc: '커리어, 직종 전환, 창업, 인턴십, 어디로 가고 싶은지 말해주세요.',
     steps_2_title: 'AI가 완벽한 매칭을 찾아요',
     steps_2_desc: '경험, 분야, 멘토링 스타일을 분석해 맞춤형 매칭을 제공합니다.',
     steps_3_title: '첫 번째 세션을 예약하세요',
@@ -8888,7 +8888,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia는 AI를 통해 야심찬 전문가를 세계 최고 수준의 멘토와 몇 달이 아닌 몇 분 만에 연결합니다.',
     founders_hero_cta: 'GrowVia 지원하기',
     founders_reason_label: '우리의 존재 이유',
-    founders_reason_title: '멘토를 찾던 두 명의 경영학도 — 그리고 부족한 것을 직접 만들기로 결심했습니다.',
+    founders_reason_title: '멘토를 찾던 두 명의 경영학도, 그리고 부족한 것을 직접 만들기로 결심했습니다.',
     founders_reason_sub: '올바른 연결이 올바른 순간에 이루어지면 모든 것이 달라집니다.',
     founders_vision_label: '우리의 비전',
     founders_vision_quote: '우리는 세대 간의 연결이 새로운 사고방식을 만든다고 믿습니다. 지혜와 야망이 만나고, 경험이 성장을 가속화합니다.',
@@ -9117,7 +9117,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     pricing_mentor_label: '멘토를 위해',
     pricing_mentor_join: 'GrowVia 멘토 가입은 무료입니다',
     pricing_mentor_title: '수익이 생길 때만 지불하세요.',
-    pricing_mentor_sub: '설정 비용 없음. 월 구독료 없음. 위험 없음. GrowVia는 멘티가 세션 비용을 지불할 때만 수수료를 받습니다 — 나머지는 모두 무료.',
+    pricing_mentor_sub: '설정 비용 없음. 월 구독료 없음. 위험 없음. GrowVia는 멘티가 세션 비용을 지불할 때만 수수료를 받습니다, 나머지는 모두 무료.',
     pricing_mentor_p1: '직접 요금을 설정하세요',
     pricing_mentor_p2: '직접 가용성을 선택하세요',
     pricing_mentor_p3: 'GrowVia는 수익이 생길 때만 세션당 20% 수수료를 받습니다',
@@ -9244,7 +9244,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Become a Mentor / Register form
     bam_label: '멘토를 위해',
     bam_title: '당신의 경험을 누군가의 돌파구로 만드세요.',
-    bam_sub: '커리어를 만드는 데 수년이 걸렸습니다. GrowVia를 통해 그 전문성을 실질적인 영향으로 바꿀 수 있습니다 — 당신의 일정에 맞게, 부담 없이.',
+    bam_sub: '커리어를 만드는 데 수년이 걸렸습니다. GrowVia를 통해 그 전문성을 실질적인 영향으로 바꿀 수 있습니다, 당신의 일정에 맞게, 부담 없이.',
     bam_b1_title: '자동 리드 생성',
     bam_b1_desc: '자격을 갖춘 멘티가 직접 찾아옵니다. 콜드 아웃리치 불필요.',
     bam_b2_title: '제로 행정',
@@ -9337,7 +9337,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: '상위 매칭 수신',
     ai_s3_desc: '각각 퍼센트 점수가 있는 호환 가능한 멘토의 순위 목록을 받습니다.',
     ai_s4_label: '수락 또는 탐색',
-    ai_s4_desc: 'AI 추천을 직접 수락하거나 멘토를 수동으로 탐색하세요 — 선택은 당신의 것.',
+    ai_s4_desc: 'AI 추천을 직접 수락하거나 멘토를 수동으로 탐색하세요, 선택은 당신의 것.',
     ai_disc_label: '탐색 세션',
     ai_disc_ai: 'AI 매칭 1회 포함 · 15~20분 세션',
     ai_disc_f1: 'AI 스마트 매칭 1회 포함',
@@ -9526,7 +9526,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_badge: '멘토를 위해',
     mentor_title_1: '당신의 경험을',
     mentor_title_hl: '누군가의 돌파구로',
-    mentor_sub: '커리어를 만드는 데 수년이 걸렸습니다. GrowVia를 통해 그 전문성을 실질적인 영향으로 바꿀 수 있습니다 — 당신의 일정에 맞게, 부담 없이.',
+    mentor_sub: '커리어를 만드는 데 수년이 걸렸습니다. GrowVia를 통해 그 전문성을 실질적인 영향으로 바꿀 수 있습니다, 당신의 일정에 맞게, 부담 없이.',
     mentor_b1_title: '자동 리드 생성',
     mentor_b1_desc: '자격을 갖춘 멘티가 직접 찾아옵니다. 콜드 아웃리치도, 자기 홍보도 없음. GrowVia가 적합한 사람을 프로필로 데려옵니다.',
     mentor_b2_title: '제로 행정',
@@ -9553,7 +9553,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: '이제 시작입니다',
     success_title: '우리의 첫 번째 성공 이야기가 되세요',
-    success_sub: 'GrowVia가 지금 출시됩니다. 첫 번째 멘토와 멘티를 온보딩하고 있습니다. 오늘 가입해 플랫폼을 함께 만들어 가세요 — 당신의 이야기가 수천 명에게 영감을 줄 수 있습니다.',
+    success_sub: 'GrowVia가 지금 출시됩니다. 첫 번째 멘토와 멘티를 온보딩하고 있습니다. 오늘 가입해 플랫폼을 함께 만들어 가세요, 당신의 이야기가 수천 명에게 영감을 줄 수 있습니다.',
     success_cta_find: '내 멘토 찾기',
     success_cta_apply: '멘토로 지원하기',
 
@@ -9660,7 +9660,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: '예정된 세션 없음',
     dash_no_upcoming_desc: '멘토와 세션을 예약해 여정을 시작하세요.',
     dash_free_ai_title: '무료 AI 매칭 체험',
-    dash_free_ai_desc: '무료 AI 매칭 1회 — 엔진이 완벽한 멘토를 찾도록 하세요.',
+    dash_free_ai_desc: '무료 AI 매칭 1회, 엔진이 완벽한 멘토를 찾도록 하세요.',
     dash_try_now: '지금 체험',
     dash_unlock_ai: '무제한 AI 매칭 잠금 해제',
     dash_unlock_ai_desc: '4.99€/월부터 구독하고 완전한 접근 + 무제한 AI 매칭을 받으세요.',
@@ -9703,7 +9703,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: '필요한 것을 알려주세요',
-    dash_q_subtitle: '몇 가지 빠른 질문 — 매칭 찾기를 클릭하면 매칭이 실행됩니다',
+    dash_q_subtitle: '몇 가지 빠른 질문, 매칭 찾기를 클릭하면 매칭이 실행됩니다',
     dash_q_goal_label: '주요 목표가 무엇인가요?',
     dash_q_select_all: '(모두 선택)',
     dash_q_goal1: '커리어 성장',
@@ -9765,7 +9765,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: '1월,2월,3월,4월,5월,6월,7월,8월,9월,10월,11월,12월',
     cal_days: '월,화,수,목,금,토,일',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: '무료 데모',
     schools_why_label: 'GrowVia를 선택하는 이유',
 
@@ -9835,10 +9835,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     for_you_mentor_b3: 'Ты сам выбираешь темп и доступность',
     for_you_mentor_cta: 'Стать ментором',
     steps_label: 'Как это работает',
-    steps_title: 'В 3 шага — и ты в пути.',
+    steps_title: 'В 3 шага, и ты в пути.',
     steps_sub: 'Никаких длинных форм. Никакого ожидания. Только нужный ментор.',
     steps_1_title: 'Опиши свою цель',
-    steps_1_desc: 'Карьера, смена сферы, предпринимательство, стажировка — скажи нам, куда ты хочешь прийти.',
+    steps_1_desc: 'Карьера, смена сферы, предпринимательство, стажировка, скажи нам, куда ты хочешь прийти.',
     steps_2_title: 'ИИ находит идеальное совпадение',
     steps_2_desc: 'Наш алгоритм анализирует опыт, сферу и стиль менторства для персонального подбора.',
     steps_3_title: 'Бронируй первую сессию',
@@ -9861,7 +9861,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     testimonials_t3_initials: 'А.Р.',
     testimonials_t3_name: 'Алекс Р.',
     testimonials_t3_role: 'Ментор · Генеральный директор МСП',
-    testimonials_t3_quote: 'Я трачу 2 часа в месяц. Влияние на молодёжь — реальное и ощутимое.',
+    testimonials_t3_quote: 'Я трачу 2 часа в месяц. Влияние на молодёжь, реальное и ощутимое.',
     home_cat_label: 'Направления менторства',
     home_cat_title: 'Что мы охватываем.',
     home_browse_all: 'Смотреть все',
@@ -9890,7 +9890,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_title_pre: 'За каждой великой карьерой стоит тот, кто протянул',
     stats_title_hl: 'руку помощи.',
     stats_title_post: '',
-    stats_sub: 'Наша сеть менторов объединяет профессионалов высшего класса, которые решили помочь другим — потому что сами не забыли, чья рука была протянута им когда-то.',
+    stats_sub: 'Наша сеть менторов объединяет профессионалов высшего класса, которые решили помочь другим, потому что сами не забыли, чья рука была протянута им когда-то.',
     stats_badge_mentors: 'Менторы',
     stats_desc_mentors: 'Эксперты-менторы',
     stats_badge_mentees: 'Подопечные',
@@ -9966,19 +9966,19 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Founders page
     founders_label: 'Основатели · GrowVia',
     founders_hero_title: 'Мы ускоряем лучшие карьеры мира с помощью менторства, сети контактов и экспертизы.',
-    founders_hero_sub: 'GrowVia соединяет амбициозных профессионалов с менторами мирового класса через ИИ — за минуты, а не месяцы.',
+    founders_hero_sub: 'GrowVia соединяет амбициозных профессионалов с менторами мирового класса через ИИ, за минуты, а не месяцы.',
     founders_hero_cta: 'Присоединиться к GrowVia',
     founders_reason_label: 'Наша миссия',
-    founders_reason_title: 'Две студентки менеджмента, которые искали менторов — и решили создать то, чего не хватало.',
+    founders_reason_title: 'Две студентки менеджмента, которые искали менторов, и решили создать то, чего не хватало.',
     founders_reason_sub: 'Потому что правильная связь в нужный момент меняет всё.',
     founders_vision_label: 'Наше видение',
     founders_vision_quote: 'Мы верим, что связь поколений создаёт новый способ мышления, где мудрость встречается с амбицией, а опыт ускоряет рост.',
     founders_vision_c1_title: 'Расти каждый день',
-    founders_vision_c1_desc: 'Стремись к непрерывному личному и профессиональному развитию. Прогресс, даже маленький — единственное направление.',
+    founders_vision_c1_desc: 'Стремись к непрерывному личному и профессиональному развитию. Прогресс, даже маленький, единственное направление.',
     founders_vision_c2_title: 'Принимай перемены',
     founders_vision_c2_desc: 'Адаптируйся к вызовам и активно двигайся вперёд. Лучший путь редко бывает самым очевидным.',
     founders_vision_c3_title: 'Строй доверие',
-    founders_vision_c3_desc: 'Развивай честные и прозрачные отношения, создающие реальный результат. Доверие — основа каждой великой менторской связи.',
+    founders_vision_c3_desc: 'Развивай честные и прозрачные отношения, создающие реальный результат. Доверие, основа каждой великой менторской связи.',
     founders_history_label: 'Наша история',
     founders_history_text: 'GrowVia родился из настоящего разочарования. Луна не могла найти менторов, которые по-настоящему понимали её путь. Ясмин видела опытных профессионалов, у которых не было возможности делиться знаниями. Вместе они решили создать платформу, о которой мечтали сами.',
     founders_stories_label: 'Истории',
@@ -10002,17 +10002,17 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_stat_hq_value: 'Барселона',
     founders_cta_label: 'Присоединиться',
     founders_cta_title: 'Присоединяйся к нам в этом путешествии.',
-    founders_cta_sub: 'Хочешь расти или отдавать — в GrowVia есть место для тебя.',
+    founders_cta_sub: 'Хочешь расти или отдавать, в GrowVia есть место для тебя.',
     founders_cta_start: 'Начать',
     founders_cta_contact: 'Связаться',
     founders_founder1_bio: 'Луна на собственном опыте прочувствовала растерянность при выборе карьерного пути после окончания университета. Не найдя менторов, которые по-настоящему понимали её путь, она решила создать платформу, о которой мечтала.',
     founders_founder2_bio: 'Ясмин привносит страсть к человекоцентричному дизайну и созданию сообществ. Работая в разных странах и отраслях, она понимает сложности навигации на глобальном рынке труда.',
     founders_value1_title: 'Расти каждый день',
-    founders_value1_desc: 'Стремись к непрерывному личному и профессиональному развитию. Прогресс, даже маленький — единственное направление.',
+    founders_value1_desc: 'Стремись к непрерывному личному и профессиональному развитию. Прогресс, даже маленький, единственное направление.',
     founders_value2_title: 'Принимай перемены',
     founders_value2_desc: 'Адаптируйся к вызовам и активно двигайся вперёд. Лучший путь редко бывает самым очевидным.',
     founders_value3_title: 'Строй доверие',
-    founders_value3_desc: 'Развивай честные и прозрачные отношения, создающие реальный результат. Доверие — основа каждой великой менторской связи.',
+    founders_value3_desc: 'Развивай честные и прозрачные отношения, создающие реальный результат. Доверие, основа каждой великой менторской связи.',
     founders_testimonial_mentee: 'ПОДОПЕЧНЫЙ',
     aria_stars: '5 звёзд из 5',
     aria_testimonials_prev: 'Предыдущий отзыв',
@@ -10093,7 +10093,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_s1_d2: 'Опиши текущую ситуацию и куда хочешь прийти',
     hiw_s1_d3: 'Укажи предпочтения по доступности',
     hiw_s2_title: 'Получи ИИ-подбор (бесплатно, 1 раз)',
-    hiw_s2_desc: 'Наш ИИ-движок анализирует профиль и предлагает наиболее совместимых менторов. При регистрации — один бесплатный подбор.',
+    hiw_s2_desc: 'Наш ИИ-движок анализирует профиль и предлагает наиболее совместимых менторов. При регистрации, один бесплатный подбор.',
     hiw_s2_d1: 'Оценка совместимости по целям, личности и опыту',
     hiw_s2_d2: 'Показывает процент совместимости для прозрачности',
     hiw_s2_d3: 'Разблокируй неограниченный подбор по подписке',
@@ -10114,7 +10114,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_s5_d3: 'Стандарт: 9,99€/мес · Доступ к большинству менторов · Расширенный ИИ-подбор',
     hiw_s5_d4: 'Премиум: 14,99€/мес · Доступ КО ВСЕМ менторам · Неограниченный ИИ-подбор',
     hiw_s6_title: 'Подключись через Google Meet',
-    hiw_s6_desc: 'В день сессии подключись через интегрированную ссылку Google Meet. Никаких дополнительных приложений. Один клик — и ты в эфире.',
+    hiw_s6_desc: 'В день сессии подключись через интегрированную ссылку Google Meet. Никаких дополнительных приложений. Один клик, и ты в эфире.',
     hiw_s6_d1: 'Автоматическая ссылка встречи генерируется после бронирования',
     hiw_s6_d2: 'Email-подтверждение со ссылкой для подключения',
     hiw_s6_d3: 'Напоминание за 24 часа и за 1 час до сессии',
@@ -10136,7 +10136,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_label: 'Уведомления',
     hiw_notif_title1: 'Оставайся в курсе на',
     hiw_notif_title2: 'каждом шагу.',
-    hiw_notif_sub: 'Мы гарантируем, что ты никогда не пропустишь сессию или важное обновление. От бронирования до итогов — GrowVia держит тебя в курсе.',
+    hiw_notif_sub: 'Мы гарантируем, что ты никогда не пропустишь сессию или важное обновление. От бронирования до итогов, GrowVia держит тебя в курсе.',
     hiw_n1: 'Подтверждение по email после бронирования',
     hiw_n2: 'Напоминание за 24 часа до сессии',
     hiw_n3: 'Напоминание за 1 час до сессии',
@@ -10196,16 +10196,16 @@ export const translations: Record<Locale, Record<string, string>> = {
     pricing_free_plan: 'Бесплатный тариф',
     pricing_free_forever: 'навсегда · без карты',
     pricing_mentor_label: 'Для менторов',
-    pricing_mentor_join: 'Вступление в GrowVia в качестве ментора — бесплатно',
+    pricing_mentor_join: 'Вступление в GrowVia в качестве ментора, бесплатно',
     pricing_mentor_title: 'Платишь только когда зарабатываешь.',
-    pricing_mentor_sub: 'Никаких вступительных взносов. Никакой ежемесячной подписки. Никаких рисков. GrowVia берёт комиссию только тогда, когда подопечный оплачивает сессию — всё остальное бесплатно.',
+    pricing_mentor_sub: 'Никаких вступительных взносов. Никакой ежемесячной подписки. Никаких рисков. GrowVia берёт комиссию только тогда, когда подопечный оплачивает сессию, всё остальное бесплатно.',
     pricing_mentor_p1: 'Ты сам устанавливаешь ставки',
     pricing_mentor_p2: 'Ты сам выбираешь доступность',
     pricing_mentor_p3: 'GrowVia берёт 20% комиссии за сессию только когда ты зарабатываешь',
     pricing_mentor_p4: 'Комиссия покрывает: лидогенерацию, обработку платежей, инструменты планирования, доступ к дашборду',
     pricing_mentor_cta: 'Подать заявку как ментор',
     pricing_commission: 'Комиссия',
-    pricing_commission_sub: 'За сессию, только когда ты зарабатываешь. В остальное время — 0.',
+    pricing_commission_sub: 'За сессию, только когда ты зарабатываешь. В остальное время, 0.',
 
     // Who We Are page
     wwa_badge: 'Наша история',
@@ -10224,7 +10224,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_vision_label: 'Наше видение',
     wwa_vision_title: 'Стать мировым эталоном качественного менторства',
     wwa_vision_sub: 'Мы строим не просто платформу. Мы создаём движение, в котором каждый амбициозный человек имеет доступ к руководству, необходимому для полного раскрытия потенциала.',
-    wwa_vision_quote: '"GrowVia — это не просто менторство. Это внесение ясности в твоё будущее."',
+    wwa_vision_quote: '"GrowVia, это не просто менторство. Это внесение ясности в твоё будущее."',
     wwa_founders_title: 'Познакомься с основателями',
     wwa_founders_sub: 'Два человека с миссией изменить подход мира к карьерному руководству.',
     wwa_founder1_bio: 'Луна на собственном опыте прочувствовала растерянность при выборе карьерного пути. Не найдя менторов, которые по-настоящему понимали её, она создала платформу, о которой мечтала.',
@@ -10238,9 +10238,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_value3_title: 'Доступно для всех',
     wwa_value3_desc: 'Карьерное руководство не должно быть привилегией. Мы стараемся сделать качественное менторство доступным для студентов и специалистов везде.',
     wwa_value4_title: 'Непрерывный рост',
-    wwa_value4_desc: 'Мы верим в обучение на протяжении всей жизни для всех участников платформы — менторов и подопечных.',
+    wwa_value4_desc: 'Мы верим в обучение на протяжении всей жизни для всех участников платформы, менторов и подопечных.',
     wwa_cta_title: 'Присоединяйся к нам в этом путешествии',
-    wwa_cta_sub: 'Хочешь расти или отдавать — в GrowVia есть место для тебя.',
+    wwa_cta_sub: 'Хочешь расти или отдавать, в GrowVia есть место для тебя.',
     wwa_cta_start: 'Начать',
     wwa_cta_contact: 'Связаться',
 
@@ -10303,11 +10303,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     faq_cat3_q3: 'Что входит в подписку?',
     faq_cat3_a3: 'Базовый (19,99€/мес) включает 2 сессии в месяц и 1 использование ИИ-подбора. Премиум (39,99€/мес) включает 4 сессии в месяц, неограниченный ИИ-подбор, приоритетное бронирование и персональные рекомендации. Оба тарифа можно отменить в любое время.',
     faq_cat3_q4: 'Есть ли скрытые платежи?',
-    faq_cat3_a4: 'Нет. Цена, которую ты видишь — это цена, которую ты платишь. Все цены включают НДС. Никаких вступительных взносов, штрафов за отмену или скрытых платежей.',
+    faq_cat3_a4: 'Нет. Цена, которую ты видишь, это цена, которую ты платишь. Все цены включают НДС. Никаких вступительных взносов, штрафов за отмену или скрытых платежей.',
     faq_cat4_q1: 'Можно ли отменить забронированную сессию?',
     faq_cat4_a1: 'Да. Ты можешь отменить сессию в любое время, но не позднее чем за 1 час до начала. Поздние отмены (в течение 1 часа до сессии) фиксируются на аккаунте.',
     faq_cat4_q2: 'Вернут ли деньги при отмене?',
-    faq_cat4_a2: 'Нет. Наша политика отмены не предусматривает возврат средств независимо от причины. Если отменил более чем за 1 час заранее — кредит сессии может вернуться в зависимости от тарифа.',
+    faq_cat4_a2: 'Нет. Наша политика отмены не предусматривает возврат средств независимо от причины. Если отменил более чем за 1 час заранее, кредит сессии может вернуться в зависимости от тарифа.',
     faq_cat5_q1: 'Как отбираются менторы?',
     faq_cat5_a1: 'Каждый ментор на GrowVia проходит ручной процесс одобрения. Они подают заявку, наша команда проверяет опыт, компетенции и мотивацию. Только проверенные менторы появляются на платформе.',
     faq_cat5_q2: 'Можно ли сохранять понравившихся менторов?',
@@ -10325,9 +10325,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Become a Mentor / Register form
     bam_label: 'Для менторов',
     bam_title: 'Превращай свой опыт в чужой прорыв.',
-    bam_sub: 'Твоя карьера строилась годами. GrowVia позволяет превратить эту экспертизу в реальное влияние — в удобное время, без лишней нагрузки.',
+    bam_sub: 'Твоя карьера строилась годами. GrowVia позволяет превратить эту экспертизу в реальное влияние, в удобное время, без лишней нагрузки.',
     bam_b1_title: 'Лидогенерация на автопилоте',
-    bam_b1_desc: 'Квалифицированные подопечные приходят сами — никаких холодных рассылок.',
+    bam_b1_desc: 'Квалифицированные подопечные приходят сами, никаких холодных рассылок.',
     bam_b2_title: 'Ноль административной работы',
     bam_b2_desc: 'Мы берём на себя расписание, оплату и учёт сессий.',
     bam_b3_title: 'Твоё наследие, структурированно',
@@ -10336,7 +10336,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     bam_review_label: 'Ручная проверка',
     bam_badge_label: 'Заработай значок Сертифицированного ментора',
     bam_form_title: 'Создай аккаунт',
-    bam_form_sub: 'Присоединяйся к GrowVia — карта не нужна.',
+    bam_form_sub: 'Присоединяйся к GrowVia, карта не нужна.',
     bam_step1_title: 'Я присоединяюсь как...',
     bam_role_mentee_label: 'Я хочу найти ментора',
     bam_role_mentee_desc: 'Получи карьерное руководство и ясность',
@@ -10392,8 +10392,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_title1: 'ИИ',
     ai_title2: 'Умный подбор',
     ai_sub: 'Хватит угадывать. Наш ИИ анализирует цели, личность и опыт, чтобы рекомендовать менторов, наиболее способных помочь тебе расти, с оценкой совместимости для каждого.',
-    ai_section_title: 'Найти правильного ментора — самое сложное',
-    ai_section_p1: 'Большинство людей выбирают ментора по должности или годам опыта. Но менторы, которые по-настоящему помогают, — это те, кто понимает конкретную ситуацию, цели и личность.',
+    ai_section_title: 'Найти правильного ментора, самое сложное',
+    ai_section_p1: 'Большинство людей выбирают ментора по должности или годам опыта. Но менторы, которые по-настоящему помогают,, это те, кто понимает конкретную ситуацию, цели и личность.',
     ai_section_p2: 'ИИ-подбор GrowVia идёт глубже. Он учитывает то, чего ты хочешь достичь, как ты учишься и какой стиль руководства работает лучше для тебя.',
     ai_f1: 'Один ИИ-подбор включён в пробную сессию (9,99€)',
     ai_f2: 'Неограниченный подбор с Базовым (19,99€/мес) или Премиум (39,99€/мес)',
@@ -10418,7 +10418,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: 'Получи топ-подборы',
     ai_s3_desc: 'Ты получишь ранжированный список совместимых менторов с процентом для каждого.',
     ai_s4_label: 'Принять или выбрать вручную',
-    ai_s4_desc: 'Прими рекомендацию ИИ напрямую или выбирай менторов вручную — по твоему выбору.',
+    ai_s4_desc: 'Прими рекомендацию ИИ напрямую или выбирай менторов вручную, по твоему выбору.',
     ai_disc_label: 'Пробная сессия',
     ai_disc_ai: '1 ИИ-подбор включён · 15–20 мин сессия',
     ai_disc_f1: 'Один ИИ-подбор включён',
@@ -10459,12 +10459,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     cert_mentors_title: 'Твой значок сигнализирует о доверии.',
     cert_mentors_desc: 'Значок повышает доверие и видимость в результатах подбора. Сертифицированные менторы появляются выше в рекомендациях ИИ и чаще бронируются серьёзными подопечными.',
     cert_cta_title: 'Готов получить сертификат?',
-    cert_cta_sub: 'Подай заявку в GrowVia как ментор. После одобрения пройдёшь сертификацию в рамках адаптации — до начала первой сессии.',
+    cert_cta_sub: 'Подай заявку в GrowVia как ментор. После одобрения пройдёшь сертификацию в рамках адаптации, до начала первой сессии.',
     cert_cta_btn: 'Подать заявку как ментор',
 
     // Safety & Trust page
     safety_badge: 'Безопасность и доверие',
-    safety_title1: 'Твоя безопасность — наш',
+    safety_title1: 'Твоя безопасность, наш',
     safety_title2: 'главный приоритет',
     safety_sub: 'GrowVia построен на доверии. Каждая функция, каждый процесс и каждое решение направлены на обеспечение безопасности и поддержки нашего сообщества.',
     safety_verif_label: 'Проверка менторов',
@@ -10503,7 +10503,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     safety_d2: 'Мы собираем только данные, необходимые для работы платформы',
     safety_d3: 'Ты можешь запросить удаление данных в любое время',
     safety_d4: 'Мы никогда не продаём и не передаём данные третьим лицам',
-    safety_d5: 'Все платежи обрабатываются через Stripe — данные карты на наших серверах не хранятся',
+    safety_d5: 'Все платежи обрабатываются через Stripe, данные карты на наших серверах не хранятся',
     safety_d6: 'Куки используются только для основных функций платформы',
     safety_privacy_link: 'Читать полную Политику конфиденциальности',
     safety_concern_title: 'Есть проблема с безопасностью?',
@@ -10552,7 +10552,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Register page
     reg_title: 'Создай аккаунт',
-    reg_sub: 'Присоединяйся к GrowVia — карта не нужна.',
+    reg_sub: 'Присоединяйся к GrowVia, карта не нужна.',
     reg_full_name: 'Полное имя',
     reg_email: 'Электронная почта',
     reg_password: 'Пароль',
@@ -10578,7 +10578,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hero_title_2: 'который был',
     hero_title_hl: 'именно',
     hero_title_3: 'там, куда ты стремишься',
-    hero_sub: 'GrowVia соединяет амбициозных студентов и молодых специалистов с опытными менторами через ИИ — за минуты, а не месяцы.',
+    hero_sub: 'GrowVia соединяет амбициозных студентов и молодых специалистов с опытными менторами через ИИ, за минуты, а не месяцы.',
     hero_find: 'Найти моего ментора',
     hero_become: 'Стать ментором',
     trust_one2one: 'Индивидуальное менторство',
@@ -10592,7 +10592,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Categories (old keys)
     cat_label: 'Что мы охватываем',
     cat_title: 'Изучи категории менторства',
-    cat_sub: 'GrowVia поддерживает людей на каждом этапе — от студентов, выбирающих путь, до специалистов, ищущих новое направление.',
+    cat_sub: 'GrowVia поддерживает людей на каждом этапе, от студентов, выбирающих путь, до специалистов, ищущих новое направление.',
     cat_students: 'Студенты',
     cat_students_desc: 'Помогаем студентам выбрать будущий путь, академическую специализацию и университетское направление с помощью опытных менторов.',
     cat_career: 'Карьера',
@@ -10607,13 +10607,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_badge: 'Для менторов',
     mentor_title_1: 'Превращай свой опыт в',
     mentor_title_hl: 'чужой прорыв',
-    mentor_sub: 'Твоя карьера строилась годами. GrowVia позволяет превратить эту экспертизу в реальное влияние — в удобное время, без лишней нагрузки.',
+    mentor_sub: 'Твоя карьера строилась годами. GrowVia позволяет превратить эту экспертизу в реальное влияние, в удобное время, без лишней нагрузки.',
     mentor_b1_title: 'Лидогенерация на автопилоте',
-    mentor_b1_desc: 'Квалифицированные подопечные приходят сами — никаких холодных рассылок, никакого самопиара. GrowVia приводит нужных людей к твоему профилю.',
+    mentor_b1_desc: 'Квалифицированные подопечные приходят сами, никаких холодных рассылок, никакого самопиара. GrowVia приводит нужных людей к твоему профилю.',
     mentor_b2_title: 'Ноль административной работы',
     mentor_b2_desc: 'GrowVia берёт на себя расписание, оплату и учёт сессий. Ты полностью сосредоточен на подопечном.',
     mentor_b3_title: 'Твоё наследие, структурированно',
-    mentor_b3_desc: 'Отслеживай прогресс подопечных и зарабатывай значок Сертифицированного ментора — знак доверия, видимый каждому на платформе.',
+    mentor_b3_desc: 'Отслеживай прогресс подопечных и зарабатывай значок Сертифицированного ментора, знак доверия, видимый каждому на платформе.',
     mentor_apply: 'Подать заявку как ментор',
     mentor_apply_sub: 'Ручная проверка · Зарабатывай значок Сертифицированного ментора',
 
@@ -10634,7 +10634,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'Мы только начинаем',
     success_title: 'Стань нашей первой историей успеха',
-    success_sub: 'GrowVia запускается сейчас. Мы набираем первых менторов и подопечных. Зарегистрируйся сегодня и помоги сформировать платформу — твоя история может вдохновить тысячи.',
+    success_sub: 'GrowVia запускается сейчас. Мы набираем первых менторов и подопечных. Зарегистрируйся сегодня и помоги сформировать платформу, твоя история может вдохновить тысячи.',
     success_cta_find: 'Найти моего ментора',
     success_cta_apply: 'Подать заявку как ментор',
 
@@ -10683,9 +10683,9 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Founders, testimonial quotes
     founders_t1_quote: 'GrowVia не просто связал меня с ментором. Это изменило то, как я вижу свой потенциал.',
-    founders_t2_quote: 'Когда мой подопечный получил работу мечты, я понял, зачем нужно делиться опытом. GrowVia делает это по-настоящему легко — никаких согласований, никакой административной рутины.',
+    founders_t2_quote: 'Когда мой подопечный получил работу мечты, я понял, зачем нужно делиться опытом. GrowVia делает это по-настоящему легко, никаких согласований, никакой административной рутины.',
     founders_t3_quote: 'ИИ-подбор был поразительным. Мой ментор стоял ровно на том перекрёстке, где стоял я.',
-    founders_t4_quote: 'У меня было направление, но не было уверенности. GrowVia дал мне и то, и другое — уже на первой сессии.',
+    founders_t4_quote: 'У меня было направление, но не было уверенности. GrowVia дал мне и то, и другое, уже на первой сессии.',
     founders_t5_quote: 'Мой график плотный, но GrowVia делает помощь другим действительно простой. Ноль накладных расходов, максимальное влияние.',
     founders_t6_quote: 'Я пришёл в GrowVia отдавать. В итоге узнал не меньше, чем дал.',
     founders_stat1_quote: 'После трёх сессий у меня появился чёткий план на пять лет. Ничто другое не сравнится.',
@@ -10741,7 +10741,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: 'Нет предстоящих сессий',
     dash_no_upcoming_desc: 'Забронируй сессию с ментором, чтобы начать путь.',
     dash_free_ai_title: 'Попробуй ИИ-подбор бесплатно',
-    dash_free_ai_desc: 'У тебя 1 бесплатный ИИ-подбор — позволь движку найти идеального ментора.',
+    dash_free_ai_desc: 'У тебя 1 бесплатный ИИ-подбор, позволь движку найти идеального ментора.',
     dash_try_now: 'Попробовать',
     dash_unlock_ai: 'Разблокировать неограниченный ИИ-подбор',
     dash_unlock_ai_desc: 'Подпишись от 4,99€/мес и получи полный доступ + неограниченные подборы.',
@@ -10784,7 +10784,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: 'Расскажи, что тебе нужно',
-    dash_q_subtitle: 'Несколько быстрых вопросов — подбор запустится, когда нажмёшь «Найти совпадения»',
+    dash_q_subtitle: 'Несколько быстрых вопросов, подбор запустится, когда нажмёшь «Найти совпадения»',
     dash_q_goal_label: 'Какова твоя главная цель?',
     dash_q_select_all: '(выбери всё, что подходит)',
     dash_q_goal1: 'Карьерный рост',
@@ -10846,7 +10846,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь',
     cal_days: 'Пн,Вт,Ср,Чт,Пт,Сб,Вс',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Бесплатное демо',
     schools_why_label: 'Почему GrowVia',
 
@@ -10892,7 +10892,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     for_you_mentor_b3: 'تختار وتيرتك وتوافرك', for_you_mentor_cta: 'كن مرشدًا',
     steps_label: 'كيف يعمل', steps_title: 'في ٣ خطوات، أنت منطلق.',
     steps_sub: 'لا نماذج طويلة. لا انتظار. فقط المرشد المناسب.',
-    steps_1_title: 'صِف هدفك', steps_1_desc: 'مسيرة مهنية، تحول، ريادة أعمال، تدريب — أخبرنا إلى أين تريد الوصول.',
+    steps_1_title: 'صِف هدفك', steps_1_desc: 'مسيرة مهنية، تحول، ريادة أعمال، تدريب, أخبرنا إلى أين تريد الوصول.',
     steps_2_title: 'الذكاء الاصطناعي يجد مطابقتك المثالية', steps_2_desc: 'يحلل خوارزميتنا الخبرة والقطاع وأسلوب الإرشاد لمطابقة مخصصة.',
     steps_3_title: 'احجز جلستك الأولى', steps_3_desc: 'من ٩٫٩٩€ لجلسة اكتشاف. بلا التزام. قابلة للإلغاء حتى ٢٤ ساعة مسبقًا.',
     testimonials_label: 'وصول مبكر', testimonials_title_pre: 'ماذا', testimonials_title_hl: 'يقولون.',
@@ -10956,7 +10956,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'تربط GrowVia المهنيين الطموحين بمرشدين من الطراز العالمي عبر الذكاء الاصطناعي في دقائق لا أشهر.',
     founders_hero_cta: 'تقدم إلى GrowVia',
     founders_reason_label: 'سبب وجودنا',
-    founders_reason_title: 'طالبتا إدارة بحثتا عن مرشدين — وقررتا بناء ما كان مفقودًا.',
+    founders_reason_title: 'طالبتا إدارة بحثتا عن مرشدين, وقررتا بناء ما كان مفقودًا.',
     founders_reason_sub: 'لأن الارتباط الصحيح في اللحظة الصحيحة يغيّر كل شيء.',
     founders_vision_label: 'رؤيتنا',
     founders_vision_quote: 'نؤمن بأن ربط الأجيال المختلفة يخلق طريقة تفكير جديدة، حيث تلتقي الحكمة بالطموح وتُسرّع الخبرة النمو.',
@@ -11370,7 +11370,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     nav_lang_toggle: 'تغيير اللغة',
   },
 
-  // Arabic dialects — fall back to MSA (ar) via LangContext fallback chain
+  // Arabic dialects, fall back to MSA (ar) via LangContext fallback chain
   'ar-EG': {},
   'ar-LB': {},
   'ar-SA': {},
@@ -12439,7 +12439,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: '一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月',
     cal_days: '一,二,三,四,五,六,日',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: '免费演示',
     schools_why_label: '为什么选择 GrowVia',
 
@@ -12512,7 +12512,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: 'In 3 stappen ben je op weg.',
     steps_sub: 'Geen eindeloos formulier. Geen wachten. Gewoon de juiste mentor.',
     steps_1_title: 'Beschrijf je doel',
-    steps_1_desc: 'Carrière, loopbaanswitch, ondernemerschap, stage — vertel ons waar je naartoe wilt.',
+    steps_1_desc: 'Carrière, loopbaanswitch, ondernemerschap, stage, vertel ons waar je naartoe wilt.',
     steps_2_title: 'AI vindt jouw perfecte match',
     steps_2_desc: 'Ons algoritme analyseert ervaring, sector en mentorstijl voor een match op maat.',
     steps_3_title: 'Boek je eerste sessie',
@@ -12643,7 +12643,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia verbindt ambitieuze professionals met topmentoren via AI, in minuten, niet maanden.',
     founders_hero_cta: 'Aanmelden voor GrowVia',
     founders_reason_label: 'Onze Bestaansreden',
-    founders_reason_title: 'Twee managementstudenten die op zoek gingen naar mentoren — en besloten te bouwen wat ontbrak.',
+    founders_reason_title: 'Twee managementstudenten die op zoek gingen naar mentoren, en besloten te bouwen wat ontbrak.',
     founders_reason_sub: 'Want de juiste verbinding, op het juiste moment, verandert alles.',
     founders_vision_label: 'Onze Visie',
     founders_vision_quote: 'We geloven dat het verbinden van verschillende generaties een nieuwe manier van denken creëert, waar wijsheid ambities ontmoet en ervaring groei versnelt.',
@@ -12872,7 +12872,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     pricing_mentor_label: 'Voor mentoren',
     pricing_mentor_join: 'Lid worden van GrowVia als mentor is gratis',
     pricing_mentor_title: 'Je betaalt alleen als je verdient.',
-    pricing_mentor_sub: 'Geen installatiekosten. Geen maandelijks abonnement. Geen risico. GrowVia neemt alleen een commissie als een mentee betaalt voor een sessie — de rest is gratis.',
+    pricing_mentor_sub: 'Geen installatiekosten. Geen maandelijks abonnement. Geen risico. GrowVia neemt alleen een commissie als een mentee betaalt voor een sessie, de rest is gratis.',
     pricing_mentor_p1: 'Jij stelt je eigen tarieven in',
     pricing_mentor_p2: 'Jij kiest je beschikbaarheid',
     pricing_mentor_p3: 'GrowVia neemt 20% commissie per sessie alleen als je verdient',
@@ -12912,7 +12912,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_value3_title: 'Toegankelijk voor Iedereen',
     wwa_value3_desc: 'Loopbaanbegeleiding mag geen privilege zijn. We werken eraan om kwaliteitsmentoring beschikbaar te maken voor studenten en professionals overal ter wereld.',
     wwa_value4_title: 'Voortdurende Groei',
-    wwa_value4_desc: 'We geloven in levenslang leren voor iedereen op het platform — mentoren en mentees.',
+    wwa_value4_desc: 'We geloven in levenslang leren voor iedereen op het platform, mentoren en mentees.',
     wwa_cta_title: 'Doe mee aan deze reis',
     wwa_cta_sub: 'Of je nu wilt groeien of iets wilt teruggeven, er is een plek voor jou bij GrowVia.',
     wwa_cta_start: 'Aan de slag',
@@ -12999,9 +12999,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Become a Mentor / Register form
     bam_label: 'Voor Mentoren',
     bam_title: 'Maak van jouw ervaring de doorbraak van iemand anders.',
-    bam_sub: 'Je carrière kostte jaren om op te bouwen. GrowVia laat je die expertise omzetten in echte impact — op jouw schema, zonder overhead.',
+    bam_sub: 'Je carrière kostte jaren om op te bouwen. GrowVia laat je die expertise omzetten in echte impact, op jouw schema, zonder overhead.',
     bam_b1_title: 'Leadgeneratie op de automatische piloot',
-    bam_b1_desc: 'Gekwalificeerde mentees komen naar jou — geen koude outreach.',
+    bam_b1_desc: 'Gekwalificeerde mentees komen naar jou, geen koude outreach.',
     bam_b2_title: 'Nul administratie',
     bam_b2_desc: 'Wij regelen planning, betalingen en sessieregistratie.',
     bam_b3_title: 'Jouw erfenis, gestructureerd',
@@ -13092,7 +13092,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: 'Ontvang je topmatchs',
     ai_s3_desc: 'Je ontvangt een gerangschikte lijst van compatibele mentoren met een percentagescore voor elk.',
     ai_s4_label: 'Accepteren of verkennen',
-    ai_s4_desc: 'Accepteer de AI-aanbeveling direct of blader handmatig door mentoren — jouw keuze.',
+    ai_s4_desc: 'Accepteer de AI-aanbeveling direct of blader handmatig door mentoren, jouw keuze.',
     ai_disc_label: 'Kennismakingssessie',
     ai_disc_ai: '1 AI-match inbegrepen · Sessie van 15–20 min',
     ai_disc_f1: 'Eén AI Smart Match inbegrepen',
@@ -13281,13 +13281,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_badge: 'Voor mentoren',
     mentor_title_1: 'Maak van jouw ervaring',
     mentor_title_hl: 'de doorbraak van iemand anders',
-    mentor_sub: 'Je carrière kostte jaren om op te bouwen. GrowVia laat je die expertise omzetten in echte impact — op jouw schema, zonder overhead.',
+    mentor_sub: 'Je carrière kostte jaren om op te bouwen. GrowVia laat je die expertise omzetten in echte impact, op jouw schema, zonder overhead.',
     mentor_b1_title: 'Leadgeneratie op de automatische piloot',
-    mentor_b1_desc: 'Gekwalificeerde mentees komen naar jou — geen koude outreach, geen zelfpromotie. GrowVia brengt de juiste mensen naar je profiel.',
+    mentor_b1_desc: 'Gekwalificeerde mentees komen naar jou, geen koude outreach, geen zelfpromotie. GrowVia brengt de juiste mensen naar je profiel.',
     mentor_b2_title: 'Nul administratie',
     mentor_b2_desc: 'GrowVia regelt planning, betalingen en sessieregistratie. Jij richt je volledig op de mentee voor je.',
     mentor_b3_title: 'Jouw erfenis, gestructureerd',
-    mentor_b3_desc: 'Volg de voortgang van mentees in de loop van de tijd en verdien je Gecertificeerd Mentor-badge — een vertrouwensteken dat zichtbaar is voor elke mentee op het platform.',
+    mentor_b3_desc: 'Volg de voortgang van mentees in de loop van de tijd en verdien je Gecertificeerd Mentor-badge, een vertrouwensteken dat zichtbaar is voor elke mentee op het platform.',
     mentor_apply: 'Aanmelden als mentor',
     mentor_apply_sub: 'Handmatige beoordeling · Verdien je Gecertificeerd Mentor-badge',
 
@@ -13308,7 +13308,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'We zijn net begonnen',
     success_title: 'Wees ons eerste succesverhaal',
-    success_sub: 'GrowVia lanceert nu. We nemen onze eerste mentoren en mentees op. Meld je vandaag aan en help het platform vorm te geven — jouw verhaal kan het zijn dat duizenden inspireert.',
+    success_sub: 'GrowVia lanceert nu. We nemen onze eerste mentoren en mentees op. Meld je vandaag aan en help het platform vorm te geven, jouw verhaal kan het zijn dat duizenden inspireert.',
     success_cta_find: 'Vind mijn mentor',
     success_cta_apply: 'Aanmelden als mentor',
 
@@ -13359,7 +13359,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_t1_quote: 'GrowVia verbond me niet alleen met een mentor. Het veranderde hoe ik mijn potentieel zie.',
     founders_t2_quote: 'Zien hoe mijn mentee zijn droombaan landde, herinnerde me eraan waarom ervaring gedeeld moet worden. GrowVia maakt dat werkelijk moeiteloos.',
     founders_t3_quote: 'De AI-matching was verbazingwekkend. Mijn mentor had exact hetzelfde kruispunt ervaren als ik.',
-    founders_t4_quote: 'Ik had de richting, maar niet het vertrouwen. GrowVia gaf me beide — in mijn allereerste sessie.',
+    founders_t4_quote: 'Ik had de richting, maar niet het vertrouwen. GrowVia gaf me beide, in mijn allereerste sessie.',
     founders_t5_quote: 'Mijn agenda zit vol, maar GrowVia maakt iets teruggeven werkelijk zonder wrijving. Nul overhead, maximale impact.',
     founders_t6_quote: 'Ik sloot me aan bij GrowVia om iets terug te geven. Uiteindelijk leerde ik net zoveel als ik onderwees.',
     founders_stat1_quote: 'Na drie sessies had ik een helder vijfjarenplan. Niets anders kwam in de buurt.',
@@ -13415,7 +13415,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: 'Geen aankomende sessies',
     dash_no_upcoming_desc: 'Boek een sessie met een mentor om je reis te beginnen.',
     dash_free_ai_title: 'Probeer AI-matching gratis',
-    dash_free_ai_desc: 'Je hebt 1 gratis AI-match — laat onze motor je perfecte mentor vinden.',
+    dash_free_ai_desc: 'Je hebt 1 gratis AI-match, laat onze motor je perfecte mentor vinden.',
     dash_try_now: 'Probeer nu',
     dash_unlock_ai: 'Onbeperkte AI-matching ontgrendelen',
     dash_unlock_ai_desc: 'Abonneer je vanaf €4,99/maand en krijg volledige toegang + onbeperkte AI-matches.',
@@ -13458,7 +13458,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: 'Vertel ons wat je nodig hebt',
-    dash_q_subtitle: 'Enkele snelle vragen — je match wordt uitgevoerd als je op Vind Mijn Matches klikt',
+    dash_q_subtitle: 'Enkele snelle vragen, je match wordt uitgevoerd als je op Vind Mijn Matches klikt',
     dash_q_goal_label: 'Wat is je hoofddoel?',
     dash_q_select_all: '(selecteer alles wat van toepassing is)',
     dash_q_goal1: 'Loopbaangroei',
@@ -13520,7 +13520,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Januari,Februari,Maart,April,Mei,Juni,Juli,Augustus,September,Oktober,November,December',
     cal_days: 'Ma,Di,Wo,Do,Vr,Za,Zo',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Gratis Demo',
     schools_why_label: 'Waarom GrowVia',
 
@@ -13593,7 +13593,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: 'W 3 krokach jesteś w drodze.',
     steps_sub: 'Żadnych długich formularzy. Żadnego czekania. Tylko właściwy mentor.',
     steps_1_title: 'Opisujesz swój cel',
-    steps_1_desc: 'Kariera, zmiana branży, przedsiębiorczość, staż — powiedz nam, dokąd chcesz dotrzeć.',
+    steps_1_desc: 'Kariera, zmiana branży, przedsiębiorczość, staż, powiedz nam, dokąd chcesz dotrzeć.',
     steps_2_title: 'AI znajduje twój idealny match',
     steps_2_desc: 'Nasz algorytm analizuje doświadczenie, branżę i styl mentoringu, aby dopasować cię perfekcyjnie.',
     steps_3_title: 'Rezerwujesz pierwszą sesję',
@@ -13645,7 +13645,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_title_pre: 'Za każdą wielką karierą stoi ktoś, kto wyciągnął pomocną',
     stats_title_hl: 'dłoń.',
     stats_title_post: '',
-    stats_sub: 'Nasza sieć mentorów skupia najlepszych profesjonalistów, którzy zdecydowali się wyciągnąć pomocną dłoń — bo nigdy nie zapomnieli czyja dłoń kiedyś pomogła im.',
+    stats_sub: 'Nasza sieć mentorów skupia najlepszych profesjonalistów, którzy zdecydowali się wyciągnąć pomocną dłoń, bo nigdy nie zapomnieli czyja dłoń kiedyś pomogła im.',
     stats_badge_mentors: 'Mentorzy',
     stats_desc_mentors: 'Mentorzy Eksperci',
     stats_badge_mentees: 'Mentees',
@@ -13724,7 +13724,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia łączy ambitnych profesjonalistów z mentorami najwyższej klasy przez AI, w minutach, nie miesiącach.',
     founders_hero_cta: 'Aplikuj do GrowVia',
     founders_reason_label: 'Nasza Racja Bytu',
-    founders_reason_title: 'Dwie studentki zarządzania, które szukały mentorów — i postanowiły zbudować to, czego brakowało.',
+    founders_reason_title: 'Dwie studentki zarządzania, które szukały mentorów, i postanowiły zbudować to, czego brakowało.',
     founders_reason_sub: 'Bo właściwe połączenie, we właściwym momencie, zmienia wszystko.',
     founders_vision_label: 'Nasza Wizja',
     founders_vision_quote: 'Wierzymy, że łączenie różnych pokoleń tworzy nowy sposób myślenia, w którym mądrość spotyka ambicję, a doświadczenie przyspiesza wzrost.',
@@ -13757,7 +13757,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_stat_hq_value: 'Barcelona',
     founders_cta_label: 'Dołącz do nas',
     founders_cta_title: 'Dołącz do nas w tej podróży.',
-    founders_cta_sub: 'Czy chcesz się rozwijać, czy chcesz coś dać innym — jest dla ciebie miejsce w GrowVia.',
+    founders_cta_sub: 'Czy chcesz się rozwijać, czy chcesz coś dać innym, jest dla ciebie miejsce w GrowVia.',
     founders_cta_start: 'Zacznij',
     founders_cta_contact: 'Skontaktuj się',
     founders_founder1_bio: 'Luna na własnej skórze doświadczyła zagubienia przy wyborze ścieżki kariery po studiach. Nie mogąc znaleźć mentorów, którzy naprawdę rozumieli jej drogę, postanowiła zbudować platformę, jakiej sama pragnęła.',
@@ -13953,7 +13953,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     pricing_mentor_label: 'Dla mentorów',
     pricing_mentor_join: 'Dołączenie do GrowVia jako mentor jest bezpłatne',
     pricing_mentor_title: 'Płacisz tylko wtedy, gdy zarabiasz.',
-    pricing_mentor_sub: 'Żadnych opłat konfiguracyjnych. Żadnej miesięcznej subskrypcji. Żadnego ryzyka. GrowVia pobiera prowizję tylko wtedy, gdy mentee płaci za sesję — wszystko inne jest bezpłatne.',
+    pricing_mentor_sub: 'Żadnych opłat konfiguracyjnych. Żadnej miesięcznej subskrypcji. Żadnego ryzyka. GrowVia pobiera prowizję tylko wtedy, gdy mentee płaci za sesję, wszystko inne jest bezpłatne.',
     pricing_mentor_p1: 'Sam ustalasz własne stawki',
     pricing_mentor_p2: 'Sam wybierasz swoją dostępność',
     pricing_mentor_p3: 'GrowVia pobiera 20% prowizji za sesję tylko gdy zarabiasz',
@@ -13993,9 +13993,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_value3_title: 'Dostępne dla Wszystkich',
     wwa_value3_desc: 'Doradztwo zawodowe nie powinno być przywilejem. Pracujemy nad tym, aby mentoring wysokiej jakości był dostępny dla studentów i profesjonalistów wszędzie.',
     wwa_value4_title: 'Ciągły Rozwój',
-    wwa_value4_desc: 'Wierzymy w uczenie się przez całe życie dla wszystkich na platformie — mentorów i mentees.',
+    wwa_value4_desc: 'Wierzymy w uczenie się przez całe życie dla wszystkich na platformie, mentorów i mentees.',
     wwa_cta_title: 'Dołącz do nas w tej podróży',
-    wwa_cta_sub: 'Czy chcesz się rozwijać, czy chcesz coś dać innym — jest dla ciebie miejsce w GrowVia.',
+    wwa_cta_sub: 'Czy chcesz się rozwijać, czy chcesz coś dać innym, jest dla ciebie miejsce w GrowVia.',
     wwa_cta_start: 'Zacznij',
     wwa_cta_contact: 'Skontaktuj się',
 
@@ -14080,9 +14080,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Become a Mentor / Register form
     bam_label: 'Dla Mentorów',
     bam_title: 'Zamień swoje doświadczenie w przełom dla kogoś innego.',
-    bam_sub: 'Twoja kariera zajęła lata, aby ją zbudować. GrowVia pozwala ci zamienić tę wiedzę w realny wpływ — zgodnie z twoim harmonogramem, bez żadnego obciążenia.',
+    bam_sub: 'Twoja kariera zajęła lata, aby ją zbudować. GrowVia pozwala ci zamienić tę wiedzę w realny wpływ, zgodnie z twoim harmonogramem, bez żadnego obciążenia.',
     bam_b1_title: 'Generowanie leadów na autopilocie',
-    bam_b1_desc: 'Wykwalifikowani mentees przychodzą do ciebie — żadnego zimnego outreachu.',
+    bam_b1_desc: 'Wykwalifikowani mentees przychodzą do ciebie, żadnego zimnego outreachu.',
     bam_b2_title: 'Zero administracji',
     bam_b2_desc: 'My zajmujemy się planowaniem, płatnościami i śledzeniem sesji.',
     bam_b3_title: 'Twoje dziedzictwo, ustrukturyzowane',
@@ -14146,7 +14146,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_badge: 'Funkcja Premium',
     ai_title1: 'AI',
     ai_title2: 'Smart Matching',
-    ai_sub: 'Przestań zgadywać. Nasza AI analizuje twoje cele, osobowość i doświadczenie, aby polecić mentorów, którzy z największym prawdopodobieństwem pomogą ci się rozwijać — z wynikiem kompatybilności dla każdego dopasowania.',
+    ai_sub: 'Przestań zgadywać. Nasza AI analizuje twoje cele, osobowość i doświadczenie, aby polecić mentorów, którzy z największym prawdopodobieństwem pomogą ci się rozwijać, z wynikiem kompatybilności dla każdego dopasowania.',
     ai_section_title: 'Znalezienie właściwego mentora to najtrudniejsza część',
     ai_section_p1: 'Większość ludzi wybiera mentora na podstawie stanowiska lub liczby lat doświadczenia. Ale mentorzy, którzy naprawdę pomagają, to ci, którzy rozumieją twoją konkretną sytuację, cele i osobowość.',
     ai_section_p2: 'AI Smart Matching GrowVia idzie głębiej. Bierze pod uwagę to, co chcesz osiągnąć, jak się uczysz i jaki styl wskazówek działa dla ciebie najlepiej.',
@@ -14156,7 +14156,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_f4: 'Oparty na celach, osobowości i doświadczeniu',
     ai_matches_title: 'Twoje Dopasowania AI',
     ai_how_title: 'Jak działa dopasowanie',
-    ai_how_sub: 'Więcej niż filtr — prawdziwy silnik kompatybilności.',
+    ai_how_sub: 'Więcej niż filtr, prawdziwy silnik kompatybilności.',
     ai_feat1_title: 'Rozumie twoje cele',
     ai_feat1_desc: 'AI analizuje twoje cele zawodowe, zainteresowania i doświadczenie, aby znaleźć mentorów, którzy przeszli tę samą ścieżkę.',
     ai_feat2_title: 'Pokazuje procent kompatybilności',
@@ -14173,7 +14173,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_s3_label: 'Otrzymaj swoje najlepsze dopasowania',
     ai_s3_desc: 'Otrzymujesz posortowaną listę kompatybilnych mentorów z procentowym wynikiem dla każdego.',
     ai_s4_label: 'Akceptuj lub przeglądaj',
-    ai_s4_desc: 'Zaakceptuj rekomendację AI bezpośrednio lub przeglądaj mentorów ręcznie — twój wybór.',
+    ai_s4_desc: 'Zaakceptuj rekomendację AI bezpośrednio lub przeglądaj mentorów ręcznie, twój wybór.',
     ai_disc_label: 'Sesja Odkrywcza',
     ai_disc_ai: '1 dopasowanie AI dołączone · Sesja 15–20 min',
     ai_disc_f1: 'Jedno dopasowanie AI Smart Match dołączone',
@@ -14362,13 +14362,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     mentor_badge: 'Dla mentorów',
     mentor_title_1: 'Zamień swoje doświadczenie w',
     mentor_title_hl: 'przełom dla kogoś innego',
-    mentor_sub: 'Twoja kariera zajęła lata, aby ją zbudować. GrowVia pozwala ci zamienić tę wiedzę w realny wpływ — zgodnie z twoim harmonogramem, bez żadnego obciążenia.',
+    mentor_sub: 'Twoja kariera zajęła lata, aby ją zbudować. GrowVia pozwala ci zamienić tę wiedzę w realny wpływ, zgodnie z twoim harmonogramem, bez żadnego obciążenia.',
     mentor_b1_title: 'Generowanie leadów na autopilocie',
-    mentor_b1_desc: 'Wykwalifikowani mentees przychodzą do ciebie — żadnego zimnego outreachu, żadnej autopromocji. GrowVia przyciąga właściwych ludzi do twojego profilu.',
+    mentor_b1_desc: 'Wykwalifikowani mentees przychodzą do ciebie, żadnego zimnego outreachu, żadnej autopromocji. GrowVia przyciąga właściwych ludzi do twojego profilu.',
     mentor_b2_title: 'Zero administracji',
     mentor_b2_desc: 'GrowVia zajmuje się planowaniem, płatnościami i śledzeniem sesji. Ty skupiasz się całkowicie na mentee przed tobą.',
     mentor_b3_title: 'Twoje dziedzictwo, ustrukturyzowane',
-    mentor_b3_desc: 'Śledź postępy mentees w czasie i zdobywaj odznakę Certyfikowanego Mentora — znak zaufania widoczny dla każdego mentee na platformie.',
+    mentor_b3_desc: 'Śledź postępy mentees w czasie i zdobywaj odznakę Certyfikowanego Mentora, znak zaufania widoczny dla każdego mentee na platformie.',
     mentor_apply: 'Aplikuj jako mentor',
     mentor_apply_sub: 'Ręczna weryfikacja · Zdobądź odznakę Certyfikowanego Mentora',
 
@@ -14389,7 +14389,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'Dopiero zaczynamy',
     success_title: 'Bądź naszą pierwszą historią sukcesu',
-    success_sub: 'GrowVia właśnie się uruchamia. Wdrażamy naszych pierwszych mentorów i mentees. Zarejestruj się dziś i pomóż kształtować platformę — twoja historia może być tą, która zainspiruje tysiące.',
+    success_sub: 'GrowVia właśnie się uruchamia. Wdrażamy naszych pierwszych mentorów i mentees. Zarejestruj się dziś i pomóż kształtować platformę, twoja historia może być tą, która zainspiruje tysiące.',
     success_cta_find: 'Znajdź mojego mentora',
     success_cta_apply: 'Aplikuj jako mentor',
 
@@ -14440,7 +14440,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_t1_quote: 'GrowVia nie tylko połączyła mnie z mentorem. Zmieniła to, jak postrzegam swój potencjał.',
     founders_t2_quote: 'Widząc, jak mój mentee dostaje pracę marzeń, przypomniałem sobie, dlaczego doświadczenie jest po to, by je dzielić. GrowVia sprawia, że to jest naprawdę łatwe.',
     founders_t3_quote: 'Dopasowanie AI było niesamowite. Mój mentor stanął dokładnie na tym samym rozdrożu, na którym ja stałem.',
-    founders_t4_quote: 'Miałem kierunek, ale nie miałem pewności siebie. GrowVia dała mi oboje — już na pierwszej sesji.',
+    founders_t4_quote: 'Miałem kierunek, ale nie miałem pewności siebie. GrowVia dała mi oboje, już na pierwszej sesji.',
     founders_t5_quote: 'Mój harmonogram jest wypełniony, ale GrowVia sprawia, że dawanie czegoś od siebie jest naprawdę bezproblemowe. Zero obciążenia, maksymalny wpływ.',
     founders_t6_quote: 'Dołączyłem do GrowVia, aby coś dać. Skończyłem ucząc się tyle, ile nauczyłem.',
     founders_stat1_quote: 'Po trzech sesjach miałem jasny pięcioletni plan. Nic innego nie mogło się z tym równać.',
@@ -14496,7 +14496,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: 'Brak nadchodzących sesji',
     dash_no_upcoming_desc: 'Zarezerwuj sesję z mentorem, aby rozpocząć swoją podróż.',
     dash_free_ai_title: 'Wypróbuj Dopasowanie AI za darmo',
-    dash_free_ai_desc: 'Masz 1 bezpłatne dopasowanie AI — niech nasz silnik znajdzie twojego idealnego mentora.',
+    dash_free_ai_desc: 'Masz 1 bezpłatne dopasowanie AI, niech nasz silnik znajdzie twojego idealnego mentora.',
     dash_try_now: 'Spróbuj teraz',
     dash_unlock_ai: 'Odblokuj nieograniczone dopasowanie AI',
     dash_unlock_ai_desc: 'Subskrybuj od €4,99/miesiąc i uzyskaj pełny dostęp + nieograniczone dopasowania AI.',
@@ -14539,7 +14539,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: 'Powiedz nam, czego potrzebujesz',
-    dash_q_subtitle: 'Kilka szybkich pytań — twoje dopasowanie uruchamia się, gdy klikniesz Znajdź Moje Dopasowania',
+    dash_q_subtitle: 'Kilka szybkich pytań, twoje dopasowanie uruchamia się, gdy klikniesz Znajdź Moje Dopasowania',
     dash_q_goal_label: 'Jaki jest twój główny cel?',
     dash_q_select_all: '(zaznacz wszystko, co dotyczy)',
     dash_q_goal1: 'Rozwój kariery',
@@ -14601,7 +14601,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Styczeń,Luty,Marzec,Kwiecień,Maj,Czerwiec,Lipiec,Sierpień,Wrzesień,Październik,Listopad,Grudzień',
     cal_days: 'Pn,Wt,Śr,Cz,Pt,So,Nd',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Bezpłatne Demo',
     schools_why_label: 'Dlaczego GrowVia',
 
@@ -14674,7 +14674,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     steps_title: '3 adımda başlıyorsun.',
     steps_sub: 'Uzun form yok. Bekleme yok. Sadece doğru mentor.',
     steps_1_title: 'Hedefini tanımlıyorsun',
-    steps_1_desc: 'Kariyer, geçiş, girişimcilik, staj — nereye gitmek istediğini bize söyle.',
+    steps_1_desc: 'Kariyer, geçiş, girişimcilik, staj, nereye gitmek istediğini bize söyle.',
     steps_2_title: 'Yapay zeka mükemmel eşleşmeni buluyor',
     steps_2_desc: 'Algoritmamız deneyimi, sektörü ve mentorluk stilini analiz ederek sana özel bir eşleşme sunar.',
     steps_3_title: 'İlk oturumunu rezerve ediyorsun',
@@ -14726,7 +14726,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_title_pre: 'Her büyük kariyerin arkasında uzanan bir',
     stats_title_hl: 'el vardır.',
     stats_title_post: '',
-    stats_sub: 'Mentor ağımız, gençlere el uzatmayı tercih eden üst düzey profesyonelleri bir araya getiriyor — çünkü onlar da bir zamanlar kendilerine uzatılan eli hiç unutmadı.',
+    stats_sub: 'Mentor ağımız, gençlere el uzatmayı tercih eden üst düzey profesyonelleri bir araya getiriyor, çünkü onlar da bir zamanlar kendilerine uzatılan eli hiç unutmadı.',
     stats_badge_mentors: 'Mentorlar',
     stats_desc_mentors: 'Uzman Mentorlar',
     stats_badge_mentees: 'Menterler',
@@ -14805,7 +14805,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_hero_sub: 'GrowVia, hırslı profesyonelleri yapay zeka aracılığıyla dakikalar içinde, aylar değil, dünya standartlarında mentorlarla buluşturur.',
     founders_hero_cta: 'GrowVia\'ya başvur',
     founders_reason_label: 'Var Oluş Nedenimiz',
-    founders_reason_title: 'Mentor arayan iki yönetim öğrencisi — ve eksik olanı inşa etmeye karar verdiler.',
+    founders_reason_title: 'Mentor arayan iki yönetim öğrencisi, ve eksik olanı inşa etmeye karar verdiler.',
     founders_reason_sub: 'Çünkü doğru bağlantı, doğru anda, her şeyi değiştirir.',
     founders_vision_label: 'Vizyonumuz',
     founders_vision_quote: 'Farklı nesilleri bir araya getirmenin yeni bir düşünce biçimi yarattığına inanıyoruz; bilgelik hırsla buluşur, deneyim büyümeyi hızlandırır.',
@@ -14838,7 +14838,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_stat_hq_value: 'Barselona',
     founders_cta_label: 'Katıl',
     founders_cta_title: 'Bu yolculukta bize katıl.',
-    founders_cta_sub: 'İster büyümek ister geri vermek iste — GrowVia\'da sana bir yer var.',
+    founders_cta_sub: 'İster büyümek ister geri vermek iste, GrowVia\'da sana bir yer var.',
     founders_cta_start: 'Başla',
     founders_cta_contact: 'Bize ulaş',
     founders_founder1_bio: 'Luna, mezuniyetinin ardından kariyer yolu seçimindeki kargaşayı bizzat yaşadı. Kendi yolculuğunu gerçekten anlayan mentorlar bulamayınca, keşke sahip olsaydı diye düşündüğü platformu inşa etmeye karar verdi.',
@@ -15076,7 +15076,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     wwa_value4_title: 'Sürekli Büyüme',
     wwa_value4_desc: 'Platformdaki herkes için, hem mentorlar hem de menterler için yaşam boyu öğrenmeye inanıyoruz.',
     wwa_cta_title: 'Bu yolculukta bize katıl',
-    wwa_cta_sub: 'İster büyümek ister geri vermek iste — GrowVia\'da sana bir yer var.',
+    wwa_cta_sub: 'İster büyümek ister geri vermek iste, GrowVia\'da sana bir yer var.',
     wwa_cta_start: 'Başla',
     wwa_cta_contact: 'Bize Ulaş',
 
@@ -15227,7 +15227,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     ai_badge: 'Premium Özellik',
     ai_title1: 'YZ',
     ai_title2: 'Akıllı Eşleştirme',
-    ai_sub: 'Tahmin etmeyi bırak. YZ\'miz, büyüme potansiyelini en çok artıracak mentorları önermek için hedeflerini, kişiliğini ve deneyimini analiz eder — her eşleşme için uyumluluk skoru ile.',
+    ai_sub: 'Tahmin etmeyi bırak. YZ\'miz, büyüme potansiyelini en çok artıracak mentorları önermek için hedeflerini, kişiliğini ve deneyimini analiz eder, her eşleşme için uyumluluk skoru ile.',
     ai_section_title: 'Doğru mentoru bulmak en zor kısım',
     ai_section_p1: 'Çoğu kişi unvan veya deneyim yılı sayısına göre mentor seçer. Ama gerçekten yardımcı olan mentorlar, senin özel durumunu, hedeflerini ve kişiliğini anlayanlardır.',
     ai_section_p2: "GrowVia'nın YZ Akıllı Eşleştirmesi daha derine iner. Ne elde etmek istediğini, nasıl öğrendiğini ve sana hangi rehberlik stilinin daha iyi gittiğini dikkate alır.",
@@ -15470,7 +15470,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Success CTA
     success_badge: 'Daha yeni başlıyoruz',
     success_title: 'İlk başarı hikayemiz sen ol',
-    success_sub: "GrowVia şimdi başlıyor. İlk mentorlarımızı ve menterlerimizi alıyoruz. Bugün kaydol ve platformu şekillendirmeye yardım et — hikayen binlercesine ilham verecek olan olabilir.",
+    success_sub: "GrowVia şimdi başlıyor. İlk mentorlarımızı ve menterlerimizi alıyoruz. Bugün kaydol ve platformu şekillendirmeye yardım et, hikayen binlercesine ilham verecek olan olabilir.",
     success_cta_find: 'Mentorumu bul',
     success_cta_apply: 'Mentor olarak başvur',
 
@@ -15521,7 +15521,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     founders_t1_quote: "GrowVia beni sadece bir mentorla buluşturmadı. Potansiyelimi görme biçimimi tamamen değiştirdi.",
     founders_t2_quote: "Menterimin hayalindeki işe girmesini görmek, deneyimin paylaşılmak için var olduğunu bana hatırlattı. GrowVia bunu gerçekten zahmetsiz kılıyor; program karmaşası yok, yönetim yükü yok.",
     founders_t3_quote: "YZ eşleştirmesi inanılmazdı. Mentorun tam olarak durduğum kavşakta durmuştu.",
-    founders_t4_quote: "Yönüm vardı, özgüvenim yoktu. GrowVia her ikisini de verdi — ilk oturumda.",
+    founders_t4_quote: "Yönüm vardı, özgüvenim yoktu. GrowVia her ikisini de verdi, ilk oturumda.",
     founders_t5_quote: "Program yoğun ama GrowVia geri vermeyi gerçekten kolaylaştırıyor. Sıfır genel gider, birisinin hayatı üzerinde maksimum etki.",
     founders_t6_quote: 'GrowVia\'ya geri vermek için katıldım. Öğrettiğim kadar öğrendiğimi fark ettim.',
     founders_stat1_quote: 'Üç oturumda net bir beş yıllık planım oluştu. Başka hiçbir şey buna yaklaşamadı.',
@@ -15577,7 +15577,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_no_upcoming: 'Yaklaşan oturum yok',
     dash_no_upcoming_desc: 'Yolculuğuna başlamak için bir mentorla oturum rezerve et.',
     dash_free_ai_title: 'YZ Eşleştirmeyi ücretsiz dene',
-    dash_free_ai_desc: '1 ücretsiz YZ eşleşmen var — motorumuzun mükemmel mentorunu bulmasına izin ver.',
+    dash_free_ai_desc: '1 ücretsiz YZ eşleşmen var, motorumuzun mükemmel mentorunu bulmasına izin ver.',
     dash_try_now: 'Şimdi dene',
     dash_unlock_ai: 'Sınırsız YZ eşleştirmenin kilidini aç',
     dash_unlock_ai_desc: '4,99€/ay\'dan itibaren abone ol ve tam erişim + sınırsız YZ eşleşmeleri kazan.',
@@ -15620,7 +15620,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Dashboard, questionnaire
     dash_q_title: 'Neye ihtiyaç duyduğunu anlat',
-    dash_q_subtitle: 'Birkaç hızlı soru — Eşleşmelerimi Bul\'a tıkladığında eşleştirme başlar',
+    dash_q_subtitle: 'Birkaç hızlı soru, Eşleşmelerimi Bul\'a tıkladığında eşleştirme başlar',
     dash_q_goal_label: 'Ana hedefin nedir?',
     dash_q_select_all: '(tümünü seç)',
     dash_q_goal1: 'Kariyer gelişimi',
@@ -15682,7 +15682,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cal_months: 'Ocak,Şubat,Mart,Nisan,Mayıs,Haziran,Temmuz,Ağustos,Eylül,Ekim,Kasım,Aralık',
     cal_days: 'P,S,Ç,P,C,C,P',
 
-    // Schools — missing keys
+    // Schools, missing keys
     schools_form_eyebrow: 'Ücretsiz Demo',
     schools_why_label: 'Neden GrowVia',
 
