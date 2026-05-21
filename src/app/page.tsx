@@ -55,25 +55,25 @@ export default function HomePage() {
     {
       label: t("home_cat_students"),
       desc: t("home_cat_students_desc"),
-      href: "/auth/register?category=students",
+      href: "/mentoring-areas/students",
       image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
     },
     {
       label: t("home_cat_career"),
       desc: t("home_cat_career_desc"),
-      href: "/auth/register?category=career",
+      href: "/mentoring-areas/career",
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
     },
     {
       label: t("home_cat_business"),
       desc: t("home_cat_business_desc"),
-      href: "/auth/register?category=business",
+      href: "/mentoring-areas/business",
       image: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80",
     },
     {
       label: t("home_cat_growth"),
       desc: t("home_cat_growth_desc"),
-      href: "/auth/register?category=personal_growth",
+      href: "/mentoring-areas/personal-growth",
       image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80",
     },
   ];
@@ -255,21 +255,13 @@ export default function HomePage() {
       <section className="py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-          <div className="reveal flex items-end justify-between mb-12">
-            <div>
-              <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
-                {t("home_cat_label")}
-              </p>
-              <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-tight">
-                {t("home_cat_title")}
-              </h2>
-            </div>
-            <Link
-              href="/auth/register"
-              className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white transition-colors mb-1"
-            >
-              {t("home_browse_all")} <ArrowRight className="w-4 h-4" />
-            </Link>
+          <div className="reveal mb-12">
+            <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
+              {t("home_cat_label")}
+            </p>
+            <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-tight">
+              {t("home_cat_title")}
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
