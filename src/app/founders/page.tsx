@@ -115,8 +115,8 @@ export default function FoundersPage() {
 
   /* ── Data ────────────────────────────────────────────────────── */
   const founders = [
-    { name: "Luna Davin",    role: "Co-Founder & CEO", bio: t("founders_founder1_bio") },
-    { name: "Yasmine Tunon", role: "Co-Founder & COO", bio: t("founders_founder2_bio") },
+    { name: "Luna Davin",    role: "Co-Founder & Co-CEO / Community & Outreach Lead",  bio: t("founders_founder1_bio") },
+    { name: "Yasmine Tunon", role: "Co-Founder & Co-CEO / Digital & Operational Lead", bio: t("founders_founder2_bio") },
   ];
 
   const values = [

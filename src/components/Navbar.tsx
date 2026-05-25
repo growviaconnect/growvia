@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useLang } from "@/contexts/LangContext";
 import LangSwitcher from "@/components/LangSwitcher";
+import UserAvatar from "@/components/UserAvatar";
 
 export default function Navbar() {
   const router = useRouter();
@@ -39,13 +40,9 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { href: "/explore",     label: t("nav_explore") },
-    { href: "/for-schools", label: t("nav_for_schools") },
+    { href: "/founders", label: t("nav_founders") },
+    { href: "/explore",  label: t("nav_explore") },
   ];
-
-  const initials = session?.nom
-    ? session.nom.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()
-    : "";
 
   return (
     <nav
@@ -78,14 +75,6 @@ export default function Navbar() {
 
             {/* Nav links, desktop only */}
             <div className="hidden lg:flex items-center gap-6">
-              {pathname !== "/" && (
-                <Link
-                  href="/"
-                  className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200"
-                >
-                  {t("nav_home")}
-                </Link>
-              )}
               {navLinks.map((l) => (
                 <Link
                   key={l.href}
@@ -102,14 +91,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-3 mr-2">
 
             {/* Dynamic account button */}
-            {session ? (
-              <Link
-                href="/profile"
-                className="text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg border border-white/15 transition-all duration-200"
-              >
-                {t("nav_my_profile")}
-              </Link>
-            ) : (
+            {!session && (
               <Link
                 href="/auth/register"
                 className="text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg border border-white/15 transition-all duration-200"
@@ -120,18 +102,15 @@ export default function Navbar() {
 
             {session ? (
               <>
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
-                >
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+                <div className="flex items-center gap-2">
+                  <UserAvatar editable photo={session.photo} name={session.nom} size={28} rounded="lg" />
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-white/70 hover:text-white transition-colors"
                   >
-                    {initials}
-                  </div>
-                  {t("nav_dashboard")}
-                </Link>
+                    {t("nav_dashboard")}
+                  </Link>
+                </div>
                 <button
                   onClick={handleLogout}
                   className="text-sm font-medium text-white/35 hover:text-white/70 transition-colors"
@@ -201,15 +180,6 @@ export default function Navbar() {
 
           {/* Nav links */}
           <div className="space-y-0.5 mb-5">
-            {pathname !== "/" && (
-              <Link
-                href="/"
-                onClick={() => setMenuOpen(false)}
-                className="block py-3 text-base font-medium text-white/60 hover:text-white transition-colors border-b border-white/[0.04]"
-              >
-                {t("nav_home")}
-              </Link>
-            )}
             {navLinks.map((l) => (
               <Link
                 key={l.href}
@@ -230,19 +200,16 @@ export default function Navbar() {
           {/* CTA buttons, always at bottom */}
           {session ? (
             <div className="space-y-3">
-              <Link
-                href="/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 py-3 text-base font-medium text-white/70 hover:text-white transition-colors"
-              >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs"
-                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+              <div className="flex items-center gap-3 py-3">
+                <UserAvatar editable photo={session.photo} name={session.nom} size={32} rounded="lg" />
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-base font-medium text-white/70 hover:text-white transition-colors"
                 >
-                  {initials}
-                </div>
-                {t("nav_dashboard")}
-              </Link>
+                  {t("nav_dashboard")}
+                </Link>
+              </div>
               <button
                 onClick={handleLogout}
                 className="block w-full text-left py-3 text-base font-medium text-red-400/70 hover:text-red-400 transition-colors"

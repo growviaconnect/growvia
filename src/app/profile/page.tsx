@@ -1,13 +1,17 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Edit3, Save, X, Check, Loader2, Upload,
-  User, FileText, AlertCircle, CheckCircle2,
+  ArrowLeft, Edit3, Save, X, Loader2,
+  AlertCircle, CheckCircle2, Check, FileText, User,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { getUserSession } from "@/lib/session";
+import UserAvatar from "@/components/UserAvatar";
+import AvailabilitySelector from "@/components/AvailabilitySelector";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -49,6 +53,7 @@ interface MentorProfile {
   secteurs: string[]; competences: CompetenceEntry[]; type_profils_aides: string[];
   style_mentorat: string; disponibilite_heures: number; max_mentees: number;
   format_prefere: string; langues: string[]; motivation: string; cv_url: string;
+  session_price: number | null;
   survey_completed: boolean;
 }
 interface MenteeProfile {
@@ -63,14 +68,24 @@ interface MenteeProfile {
 
 // ─── Completion helpers ─────────────────────────────────────────────────────────
 function mentorCompletion(p: MentorProfile): number {
-  const checks = [
-    !!p.nom.trim(), !!p.photo_url, !!p.poste_actuel.trim(), !!p.entreprise.trim(),
-    p.annees_experience !== "", !!p.localisation.trim(), !!p.linkedin_url.trim(), !!p.bio.trim(),
-    p.secteurs.length > 0, p.competences.length > 0, p.type_profils_aides.length > 0,
-    !!p.style_mentorat, p.disponibilite_heures > 0, p.max_mentees > 0,
-    !!p.format_prefere, p.langues.length > 0, !!p.motivation.trim(), !!p.cv_url,
+  // 8 required fields — all filled → 100%
+  const required = [
+    !!p.nom.trim(),
+    !!p.poste_actuel.trim(),
+    p.annees_experience !== "",
+    !!p.localisation.trim(),
+    p.secteurs.length > 0,
+    p.type_profils_aides.length > 0,  // help_with
+    !!p.motivation.trim(),
+    p.session_price != null && p.session_price > 0,  // tarif_horaire
   ];
-  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  if (required.every(Boolean)) return 100;
+
+  // Partial score: required fields worth 80%, optional bonus worth 20%
+  const reqScore = Math.round((required.filter(Boolean).length / required.length) * 80);
+  const optional = [!!p.photo_url, !!p.linkedin_url.trim(), !!p.bio.trim(), !!p.cv_url];
+  const optScore = Math.round((optional.filter(Boolean).length / optional.length) * 20);
+  return Math.min(99, reqScore + optScore);
 }
 function menteeCompletion(p: MenteeProfile): number {
   const checks = [
@@ -85,13 +100,6 @@ function menteeCompletion(p: MenteeProfile): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-// ─── Storage helper ─────────────────────────────────────────────────────────────
-async function uploadToStorage(bucket: string, path: string, file: File): Promise<string> {
-  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
-  if (error) throw new Error(error.message);
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-}
 
 // ─── Shared UI ──────────────────────────────────────────────────────────────────
 const inputCls =
@@ -193,7 +201,7 @@ const defaultMentor: MentorProfile = {
   localisation:"", linkedin_url:"", bio:"",
   secteurs:[], competences:[], type_profils_aides:[],
   style_mentorat:"", disponibilite_heures:3, max_mentees:3,
-  format_prefere:"", langues:[], motivation:"", cv_url:"", survey_completed:false,
+  format_prefere:"", langues:[], motivation:"", cv_url:"", session_price:null, survey_completed:false,
 };
 const defaultMentee: MenteeProfile = {
   nom:"", photo_url:"", niveau_etudes:"", ecole:"", localisation:"", linkedin_url:"", bio:"",
@@ -205,6 +213,7 @@ const defaultMentee: MenteeProfile = {
 // ─── Main component ─────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const router = useRouter();
+  const { setSession: setGlobalSession } = useAuth();
 
   const [pageLoading, setPageLoading]   = useState(true);
   const [saving, setSaving]             = useState(false);
@@ -213,14 +222,12 @@ export default function ProfilePage() {
   const [toast, setToast]               = useState<"success" | "error" | null>(null);
 
   const [userId, setUserId]             = useState("");
+  const [mentorDbId, setMentorDbId]     = useState<string | null>(null);
   const [role, setRole]                 = useState<Role>(null);
   const [mentor, setMentor]             = useState<MentorProfile>(defaultMentor);
   const [mentee, setMentee]             = useState<MenteeProfile>(defaultMentee);
 
-  // Photo upload
-  const photoInputRef                       = useRef<HTMLInputElement>(null);
-  const [photoPreview, setPhotoPreview]     = useState("");
-  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState("");
 
   // ── Toast helper ────────────────────────────────────────────────────────────
   const showToast = useCallback((type: "success" | "error") => {
@@ -241,6 +248,7 @@ export default function ProfilePage() {
 
       if (mentorRow) {
         setRole("mentor");
+        setMentorDbId(mentorRow.id as string);
         setMentor({
           nom:               mentorRow.nom               ?? "",
           photo_url:         mentorRow.photo_url         ?? "",
@@ -260,6 +268,7 @@ export default function ProfilePage() {
           langues:           mentorRow.langues           ?? [],
           motivation:        mentorRow.motivation        ?? "",
           cv_url:            mentorRow.cv_url            ?? "",
+          session_price:     mentorRow.session_price     ?? null,
           survey_completed:  mentorRow.survey_completed  ?? false,
         });
         if (mentorRow.photo_url) setPhotoPreview(mentorRow.photo_url);
@@ -302,24 +311,6 @@ export default function ProfilePage() {
     init();
   }, [router]);
 
-  // ── Photo upload ────────────────────────────────────────────────────────────
-  async function handlePhotoSelect(file: File) {
-    if (!userId) return;
-    setPhotoPreview(URL.createObjectURL(file));
-    setPhotoUploading(true);
-    try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const url = await uploadToStorage("avatars", `${userId}/avatar.${ext}`, file);
-      if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
-      else setMentee(p => ({ ...p, photo_url: url }));
-    } catch {
-      setError("Photo upload failed, please try again.");
-      setPhotoPreview(role === "mentor" ? mentor.photo_url : mentee.photo_url);
-    } finally {
-      setPhotoUploading(false);
-    }
-  }
-
   // ── Toggle array helpers ────────────────────────────────────────────────────
   function toggleMentorArr(field: keyof Pick<MentorProfile,"secteurs"|"type_profils_aides"|"langues">, val: string) {
     setMentor(p => {
@@ -357,10 +348,12 @@ export default function ProfilePage() {
     setSaving(true);
     setError(null);
     try {
-      const base = { id: userId, updated_at: new Date().toISOString() };
+      // Use UPDATE (not upsert) so we never touch NOT NULL columns like email
+      // that are not part of the edit form.
+      const ts = new Date().toISOString();
       if (role === "mentor") {
-        await supabase.from("mentors").upsert({
-          ...base,
+        await supabase.from("mentors").update({
+          updated_at:        ts,
           nom:               mentor.nom.trim()           || null,
           photo_url:         mentor.photo_url            || null,
           poste_actuel:      mentor.poste_actuel.trim()  || null,
@@ -379,10 +372,10 @@ export default function ProfilePage() {
           langues:           mentor.langues,
           motivation:        mentor.motivation.trim()    || null,
           cv_url:            mentor.cv_url               || null,
-        }).throwOnError();
+        }).eq("id", userId).throwOnError();
       } else {
-        await supabase.from("mentees").upsert({
-          ...base,
+        await supabase.from("mentees").update({
+          updated_at:         ts,
           nom:                mentee.nom.trim()              || null,
           photo_url:          mentee.photo_url               || null,
           niveau_etudes:      mentee.niveau_etudes           || null,
@@ -402,10 +395,17 @@ export default function ProfilePage() {
           langues:            mentee.langues,
           motivation:         mentee.motivation.trim()       || null,
           cv_url:             mentee.cv_url                  || null,
-        }).throwOnError();
+        }).eq("id", userId).throwOnError();
       }
       setEditing(false);
       showToast("success");
+      // Sync name + photo into global session
+      const cur = getUserSession();
+      if (cur) {
+        const nom = role === "mentor" ? mentor.nom : mentee.nom;
+        const photoUrl = role === "mentor" ? mentor.photo_url : mentee.photo_url;
+        setGlobalSession({ ...cur, nom: nom || cur.nom, photo: photoPreview || photoUrl || cur.photo });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save, please try again.");
       showToast("error");
@@ -507,26 +507,21 @@ export default function ProfilePage() {
           <div className="px-8 pb-8 -mt-12">
             {/* Avatar */}
             <div className="relative inline-block mb-4">
-              <div className="w-20 h-20 rounded-2xl border-4 overflow-hidden flex items-center justify-center"
+              <div className="w-20 h-20 rounded-2xl border-4 overflow-hidden"
                 style={{ borderColor: "#13111F", background: "rgba(124,58,237,0.2)" }}>
-                {photoPreview
-                  ? <img src={photoPreview} alt="avatar" className="w-full h-full object-cover" />
-                  : <span className="text-white font-bold text-xl">{initials}</span>
-                }
+                <UserAvatar
+                  editable={editing}
+                  photo={photoPreview || null}
+                  name={profileName || "?"}
+                  size={80}
+                  rounded="lg"
+                  onPhotoUploaded={(url) => {
+                    setPhotoPreview(url);
+                    if (role === "mentor") setMentor(p => ({ ...p, photo_url: url }));
+                    else setMentee(p => ({ ...p, photo_url: url }));
+                  }}
+                />
               </div>
-              {editing && (
-                <button
-                  type="button"
-                  disabled={photoUploading}
-                  onClick={() => photoInputRef.current?.click()}
-                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-colors disabled:opacity-50"
-                  style={{ background: "#7C3AED", borderColor: "#13111F" }}>
-                  {photoUploading ? <Loader2 className="w-3 h-3 text-white animate-spin" /> : <Upload className="w-3 h-3 text-white" />}
-                </button>
-              )}
-              <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoSelect(f); e.target.value = ""; }} />
             </div>
 
             <div className="flex items-start justify-between gap-4">
@@ -631,8 +626,8 @@ export default function ProfilePage() {
                       placeholder="https://linkedin.com/in/..." />
                   </div>
                   <div>
-                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentor.bio.length}/300</span></FieldLabel>
-                    <textarea rows={3} maxLength={300} className={`${inputCls} resize-none`} value={mentor.bio}
+                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentor.bio.length}/500</span></FieldLabel>
+                    <textarea rows={4} maxLength={500} className={`${inputCls} resize-none`} value={mentor.bio}
                       onChange={e => setMentor(p => ({ ...p, bio: e.target.value }))}
                       placeholder="A few sentences about your background…" />
                   </div>
@@ -653,6 +648,14 @@ export default function ProfilePage() {
                 </>
               )}
             </Section>
+
+            {/* My Availability */}
+            {mentorDbId && (
+              <Section>
+                <SectionTitle>My Availability</SectionTitle>
+                <AvailabilitySelector mentorId={mentorDbId} variant="dark" />
+              </Section>
+            )}
 
             {/* Expertise */}
             <Section>
@@ -904,8 +907,8 @@ export default function ProfilePage() {
                       placeholder="https://linkedin.com/in/..." />
                   </div>
                   <div>
-                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentee.bio.length}/300</span></FieldLabel>
-                    <textarea rows={3} maxLength={300} className={`${inputCls} resize-none`} value={mentee.bio}
+                    <FieldLabel>Bio <span className="ml-1 text-white/30 font-normal text-xs">{mentee.bio.length}/500</span></FieldLabel>
+                    <textarea rows={4} maxLength={500} className={`${inputCls} resize-none`} value={mentee.bio}
                       onChange={e => setMentee(p => ({ ...p, bio: e.target.value }))}
                       placeholder="A few sentences about yourself…" />
                   </div>
@@ -1168,6 +1171,7 @@ export default function ProfilePage() {
         )}
 
       </div>
+
     </div>
   );
 }
@@ -1182,6 +1186,3 @@ function Section({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ── User icon re-export (used in JSX above) ─────────────────────────────────────
-// (already imported at top)
-void User;

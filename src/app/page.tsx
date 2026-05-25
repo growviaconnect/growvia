@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { useParallax } from "@/hooks/useParallax";
 import ManifestoSection from "@/components/ManifestoSection";
 import StatsSection from "@/components/StatsSection";
 import CTASection from "@/components/CTASection";
@@ -11,13 +10,13 @@ import ForYouSection from "@/components/ForYouSection";
 import LogoTicker from "@/components/LogoTicker";
 import MentorsSection from "@/components/MentorsSection";
 import HeroParticles from "@/components/HeroParticles";
-import SessionsGallery from "@/components/SessionsGallery";
 import { useLang } from "@/contexts/LangContext";
 
 const HERO_SECTORS = [
   "Finance", "Tech", "Marketing", "Consulting", "Design", "RH",
-  "Stratégie", "Product", "Startups", "Growth", "Sales", "Data",
+  "Strategy", "Product", "Startups", "Growth", "Sales", "Data",
   "Legal", "Venture Capital", "Real Estate", "Management",
+  "Art", "Medicine", "Law", "Studies Discovery",
 ];
 
 const ACCENT = "#A78BFA";
@@ -36,8 +35,6 @@ export default function HomePage() {
   const { t } = useLang();
 
   const heroSectionRef = useRef<HTMLElement>(null);
-  const heroImgRef     = useRef<HTMLImageElement>(null);
-  useParallax(heroImgRef, heroSectionRef);
 
   const [mentorCount, setMentorCount] = useState(0);
   useEffect(() => {
@@ -58,48 +55,98 @@ export default function HomePage() {
     {
       label: t("home_cat_students"),
       desc: t("home_cat_students_desc"),
-      href: "/auth/register?category=students",
+      href: "/mentoring-areas/students",
       image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
     },
     {
       label: t("home_cat_career"),
       desc: t("home_cat_career_desc"),
-      href: "/auth/register?category=career",
+      href: "/mentoring-areas/career",
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
     },
     {
       label: t("home_cat_business"),
       desc: t("home_cat_business_desc"),
-      href: "/auth/register?category=business",
+      href: "/mentoring-areas/business",
       image: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80",
     },
     {
       label: t("home_cat_growth"),
       desc: t("home_cat_growth_desc"),
-      href: "/auth/register?category=personal_growth",
+      href: "/mentoring-areas/personal-growth",
       image: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80",
     },
   ];
 
   return (
     <>
+      <style>{`
+        @keyframes hero-fade-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes underline-draw {
+          from { width: 0; }
+          to   { width: 100%; }
+        }
+        @keyframes float-dot {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-8px); }
+        }
+        @keyframes fade-in-only {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes shimmer-sweep {
+          0%   { left: -80%; }
+          100% { left: 130%; }
+        }
+        .hero-fade {
+          opacity: 0;
+          animation: hero-fade-up 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .hero-cta-btn {
+          position: relative;
+          overflow: hidden;
+        }
+        .hero-cta-btn::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -80%;
+          width: 55%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+          transform: skewX(-20deg);
+        }
+        .hero-cta-btn:hover::before {
+          animation: shimmer-sweep 0.6s ease-out;
+        }
+        .hero-mentor-link .hero-arrow {
+          display: inline-flex;
+          transition: transform 0.2s ease;
+        }
+        .hero-mentor-link:hover .hero-arrow {
+          transform: translateX(4px);
+        }
+      `}</style>
+
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section ref={heroSectionRef} className="relative min-h-screen flex flex-col overflow-hidden">
 
         {/* Background */}
         <div className="absolute inset-0">
-          <img
-            ref={heroImgRef}
-            src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
-            alt=""
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
             aria-hidden="true"
             className="w-full h-full object-cover object-center"
-            style={{ filter: "brightness(0.25) saturate(0.4)" }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 80% 60% at 30% 50%, rgba(124,58,237,0.18) 0%, transparent 70%)" }}
-          />
+            style={{ filter: "brightness(0.28) saturate(0.5)" }}
+            poster="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80"
+          >
+            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+          </video>
           <div
             className="absolute inset-0"
             style={{ background: "linear-gradient(to bottom, rgba(13,10,26,0.5) 0%, transparent 30%, transparent 70%, #0D0A1A 100%)" }}
@@ -112,25 +159,31 @@ export default function HomePage() {
           <div className="w-full max-w-7xl mx-auto px-6 lg:px-8">
             <div className="grid lg:grid-cols-[1fr_380px] gap-16 items-center">
 
-              {/* LEFT — massive bleeding headline */}
-              <div>
-                <p
-                  className="animate-fade-up text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.32em] mb-8"
-                  style={{ animationDelay: "0ms" }}
-                >
-                  {t("home_badge")}
-                </p>
-                <div className="animate-fade-up overflow-visible" style={{ animationDelay: "80ms" }}>
-                  <p className="text-base md:text-lg font-semibold text-white/35 uppercase tracking-[0.25em] mb-1 leading-none">
-                    {t("home_hero_eyebrow")}
-                  </p>
+              {/* LEFT — premium headline */}
+              <div className="relative">
+                {/* Vertical purple accent line */}
+                <div
+                  className="absolute -left-6 top-0 bottom-0 w-px hidden lg:block"
+                  style={{ background: "linear-gradient(to bottom, transparent, rgba(124,58,237,0.5) 30%, rgba(124,58,237,0.5) 70%, transparent)" }}
+                />
+
+                <div className="hero-fade overflow-visible" style={{ animationDelay: "80ms" }}>
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 bg-white/[0.07] border border-white/[0.12] text-white/60 text-[10px] font-bold px-3 py-1.5 rounded-full mb-6 uppercase tracking-[0.2em]">
+                    {t("home_badge")}
+                  </div>
+
+                  {/* Main headline */}
                   <h1
-                    className="font-extrabold text-white leading-[0.82] tracking-tighter whitespace-nowrap"
-                    style={{ fontSize: "clamp(80px, 16vw, 230px)" }}
+                    className="font-extrabold text-white tracking-tighter"
+                    style={{ fontSize: "clamp(36px, 5.5vw, 68px)", lineHeight: 1.08 }}
                   >
-                    mentor.
+                    {t("home_hero_line1")}<br />
+                    {t("home_hero_line2")}<br />
+                    {t("home_hero_line3")}
                   </h1>
-                  <p className="text-xl md:text-2xl font-semibold text-white/50 mt-5 leading-snug max-w-sm">
+
+                  <p className="text-lg md:text-xl font-semibold text-white/50 mt-6 leading-snug max-w-lg">
                     {t("home_hero_title3")}
                   </p>
                 </div>
@@ -161,24 +214,6 @@ export default function HomePage() {
                   {t("home_hero_sub")}
                 </p>
 
-                {/* Primary CTA */}
-                <div className="flex flex-col gap-3">
-                  <Link
-                    href="/auth/register"
-                    className="inline-flex items-center justify-center gap-2.5 text-white font-semibold px-7 py-4 rounded-lg transition-colors text-sm"
-                    style={{ background: "#7C3AED" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
-                  >
-                    {t("home_build_future")} <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    href="/become-a-mentor"
-                    className="inline-flex items-center justify-center gap-2 text-white/35 hover:text-white/70 font-medium py-2 transition-colors text-sm"
-                  >
-                    {t("home_watch_film")} <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
@@ -207,9 +242,6 @@ export default function HomePage() {
       {/* ── MANIFESTO ────────────────────────────────────────────── */}
       <ManifestoSection />
 
-      {/* ── SESSIONS GALLERY ─────────────────────────────────────── */}
-      <SessionsGallery />
-
       {/* ── STATS ────────────────────────────────────────────────── */}
       <StatsSection />
 
@@ -223,21 +255,13 @@ export default function HomePage() {
       <section className="py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-          <div className="reveal flex items-end justify-between mb-12">
-            <div>
-              <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
-                {t("home_cat_label")}
-              </p>
-              <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-tight">
-                {t("home_cat_title")}
-              </h2>
-            </div>
-            <Link
-              href="/auth/register"
-              className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white transition-colors mb-1"
-            >
-              {t("home_browse_all")} <ArrowRight className="w-4 h-4" />
-            </Link>
+          <div className="reveal mb-12">
+            <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-[0.25em] mb-4">
+              {t("home_cat_label")}
+            </p>
+            <h2 className="text-4xl md:text-[56px] lg:text-[76px] font-extrabold text-white tracking-tight leading-tight">
+              {t("home_cat_title")}
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

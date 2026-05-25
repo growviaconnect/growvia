@@ -262,6 +262,93 @@ export async function sendSessionReminder(params: ReminderParams) {
   return r.emails.send({ from: FROM, to: email, subject, html: layout(body), ...(scheduledAt ? { scheduledAt } : {}) });
 }
 
+// ─── 6. Account deletion confirmation ────────────────────────────────────────
+
+export async function sendAccountDeletionEmail(to: string, nom: string, deletedAt: Date) {
+  const formattedDate = deletedAt.toLocaleString("fr-FR", {
+    day: "numeric", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris",
+  });
+
+  const body = `
+    ${badge("#dc2626", "Compte supprimé")}
+    <br/><br/>
+    ${h1("Votre compte GrowVia a été supprimé")}
+    ${p(`Bonjour ${nom},`)}
+    ${p(`Votre compte et toutes vos données associées ont été définitivement supprimés le <strong>${formattedDate}</strong>.`)}
+    ${p("Si vous êtes à l'origine de cette demande, aucune action supplémentaire n'est requise.")}
+    ${p(`Si ce n'était <strong>pas vous</strong>, contactez-nous immédiatement à <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;">contact@growviaconnect.com</a>`)}
+  `;
+
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({
+    from: FROM,
+    to,
+    subject: "Votre compte GrowVia a été supprimé",
+    html: layout(body),
+  });
+}
+
+// ─── 7. Session confirmed — sent to BOTH mentor and mentee with Meet link ─────
+
+export type ConfirmWithMeetParams = {
+  mentorEmail: string;
+  mentorNom:   string;
+  menteeEmail: string;
+  menteeNom:   string;
+  date:        string;
+  meetLink?:   string;
+};
+
+export async function sendConfirmationWithMeet(params: ConfirmWithMeetParams) {
+  const { mentorEmail, mentorNom, menteeEmail, menteeNom, date, meetLink } = params;
+  const formattedDate = formatDate(date);
+  const dashUrl = `${BASE_URL}/dashboard`;
+
+  const joinBtn = meetLink
+    ? `<a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;">Join session →</a>`
+    : btn("View dashboard →", dashUrl);
+
+  const meetRow = meetLink
+    ? highlight("Google Meet", `<a href="${meetLink}" style="color:#7C3AED;word-break:break-all;">${meetLink}</a>`)
+    : "";
+
+  const mentorBody = `
+    ${badge("#059669", "Session confirmed ✓")}
+    <br/><br/>
+    ${h1("Your session is confirmed!")}
+    ${p(`You accepted <strong>${menteeNom}</strong>'s session request. Here's what you need:`)}
+    ${infoBox(
+      highlight("Date & time", formattedDate) +
+      highlight("Mentee",      menteeNom) +
+      meetRow
+    )}
+    ${joinBtn}
+  `;
+
+  const menteeBody = `
+    ${badge("#059669", "Session confirmed ✓")}
+    <br/><br/>
+    ${h1("Your session is confirmed!")}
+    ${p(`Great news! <strong>${mentorNom}</strong> accepted your session request.`)}
+    ${infoBox(
+      highlight("Date & time", formattedDate) +
+      highlight("Mentor",      mentorNom) +
+      meetRow
+    )}
+    ${joinBtn}
+  `;
+
+  const subject = "Your GrowVia session is confirmed ✅";
+  const r = getResend();
+  if (!r) return;
+  await Promise.all([
+    r.emails.send({ from: FROM, to: mentorEmail, subject, html: layout(mentorBody) }),
+    r.emails.send({ from: FROM, to: menteeEmail, subject, html: layout(menteeBody) }),
+  ]);
+}
+
 // ─── Schedule all reminders at booking time ───────────────────────────────────
 // Called once when a session is booked. Resend queues and delivers each email
 // at the calculated future timestamp, no cron job required.
@@ -303,4 +390,73 @@ export async function scheduleSessionReminders(params: ScheduleRemindersParams) 
   }
 
   return Promise.allSettled(sends);
+}
+
+// ─── 8. Payment failed — mentee needs to update card ──────────────────────────
+
+export type PaymentFailedParams = {
+  menteeEmail: string;
+  menteeNom:   string;
+  sessionDate: string;
+};
+
+export async function sendPaymentFailedEmail(params: PaymentFailedParams) {
+  const { menteeEmail, menteeNom, sessionDate } = params;
+  const formattedDate = formatDate(sessionDate);
+  const portalUrl     = `${BASE_URL}/settings?tab=subscription`;
+
+  const body = `
+    ${badge("#dc2626", "Payment failed")}
+    <br/><br/>
+    ${h1("We couldn't process your session payment")}
+    ${p(`Hi ${menteeNom}, your mentor accepted the session but the payment for the following session could not be processed.`)}
+    ${infoBox(
+      highlight("Scheduled date", formattedDate)
+    )}
+    ${p("Please update your payment method to confirm the session. Your spot is reserved for 24 hours.")}
+    ${btn("Update payment method →", portalUrl)}
+  `;
+
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({
+    from:    FROM,
+    to:      menteeEmail,
+    subject: "⚠️ Action required: session payment failed",
+    html:    layout(body),
+  });
+}
+
+// ─── 9. Mentor proposes a new session time ────────────────────────────────────
+
+export async function sendProposeNewTime(params: {
+  menteeEmail: string;
+  menteeNom:   string;
+  mentorNom:   string;
+  newDateIso:  string;
+}) {
+  const { menteeEmail, menteeNom, mentorNom, newDateIso } = params;
+  const formattedDate = formatDate(newDateIso);
+  const dashUrl       = `${BASE_URL}/dashboard`;
+
+  const body = `
+    ${badge("#F59E0B", "New time proposed")}
+    <br/><br/>
+    ${h1("Your mentor proposed a new time")}
+    ${p(`Hi ${menteeNom}, <strong>${mentorNom}</strong> has suggested a different time for your session.`)}
+    ${infoBox(highlight("Proposed date & time", formattedDate))}
+    ${p("Go to your dashboard to accept or decline the new time.")}
+    ${btn("View on dashboard →", dashUrl)}
+    <br/>
+    ${p(`If you decline, your session request will be cancelled and you'll be free to book with another mentor.`)}
+  `;
+
+  const r = getResend();
+  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  return r.emails.send({
+    from:    FROM,
+    to:      menteeEmail,
+    subject: `${mentorNom} proposed a new session time`,
+    html:    layout(body),
+  });
 }

@@ -8,18 +8,21 @@ import { getUserSession, type UserSession } from "@/lib/session";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LangContext";
 import {
-  CalendarCheck, Heart, Sparkles, User, Clock, Video, Star,
+  CalendarCheck, Heart, Sparkles, User, Clock, Video,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
+  Users, CheckCircle, XCircle, CalendarRange,
 } from "lucide-react";
+import AvailabilitySelector from "@/components/AvailabilitySelector";
 
-type Tab = "overview" | "sessions" | "saved" | "matching";
+type Tab = "overview" | "sessions" | "matching" | "mentees" | "calendar";
 
 type Connexion = {
   id: string;
   date: string;
-  statut: "pending" | "active" | "completed" | "cancelled";
+  statut: "pending" | "active" | "completed" | "cancelled" | "rescheduled";
+  meet_link?: string | null;
   mentors: { nom: string; email: string; specialite: string | null } | null;
-  mentees: { nom: string; email: string; objectif: string | null } | null;
+  mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
 };
 
 type MatchResult = {
@@ -291,13 +294,13 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
       {/* Actions */}
       <div className="mt-4 flex gap-2">
         <Link
-          href="/explore"
+          href={`/mentors/${match.id}`}
           className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl border border-white/10 hover:border-[#7C3AED]/50 text-white/55 hover:text-white transition-colors"
         >
           {t("dash_ai_view_profile")}
         </Link>
         <Link
-          href="/explore"
+          href={`/mentors/${match.id}`}
           className="flex-1 text-center text-xs font-semibold py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition-colors"
         >
           {t("dash_ai_request")}
@@ -323,6 +326,7 @@ function DashboardContent() {
   const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack]       = useState(false);
   const [hasUsedFreeMatch, setHasUsedFreeMatch] = useState(false);
+  const [freeSessionUsed, setFreeSessionUsed]   = useState(false);
   const [menteeDbId, setMenteeDbId]         = useState<string | null>(null);
   const [menteeProfile, setMenteeProfile]   = useState<MenteeMatchProfile | null>(null);
   const [matches, setMatches]               = useState<MatchResult[]>([]);
@@ -336,17 +340,38 @@ function DashboardContent() {
   const [qPriorities, setQPriorities]       = useState<string[]>([]);
   const [qBio, setQBio]                     = useState("");
 
+  // Mentor-specific state
+  const [mentorSessionTab, setMentorSessionTab] = useState<"pending" | "upcoming" | "past">("pending");
+  const [actionLoading, setActionLoading]       = useState<string | null>(null);
+  const [mentorDbId, setMentorDbId]             = useState<string | null>(null);
+
+  // Propose new time modal state
+  const [proposeModal, setProposeModal]   = useState<string | null>(null); // connexionId
+  const [proposeDate, setProposeDate]     = useState("");
+  const [proposeTime, setProposeTime]     = useState("");
+  const [proposeLoading, setProposeLoading] = useState(false);
+
   // Nav items, defined inside component so they react to lang changes
-  const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
-    { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
-    { id: "saved",    label: t("dash_nav_saved"),    icon: Heart         },
-    { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
-  ];
+  const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
+    user?.role === "mentor"
+      ? [
+          { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
+          { id: "sessions", label: "My Sessions",           icon: CalendarCheck },
+          { id: "mentees",  label: "My Mentees",            icon: Users         },
+          { id: "calendar", label: "Calendar",              icon: CalendarRange },
+        ]
+      : [
+          { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
+          { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
+          { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
+        ];
   const secondaryNav = [
-    { href: "/profile",  label: t("dash_nav_profile"),   icon: User         },
-    { href: "/calendar", label: t("dash_nav_calendar"),  icon: CalendarCheck },
-    { href: "/settings", label: t("dash_nav_settings"),  icon: Settings      },
+    ...(user?.role !== "mentor" ? [
+      { href: "/dashboard/saved-mentors", label: "Saved Mentors", icon: Heart },
+      { href: "/dashboard/mes-demandes",  label: "Mes Demandes",  icon: Clock },
+    ] : []),
+    { href: "/profile",  label: t("dash_nav_profile"),  icon: User     },
+    { href: "/settings", label: t("dash_nav_settings"), icon: Settings },
   ];
 
   const roleLabel =
@@ -447,12 +472,14 @@ function DashboardContent() {
         const table = us.role === "mentor" ? "mentors" : "mentees";
         const { data: profile } = await supabase
           .from(table)
-          .select("id, statut, onboarding_completed, has_used_free_ai_match, field, interests, main_goal")
+          .select("id, statut, onboarding_completed, has_used_free_ai_match, free_session_used, field, interests, main_goal")
           .eq("email", us.email)
           .single();
 
-        // Mentors who haven't completed onboarding always go back to the questionnaire
-        if (us.role === "mentor" && !justOnboarded && !profile?.onboarding_completed) {
+        // Only redirect to onboarding when we have a valid profile row that
+        // explicitly lacks onboarding_completed — never redirect on a null result
+        // (which could be an RLS block or network error) to prevent redirect loops.
+        if (us.role === "mentor" && !justOnboarded && profile && !profile.onboarding_completed) {
           router.push("/onboarding/mentor");
           return;
         }
@@ -467,6 +494,7 @@ function DashboardContent() {
         if (us.role === "mentee" && profile) {
           setMenteeDbId(profile.id);
           setHasUsedFreeMatch(profile.has_used_free_ai_match ?? false);
+          setFreeSessionUsed(profile.free_session_used ?? false);
           setMenteeProfile({
             field: profile.field ?? null,
             interests: profile.interests ?? null,
@@ -492,12 +520,16 @@ function DashboardContent() {
           }
         }
 
+        if (us.role === "mentor" && profile?.id) {
+          setMentorDbId(profile.id);
+        }
+
         // Load their sessions using the DB row id
         if (profile?.id) {
           const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
           const { data: rows } = await supabase
             .from("connexions")
-            .select("id, date, statut, mentors(nom, email, specialite), mentees(nom, email, objectif)")
+            .select("id, date, statut, meet_link, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
             .eq(idField, profile.id)
             .order("date", { ascending: true });
 
@@ -663,11 +695,132 @@ function DashboardContent() {
 
   // Derived data
   const upcoming = connexions.filter(
-    (c) => ["pending", "active"].includes(c.statut) && new Date(c.date) >= new Date()
+    (c) => ["pending", "active", "rescheduled"].includes(c.statut) && new Date(c.date) >= new Date()
   );
   const past = connexions.filter(
     (c) => c.statut === "completed" || (c.statut !== "cancelled" && new Date(c.date) < new Date())
   );
+
+  // Mentor-derived data
+  const mentorPending     = connexions.filter(c => c.statut === "pending");
+  const mentorRescheduled = connexions.filter(c => c.statut === "rescheduled");
+  const mentorUpcoming = connexions.filter(
+    c => c.statut === "active" && new Date(c.date) >= new Date()
+  );
+  const mentorPast = connexions.filter(
+    c => c.statut === "completed" || (["active", "pending"].includes(c.statut) && new Date(c.date) < new Date())
+  );
+  const myMentees = Array.from(
+    new Map(
+      connexions
+        .filter(c => ["active", "completed"].includes(c.statut) && c.mentees?.id)
+        .map(c => [c.mentees!.id, c.mentees!])
+    ).values()
+  );
+
+  async function handleAcceptSession(connId: string) {
+    setActionLoading(connId);
+    try {
+      const res = await fetch("/api/sessions/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      const json = (await res.json()) as { success?: boolean; meetLink?: string | null; error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      setConnexions(prev => prev.map(c =>
+        c.id === connId ? { ...c, statut: "active" as const, meet_link: json.meetLink ?? null } : c
+      ));
+    } catch (err) {
+      console.error("[accept]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleDeclineSession(connId: string) {
+    setActionLoading(connId);
+    try {
+      const res = await fetch("/api/sessions/decline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+      setConnexions(prev => prev.filter(c => c.id !== connId));
+    } catch (err) {
+      console.error("[decline]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleProposeTime() {
+    if (!proposeModal || !proposeDate || !proposeTime) return;
+    setProposeLoading(true);
+    try {
+      const res = await fetch("/api/sessions/modify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: proposeModal, newDate: proposeDate, newTime: proposeTime }),
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+      setConnexions(prev => prev.map(c =>
+        c.id === proposeModal ? { ...c, statut: "rescheduled" as const } : c
+      ));
+      setProposeModal(null);
+    } catch (err) {
+      console.error("[propose-time]", err);
+    } finally {
+      setProposeLoading(false);
+    }
+  }
+
+  async function handleAcceptRetime(connId: string) {
+    setActionLoading(connId);
+    try {
+      const res = await fetch("/api/sessions/accept-retime", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      const json = (await res.json()) as { success?: boolean; meetLink?: string | null; error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      setConnexions(prev => prev.map(c =>
+        c.id === connId ? { ...c, statut: "active" as const, meet_link: json.meetLink ?? null } : c
+      ));
+    } catch (err) {
+      console.error("[accept-retime]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleDeclineRetime(connId: string) {
+    setActionLoading(connId);
+    try {
+      const res = await fetch("/api/sessions/decline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+      setConnexions(prev => prev.filter(c => c.id !== connId));
+    } catch (err) {
+      console.error("[decline-retime]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
 
   const firstName = (user?.nom ?? "").split(" ")[0] || "there";
   const userInitials = initials(user?.nom ?? "?");
@@ -682,6 +835,53 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-[#0D0A1A]">
+
+      {/* ── Propose new time modal ─────────────────────────────────────── */}
+      {proposeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] p-6"
+            style={{ background: "#1a1530" }}>
+            <h2 className="font-bold text-white text-lg mb-1">Propose a new time</h2>
+            <p className="text-white/40 text-sm mb-5">The mentee will receive an email to accept or decline.</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-white/50 mb-1.5">Date</label>
+                <input
+                  type="date"
+                  value={proposeDate}
+                  onChange={e => setProposeDate(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#7C3AED]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-white/50 mb-1.5">Time</label>
+                <input
+                  type="time"
+                  value={proposeTime}
+                  onChange={e => setProposeTime(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#7C3AED]"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setProposeModal(null)}
+                className="flex-1 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleProposeTime}
+                disabled={!proposeDate || !proposeTime || proposeLoading}
+                className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {proposeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Send proposal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-6">
 
@@ -768,7 +968,9 @@ function DashboardContent() {
                   >
                     <div className="w-2 h-2 rounded-full bg-[#A78BFA] flex-shrink-0" />
                     <span className="text-[#C4B5FD] text-sm font-medium">
-                      {t("dash_profile_complete")}
+                      {user?.role === "mentor"
+                        ? "Profile complete! Mentees can now find and book sessions with you."
+                        : t("dash_profile_complete")}
                     </span>
                   </div>
                 )}
@@ -786,19 +988,24 @@ function DashboardContent() {
                   </div>
                 )}
 
-                {/* Stats */}
+                {/* Stats — mentor vs mentee */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { label: t("dash_stat_booked"),   value: connexions.length,  icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
-                    { label: t("dash_stat_done"),      value: past.length,         icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
-                    { label: t("dash_stat_upcoming"),  value: upcoming.length,     icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                    { label: t("dash_stat_ai"),        value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "0" : "1", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
-                  ].map((stat) => (
+                  {(user?.role === "mentor"
+                    ? [
+                        { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
+                        { label: t("dash_stat_done"),       value: mentorPast.length,    icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
+                        { label: t("dash_stat_upcoming"),   value: mentorUpcoming.length, icon: Clock,        accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
+                        { label: "My Mentees",              value: myMentees.length,     icon: Users,         accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                      ]
+                    : [
+                        { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
+                        { label: t("dash_stat_done"),       value: past.length,          icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
+                        { label: t("dash_stat_upcoming"),   value: upcoming.length,      icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
+                        { label: t("dash_stat_ai"),         value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "1" : "0", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                      ]
+                  ).map((stat) => (
                     <Card key={stat.label} className="p-5">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                        style={{ background: stat.accent }}
-                      >
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: stat.accent }}>
                         <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
                       </div>
                       <div className="text-2xl font-extrabold text-white">{stat.value}</div>
@@ -807,99 +1014,205 @@ function DashboardContent() {
                   ))}
                 </div>
 
-                {/* Next session or empty state */}
-                {upcoming.length > 0 ? (
-                  <Card className="p-6">
-                    <div className="flex justify-between items-center mb-5">
-                      <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
-                      <button
-                        onClick={() => setTab("sessions")}
-                        className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors"
-                      >
-                        {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                    {(() => {
-                      const c = upcoming[0];
-                      const other = user?.role === "mentor" ? c.mentees : c.mentors;
-                      const otherNom = other?.nom ?? ", ";
-                      return (
-                        <div className="flex items-center gap-4">
-                          <div
-                            className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                            style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-                          >
-                            {initials(otherNom)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-white text-sm">{otherNom}</div>
-                            <div className="text-xs text-white/35 mt-0.5">
-                              {user?.role === "mentor"
-                                ? c.mentees?.objectif ?? t("dash_role_mentee")
-                                : c.mentors?.specialite ?? t("dash_role_mentor")}
+                {/* ── Mentor overview: pending requests + next session ─────── */}
+                {user?.role === "mentor" && (
+                  <>
+                    {/* Pending requests */}
+                    {mentorPending.length > 0 && (
+                      <Card className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">Pending Requests</h2>
+                          <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full">
+                            {mentorPending.length} new
+                          </span>
+                        </div>
+                        <div className="divide-y divide-white/[0.06]">
+                          {mentorPending.map(c => (
+                            <div key={c.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                {initials(c.mentees?.nom ?? "?")}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                                <div className="text-xs text-white/40 mt-0.5">
+                                  {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} {fmtTime(c.date, lang)}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button onClick={() => handleAcceptSession(c.id)} disabled={actionLoading === c.id}
+                                  className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                                  {actionLoading === c.id
+                                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    : <CheckCircle className="w-3.5 h-3.5" />
+                                  } Accept
+                                </button>
+                                <button onClick={() => handleDeclineSession(c.id)} disabled={actionLoading === c.id}
+                                  className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                                  {actionLoading === c.id
+                                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    : <XCircle className="w-3.5 h-3.5" />
+                                  } Decline
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="text-right flex-shrink-0 hidden sm:block">
-                            <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
-                            <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
-                          </div>
-                          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
-                            <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Next upcoming session */}
+                    {mentorUpcoming.length > 0 ? (
+                      <Card className="p-6">
+                        <div className="flex justify-between items-center mb-5">
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
+                          <button onClick={() => setTab("sessions")}
+                            className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors">
+                            {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
                           </button>
                         </div>
-                      );
-                    })()}
-                  </Card>
-                ) : (
-                  <EmptyState
-                    icon={CalendarCheck}
-                    title={t("dash_no_upcoming")}
-                    desc={t("dash_no_upcoming_desc")}
-                    action={
-                      <Link
-                        href="/explore"
-                        className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                      >
-                        {t("dash_explore_mentors")}
-                      </Link>
-                    }
-                  />
+                        {(() => {
+                          const c = mentorUpcoming[0];
+                          return (
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                {initials(c.mentees?.nom ?? "?")}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                              </div>
+                              <div className="text-right flex-shrink-0 hidden sm:block">
+                                <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
+                              </div>
+                              <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </Card>
+                    ) : mentorPending.length === 0 && (
+                      <EmptyState
+                        icon={CalendarCheck}
+                        title="No upcoming sessions"
+                        desc="Your schedule is clear. Once a mentee books a session it will appear here."
+                      />
+                    )}
+                  </>
                 )}
 
-                {/* Bottom banner, freemium AI match or upgrade */}
-                {user?.role === "mentee" && user?.plan === "free" && (
-                  <div
-                    className="rounded-2xl p-6 border border-[#7C3AED]/30"
-                    style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}
-                  >
-                    {!hasUsedFreeMatch ? (
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
-                          <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
+                {/* ── Mentee overview: next session + freemium banner ──────── */}
+                {user?.role !== "mentor" && (
+                  <>
+                    {upcoming.length > 0 ? (
+                      <Card className="p-6">
+                        <div className="flex justify-between items-center mb-5">
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_next_session")}</h2>
+                          <button onClick={() => setTab("sessions")}
+                            className="text-xs text-[#7C3AED] hover:text-[#A78BFA] flex items-center gap-1 transition-colors">
+                            {t("dash_view_all")} <ChevronRight className="w-3 h-3" />
+                          </button>
                         </div>
-                        <button
-                          onClick={handleStartMatching}
-                          className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
-                        >
-                          {t("dash_try_now")}
-                        </button>
-                      </div>
+                        {(() => {
+                          const c = upcoming[0];
+                          const other = c.mentors;
+                          const otherNom = other?.nom ?? ", ";
+                          return (
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                {initials(otherNom)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-white text-sm">{otherNom}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{c.mentors?.specialite ?? t("dash_role_mentor")}</div>
+                              </div>
+                              <div className="text-right flex-shrink-0 hidden sm:block">
+                                <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
+                              </div>
+                              <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                                <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </Card>
                     ) : (
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <EmptyState
+                        icon={CalendarCheck}
+                        title={t("dash_no_upcoming")}
+                        desc={t("dash_no_upcoming_desc")}
+                        action={
+                          <Link href="/explore"
+                            className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                            {t("dash_explore_mentors")}
+                          </Link>
+                        }
+                      />
+                    )}
+
+                    {/* Trial-over banner */}
+                    {hasUsedFreeMatch && freeSessionUsed && user?.plan === "free" && (
+                      <div
+                        className="rounded-2xl p-5 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        style={{ background: "rgba(245,158,11,0.06)" }}
+                      >
                         <div>
-                          <div className="font-bold text-white mb-1">{t("dash_unlock_ai")}</div>
-                          <div className="text-white/45 text-sm">{t("dash_unlock_ai_desc")}</div>
+                          <p className="text-white font-semibold mb-0.5">Your free trial is over.</p>
+                          <p className="text-white/45 text-sm">
+                            Subscribe to continue booking sessions and using AI matching.
+                          </p>
                         </div>
                         <Link
-                          href="/pricing"
-                          className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                          href="/subscribe"
+                          className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                         >
-                          {t("dash_upgrade")}
+                          Subscribe →
                         </Link>
                       </div>
                     )}
-                  </div>
+
+                    {/* Free discovery session banner */}
+                    {!freeSessionUsed && (
+                      <div
+                        className="rounded-2xl p-5 border border-emerald-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        style={{ background: "rgba(16,185,129,0.06)" }}
+                      >
+                        <div>
+                          <p className="text-white font-semibold mb-0.5">🎁 You have 1 free discovery session!</p>
+                          <p className="text-white/45 text-sm">
+                            Book your first session with any mentor, completely free, no subscription needed.
+                          </p>
+                        </div>
+                        <Link
+                          href="/explore"
+                          className="flex-shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+                        >
+                          Find a mentor →
+                        </Link>
+                      </div>
+                    )}
+
+                    {user?.plan === "free" && !hasUsedFreeMatch && (
+                      <div className="rounded-2xl p-6 border border-[#7C3AED]/30"
+                        style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div>
+                            <div className="font-bold text-white mb-1">{t("dash_free_ai_title")}</div>
+                            <div className="text-white/45 text-sm">{t("dash_free_ai_desc")}</div>
+                          </div>
+                          <button onClick={handleStartMatching}
+                            className="flex-shrink-0 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+                            {t("dash_try_now")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -907,63 +1220,259 @@ function DashboardContent() {
             {/* MY SESSIONS */}
             {tab === "sessions" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_sessions_title")}</h1>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                  {user?.role === "mentor" ? "My Sessions" : t("dash_sessions_title")}
+                </h1>
 
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
-                  {upcoming.length > 0 ? (
-                    <div className="space-y-3">
-                      {upcoming.map((c) => (
-                        <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
+                {/* ── Mentor 3-tab sessions view ──────────────────────────── */}
+                {user?.role === "mentor" ? (
+                  <>
+                    {/* Tab bar */}
+                    <div className="flex gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit">
+                      {(["pending", "upcoming", "past"] as const).map((st) => (
+                        <button key={st} onClick={() => setMentorSessionTab(st)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            mentorSessionTab === st
+                              ? "bg-[#7C3AED] text-white"
+                              : "text-white/45 hover:text-white"
+                          }`}>
+                          {st === "pending"
+                            ? `Pending requests${mentorPending.length > 0 ? ` (${mentorPending.length})` : ""}`
+                            : st === "upcoming" ? "Upcoming" : "Past sessions"}
+                        </button>
                       ))}
                     </div>
-                  ) : (
-                    <EmptyState
-                      icon={CalendarCheck}
-                      title={t("dash_no_sessions")}
-                      desc={t("dash_no_sessions_desc")}
-                      action={
-                        <Link
-                          href="/explore"
-                          className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                        >
-                          <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
-                        </Link>
-                      }
-                    />
-                  )}
-                </div>
 
-                {past.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_past_label")}</p>
-                    <div className="space-y-3">
-                      {past.map((c) => (
-                        <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />
-                      ))}
+                    {/* Pending requests + rescheduled awaiting mentee */}
+                    {mentorSessionTab === "pending" && (
+                      mentorPending.length > 0 || mentorRescheduled.length > 0 ? (
+                        <div className="space-y-6">
+                          {/* Awaiting mentee acceptance (rescheduled) */}
+                          {mentorRescheduled.length > 0 && (
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">Awaiting mentee response</p>
+                              <div className="space-y-3">
+                                {mentorRescheduled.map(c => (
+                                  <Card key={c.id} className="p-5">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                        style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                        {initials(c.mentees?.nom ?? "?")}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</span>
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                            style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
+                                            New time proposed
+                                          </span>
+                                        </div>
+                                        <div className="text-xs text-white/40 mt-0.5">
+                                          {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Card>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* New requests awaiting mentor action */}
+                          {mentorPending.length > 0 && (
+                            <div>
+                              {mentorRescheduled.length > 0 && <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">New requests</p>}
+                              <div className="space-y-3">
+                          {mentorPending.map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-start gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                  {initials(c.mentees?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-white">{c.mentees?.nom ?? "Mentee"}</div>
+                                  <div className="text-xs text-white/40 mt-0.5 mb-3">
+                                    {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                  </div>
+                                  <div className="flex gap-2 flex-wrap">
+                                    <button onClick={() => handleAcceptSession(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                      Accept
+                                    </button>
+                                    <button onClick={() => handleDeclineSession(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                                      Decline
+                                    </button>
+                                    <button
+                                      onClick={() => { setProposeDate(""); setProposeTime(""); setProposeModal(c.id); }}
+                                      className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+                                      <CalendarRange className="w-3.5 h-3.5" /> Propose new time
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <EmptyState icon={CalendarCheck} title="No pending requests" desc="New session requests from mentees will appear here." />
+                      )
+                    )}
+
+                    {/* Upcoming confirmed */}
+                    {mentorSessionTab === "upcoming" && (
+                      mentorUpcoming.length > 0 ? (
+                        <div className="space-y-3">
+                          {mentorUpcoming.map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                  {initials(c.mentees?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-white">{c.mentees?.nom ?? "Mentee"}</div>
+                                  <div className="text-xs text-white/40 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                </div>
+                                <div className="text-right flex-shrink-0 hidden sm:block mr-4">
+                                  <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
+                                  <div className="text-xs text-white/35 mt-0.5">{fmtTime(c.date, lang)}</div>
+                                </div>
+                                <div className="flex gap-2 flex-shrink-0">
+                                  {c.meet_link ? (
+                                    <a
+                                      href={c.meet_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                                    >
+                                      <Video className="w-3.5 h-3.5" /> Join session
+                                    </a>
+                                  ) : (
+                                    <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+                                      <Video className="w-3.5 h-3.5" /> Join
+                                    </button>
+                                  )}
+                                  <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+                                    Reschedule
+                                  </button>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState icon={Clock} title="No upcoming sessions" desc="Confirmed sessions will appear here once a request is accepted." />
+                      )
+                    )}
+
+                    {/* Past sessions */}
+                    {mentorSessionTab === "past" && (
+                      mentorPast.length > 0 ? (
+                        <div className="space-y-3">
+                          {mentorPast.map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "rgba(255,255,255,0.06)" }}>
+                                  {initials(c.mentees?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-white/70">{c.mentees?.nom ?? "Mentee"}</div>
+                                  <div className="text-xs text-white/30 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <div className="text-sm font-medium text-white/50">{fmtDate(c.date, t, lang)}</div>
+                                  <div className="text-xs text-white/25 mt-0.5">{fmtTime(c.date, lang)}</div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState icon={Video} title="No past sessions yet" desc="Completed sessions will show here." />
+                      )
+                    )}
+                  </>
+                ) : (
+                  /* ── Mentee sessions view ───────────────────────────────── */
+                  <>
+                    {/* Rescheduled — awaiting mentee response */}
+                    {upcoming.filter(c => c.statut === "rescheduled").length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">New time proposed</p>
+                        <div className="space-y-3">
+                          {upcoming.filter(c => c.statut === "rescheduled").map(c => (
+                            <Card key={c.id} className="p-5">
+                              <div className="flex items-start gap-4">
+                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                  {initials(c.mentors?.nom ?? "?")}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="font-semibold text-white text-sm">{c.mentors?.nom ?? "Mentor"}</span>
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                      style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
+                                      New time proposed
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-white/40 mt-0.5 mb-3">
+                                    {c.mentors?.specialite ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button onClick={() => handleAcceptRetime(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                      Accept new time
+                                    </button>
+                                    <button onClick={() => handleDeclineRetime(c.id)} disabled={actionLoading === c.id}
+                                      className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                                      Decline
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
+                      {upcoming.filter(c => c.statut !== "rescheduled").length > 0 ? (
+                        <div className="space-y-3">
+                          {upcoming.filter(c => c.statut !== "rescheduled").map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
+                        </div>
+                      ) : (
+                        <EmptyState icon={CalendarCheck} title={t("dash_no_sessions")} desc={t("dash_no_sessions_desc")}
+                          action={
+                            <Link href="/explore"
+                              className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                              <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
+                            </Link>
+                          }
+                        />
+                      )}
                     </div>
-                  </div>
+                    {past.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_past_label")}</p>
+                        <div className="space-y-3">
+                          {past.map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
-              </div>
-            )}
-
-            {/* SAVED MENTORS */}
-            {tab === "saved" && (
-              <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_saved_title")}</h1>
-                <EmptyState
-                  icon={Heart}
-                  title={t("dash_no_saved")}
-                  desc={t("dash_no_saved_desc")}
-                  action={
-                    <Link
-                      href="/explore"
-                      className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm"
-                    >
-                      <BookOpen className="w-4 h-4" /> {t("dash_browse_mentors")}
-                    </Link>
-                  }
-                />
               </div>
             )}
 
@@ -1263,9 +1772,285 @@ function DashboardContent() {
               </div>
             )}
 
+            {/* MY MENTEES */}
+            {tab === "mentees" && user?.role === "mentor" && (
+              <div className="space-y-6">
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">My Mentees</h1>
+                {myMentees.length > 0 ? (
+                  <div className="space-y-3">
+                    {myMentees.map(mentee => {
+                      const sessionsDone = connexions.filter(
+                        c => c.mentees?.id === mentee.id && c.statut === "completed"
+                      ).length;
+                      return (
+                        <Card key={mentee.id} className="p-5">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0"
+                              style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                              {initials(mentee.nom)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-white">{mentee.nom}</div>
+                              <div className="text-xs text-white/40 mt-0.5">{mentee.objectif ?? "Mentoring"}</div>
+                            </div>
+                            <div className="text-center flex-shrink-0 mr-4 hidden sm:block">
+                              <div className="text-xl font-extrabold text-white">{sessionsDone}</div>
+                              <div className="text-xs text-white/35">sessions done</div>
+                            </div>
+                            <button className="flex items-center gap-1.5 border border-white/10 hover:border-[#7C3AED]/50 text-white/60 hover:text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+                              View profile
+                            </button>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={Users}
+                    title="No mentees yet"
+                    desc="Mentees who have active or completed sessions with you will appear here."
+                  />
+                )}
+              </div>
+            )}
+
+            {/* CALENDAR */}
+            {tab === "calendar" && user?.role === "mentor" && (
+              <div className="space-y-6">
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">Calendar</h1>
+                {mentorDbId && <AvailabilitySelector mentorId={mentorDbId} variant="dark" />}
+                <MentorCalendar connexions={connexions} userEmail={user?.email ?? null} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
+              </div>
+            )}
+
           </main>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Mentor Calendar ───────────────────────────────────────────────────────────
+
+// Convert JS getDay() (0=Sun) to our day_of_week (0=Mon)
+function jsDayToAvailDay(jsDay: number): number {
+  return (jsDay + 6) % 7;
+}
+
+function sessionDotColor(c: Connexion): string {
+  const now = new Date();
+  if (c.statut === "pending") return "#F472B6";
+  if (c.statut === "active" && new Date(c.date) >= now) return "#4ADE80";
+  if (c.statut === "completed" || c.statut === "cancelled") return "#60A5FA";
+  if (c.statut === "active" && new Date(c.date) < now) return "#60A5FA"; // past active
+  return "#A78BFA";
+}
+
+function MentorCalendar({
+  connexions,
+  userEmail,
+  fmtDate,
+  fmtTime,
+  t,
+  lang,
+}: {
+  connexions: Connexion[];
+  userEmail: string | null;
+  fmtDate: (iso: string, t: (k: string) => string, lang: string) => string;
+  fmtTime: (iso: string, lang: string) => string;
+  t: (k: string) => string;
+  lang: string;
+}) {
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [availableDays, setAvailableDays] = useState<Set<number>>(new Set());
+
+  const today = new Date();
+  const [viewYear, setViewYear]   = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  // Fetch which day_of_week values have availability slots (resolve mentor id from email)
+  useEffect(() => {
+    if (!userEmail) return;
+    (async () => {
+      try {
+        const { data: mentorRow } = await supabase
+          .from("mentors")
+          .select("id")
+          .eq("email", userEmail)
+          .single();
+        if (!mentorRow?.id) return;
+        const { data: slots } = await supabase
+          .from("mentor_availability")
+          .select("day_of_week")
+          .eq("mentor_id", mentorRow.id);
+        setAvailableDays(new Set((slots ?? []).map(s => s.day_of_week as number)));
+      } catch {
+        // show calendar without availability tint if fetch fails
+      }
+    })();
+  }, [userEmail]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const lastDay  = new Date(viewYear, viewMonth + 1, 0);
+  const startPad = firstDay.getDay(); // 0=Sun
+
+  const sessionsByDay = new Map<string, Connexion[]>();
+  connexions.forEach(c => {
+    const d = new Date(c.date);
+    if (d.getFullYear() === viewYear && d.getMonth() === viewMonth) {
+      const key = d.toDateString();
+      sessionsByDay.set(key, [...(sessionsByDay.get(key) ?? []), c]);
+    }
+  });
+
+  const monthLabel = new Date(viewYear, viewMonth).toLocaleString(
+    lang === "fr" ? "fr-FR" : lang === "es" ? "es-ES" : "en-US",
+    { month: "long", year: "numeric" }
+  );
+
+  const dayNames = lang === "fr"
+    ? ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const days: (number | null)[] = [
+    ...Array(startPad).fill(null),
+    ...Array.from({ length: lastDay.getDate() }, (_, i) => i + 1),
+  ];
+
+  const selectedSessions = selectedDay
+    ? (sessionsByDay.get(new Date(viewYear, viewMonth, Number(selectedDay)).toDateString()) ?? [])
+    : [];
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-6">
+        {/* Month navigation */}
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={() => {
+            const d = new Date(viewYear, viewMonth - 1);
+            setViewYear(d.getFullYear()); setViewMonth(d.getMonth()); setSelectedDay(null);
+          }} className="w-8 h-8 rounded-lg border border-white/10 hover:border-white/20 flex items-center justify-center text-white/50 hover:text-white transition-colors">
+            ‹
+          </button>
+          <span className="font-bold text-white capitalize">{monthLabel}</span>
+          <button onClick={() => {
+            const d = new Date(viewYear, viewMonth + 1);
+            setViewYear(d.getFullYear()); setViewMonth(d.getMonth()); setSelectedDay(null);
+          }} className="w-8 h-8 rounded-lg border border-white/10 hover:border-white/20 flex items-center justify-center text-white/50 hover:text-white transition-colors">
+            ›
+          </button>
+        </div>
+
+        {/* Day names */}
+        <div className="grid grid-cols-7 mb-2">
+          {dayNames.map(d => (
+            <div key={d} className="text-center text-xs font-semibold text-white/25 py-1">{d}</div>
+          ))}
+        </div>
+
+        {/* Day cells */}
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day, idx) => {
+            if (day === null) return <div key={`pad-${idx}`} />;
+            const dateObj = new Date(viewYear, viewMonth, day);
+            const key = dateObj.toDateString();
+            const sessions = sessionsByDay.get(key) ?? [];
+            const ourDay = jsDayToAvailDay(dateObj.getDay());
+            const hasAvail = availableDays.has(ourDay);
+            const isToday = today.getDate() === day && today.getMonth() === viewMonth && today.getFullYear() === viewYear;
+            const isSelected = selectedDay === String(day);
+
+            // Background: selected > availability tint (+ session colour overlay)
+            let bgStyle: React.CSSProperties | undefined;
+            if (!isSelected) {
+              if (hasAvail && sessions.length > 0) {
+                bgStyle = { background: "rgba(196,181,253,0.18)" };
+              } else if (hasAvail) {
+                bgStyle = { background: "rgba(196,181,253,0.12)" };
+              } else if (sessions.length > 0) {
+                bgStyle = { background: "rgba(124,58,237,0.12)" };
+              }
+            }
+
+            // Session dots: up to 3, colored by status
+            const dots = sessions.slice(0, 3).map(c => sessionDotColor(c));
+
+            return (
+              <button key={day} onClick={() => setSelectedDay(isSelected ? null : String(day))}
+                style={bgStyle}
+                className={`relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-colors ${
+                  isSelected
+                    ? "bg-[#7C3AED] text-white"
+                    : isToday
+                      ? "border border-[#7C3AED]/50 text-[#A78BFA]"
+                      : sessions.length > 0 || hasAvail
+                        ? "text-white hover:opacity-80"
+                        : "text-white/40 hover:text-white hover:bg-white/[0.05]"
+                }`}>
+                {day}
+                {dots.length > 0 && !isSelected && (
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                    {dots.map((color, i) => (
+                      <span key={i} className="w-1 h-1 rounded-full" style={{ background: color }} />
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-5 pt-4 border-t border-white/[0.06]">
+          {[
+            { color: "#C4B5FD", label: "Available slots" },
+            { color: "#4ADE80", label: "Confirmed" },
+            { color: "#F472B6", label: "Pending" },
+            { color: "#60A5FA", label: "Completed" },
+          ].map(({ color, label }) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
+              <span className="text-xs text-white/35">{label}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Session details for selected day */}
+      {selectedDay && (
+        <Card className="p-6">
+          <h3 className="font-bold text-white text-sm uppercase tracking-[0.12em] mb-4">
+            {fmtDate(new Date(viewYear, viewMonth, Number(selectedDay)).toISOString(), t, lang)}
+          </h3>
+          {selectedSessions.length > 0 ? (
+            <div className="divide-y divide-white/[0.06]">
+              {selectedSessions.map(c => {
+                const dotColor = sessionDotColor(c);
+                return (
+                  <div key={c.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                      {c.mentees?.nom?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
+                      <div className="text-xs text-white/40 mt-0.5">{fmtTime(c.date, lang)}</div>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 flex items-center gap-1.5"
+                      style={{ background: `${dotColor}20`, color: dotColor }}>
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dotColor }} />
+                      {c.statut}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-white/30 text-sm">No sessions on this day.</p>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

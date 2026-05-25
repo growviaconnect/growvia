@@ -51,6 +51,7 @@ export default function ManifestoSection() {
   const isMobile = useIsMobile();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const stickyRef    = useRef<HTMLDivElement>(null);
   const phraseRefs   = useRef<(HTMLParagraphElement | null)[]>([]);
   const dotRefs      = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef       = useRef<number | null>(null);
@@ -75,6 +76,12 @@ export default function ManifestoSection() {
       if (!containerRef.current) return;
       const rect     = containerRef.current.getBoundingClientRect();
       const progress = -rect.top / window.innerHeight; // viewport-height units scrolled in
+
+      // ── Panel fade-in as section enters viewport ───────────────────────────────────
+      // progress goes from −FADE_IN (section top at 30% below viewport top) to 0 (at top)
+      const FADE_IN = 0.3;
+      const panelO = progress < -FADE_IN ? 0 : progress < 0 ? (progress + FADE_IN) / FADE_IN : 1;
+      if (stickyRef.current) stickyRef.current.style.opacity = String(Math.min(1, panelO).toFixed(3));
 
       // ── Phrases: continuous imperative updates (no React state, no CSS transition) ──
       phraseRefs.current.forEach((el, i) => {
@@ -155,7 +162,7 @@ export default function ManifestoSection() {
   /* ── Desktop: 500vh scroll trap with sticky panel ─────────────────── */
   return (
     <div ref={containerRef} style={{ height: "500vh" }}>
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div ref={stickyRef} className="sticky top-0 h-screen overflow-hidden" style={{ opacity: 0 }}>
 
         {/* Background */}
         <img

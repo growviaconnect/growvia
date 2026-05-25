@@ -1,0 +1,676 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft, ChevronLeft, ChevronRight, ChevronDown,
+  Clock, Globe, Loader2, Send,
+} from "lucide-react";
+import { supabase, type Mentor } from "@/lib/supabase";
+import { getUserSession } from "@/lib/session";
+
+// ── Day / time constants ──────────────────────────────────────────────────────
+
+const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAY_NAMES_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const PERIOD_LABELS: Record<string, string> = {
+  morning:   "Morning",
+  afternoon: "Afternoon",
+  evening:   "Evening",
+};
+const PERIOD_HOURS: Record<string, string> = {
+  morning:   "8h – 12h",
+  afternoon: "12h – 18h",
+  evening:   "18h – 22h",
+};
+const PERIOD_SLOTS: Record<string, string[]> = {
+  morning:   ["08:00", "09:00", "10:00", "11:00"],
+  afternoon: ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
+  evening:   ["18:00", "19:00", "20:00", "21:00"],
+};
+const PERIOD_ORDER = ["morning", "afternoon", "evening"];
+
+const DURATIONS: { label: string; minutes: number; multiplier: number }[] = [
+  { label: "30 min",  minutes: 30, multiplier: 0.5  },
+  { label: "45 min",  minutes: 45, multiplier: 0.75 },
+  { label: "1h",      minutes: 60, multiplier: 1.0  },
+  { label: "1h30",    minutes: 90, multiplier: 1.5  },
+];
+
+/** Round price to nearest 0.5€, with an optional floor. */
+function roundHalf(n: number, floor = 0): number {
+  return Math.max(floor, Math.round(n * 2) / 2);
+}
+
+/** Convert JS Date.getDay() (0=Sun) to our table convention (0=Mon). */
+function jsDayToAvail(jsDay: number): number {
+  return (jsDay + 6) % 7;
+}
+
+function initials(name: string) {
+  return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
+function fmt2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function toDateKey(d: Date) {
+  return `${d.getFullYear()}-${fmt2(d.getMonth() + 1)}-${fmt2(d.getDate())}`;
+}
+function formatDisplayDate(d: Date) {
+  return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
+// ── Card wrapper ──────────────────────────────────────────────────────────────
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-2xl border border-white/[0.08] ${className}`}
+      style={{ background: "#13111F" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/35 mb-5">
+      {children}
+    </p>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+
+export default function BookingPage() {
+  const params   = useParams();
+  const router   = useRouter();
+  const mentorId = params?.mentorId as string;
+
+  // ── Data state
+  const [mentor,   setMentor]   = useState<Mentor | null>(null);
+  const [avail,    setAvail]    = useState<{ day_of_week: number; period: string }[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  // ── Calendar state
+  const today      = useMemo(() => new Date(), []);
+  const [calYear,  setCalYear]  = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [selDate,  setSelDate]  = useState<Date | null>(null);
+  const [selTime,  setSelTime]  = useState<string | null>(null);
+
+  // ── Form state
+  const [topic,       setTopic]      = useState("");
+  const [language,    setLanguage]   = useState("");
+  const [langOpen,    setLangOpen]   = useState(false);
+  const [duration,    setDuration]   = useState(60);
+
+  // ── Submission state
+  const [submitting, setSubmitting] = useState(false);
+  const [submitErr,  setSubmitErr]  = useState<string | null>(null);
+
+  // ── Auth + subscription gate
+  const session = getUserSession();
+  const [subChecked,      setSubChecked]      = useState(false);
+  const [hasSub,          setHasSub]          = useState(false);
+  const [freeSessionUsed, setFreeSessionUsed] = useState(true); // pessimistic default
+
+  useEffect(() => {
+    if (!mentorId) return;
+
+    Promise.all([
+      supabase.from("mentors").select("*").eq("id", mentorId).single(),
+      supabase.from("mentor_availability").select("day_of_week, period").eq("mentor_id", mentorId),
+    ]).then(([{ data: m, error: mErr }, { data: av }]) => {
+      if (mErr || !m) { setNotFound(true); setLoading(false); return; }
+      setMentor(m as Mentor);
+      setAvail(av ?? []);
+      const mentorLangs = (m as Mentor).langues ?? (m as Mentor).languages ?? [];
+      setLanguage(mentorLangs[0] ?? "");
+      setLoading(false);
+    });
+  }, [mentorId]);
+
+  // ── Subscription + free-session gate
+  useEffect(() => {
+    if (!session?.email || session.role !== "mentee") { setSubChecked(true); return; }
+    supabase
+      .from("mentees").select("id, free_session_used").eq("email", session.email).single()
+      .then(({ data: menteeRow }) => {
+        if (!menteeRow) { setSubChecked(true); return; }
+        const row = menteeRow as { id: string; free_session_used: boolean };
+        setFreeSessionUsed(row.free_session_used);
+        supabase
+          .from("mentee_subscriptions")
+          .select("id")
+          .eq("mentee_id", row.id)
+          .eq("status", "active")
+          .limit(1)
+          .then(({ data }) => {
+            setHasSub((data?.length ?? 0) > 0);
+            setSubChecked(true);
+          });
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.email]);
+
+  // Available day_of_week set
+  const availDaySet = useMemo(() => new Set(avail.map(a => a.day_of_week)), [avail]);
+
+  // Periods available for a specific day_of_week value
+  function periodsForDay(availDay: number): string[] {
+    return avail.filter(a => a.day_of_week === availDay).map(a => a.period);
+  }
+
+  // ── Calendar helpers
+  const firstOfMonth = new Date(calYear, calMonth, 1);
+  const lastOfMonth  = new Date(calYear, calMonth + 1, 0);
+  const startPad     = firstOfMonth.getDay(); // 0=Sun — calendar starts on Sun
+  const monthLabel   = firstOfMonth.toLocaleString("en-US", { month: "long", year: "numeric" });
+
+  const calDays: (number | null)[] = [
+    ...Array(startPad).fill(null),
+    ...Array.from({ length: lastOfMonth.getDate() }, (_, i) => i + 1),
+  ];
+
+  function isDayAvailable(day: number) {
+    const d = new Date(calYear, calMonth, day);
+    if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) return false;
+    return availDaySet.has(jsDayToAvail(d.getDay()));
+  }
+
+  function handleDayClick(day: number) {
+    if (!isDayAvailable(day)) return;
+    const d = new Date(calYear, calMonth, day);
+    setSelDate(d);
+    setSelTime(null);
+  }
+
+  function prevMonth() {
+    const d = new Date(calYear, calMonth - 1);
+    setCalYear(d.getFullYear()); setCalMonth(d.getMonth());
+  }
+  function nextMonth() {
+    const d = new Date(calYear, calMonth + 1);
+    setCalYear(d.getFullYear()); setCalMonth(d.getMonth());
+  }
+
+  // Time slots for the selected date
+  const selectedPeriods = selDate ? periodsForDay(jsDayToAvail(selDate.getDay())) : [];
+
+  // ── Submit → create session request (payment charged when mentor accepts)
+  async function handleSubmit() {
+    if (!selDate || !selTime) { setSubmitErr("Please pick a date and time."); return; }
+    if (!session?.email) { router.push(`/auth/register?redirect=/book/${mentorId}`); return; }
+    // Must have either a free session available OR an active subscription
+    if (freeSessionUsed && !hasSub) { router.push("/subscribe"); return; }
+
+    setSubmitting(true);
+    setSubmitErr(null);
+
+    const isFreeSession = !freeSessionUsed && !hasSub;
+
+    try {
+      const res = await fetch("/api/sessions/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mentorId,
+          menteeEmail:     session.email,
+          topic,
+          date:            toDateKey(selDate),
+          time:            selTime,
+          language,
+          durationMinutes: duration,
+          priceCents:      isFreeSession ? 0 : (sessionPrice != null ? Math.round(sessionPrice * 100) : null),
+          isFreeSession,
+        }),
+      });
+      const json = (await res.json()) as { success?: boolean; error?: string };
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      router.push(`/book/${mentorId}/confirmation`);
+    } catch (err) {
+      setSubmitErr(err instanceof Error ? err.message : "Something went wrong");
+      setSubmitting(false);
+    }
+  }
+
+  // ── Render guards
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#7C3AED] animate-spin" />
+      </div>
+    );
+  }
+  if (notFound || !mentor) {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4">
+        <p className="text-white/50 text-sm">Mentor not found.</p>
+        <Link href="/mentors" className="text-[#A78BFA] hover:text-white text-sm transition-colors">
+          ← Back to mentors
+        </Link>
+      </div>
+    );
+  }
+
+  // Gate: block only when free session already used AND no active subscription
+  if (subChecked && freeSessionUsed && !hasSub && session?.role === "mentee") {
+    return (
+      <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-2xl">🚀</p>
+        <p className="text-white font-semibold text-lg">You&apos;ve used your free session!</p>
+        <p className="text-white/40 text-sm max-w-xs">
+          Subscribe to keep growing, from 4.99€/month. Your card is saved and sessions are charged automatically when the mentor confirms.
+        </p>
+        <Link
+          href="/subscribe"
+          className="mt-2 px-6 py-3 rounded-xl text-sm font-bold text-white"
+          style={{ background: "#7C3AED" }}
+        >
+          Choose a plan →
+        </Link>
+      </div>
+    );
+  }
+
+  const price   = mentor.session_price;
+  const canBook = !!selDate && !!selTime;
+
+  // Calculated price based on selected duration (round to nearest 0.5€, min 10€ for 30min)
+  const durMultiplier = DURATIONS.find(d => d.minutes === duration)?.multiplier ?? 1;
+  const sessionPrice  = price != null
+    ? roundHalf(price * durMultiplier, duration === 30 ? 10 : 0)
+    : null;
+  const durLabel = DURATIONS.find(d => d.minutes === duration)?.label ?? "1h";
+
+  // Languages: only what the mentor actually selected (langues column, fall back to languages)
+  const langs = (mentor.langues?.length ? mentor.langues : mentor.languages) ?? [];
+
+  return (
+    <div className="min-h-screen bg-[#0D0A1A]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-24">
+
+        {/* Back nav */}
+        <Link
+          href={`/mentors/${mentorId}`}
+          className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors mb-8"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to profile
+        </Link>
+
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+          {/* ── LEFT COLUMN ────────────────────────────────────────────── */}
+          <div className="flex-1 min-w-0 space-y-5">
+
+            {/* SECTION 1 — Mentor summary */}
+            <Card className="p-6">
+              <SectionTitle>You&apos;re booking with</SectionTitle>
+
+              <div className="flex items-start gap-4 mb-5">
+                {mentor.photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={mentor.photo_url}
+                    alt={mentor.nom}
+                    className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+                  >
+                    {initials(mentor.nom)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl font-extrabold text-white leading-tight">{mentor.nom}</h1>
+                  <p className="text-white/55 text-sm mt-0.5">
+                    {mentor.job_title}
+                    {mentor.company && <span className="text-white/30"> @ {mentor.company}</span>}
+                  </p>
+                  {price != null && (
+                    <div className="mt-3">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/70 px-2.5 py-1 rounded-lg border border-white/10">
+                        {price}€ / session
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {mentor.bio && (
+                <p className="text-white/55 text-sm leading-relaxed mb-5 border-t border-white/[0.06] pt-5">
+                  {mentor.bio}
+                </p>
+              )}
+              {!mentor.bio && mentor.help_with && (
+                <p className="text-white/55 text-sm leading-relaxed mb-5 border-t border-white/[0.06] pt-5">
+                  {mentor.help_with}
+                </p>
+              )}
+
+              {/* Availability schedule */}
+              {avail.length > 0 && (
+                <div className="border-t border-white/[0.06] pt-5">
+                  <p className="text-xs font-semibold text-white/35 uppercase tracking-wider mb-3">
+                    Weekly availability
+                  </p>
+                  <div className="space-y-1.5">
+                    {DAY_NAMES.map((day, idx) => {
+                      const periods = periodsForDay(idx);
+                      if (periods.length === 0) return null;
+                      return (
+                        <div key={day} className="flex items-center gap-3">
+                          <span className="text-xs font-semibold text-white/40 w-8 flex-shrink-0">{day}</span>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {PERIOD_ORDER.filter(p => periods.includes(p)).map(p => (
+                              <span
+                                key={p}
+                                className="text-xs px-2 py-0.5 rounded text-[#A78BFA]"
+                                style={{ background: "rgba(124,58,237,0.12)" }}
+                              >
+                                {PERIOD_LABELS[p]} · {PERIOD_HOURS[p]}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* SECTION 2 — Pick a date */}
+            <Card className="p-6">
+              <SectionTitle>Pick a date</SectionTitle>
+
+              {avail.length === 0 ? (
+                <p className="text-white/40 text-sm">
+                  This mentor hasn&apos;t set their availability yet. Try reaching out directly.
+                </p>
+              ) : (
+                <>
+                  {/* Month nav */}
+                  <div className="flex items-center justify-between mb-5">
+                    <button
+                      onClick={prevMonth}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 hover:border-white/25 text-white/40 hover:text-white transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-sm font-bold text-white capitalize">{monthLabel}</span>
+                    <button
+                      onClick={nextMonth}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 hover:border-white/25 text-white/40 hover:text-white transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Day-of-week headers */}
+                  <div className="grid grid-cols-7 mb-1">
+                    {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
+                      <div key={d} className="text-center text-xs font-semibold text-white/25 py-1">{d}</div>
+                    ))}
+                  </div>
+
+                  {/* Day cells */}
+                  <div className="grid grid-cols-7 gap-0.5">
+                    {calDays.map((day, idx) => {
+                      if (day === null) return <div key={`p-${idx}`} />;
+                      const available = isDayAvailable(day);
+                      const dateObj   = new Date(calYear, calMonth, day);
+                      const isToday   = toDateKey(dateObj) === toDateKey(today);
+                      const isSel     = selDate ? toDateKey(dateObj) === toDateKey(selDate) : false;
+
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => handleDayClick(day)}
+                          disabled={!available}
+                          className={`aspect-square rounded-xl text-sm font-medium transition-all ${
+                            isSel
+                              ? "bg-[#7C3AED] text-white"
+                              : available
+                                ? isToday
+                                  ? "border border-[#7C3AED]/50 text-[#A78BFA] hover:bg-[#7C3AED]/20"
+                                  : "text-white hover:bg-[#7C3AED]/20 cursor-pointer"
+                                : "text-white/15 cursor-not-allowed"
+                          }`}
+                          style={available && !isSel ? { background: "rgba(124,58,237,0.08)" } : undefined}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <p className="text-xs text-white/25 mt-4">
+                    Highlighted dates match the mentor&apos;s availability.
+                  </p>
+                </>
+              )}
+            </Card>
+
+            {/* SECTION 2b — Pick a time (appears after date selected) */}
+            {selDate && selectedPeriods.length > 0 && (
+              <Card className="p-6">
+                <SectionTitle>
+                  Pick a time · {formatDisplayDate(selDate)}
+                </SectionTitle>
+
+                <div className="space-y-5">
+                  {PERIOD_ORDER.filter(p => selectedPeriods.includes(p)).map(period => (
+                    <div key={period}>
+                      <p className="text-xs font-semibold text-white/40 mb-2.5">
+                        {PERIOD_LABELS[period]}
+                        <span className="text-white/25 ml-2">{PERIOD_HOURS[period]}</span>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {PERIOD_SLOTS[period].map(slot => (
+                          <button
+                            key={slot}
+                            onClick={() => setSelTime(slot)}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                              selTime === slot
+                                ? "bg-[#7C3AED] border-[#7C3AED] text-white"
+                                : "border-white/10 text-white/60 hover:border-[#7C3AED]/50 hover:text-white"
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* SECTION 3 — Session details */}
+            <Card className="p-6">
+              <SectionTitle>Session details</SectionTitle>
+
+              <div className="space-y-5">
+                {/* Topic */}
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2">
+                    What do you want to work on?
+                  </label>
+                  <textarea
+                    value={topic}
+                    onChange={e => setTopic(e.target.value)}
+                    placeholder="Describe your goal, challenge, or what you'd like to get out of this session…"
+                    rows={4}
+                    className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 resize-none focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/50 transition-shadow"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  />
+                </div>
+
+                {/* Duration */}
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2.5 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-white/35" /> Duration
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {DURATIONS.map(d => (
+                      <button
+                        key={d.minutes}
+                        type="button"
+                        onClick={() => setDuration(d.minutes)}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                          duration === d.minutes
+                            ? "bg-[#7C3AED] border-[#7C3AED] text-white"
+                            : "border-white/10 text-white/55 hover:border-[#7C3AED]/50 hover:text-white"
+                        }`}
+                      >
+                        {d.label}
+                        {price != null && (
+                          <span className={`ml-2 text-xs ${duration === d.minutes ? "text-white/70" : "text-white/30"}`}>
+                            {roundHalf(price * d.multiplier, d.minutes === 30 ? 10 : 0)}€
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Language */}
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-white/70 mb-2.5 flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-white/35" /> Session language
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setLangOpen(o => !o)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm text-white transition-all focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/50"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: `1px solid ${langOpen ? "rgba(124,58,237,0.5)" : "rgba(255,255,255,0.08)"}`,
+                    }}
+                  >
+                    <span>{language || "Select a language"}</span>
+                    <ChevronDown
+                      className="w-4 h-4 text-white/40 flex-shrink-0 transition-transform"
+                      style={{ transform: langOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                    />
+                  </button>
+                  {langOpen && (
+                    <div
+                      className="absolute left-0 right-0 top-full mt-1.5 rounded-xl overflow-hidden z-20 shadow-xl"
+                      style={{ background: "#1A1828", border: "1px solid rgba(255,255,255,0.10)" }}
+                    >
+                      {langs.map(l => (
+                        <button
+                          key={l}
+                          type="button"
+                          onClick={() => { setLanguage(l); setLangOpen(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                            language === l
+                              ? "text-white bg-[#7C3AED]/30"
+                              : "text-white/60 hover:text-white hover:bg-white/[0.05]"
+                          }`}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* ── RIGHT COLUMN — Payment summary (sticky) ──────────────── */}
+          <div className="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-6">
+            <Card className="p-6">
+              <SectionTitle>Order summary</SectionTitle>
+
+              {/* Selected date / time recap */}
+              {(selDate || selTime) && (
+                <div
+                  className="rounded-xl p-3 mb-5 space-y-1"
+                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.15)" }}
+                >
+                  {selDate && (
+                    <p className="text-xs font-semibold text-[#A78BFA]">
+                      {selDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                    </p>
+                  )}
+                  {selTime && (
+                    <p className="text-xs text-white/50">{selTime} · {durLabel}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Price breakdown */}
+              <div className="space-y-3 mb-5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Session ({durLabel})</span>
+                  <span className="text-white font-semibold">
+                    {sessionPrice != null ? `${sessionPrice}€` : "–"}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">GrowVia fee</span>
+                  <span className="text-[#10B981] text-xs font-semibold">Included</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold border-t border-white/[0.06] pt-3">
+                  <span className="text-white">Total</span>
+                  <span className="text-white">
+                    {sessionPrice != null ? `${sessionPrice}€` : "Price on request"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Error */}
+              {submitErr && (
+                <div
+                  className="rounded-lg px-3 py-2 mb-4 text-xs text-red-400"
+                  style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
+                >
+                  {submitErr}
+                </div>
+              )}
+
+              {/* Submit */}
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-60"
+                style={{ background: canBook ? "#7C3AED" : "rgba(124,58,237,0.35)" }}
+              >
+                {submitting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Sending request…</>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Request session{sessionPrice != null ? ` · ${sessionPrice}€` : ""}
+                  </>
+                )}
+              </button>
+
+              {!canBook && !submitting && (
+                <p className="text-xs text-white/25 text-center mt-3">
+                  {!selDate ? "Select a date to continue" : "Select a time to continue"}
+                </p>
+              )}
+
+              <p className="text-xs text-white/25 text-center mt-3 leading-relaxed">
+                No charge now. Your saved card is billed when the mentor confirms.
+              </p>
+            </Card>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}

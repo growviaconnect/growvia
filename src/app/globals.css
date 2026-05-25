@@ -46,6 +46,231 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading, 'Plus Jakarta Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ── CJK typography — Noto Sans SC for Mandarin ─────────────── */
+html[lang='zh'] body,
+html[lang='zh'] h1,
+html[lang='zh'] h2,
+html[lang='zh'] h3,
+html[lang='zh'] h4,
+html[lang='zh'] h5,
+html[lang='zh'] h6,
+html[lang='zh'] p,
+html[lang='zh'] span,
+html[lang='zh'] a,
+html[lang='zh'] button,
+html[lang='zh'] input,
+html[lang='zh'] textarea,
+html[lang='zh'] select,
+html[lang='zh'] label {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* ── Japanese typography — Noto Sans JP + palt + generous line-height ── */
+html[lang='ja'] body,
+html[lang='ja'] h1,
+html[lang='ja'] h2,
+html[lang='ja'] h3,
+html[lang='ja'] h4,
+html[lang='ja'] h5,
+html[lang='ja'] h6,
+html[lang='ja'] p,
+html[lang='ja'] span,
+html[lang='ja'] a,
+html[lang='ja'] button,
+html[lang='ja'] input,
+html[lang='ja'] textarea,
+html[lang='ja'] select,
+html[lang='ja'] label {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.04em;
+}
+
+html[lang='ja'] body,
+html[lang='ja'] p,
+html[lang='ja'] li,
+html[lang='ja'] td,
+html[lang='ja'] th,
+html[lang='ja'] label,
+html[lang='ja'] span {
+  line-height: 1.8;
+}
+
+html[lang='ja'] h1,
+html[lang='ja'] h2,
+html[lang='ja'] h3 {
+  line-height: 1.5;
+}
+
+/* ── Korean / Hangul typography — Noto Sans KR + word-break ──────── */
+html[lang='ko'] body,
+html[lang='ko'] h1,
+html[lang='ko'] h2,
+html[lang='ko'] h3,
+html[lang='ko'] h4,
+html[lang='ko'] h5,
+html[lang='ko'] h6,
+html[lang='ko'] p,
+html[lang='ko'] span,
+html[lang='ko'] a,
+html[lang='ko'] button,
+html[lang='ko'] input,
+html[lang='ko'] textarea,
+html[lang='ko'] select,
+html[lang='ko'] label {
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', sans-serif;
+  word-break: keep-all;
+  letter-spacing: -0.01em;
+}
+
+html[lang='ko'] body,
+html[lang='ko'] p,
+html[lang='ko'] li,
+html[lang='ko'] td,
+html[lang='ko'] th,
+html[lang='ko'] label,
+html[lang='ko'] span {
+  line-height: 1.8;
+}
+
+html[lang='ko'] h1,
+html[lang='ko'] h2,
+html[lang='ko'] h3 {
+  line-height: 1.5;
+}
+
+/* ── Russian / Cyrillic typography — Noto Sans (cyrillic subset) ── */
+html[lang='ru'] body,
+html[lang='ru'] h1,
+html[lang='ru'] h2,
+html[lang='ru'] h3,
+html[lang='ru'] h4,
+html[lang='ru'] h5,
+html[lang='ru'] h6,
+html[lang='ru'] p,
+html[lang='ru'] span,
+html[lang='ru'] a,
+html[lang='ru'] button,
+html[lang='ru'] input,
+html[lang='ru'] textarea,
+html[lang='ru'] select,
+html[lang='ru'] label {
+  font-family: 'Noto Sans', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/* ── Dutch typography — overflow-wrap for long compound words ── */
+html[lang='nl'] h1,
+html[lang='nl'] h2,
+html[lang='nl'] h3,
+html[lang='nl'] h4,
+html[lang='nl'] h5,
+html[lang='nl'] h6,
+html[lang='nl'] p,
+html[lang='nl'] span,
+html[lang='nl'] a,
+html[lang='nl'] button,
+html[lang='nl'] li,
+html[lang='nl'] td,
+html[lang='nl'] th,
+html[lang='nl'] label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ── Turkish typography — overflow-wrap for agglutinative long words ── */
+html[lang='tr'] h1,
+html[lang='tr'] h2,
+html[lang='tr'] h3,
+html[lang='tr'] h4,
+html[lang='tr'] h5,
+html[lang='tr'] h6,
+html[lang='tr'] p,
+html[lang='tr'] span,
+html[lang='tr'] a,
+html[lang='tr'] button,
+html[lang='tr'] li,
+html[lang='tr'] td,
+html[lang='tr'] th,
+html[lang='tr'] label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ── Polish typography — overflow-wrap for long compound words ── */
+html[lang='pl'] h1,
+html[lang='pl'] h2,
+html[lang='pl'] h3,
+html[lang='pl'] h4,
+html[lang='pl'] h5,
+html[lang='pl'] h6,
+html[lang='pl'] p,
+html[lang='pl'] span,
+html[lang='pl'] a,
+html[lang='pl'] button,
+html[lang='pl'] li,
+html[lang='pl'] td,
+html[lang='pl'] th,
+html[lang='pl'] label {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ── Arabic typography — Noto Sans Arabic + RTL layout ──────── */
+[lang^='ar'] body,
+[lang^='ar'] h1,
+[lang^='ar'] h2,
+[lang^='ar'] h3,
+[lang^='ar'] h4,
+[lang^='ar'] h5,
+[lang^='ar'] h6,
+[lang^='ar'] p,
+[lang^='ar'] span,
+[lang^='ar'] a,
+[lang^='ar'] button,
+[lang^='ar'] input,
+[lang^='ar'] textarea,
+[lang^='ar'] select,
+[lang^='ar'] label {
+  font-family: 'Noto Sans Arabic', 'Geeza Pro', 'Arabic Typesetting', sans-serif;
+  letter-spacing: 0;
+  word-spacing: 0.05em;
+}
+
+/* RTL layout corrections ---------------------------------------- */
+[dir='rtl'] body { text-align: right; }
+
+/* Inputs */
+[dir='rtl'] input,
+[dir='rtl'] textarea,
+[dir='rtl'] select { text-align: right; direction: rtl; }
+
+/* Flex rows that shouldn't auto-reverse (arrows, icons on correct side) */
+[dir='rtl'] .hero-fade { direction: rtl; }
+
+/* Vertical accent line: left → right */
+[dir='rtl'] .-left-6 { left: auto; right: -1.5rem; }
+[dir='rtl'] .border-l { border-left: none; border-right-width: 1px; }
+[dir='rtl'] .border-r { border-right: none; border-left-width: 1px; }
+
+/* Padding/margin directional overrides — most important utilities */
+[dir='rtl'] .pl-16 { padding-left: 0; padding-right: 4rem; }
+[dir='rtl'] .pl-4  { padding-left: 0; padding-right: 1rem; }
+[dir='rtl'] .pl-6  { padding-left: 0; padding-right: 1.5rem; }
+[dir='rtl'] .pr-4  { padding-right: 0; padding-left: 1rem; }
+[dir='rtl'] .pr-6  { padding-right: 0; padding-left: 1.5rem; }
+[dir='rtl'] .ml-auto { margin-left: 0; margin-right: auto; }
+[dir='rtl'] .mr-auto { margin-right: 0; margin-left: auto; }
+[dir='rtl'] .-left-6 { left: auto; right: -1.5rem; }
+
+/* Rounded corners */
+[dir='rtl'] .rounded-l-xl { border-radius: 0 0.75rem 0.75rem 0; }
+[dir='rtl'] .rounded-r-xl { border-radius: 0.75rem 0 0 0.75rem; }
+
+/* ticker animation (keep LTR direction for sector names) */
+[dir='rtl'] .animate-ticker { direction: ltr; }
+
 /* ── Dark card surface — glassmorphism ───────────────────────── */
 .card-dark {
   backdrop-filter: blur(40px) saturate(180%);

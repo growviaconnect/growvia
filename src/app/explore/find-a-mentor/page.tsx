@@ -2,95 +2,68 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Star, Sparkles, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import SaveMentorButton from "@/components/SaveMentorButton";
 
 type MentorRow = {
   id: string;
   nom: string;
-  job_title: string | null;
-  company: string | null;
-  expertise: string[] | null;
-  mentor_score: number | null;
+  poste_actuel: string | null;
+  entreprise: string | null;
+  photo_url: string | null;
   session_price: number | null;
-  seniority: string | null;
 };
-
-function scoreColor(s: number | null | undefined) {
-  if (!s) return "#6B7280";
-  return s >= 70 ? "#10B981" : s >= 40 ? "#F59E0B" : "#EF4444";
-}
 
 function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function MentorCard({ mentor }: { mentor: MentorRow }) {
-  const color = scoreColor(mentor.mentor_score);
-  const tags = (mentor.expertise ?? []).slice(0, 3);
-  const extra = (mentor.expertise ?? []).length - 3;
-
   return (
     <div
-      className="rounded-2xl p-6 border border-white/[0.08] flex flex-col gap-4 hover:border-[#7C3AED]/40 transition-colors duration-300"
+      className="rounded-2xl p-6 border border-white/[0.08] flex flex-col gap-4 hover:border-[#7C3AED]/40 transition-colors duration-300 relative"
       style={{ background: "#13111F" }}
     >
-      <div className="flex items-start gap-4">
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
-        >
-          {initials(mentor.nom)}
-        </div>
+      {/* Heart save button */}
+      <SaveMentorButton
+        mentorId={mentor.id}
+        size="w-4 h-4"
+        className="absolute top-4 right-4 w-8 h-8"
+      />
+
+      {/* Identity */}
+      <div className="flex items-center gap-4 pr-10">
+        {mentor.photo_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={mentor.photo_url} alt={mentor.nom} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+        ) : (
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}
+          >
+            {initials(mentor.nom)}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="font-bold text-white truncate">{mentor.nom}</h3>
           <p className="text-sm text-white/50 truncate">
-            {mentor.job_title}
-            {mentor.company && <span className="text-white/30"> @ {mentor.company}</span>}
+            {mentor.poste_actuel}
+            {mentor.entreprise && <span className="text-white/30"> · {mentor.entreprise}</span>}
           </p>
         </div>
       </div>
 
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map(tag => (
-            <span
-              key={tag}
-              className="px-2.5 py-1 rounded-lg text-xs font-medium text-[#A78BFA] border border-[#7C3AED]/20"
-              style={{ background: "rgba(124,58,237,0.06)" }}
-            >
-              {tag}
-            </span>
-          ))}
-          {extra > 0 && (
-            <span className="px-2.5 py-1 rounded-lg text-xs font-medium text-white/30 border border-white/10">
-              +{extra}
-            </span>
-          )}
+      {/* Price */}
+      {mentor.session_price != null && (
+        <div
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06] self-start"
+          style={{ background: "#0D0A1A" }}
+        >
+          <span className="text-sm font-bold text-white">{mentor.session_price}€</span>
+          <span className="text-xs text-white/30">/ session</span>
         </div>
       )}
-
-      <div className="flex items-center gap-3">
-        {mentor.mentor_score != null && (
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06]"
-            style={{ background: "#0D0A1A" }}
-          >
-            <Star className="w-3 h-3 flex-shrink-0" style={{ color }} />
-            <span className="text-sm font-bold" style={{ color }}>{mentor.mentor_score}</span>
-            <span className="text-xs text-white/30">/100</span>
-          </div>
-        )}
-        {mentor.session_price != null && (
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.06]"
-            style={{ background: "#0D0A1A" }}
-          >
-            <span className="text-sm font-bold text-white">{mentor.session_price}€</span>
-            <span className="text-xs text-white/30">/ session</span>
-          </div>
-        )}
-      </div>
 
       <div className="mt-auto">
         <Link
@@ -139,10 +112,10 @@ export default function FindAMentorPage() {
     async function fetchMentors() {
       const { data } = await supabase
         .from("mentors")
-        .select("id, nom, job_title, company, expertise, mentor_score, session_price, seniority")
+        .select("id, nom, poste_actuel, entreprise, photo_url, session_price")
         .eq("onboarding_completed", true)
         .eq("statut", "active")
-        .order("mentor_score", { ascending: false });
+        .order("created_at", { ascending: false });
 
       setMentors((data as MentorRow[]) ?? []);
       setLoading(false);
@@ -164,8 +137,8 @@ export default function FindAMentorPage() {
         const q = search.toLowerCase();
         return (
           m.nom.toLowerCase().includes(q) ||
-          (m.job_title ?? "").toLowerCase().includes(q) ||
-          (m.expertise ?? []).some(e => e.toLowerCase().includes(q))
+          (m.poste_actuel ?? "").toLowerCase().includes(q) ||
+          (m.entreprise ?? "").toLowerCase().includes(q)
         );
       })
     : mentors;

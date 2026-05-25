@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Video, Bell, Clock, CheckCircle, Mail } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
@@ -25,17 +25,16 @@ const CARD_BG = [
   "#1F1B37",
 ];
 
+
 const stepImages = [
-  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80",
-  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80",
-  "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&q=80",
+  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80", // 01 — Créez votre profil
+  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80", // 02 — Match IA
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80", // 03 — Session Découverte
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80",
   "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80",
   "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80",
   "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",
 ];
-
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 export default function HowItWorksPage() {
   const { t } = useLang();
@@ -71,7 +70,7 @@ export default function HowItWorksPage() {
     },
     {
       num: "05", title: t("hiw_s5_title"), desc: t("hiw_s5_desc"),
-      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3")],
+      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3"), t("hiw_s5_d4")],
       image: stepImages[4],
     },
     {
@@ -81,7 +80,7 @@ export default function HowItWorksPage() {
     },
     {
       num: "07", title: t("hiw_s7_title"), desc: t("hiw_s7_desc"),
-      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3")],
+      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3"), t("hiw_s7_d4")],
       image: stepImages[6],
     },
   ];
@@ -106,62 +105,6 @@ export default function HowItWorksPage() {
     { Icon: CheckCircle, label: t("hiw_n4") },
   ];
 
-  // ── Scroll-driven card peel ─────────────────────────────────────────
-  const CARD_VH = 85; // scroll runway per card (vh)
-
-  const sectionRef      = useRef<HTMLElement>(null);
-  const cardRefs        = useRef<(HTMLDivElement | null)[]>([]);
-  const targetProgress  = useRef<number[]>(new Array(N).fill(0));
-  const currentProgress = useRef<number[]>(new Array(N).fill(0));
-  const rafId           = useRef(0);
-
-  useEffect(() => {
-    if (isMobile) return;
-
-    const section = sectionRef.current as HTMLElement;
-    if (!section) return;
-
-    function tick() {
-      let live = false;
-      for (let i = 0; i < N; i++) {
-        const card = cardRefs.current[i];
-        if (!card) continue;
-        const prev = currentProgress.current[i];
-        currentProgress.current[i] = lerp(prev, targetProgress.current[i], 0.1);
-        const p = currentProgress.current[i];
-        const ty = -p * window.innerHeight;
-        const sc = 1 - p * 0.03;
-        const op = i === N - 1 ? 1 : Math.max(0.6, 1 - p * 0.4);
-        card.style.transform = `translateY(${ty}px) scale(${sc})`;
-        card.style.opacity   = String(op);
-        if (Math.abs(p - targetProgress.current[i]) > 0.0005) live = true;
-      }
-      rafId.current = live ? requestAnimationFrame(tick) : 0;
-    }
-
-    function onScroll() {
-      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-      const vh = window.innerHeight;
-      for (let i = 0; i < N - 1; i++) {
-        // Card i peels away across its CARD_VH runway
-        const start = sectionTop + i * (vh * CARD_VH / 100);
-        targetProgress.current[i] = Math.max(0, Math.min(1, (window.scrollY - start) / (vh * CARD_VH / 100)));
-      }
-      // Last card stays put
-      targetProgress.current[N - 1] = 0;
-
-      if (!rafId.current) rafId.current = requestAnimationFrame(tick);
-    }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(rafId.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
 
   return (
     <>
@@ -195,32 +138,44 @@ export default function HowItWorksPage() {
       {/* ── CARD STACK — desktop ──────────────────────────────────────── */}
       {!isMobile ? (
         <section
-          ref={sectionRef}
-          style={{ height: `${N * CARD_VH}vh`, position: "relative" }}
-          aria-label="Étapes — comment ça marche"
+          aria-label="Étapes : comment ça marche"
+          style={{
+            background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(124,58,237,0.04) 0%, transparent 70%)",
+          }}
         >
+          <div id="hiw-container" style={{ position: "relative", height: `calc(${N} * 85vh + 100px)` }}>
           {steps.map((step, i) => {
             const bg = CARD_BG[i % CARD_BG.length];
             return (
               <div
                 key={step.num}
-                ref={(el) => { cardRefs.current[i] = el; }}
                 style={{
                   position:     "sticky",
-                  top:          64,
-                  height:       "100vh",
+                  top:          80,
+                  minHeight:    i === N - 1 ? "100vh" : "85vh",
+                  height:       "auto",
                   overflow:     "hidden",
-                  borderRadius: 20,
-                  zIndex:       (N - i) * 10,
+                  borderRadius: 24,
+                  zIndex:       (i + 1) * 10,
                   background:   bg,
                   display:      "flex",
-                  willChange:   "transform",
-                  marginTop:    i > 0 ? -48 : 0,
-                  transformOrigin: "top center",
-                  boxShadow:    "0 -12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.08)",
-                  borderTop:    "1px solid rgba(124,58,237,0.15)",
+                  width:        "calc(100% - 120px)",
+                  marginLeft:   60,
+                  marginRight:  60,
+                  marginTop:    i > 0 ? -60 : 0,
+                  paddingBottom: 80,
+                  // no rotate — clean architectural look
+                  boxShadow:    "0 0 0 1px rgba(124,58,237,0.1), 0 24px 80px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4)",
+                  borderTop:    "1px solid rgba(124,58,237,0.35)",
                 }}
               >
+                {/* ── Vertical separator — left/right split ─────────── */}
+                <div style={{
+                  position: "absolute", top: 0, bottom: 0, left: "50%",
+                  width: 1, background: "rgba(124,58,237,0.15)",
+                  pointerEvents: "none", zIndex: 2,
+                }} />
+
                 {/* ── LEFT — text content (50%) ──────────────── */}
                 <div style={{
                   width: "50%", flexShrink: 0,
@@ -228,39 +183,39 @@ export default function HowItWorksPage() {
                   padding: "0 clamp(36px, 6vw, 88px)",
                   position: "relative", zIndex: 1,
                 }}>
-                  {/* Decorative step number — watermark */}
-                  <div style={{
-                    position: "absolute", top: "50%", left: "clamp(36px, 6vw, 88px)",
-                    transform: "translateY(-60%)",
-                    fontSize: "clamp(100px, 18vw, 160px)", fontWeight: 800,
-                    color: "rgba(124,58,237,0.07)", lineHeight: 1,
-                    userSelect: "none", pointerEvents: "none",
-                    letterSpacing: "-0.04em",
-                  }}>
-                    {step.num}
-                  </div>
-
                   <div style={{ position: "relative" }}>
+                    <span style={{
+                      position: "absolute", top: 20, left: 32,
+                      fontSize: "clamp(80px, 14vw, 140px)", fontWeight: 800,
+                      color: "rgba(124,58,237,0.08)", lineHeight: 1,
+                      pointerEvents: "none", userSelect: "none", zIndex: 0,
+                    }} aria-hidden="true">
+                      {step.num}
+                    </span>
                     <p style={{
                       fontSize: 10, fontWeight: 700, letterSpacing: "0.32em",
                       textTransform: "uppercase", color: ACCENT, marginBottom: 18,
+                      position: "relative", zIndex: 1,
+                      display: "flex", alignItems: "center", gap: 6,
                     }}>
-                      ÉTAPE {step.num}
+                      <span>ÉTAPE</span><span>{step.num}</span>
                     </p>
                     <h2 style={{
                       fontSize: "clamp(28px, 3.8vw, 52px)", fontWeight: 800,
                       color: "white", lineHeight: 1.12, margin: "0 0 20px",
                       letterSpacing: "-0.025em",
+                      position: "relative", zIndex: 1,
                     }}>
                       {step.title}
                     </h2>
                     <p style={{
                       fontSize: "clamp(14px, 1.5vw, 17px)", color: "rgba(255,255,255,0.48)",
                       lineHeight: 1.78, margin: "0 0 30px", maxWidth: 460,
+                      position: "relative", zIndex: 1,
                     }}>
                       {step.desc}
                     </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
                       {step.detail.map((d) => (
                         <div key={d} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                           <span style={{
@@ -283,7 +238,7 @@ export default function HowItWorksPage() {
                   </div>
                 </div>
 
-                {/* ── RIGHT — full-bleed image (50%) ─────────── */}
+                {/* ── RIGHT — full-bleed photo ─────────────────── */}
                 <div style={{ width: "50%", flexShrink: 0, position: "relative", overflow: "hidden" }}>
                   <img
                     src={step.image}
@@ -294,10 +249,10 @@ export default function HowItWorksPage() {
                     }}
                     loading="lazy"
                   />
-                  {/* Gradient left → transparent so image bleeds into card bg */}
+                  {/* Gradient left → transparent — stronger blend */}
                   <div style={{
                     position: "absolute", inset: 0,
-                    background: `linear-gradient(to right, ${bg} 0%, ${bg}88 12%, transparent 35%)`,
+                    background: "linear-gradient(to right, rgba(13,10,26,0.6) 0%, transparent 25%)",
                   }} />
                   {/* Subtle violet tint */}
                   <div style={{
@@ -326,7 +281,7 @@ export default function HowItWorksPage() {
 
                 {/* ── Step counter — bottom right ─────────────── */}
                 <div style={{
-                  position: "absolute", bottom: 20, right: 28,
+                  position: "absolute", bottom: 24, right: 28,
                   fontFamily: "monospace", fontSize: 11,
                   color: "rgba(255,255,255,0.18)", userSelect: "none", zIndex: 3,
                 }}>
@@ -354,6 +309,7 @@ export default function HowItWorksPage() {
               </div>
             );
           })}
+          </div>{/* end #hiw-container */}
         </section>
       ) : (
         /* ── MOBILE — simple vertical stack ─────────────────────── */
@@ -363,7 +319,12 @@ export default function HowItWorksPage() {
               key={step.num}
               style={{
                 padding: "72px 24px 60px",
+                width: "calc(100% - 32px)",
+                marginLeft: 16,
+                marginRight: 16,
+                borderRadius: 16,
                 borderTop: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                boxSizing: "border-box",
               }}
             >
               {/* Image */}

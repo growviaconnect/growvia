@@ -20,15 +20,16 @@ const TikTokIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const YouTubeIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+const EmailIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M2 7l10 7 10-7" />
   </svg>
 );
 
-const XIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+const PhoneIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z" />
   </svg>
 );
 
@@ -38,14 +39,14 @@ const LinkedInIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-type SocialLink = { label: string; href: string; Icon: React.ComponentType<{ className?: string }> };
+type SocialLink = { label: string; href: string; Icon: React.ComponentType<{ className?: string }>; newTab?: boolean; title?: string };
 
 const socials: SocialLink[] = [
-  { label: "Instagram", href: "#", Icon: InstagramIcon },
-  { label: "TikTok",    href: "#", Icon: TikTokIcon },
-  { label: "YouTube",   href: "#", Icon: YouTubeIcon },
-  { label: "X",         href: "#", Icon: XIcon },
-  { label: "LinkedIn",  href: "#", Icon: LinkedInIcon },
+  { label: "Instagram", href: "https://www.instagram.com/growviaconnect",                newTab: true,  Icon: InstagramIcon },
+  { label: "TikTok",    href: "https://www.tiktok.com/@growviaconnect",                  newTab: true,  Icon: TikTokIcon    },
+  { label: "LinkedIn",  href: "https://www.linkedin.com/in/growvia-connect-7bb495402/",  newTab: true,  Icon: LinkedInIcon  },
+  { label: "Email",     href: "mailto:contact@growviaconnect.com",                        newTab: false, Icon: EmailIcon     },
+  { label: "Phone",     href: "tel:+33767508119",                                         newTab: false, Icon: PhoneIcon, title: "+33 7 67 50 81 19 / +33 7 81 89 20 21" },
 ];
 
 /* ── Footer component ─────────────────────────────────────────── */
@@ -55,17 +56,26 @@ export default function Footer() {
   const hideHeadline = pathname === "/how-it-works";
 
   const navLinks = [
-    { label: t("footer_link_home"),     href: "/" },
-    { label: t("footer_link_founders"), href: "/founders" },
-    { label: t("footer_link_stories"),  href: "/for-schools" },
-    { label: t("footer_link_pricing"),  href: "/pricing" },
+    { label: "Accueil",          href: "/"                },
+    { label: "Explorer",         href: "/explore"         },
+    { label: "Devenir Mentor",   href: "/become-a-mentor" },
+    { label: "Fonctionnement",   href: "/how-it-works"    },
+    { label: "Tarifs",           href: "/pricing"         },
+    { label: "Notre Histoire",   href: "/founders"        },
+  ];
+
+  const platformLinks = [
+    { label: "Trouver un Mentor",     href: "/explore/find-a-mentor"  },
+    { label: "Matching IA",           href: "/ai-smart-matching"      },
+    { label: "Certification Mentor",  href: "/mentor-certification"   },
+    { label: "Pour les Écoles",       href: "/for-schools"            },
   ];
 
   const companyLinks = [
-    { label: t("footer_link_manifesto"), href: "/#manifesto" },
-    { label: t("footer_link_careers"),   href: "/careers" },
-    { label: t("footer_link_contact"),   href: "/contact" },
-    { label: t("footer_link_privacy"),   href: "/legal/privacy" },
+    { label: "FAQ",                        href: "/faq"             },
+    { label: "Sécurité & Confiance",       href: "/safety-trust"   },
+    { label: "Contact",                    href: "/contact"         },
+    { label: "Politique de confidentialité", href: "/legal/privacy" },
   ];
 
   const cities = [
@@ -104,12 +114,12 @@ export default function Footer() {
         {/* ── Links + cities row ─────────────────────────────── */}
         <div className="reveal reveal-delay-1 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
 
-          {/* Left: two nav columns */}
-          <div className="flex gap-12 md:gap-20">
+          {/* Left: three nav columns */}
+          <div className="flex gap-12 md:gap-16">
             {/* NAVIGATION */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                {t("footer_nav_label")}
+                Navigation
               </p>
               <ul className="space-y-3.5">
                 {navLinks.map((l) => (
@@ -125,10 +135,29 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* COMPANY */}
+            {/* PLATEFORME */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                {t("footer_company_label")}
+                Plateforme
+              </p>
+              <ul className="space-y-3.5">
+                {platformLinks.map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href}
+                      className="text-sm text-white/45 hover:text-white transition-colors duration-200"
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* ENTREPRISE */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
+                Entreprise
               </p>
               <ul className="space-y-3.5">
                 {companyLinks.map((l) => (
@@ -186,11 +215,12 @@ export default function Footer() {
 
           {/* Social icons, right */}
           <div className="flex items-center gap-4 order-3">
-            {socials.map(({ label, href, Icon }) => (
+            {socials.map(({ label, href, Icon, newTab, title }) => (
               <a
                 key={label}
                 href={href}
-                title={label}
+                title={title ?? label}
+                {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="text-white/35 hover:text-[#7C3AED] transition-colors duration-200"
               >
                 <Icon className="w-4 h-4" />

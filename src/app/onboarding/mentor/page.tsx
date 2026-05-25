@@ -286,6 +286,12 @@ export default function MentorOnboarding() {
       const { data: existing } = await supabase
         .from("mentors").select("*").eq("id", user.id).single();
 
+      // Already completed — never show the form again
+      if (existing?.onboarding_completed === true) {
+        window.location.href = "/dashboard";
+        return;
+      }
+
       if (existing) {
         setS1({
           nom:               existing.nom               ?? metaName,
@@ -589,7 +595,7 @@ export default function MentorOnboarding() {
         // any cached React state from this component.
         window.location.href = "/dashboard?onboarded=1";
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Save failed — please try again.";
+        const msg = err instanceof Error ? err.message : "Save failed, please try again.";
         console.error("[handleSavePrice] error:", msg);
         setScoringError(msg);
         setSavingPrice(false);
