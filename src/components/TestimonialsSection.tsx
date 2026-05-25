@@ -19,12 +19,12 @@ const PHOTO_H = Math.round(CARD_H * 0.55); // 286px
 // Headline words come from the "testimonials_headline" i18n key (comma-separated)
 
 const TESTIMONIALS = [
-  { type: "MENTORÉE", quote: "GrowVia ne m'a pas seulement connectée à un mentor. Ça a changé ma façon de voir mon potentiel.", name: "Sarah Chen",     role: "Product Manager · Stripe",       gender: "women", portrait: 44 },
-  { type: "MENTOR",   quote: "Voir mon mentoré décrocher le poste de ses rêves m'a rappelé pourquoi l'expérience est faite pour être partagée.", name: "Marcus Johnson", role: "VP Engineering · Mentor",         gender: "men",   portrait: 32 },
-  { type: "MENTORÉE", quote: "Le matching IA était étonnant. Mon mentor avait fait face exactement au même carrefour.", name: "Aisha Patel",    role: "Founder · EduScale",             gender: "women", portrait: 68 },
-  { type: "MENTORÉ",  quote: "J'avais la direction, pas la confiance. GrowVia m'a donné les deux dès ma première session.", name: "Thomas Dubois",  role: "Strategy Consultant · Paris",     gender: "men",   portrait: 56 },
-  { type: "MENTOR",   quote: "Mon emploi du temps est chargé, mais GrowVia rend le fait de donner en retour sans friction.", name: "Elena Rossi",    role: "Partner · McKinsey",             gender: "women", portrait: 22 },
-  { type: "MENTOR",   quote: "J'ai rejoint GrowVia pour donner en retour. J'ai fini par apprendre autant que j'ai enseigné.", name: "James Okonkwo",  role: "Design Lead · Meta",             gender: "men",   portrait: 75 },
+  { type: "MENTORÉE", quote: "GrowVia ne m'a pas seulement connectée à un mentor. Ça a changé ma façon de voir mon potentiel.", name: "Sarah Chen",     role: "Product Manager · Stripe",       photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop&crop=face&q=80" },
+  { type: "MENTOR",   quote: "Voir mon mentoré décrocher le poste de ses rêves m'a rappelé pourquoi l'expérience est faite pour être partagée.", name: "Marcus Johnson", role: "VP Engineering · Mentor",         photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=500&fit=crop&crop=face&q=80" },
+  { type: "MENTORÉE", quote: "Le matching IA était étonnant. Mon mentor avait fait face exactement au même carrefour.", name: "Aisha Patel",    role: "Founder · EduScale",             photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face&q=80" },
+  { type: "MENTORÉ",  quote: "J'avais la direction, pas la confiance. GrowVia m'a donné les deux dès ma première session.", name: "Thomas Dubois",  role: "Strategy Consultant · Paris",     photo: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&h=500&fit=crop&crop=face&q=80" },
+  { type: "MENTOR",   quote: "Mon emploi du temps est chargé, mais GrowVia rend le fait de donner en retour sans friction.", name: "Elena Rossi",    role: "Partner · McKinsey",             photo: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=500&fit=crop&crop=face&q=80" },
+  { type: "MENTOR",   quote: "J'ai rejoint GrowVia pour donner en retour. J'ai fini par apprendre autant que j'ai enseigné.", name: "James Okonkwo",  role: "Design Lead · Meta",             photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=500&fit=crop&crop=face&q=80" },
 ] as const;
 
 type T = typeof TESTIMONIALS[number];
@@ -59,9 +59,9 @@ function GalleryCard({ item, isActive, mobile = false }: { item: T; isActive: bo
       {/* Photo */}
       <div style={{ height: mobile ? 200 : PHOTO_H, overflow: "hidden", position: "relative" }}>
         <img
-          src={`https://randomuser.me/api/portraits/${item.gender}/${item.portrait}.jpg`}
+          src={item.photo}
           alt={item.name}
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
           loading="lazy"
         />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, #0D0A1A 100%)" }} />
