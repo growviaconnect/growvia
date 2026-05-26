@@ -27,13 +27,13 @@ const CARD_BG = [
 
 
 const stepImages = [
-  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80", // 01 — Créez votre profil
-  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80", // 02 — Match IA
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80", // 03 — Session Découverte
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=80",
-  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80",
-  "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80",
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",
+  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80", // 01 — Créez votre profil
+  "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80", // 02 — Matching IA
+  "https://images.unsplash.com/photo-1551434678-e076c223a692?w=900&q=80",    // 03 — Explorez vos matches
+  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80", // 04 — Contactez votre mentor
+  "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=900&q=80", // 05 — Réservez votre session
+  "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=900&q=80", // 06 — Votre session
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",    // 07 — Continuez votre croissance
 ];
 
 export default function HowItWorksPage() {
@@ -111,7 +111,7 @@ export default function HowItWorksPage() {
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1600&q=80"
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&q=80"
           alt="" aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ filter: "brightness(0.35) saturate(0.6)" }}
