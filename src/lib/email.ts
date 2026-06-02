@@ -275,30 +275,58 @@ export async function sendSessionReminder(params: ReminderParams) {
 
 // ─── 6. Account deletion confirmation ────────────────────────────────────────
 
-export async function sendAccountDeletionEmail(to: string, nom: string, deletedAt: Date) {
-  const formattedDate = deletedAt.toLocaleString("fr-FR", {
+export async function sendAccountDeletionEmail(
+  to: string,
+  nom: string,
+  deletedAt: Date,
+  recoveryToken?: string,
+) {
+  const deletedAtLabel = deletedAt.toLocaleString("en-GB", {
+    weekday: "long", day: "numeric", month: "long",
+    year: "numeric", hour: "2-digit", minute: "2-digit",
+    timeZone: "Europe/Paris",
+  });
+  // Permanent deletion happens 30 days after soft-delete
+  const purgeDate = new Date(deletedAt.getTime() + 30 * 24 * 3_600_000);
+  const purgeDateLabel = purgeDate.toLocaleString("en-GB", {
     day: "numeric", month: "long", year: "numeric",
-    hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris",
   });
 
+  const recoveryUrl = recoveryToken
+    ? `${BASE_URL}/account/recover?token=${recoveryToken}`
+    : `mailto:contact@growviaconnect.com?subject=Account%20recovery%20request%20-%20${encodeURIComponent(to)}`;
+
   const body = `
-    ${badge("#dc2626", "Compte supprimé")}
+    ${badge("#dc2626", "Account deleted")}
     <br/><br/>
-    ${h1("Votre compte GrowVia a été supprimé")}
-    ${p(`Bonjour ${nom},`)}
-    ${p(`Votre compte et toutes vos données associées ont été définitivement supprimés le <strong>${formattedDate}</strong>.`)}
-    ${p("Si vous êtes à l'origine de cette demande, aucune action supplémentaire n'est requise.")}
-    ${p(`Si ce n'était <strong>pas vous</strong>, contactez-nous immédiatement à <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;">contact@growviaconnect.com</a>`)}
+    ${h1(`Your GrowVia account has been deleted`)}
+    ${p(`Hi ${nom}, your account and all associated data were deleted on <strong>${deletedAtLabel}</strong>.`)}
+    ${infoBox(
+      highlight("Email",             to) +
+      highlight("Deleted on",        deletedAtLabel) +
+      highlight("Permanent removal", purgeDateLabel),
+    )}
+    ${p("If you deleted your account by mistake, you can request recovery within <strong>30 days</strong>. After that, your data is permanently and irreversibly erased.")}
+    <a href="${recoveryUrl}" style="display:inline-block;background:#7C3AED;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;">Recover my account →</a>
+    <br/><br/>
+    ${p(`If you did not request this deletion, contact us immediately at <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;text-decoration:none;">contact@growviaconnect.com</a>`)}
   `;
 
   const r = getResend();
-  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
-  return r.emails.send({
-    from: FROM,
+  if (!r) {
+    console.error("[email] sendAccountDeletionEmail: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendAccountDeletionEmail → ${to}`);
+  const result = await r.emails.send({
+    from:    FROM,
     to,
-    subject: "Votre compte GrowVia a été supprimé",
-    html: layout(body),
+    subject: "Your GrowVia account has been deleted",
+    html:    layout(body),
   });
+  if (result.error) console.error(`[email] sendAccountDeletionEmail failed for ${to}:`, result.error);
+  else              console.log(`[email] sendAccountDeletionEmail sent (id=${result.data?.id}) → ${to}`);
+  return result;
 }
 
 // ─── 7. Session confirmed — sent to BOTH mentor and mentee with Meet link ─────
@@ -470,4 +498,211 @@ export async function sendProposeNewTime(params: {
     subject: `${mentorNom} proposed a new session time`,
     html:    layout(body),
   });
+}
+
+// ─── 10. Subscription confirmation ────────────────────────────────────────────
+
+export type SubscriptionConfirmationParams = {
+  to:              string;
+  nom:             string;
+  plan:            string;   // e.g. "Basic" | "Premium"
+  priceEur:        number;   // monthly price in euros
+  nextBillingDate: string;   // ISO date string
+  trialEnd?:       string;   // ISO date string if there's a trial period
+};
+
+export async function sendSubscriptionConfirmation(params: SubscriptionConfirmationParams) {
+  const { to, nom, plan, priceEur, nextBillingDate, trialEnd } = params;
+  const billingLabel = new Date(nextBillingDate).toLocaleDateString("en-GB", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+  const trialLabel = trialEnd
+    ? new Date(trialEnd).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+
+  const body = `
+    ${badge("#059669", "Subscription active ✓")}
+    <br/><br/>
+    ${h1(`Welcome to ${plan}!`)}
+    ${p(`Hi ${nom}, your <strong>${plan}</strong> subscription is now active. Here's what's been set up:`)}
+    ${infoBox(
+      highlight("Plan",              plan) +
+      highlight("Monthly price",     `${priceEur}€ / month`) +
+      highlight("Next billing date", billingLabel) +
+      (trialLabel ? highlight("Trial ends", trialLabel) : ""),
+    )}
+    ${p(`You now have unlimited access to AI mentor matching and all ${plan} features. Start by finding your ideal mentor.`)}
+    ${btn("Find a mentor →", `${BASE_URL}/explore/find-a-mentor`)}
+    <br/>
+    ${p(`You can manage your subscription and billing at any time from your <a href="${BASE_URL}/settings" style="color:#7C3AED;text-decoration:none;">account settings</a>.`)}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendSubscriptionConfirmation: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendSubscriptionConfirmation → ${to} (plan=${plan})`);
+  const result = await r.emails.send({
+    from:    FROM,
+    to,
+    subject: `Your ${plan} subscription is confirmed ✓`,
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendSubscriptionConfirmation failed for ${to}:`, result.error);
+  else              console.log(`[email] sendSubscriptionConfirmation sent (id=${result.data?.id}) → ${to}`);
+  return result;
+}
+
+// ─── 11. Subscription changed (upgrade / downgrade) ───────────────────────────
+
+export type SubscriptionChangedParams = {
+  to:              string;
+  nom:             string;
+  oldPlan:         string;
+  newPlan:         string;
+  newPriceEur:     number;
+  nextBillingDate: string;
+  isUpgrade:       boolean;
+};
+
+export async function sendSubscriptionChanged(params: SubscriptionChangedParams) {
+  const { to, nom, oldPlan, newPlan, newPriceEur, nextBillingDate, isUpgrade } = params;
+  const billingLabel = new Date(nextBillingDate).toLocaleDateString("en-GB", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+
+  const changeLabel = isUpgrade ? "Upgraded" : "Downgraded";
+  const badgeColor  = isUpgrade ? "#7C3AED" : "#6b7280";
+  const changeNote  = isUpgrade
+    ? "Your new plan is active immediately. Enjoy the extra features!"
+    : "Your plan change takes effect at the next billing cycle. You keep access to your current plan until then.";
+
+  const body = `
+    ${badge(badgeColor, `Plan ${changeLabel}`)}
+    <br/><br/>
+    ${h1(`Your plan has been ${changeLabel.toLowerCase()}`)}
+    ${p(`Hi ${nom}, here's a summary of your subscription change:`)}
+    ${infoBox(
+      highlight("Previous plan",     oldPlan) +
+      highlight("New plan",          newPlan) +
+      highlight("New monthly price", `${newPriceEur}€ / month`) +
+      highlight("Next billing date", billingLabel),
+    )}
+    ${p(changeNote)}
+    ${btn("View subscription →", `${BASE_URL}/settings?tab=subscription`)}
+    <br/>
+    ${p(`Questions about your billing? Contact us at <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;text-decoration:none;">contact@growviaconnect.com</a>`)}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendSubscriptionChanged: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendSubscriptionChanged → ${to} (${oldPlan} → ${newPlan})`);
+  const result = await r.emails.send({
+    from:    FROM,
+    to,
+    subject: `Your GrowVia plan has been ${changeLabel.toLowerCase()} to ${newPlan}`,
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendSubscriptionChanged failed for ${to}:`, result.error);
+  else              console.log(`[email] sendSubscriptionChanged sent (id=${result.data?.id}) → ${to}`);
+  return result;
+}
+
+// ─── 12. Subscription cancelled ───────────────────────────────────────────────
+
+export type SubscriptionCancelledParams = {
+  to:          string;
+  nom:         string;
+  planName:    string;
+  accessUntil: string; // ISO date — access remains until end of billing period
+};
+
+export async function sendSubscriptionCancelled(params: SubscriptionCancelledParams) {
+  const { to, nom, planName, accessUntil } = params;
+  const accessLabel = new Date(accessUntil).toLocaleDateString("en-GB", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+
+  const body = `
+    ${badge("#6b7280", "Subscription cancelled")}
+    <br/><br/>
+    ${h1("Your subscription has been cancelled")}
+    ${p(`Hi ${nom}, your <strong>${planName}</strong> subscription has been cancelled as requested.`)}
+    ${infoBox(
+      highlight("Plan",         planName) +
+      highlight("Access until", accessLabel) +
+      highlight("Free session", "Still available"),
+    )}
+    ${p(`You still have full access to ${planName} features until <strong>${accessLabel}</strong>. After that, your account reverts to the free plan.`)}
+    ${p("Your free discovery session remains available — you can still book a session with any mentor on the platform.")}
+    ${btn("Resubscribe →", `${BASE_URL}/subscribe`)}
+    <br/>
+    ${p(`Changed your mind? Resubscribe at any time and we'll reactivate your plan immediately. Any questions, reach us at <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;text-decoration:none;">contact@growviaconnect.com</a>`)}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendSubscriptionCancelled: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendSubscriptionCancelled → ${to} (plan=${planName})`);
+  const result = await r.emails.send({
+    from:    FROM,
+    to,
+    subject: "Your GrowVia subscription has been cancelled",
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendSubscriptionCancelled failed for ${to}:`, result.error);
+  else              console.log(`[email] sendSubscriptionCancelled sent (id=${result.data?.id}) → ${to}`);
+  return result;
+}
+
+// ─── 13. Account suspended (mentor) ───────────────────────────────────────────
+
+export type AccountSuspendedParams = {
+  to:  string;
+  nom: string;
+};
+
+export async function sendAccountSuspended(params: AccountSuspendedParams) {
+  const { to, nom } = params;
+  const profileUrl  = `${BASE_URL}/profile`;
+  const supportUrl  = `mailto:contact@growviaconnect.com?subject=Account%20suspension%20-%20${encodeURIComponent(to)}`;
+
+  const body = `
+    ${badge("#F59E0B", "Account suspended")}
+    <br/><br/>
+    ${h1("Your mentor account has been suspended")}
+    ${p(`Hi ${nom}, your GrowVia mentor account has been suspended and is no longer visible to mentees.`)}
+    ${infoBox(
+      highlight("Status",        "Suspended") +
+      highlight("Profile",       "Hidden from search") +
+      highlight("Mentee impact", "Scheduled sessions notified"),
+    )}
+    ${p("Any mentees who had upcoming sessions with you will receive a notification and be prompted to find an alternative mentor.")}
+    ${p("To reactivate your account and resume mentoring, go to your profile settings and set your status back to active.")}
+    ${btn("Go to profile settings →", profileUrl)}
+    <br/>
+    ${p(`If this suspension was applied in error, or you have questions, contact us at <a href="${supportUrl}" style="color:#7C3AED;text-decoration:none;">contact@growviaconnect.com</a>`)}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendAccountSuspended: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendAccountSuspended → ${to}`);
+  const result = await r.emails.send({
+    from:    FROM,
+    to,
+    subject: "Your GrowVia mentoring account has been suspended",
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendAccountSuspended failed for ${to}:`, result.error);
+  else              console.log(`[email] sendAccountSuspended sent (id=${result.data?.id}) → ${to}`);
+  return result;
 }
