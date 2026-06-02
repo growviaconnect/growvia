@@ -337,20 +337,8 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
 
       setSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
       setAuthCookie();
-
       onClose();
-
-      if (role === "mentor") {
-        const { data: mentorRow } = await supabase
-          .from("mentors")
-          .select("onboarding_completed")
-          .eq("email", user.email!)
-          .single();
-        if (mentorRow && !mentorRow.onboarding_completed) {
-          router.push("/onboarding/mentor");
-          return;
-        }
-      }
+      // Dashboard handles onboarding-redirect itself; always send here.
       router.push("/dashboard");
     } catch {
       setSiError("Incorrect email or password. Please try again.");
@@ -369,6 +357,7 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
     const r     = role!;
 
     try {
+      // 1. Create auth user (server-side, auto-confirms email)
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -383,18 +372,17 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
         throw new Error(json.error ?? "Registration failed. Please try again.");
       }
 
+      // 2. Sign in immediately (email already confirmed)
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: suPassword });
       if (signInError) throw signInError;
 
-      if (r === "mentor") {
-        await supabase.from("mentors").insert({ nom, email, statut: "pending" });
-      } else {
-        await supabase.from("mentees").insert({ nom, email, statut: "pending" });
-      }
+      // 3. Insert domain row — best-effort, never block redirect on failure
+      const table = r === "mentor" ? "mentors" : "mentees";
+      supabase.from(table).insert({ nom, email, statut: "pending" }).then(() => {});
 
+      // 4. Persist session + cookie, close modal, redirect
       setSession({ nom, email, role: r, plan: "free" });
       setAuthCookie();
-
       onClose();
       router.push(r === "mentor" ? "/onboarding/mentor" : "/dashboard");
     } catch (err: unknown) {
