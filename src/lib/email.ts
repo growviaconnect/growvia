@@ -112,8 +112,19 @@ export async function sendWelcomeEmail(to: string, nom: string, role: string) {
   `;
 
   const r = getResend();
-  if (!r) return { data: null, error: new Error("RESEND_API_KEY not configured") };
-  return r.emails.send({ from: FROM, to, subject: "Welcome to GrowVia 🚀", html: layout(body) });
+  if (!r) {
+    console.error("[email] sendWelcomeEmail: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+
+  console.log(`[email] sendWelcomeEmail → ${to} (role=${role})`);
+  const result = await r.emails.send({ from: FROM, to, subject: "Welcome to GrowVia 🚀", html: layout(body) });
+  if (result.error) {
+    console.error(`[email] sendWelcomeEmail failed for ${to}:`, result.error);
+  } else {
+    console.log(`[email] sendWelcomeEmail sent (id=${result.data?.id}) → ${to}`);
+  }
+  return result;
 }
 
 // ─── 2. Session booking confirmation ─────────────────────────────────────────
