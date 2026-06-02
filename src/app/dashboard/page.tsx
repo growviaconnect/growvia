@@ -1151,7 +1151,7 @@ function DashboardContent() {
                         title={t("dash_no_upcoming")}
                         desc={t("dash_no_upcoming_desc")}
                         action={
-                          <Link href="/explore"
+                          <Link href="/explore/find-a-mentor"
                             className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
                             {t("dash_explore_mentors")}
                           </Link>
@@ -1193,7 +1193,7 @@ function DashboardContent() {
                           </p>
                         </div>
                         <Link
-                          href="/explore"
+                          href="/explore/find-a-mentor"
                           className="flex-shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                         >
                           Find a mentor →
@@ -1459,7 +1459,7 @@ function DashboardContent() {
                       ) : (
                         <EmptyState icon={CalendarCheck} title={t("dash_no_sessions")} desc={t("dash_no_sessions_desc")}
                           action={
-                            <Link href="/explore"
+                            <Link href="/explore/find-a-mentor"
                               className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
                               <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
                             </Link>
@@ -1542,7 +1542,7 @@ function DashboardContent() {
                         <Sparkles className="w-4 h-4" /> {t("dash_ai_use_free")}
                       </button>
                       <Link
-                        href="/explore"
+                        href="/explore/find-a-mentor"
                         className="inline-flex items-center justify-center gap-2 border border-white/10 hover:border-[#7C3AED]/40 text-white/50 hover:text-white font-medium px-7 py-3.5 rounded-xl transition-colors text-sm"
                       >
                         <BookOpen className="w-4 h-4" /> {t("dash_ai_browse")}
