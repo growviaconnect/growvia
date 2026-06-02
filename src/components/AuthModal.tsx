@@ -36,6 +36,8 @@ const inputStyle: React.CSSProperties = {
 
 const selectStyle: React.CSSProperties = {
   ...inputStyle,
+  background: "#0d0a1a",
+  color: "#fff",
   appearance: "none",
   WebkitAppearance: "none",
   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
@@ -44,6 +46,9 @@ const selectStyle: React.CSSProperties = {
   paddingRight: 36,
   cursor: "pointer",
 };
+
+const optStyle: React.CSSProperties = { background: "#0d0a1a", color: "#fff" };
+const optDisabledStyle: React.CSSProperties = { background: "#0d0a1a", color: "rgba(255,255,255,0.3)" };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -524,8 +529,8 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
         <div>
           <label htmlFor="m-industry" style={labelStyle}>Industry / Domain of interest</label>
           <select id="m-industry" value={industry} onChange={e => setIndustry(e.target.value)} style={selectStyle}>
-            <option value="" disabled>Select a domain…</option>
-            {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+            <option value="" disabled style={optDisabledStyle}>Select a domain…</option>
+            {INDUSTRIES.map(i => <option key={i} value={i} style={optStyle}>{i}</option>)}
           </select>
         </div>
 
@@ -586,8 +591,8 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
         <div>
           <label htmlFor="me-years" style={labelStyle}>Years of experience</label>
           <select id="me-years" value={yearsExp} onChange={e => setYearsExp(e.target.value)} style={selectStyle}>
-            <option value="" disabled>Select…</option>
-            {YEARS_EXP.map(y => <option key={y} value={y}>{y === "Other" ? "Other" : `${y} years`}</option>)}
+            <option value="" disabled style={optDisabledStyle}>Select…</option>
+            {YEARS_EXP.map(y => <option key={y} value={y} style={optStyle}>{y === "Other" ? "Other" : `${y} years`}</option>)}
           </select>
         </div>
 
@@ -601,8 +606,8 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
         <div>
           <label htmlFor="me-domain" style={labelStyle}>Area of expertise / Domain</label>
           <select id="me-domain" value={domain} onChange={e => setDomain(e.target.value)} style={selectStyle}>
-            <option value="" disabled>Select a domain…</option>
-            {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+            <option value="" disabled style={optDisabledStyle}>Select a domain…</option>
+            {INDUSTRIES.map(i => <option key={i} value={i} style={optStyle}>{i}</option>)}
           </select>
         </div>
 
