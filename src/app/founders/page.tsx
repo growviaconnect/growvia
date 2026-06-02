@@ -145,55 +145,68 @@ export default function FoundersPage() {
           <HeroParticles />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full py-32 pt-40">
-          <p
-            className="animate-fade-up text-[10px] font-bold uppercase tracking-[0.28em] mb-8"
-            style={{ color: "#A78BFA", animationDelay: "0ms" }}
-          >
-            {t("founders_reason_label")}
-          </p>
-          <h1
-            className="animate-fade-up text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight max-w-4xl mb-8"
-            style={{ animationDelay: "120ms" }}
-          >
-            {t("founders_reason_title")}
-          </h1>
-          <p
-            className="animate-fade-up text-lg text-white/45 max-w-xl leading-relaxed mb-12"
-            style={{ animationDelay: "240ms" }}
-          >
-            {t("founders_reason_sub")}
-          </p>
-          <div
-            className="animate-fade-up flex flex-col sm:flex-row items-start sm:items-center gap-4"
-            style={{ animationDelay: "360ms" }}
-          >
-            <Link
-              href="/explore/find-a-mentor"
-              className="inline-flex items-center gap-2.5 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
-              style={{ background: "#7C3AED" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 w-full py-32 pt-40 grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <p
+              className="animate-fade-up text-[10px] font-bold uppercase tracking-[0.28em] mb-8"
+              style={{ color: "#A78BFA", animationDelay: "0ms" }}
             >
-              {t("for_you_mentee_cta")} <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/become-a-mentor"
-              className="inline-flex items-center gap-2.5 text-white/80 hover:text-white font-semibold px-7 py-3.5 rounded-lg transition-all text-sm"
-              style={{ border: "1px solid rgba(124,58,237,0.45)" }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(124,58,237,0.85)";
-                el.style.background  = "rgba(124,58,237,0.1)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(124,58,237,0.45)";
-                el.style.background  = "";
-              }}
+              {t("founders_reason_label")}
+            </p>
+            <h1
+              className="animate-fade-up text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight max-w-4xl mb-8"
+              style={{ animationDelay: "120ms" }}
             >
-              {t("for_you_mentor_cta")}
-            </Link>
+              {t("founders_reason_title")}
+            </h1>
+            <p
+              className="animate-fade-up text-lg text-white/45 max-w-xl leading-relaxed mb-12"
+              style={{ animationDelay: "240ms" }}
+            >
+              {t("founders_reason_sub")}
+            </p>
+            <div
+              className="animate-fade-up flex flex-col sm:flex-row items-start sm:items-center gap-4"
+              style={{ animationDelay: "360ms" }}
+            >
+              <Link
+                href="/explore/find-a-mentor"
+                className="inline-flex items-center gap-2.5 text-white font-semibold px-7 py-3.5 rounded-lg transition-colors text-sm"
+                style={{ background: "#7C3AED" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#6D28D9"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#7C3AED"; }}
+              >
+                {t("for_you_mentee_cta")} <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/become-a-mentor"
+                className="inline-flex items-center gap-2.5 text-white/80 hover:text-white font-semibold px-7 py-3.5 rounded-lg transition-all text-sm"
+                style={{ border: "1px solid rgba(124,58,237,0.45)" }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = "rgba(124,58,237,0.85)";
+                  el.style.background  = "rgba(124,58,237,0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = "rgba(124,58,237,0.45)";
+                  el.style.background  = "";
+                }}
+              >
+                {t("for_you_mentor_cta")}
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero photo — desktop only */}
+          <div className="hidden lg:block relative rounded-2xl overflow-hidden aspect-[4/3]">
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&q=80"
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-[#7C3AED]/10" />
           </div>
         </div>
       </section>
@@ -217,7 +230,16 @@ export default function FoundersPage() {
               <p>{t("founders_mission_p3")}</p>
             </div>
           </div>
-          <div ref={missionStatsRef} className="flex flex-col justify-center">
+          <div ref={missionStatsRef} className="flex flex-col justify-center gap-10">
+            <div className="relative rounded-2xl overflow-hidden aspect-video w-full hidden lg:block">
+              <img
+                src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=900&q=80"
+                alt="Two people having a mentorship conversation"
+                className="w-full h-full object-cover"
+                style={{ filter: "brightness(0.7) saturate(0.6)" }}
+              />
+              <div className="absolute inset-0 bg-[#7C3AED]/20" />
+            </div>
             <div className="flex flex-wrap gap-x-0 gap-y-4">
               {[
                 { value: "2025",                        label: t("founders_stat_founded") },
@@ -244,7 +266,7 @@ export default function FoundersPage() {
       <section className="relative border-t border-white/5 py-32 overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=1600&q=80"
+            src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1600&q=80"
             alt=""
             aria-hidden="true"
             className="w-full h-full object-cover object-center"
@@ -322,8 +344,18 @@ export default function FoundersPage() {
       </section>
 
       {/* ── SECTION 5 — Notre Histoire ────────────────────────────── */}
-      <section className="border-t border-white/5 py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <section className="relative border-t border-white/5 py-32 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <img
+            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&q=80"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover object-center"
+            style={{ filter: "brightness(0.12) saturate(0.3)" }}
+          />
+          <div className="absolute inset-0 bg-[#0D0A1A]/70" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <div
             ref={historyRef}
             className="max-w-[700px] mx-auto text-center"
@@ -357,8 +389,18 @@ export default function FoundersPage() {
               <div
                 key={f.name}
                 ref={(el) => { teamCardRefs.current[i] = el; }}
-                className="group grid md:grid-cols-2 gap-10 items-start py-12 border-b border-white/10"
+                className="group grid md:grid-cols-[200px_1fr_1fr] gap-10 items-start py-12 border-b border-white/10"
               >
+                {/* Photo */}
+                <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden max-w-[180px]">
+                  <img
+                    src={i === 0 ? "/founders-luna.jpg" : "/founders-yasmine.jpg"}
+                    alt={f.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0D0A1A]/60 via-transparent to-transparent" />
+                </div>
+                {/* Name + title */}
                 <div>
                   <h3
                     className="text-5xl font-extrabold text-white transition-colors duration-300 group-hover:text-[#A78BFA] leading-none mb-3"
@@ -369,6 +411,7 @@ export default function FoundersPage() {
                     {f.role}
                   </p>
                 </div>
+                {/* Bio */}
                 <p className="text-base text-white/55 leading-relaxed md:pt-2">
                   {f.bio}
                 </p>
