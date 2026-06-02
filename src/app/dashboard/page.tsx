@@ -10,17 +10,19 @@ import { useLang } from "@/contexts/LangContext";
 import {
   CalendarCheck, Heart, Sparkles, User, Clock, Video,
   ChevronRight, TrendingUp, BookOpen, Settings, LogOut, Loader2, RefreshCw,
-  Users, CheckCircle, XCircle, CalendarRange,
+  Users, CheckCircle, XCircle, CalendarRange, Briefcase,
 } from "lucide-react";
 import AvailabilitySelector from "@/components/AvailabilitySelector";
+import { WorkspaceTab } from "@/components/WorkspaceTab";
 
-type Tab = "overview" | "sessions" | "matching" | "mentees" | "calendar";
+type Tab = "overview" | "sessions" | "matching" | "mentees" | "calendar" | "workspace";
 
 type Connexion = {
   id: string;
   date: string;
   statut: "pending" | "active" | "completed" | "cancelled" | "rescheduled";
   meet_link?: string | null;
+  mentor_id: string | null;
   mentors: { nom: string; email: string; specialite: string | null } | null;
   mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
 };
@@ -355,15 +357,17 @@ function DashboardContent() {
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
     user?.role === "mentor"
       ? [
-          { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
-          { id: "sessions", label: "My Sessions",           icon: CalendarCheck },
-          { id: "mentees",  label: "My Mentees",            icon: Users         },
-          { id: "calendar", label: "Calendar",              icon: CalendarRange },
+          { id: "overview",   label: t("dash_nav_overview"), icon: TrendingUp    },
+          { id: "sessions",   label: "My Sessions",           icon: CalendarCheck },
+          { id: "workspace",  label: "Workspace",             icon: Briefcase     },
+          { id: "mentees",    label: "My Mentees",            icon: Users         },
+          { id: "calendar",   label: "Calendar",              icon: CalendarRange },
         ]
       : [
-          { id: "overview", label: t("dash_nav_overview"), icon: TrendingUp    },
-          { id: "sessions", label: t("dash_nav_sessions"), icon: CalendarCheck },
-          { id: "matching", label: t("dash_nav_matching"), icon: Sparkles      },
+          { id: "overview",   label: t("dash_nav_overview"), icon: TrendingUp    },
+          { id: "sessions",   label: t("dash_nav_sessions"), icon: CalendarCheck },
+          { id: "workspace",  label: "Workspace",            icon: Briefcase     },
+          { id: "matching",   label: t("dash_nav_matching"), icon: Sparkles      },
         ];
   const secondaryNav = [
     ...(user?.role !== "mentor" ? [
@@ -529,7 +533,7 @@ function DashboardContent() {
           const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
           const { data: rows } = await supabase
             .from("connexions")
-            .select("id, date, statut, meet_link, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
+            .select("id, date, statut, meet_link, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
             .eq(idField, profile.id)
             .order("date", { ascending: true });
 
@@ -1822,6 +1826,14 @@ function DashboardContent() {
                 {mentorDbId && <AvailabilitySelector mentorId={mentorDbId} variant="dark" />}
                 <MentorCalendar connexions={connexions} userEmail={user?.email ?? null} fmtDate={fmtDate} fmtTime={fmtTime} t={t} lang={lang} />
               </div>
+            )}
+
+            {/* WORKSPACE */}
+            {tab === "workspace" && user && (
+              <WorkspaceTab
+                connexions={connexions}
+                user={user}
+              />
             )}
 
           </main>
