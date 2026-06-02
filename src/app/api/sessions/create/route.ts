@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
   const anonKey     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   let mentorId: string, menteeEmail: string, topic: string,
-      date: string, time: string, language: string, durationMinutes: number, priceCents: number | null,
-      isFreeSession: boolean;
+      date: string, time: string, language: string, durationMinutes: number,
+      priceCents: number | null, isFreeSession: boolean;
 
   try {
     const body = (await req.json()) as {
@@ -17,15 +17,15 @@ export async function POST(req: NextRequest) {
       date: string; time: string; language?: string; durationMinutes?: number;
       priceCents?: number | null; isFreeSession?: boolean;
     };
-    mentorId       = (body.mentorId    ?? "").trim();
-    menteeEmail    = (body.menteeEmail ?? "").trim();
-    topic          = (body.topic       ?? "").trim();
-    date           = (body.date        ?? "").trim();
-    time           = (body.time        ?? "").trim();
-    language       = (body.language    ?? "").trim();
+    mentorId        = (body.mentorId    ?? "").trim();
+    menteeEmail     = (body.menteeEmail ?? "").trim();
+    topic           = (body.topic       ?? "").trim();
+    date            = (body.date        ?? "").trim();
+    time            = (body.time        ?? "").trim();
+    language        = (body.language    ?? "").trim();
     durationMinutes = body.durationMinutes ?? 60;
-    priceCents     = body.priceCents ?? null;
-    isFreeSession  = body.isFreeSession ?? false;
+    priceCents      = body.priceCents ?? null;
+    isFreeSession   = body.isFreeSession ?? false;
     if (!mentorId || !menteeEmail || !date || !time) throw new Error("missing fields");
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // Resolve mentee DB id + free_session_used flag
+  // ── Resolve mentee ─────────────────────────────────────────────────────────
   const { data: menteeRow } = await client
     .from("mentees")
     .select("id, nom, free_session_used")
@@ -46,12 +46,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Mentee account not found" }, { status: 404 });
   }
 
-  // Guard the free-session path: reject if they've already used it
+  // Guard: reject if they've already used their free session
   if (isFreeSession && menteeRow.free_session_used) {
     return NextResponse.json({ error: "Free session already used" }, { status: 403 });
   }
 
-  // Resolve mentor email and name
+  // ── Resolve mentor ─────────────────────────────────────────────────────────
   const { data: mentorRow } = await client
     .from("mentors")
     .select("email, nom")
@@ -64,7 +64,37 @@ export async function POST(req: NextRequest) {
 
   const dateTimeIso = `${date}T${time}:00`;
 
-  // Insert session
+  // ── 1. Insert connexion (primary dashboard record) ─────────────────────────
+  // This is the record the dashboard, mentor inbox, and accept/decline flows rely on.
+  const { data: connexionRow, error: connexionErr } = await client
+    .from("connexions")
+    .insert({
+      mentor_id: mentorId,
+      mentee_id: menteeRow.id,
+      statut:    "pending",
+      date:      dateTimeIso,
+    })
+    .select("id")
+    .single() as { data: { id: string } | null; error: unknown };
+
+  if (connexionErr || !connexionRow) {
+    console.error("[sessions/create] connexions insert failed:", JSON.stringify(connexionErr));
+    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+  }
+
+  // ── 2. Mark free session used (after connexion is confirmed) ───────────────
+  if (isFreeSession) {
+    await client
+      .from("mentees")
+      .update({ free_session_used: true })
+      .eq("id", menteeRow.id);
+  }
+
+  // ── 3. Insert sessions row (best-effort, for mes-demandes page + payment) ──
+  // Not fatal: the connexion above is the authoritative record. If this fails
+  // (e.g. sessions table missing an RLS policy), the booking still appears in
+  // the dashboard. Run migration 016_sessions_table.sql to fix permanently.
+  let sessionId: string | null = null;
   const { data: sessionRow, error: sessionErr } = await client
     .from("sessions")
     .insert({
@@ -83,32 +113,26 @@ export async function POST(req: NextRequest) {
     .single() as { data: { id: string } | null; error: unknown };
 
   if (sessionErr || !sessionRow) {
-    console.error("[sessions/create] sessions insert:", sessionErr);
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+    // Log the full Supabase error so developers can diagnose the root cause.
+    // Common causes: missing RLS INSERT policy, missing column (run 016_sessions_table.sql).
+    console.error(
+      "[sessions/create] sessions insert failed (booking still created via connexion %s): %s",
+      connexionRow.id,
+      JSON.stringify(sessionErr),
+    );
+  } else {
+    sessionId = sessionRow.id;
   }
 
-  // Mark free session as used (atomically after successful insert)
-  if (isFreeSession) {
-    await client.from("mentees").update({ free_session_used: true }).eq("id", menteeRow.id);
-  }
-
-  // Also insert into connexions so the dashboard can display it
-  await client.from("connexions").insert({
-    mentor_id: mentorId,
-    mentee_id: menteeRow.id,
-    statut:    "pending",
-    date:      dateTimeIso,
-  });
-
-  // Send booking confirmation emails
+  // ── 4. Send booking confirmation emails ────────────────────────────────────
   sendBookingConfirmation({
     mentorEmail: mentorRow.email,
     mentorNom:   mentorRow.nom,
     menteeEmail,
     menteeNom:   menteeRow.nom,
     date:        dateTimeIso,
-    sessionId:   sessionRow.id,
+    sessionId:   sessionId ?? connexionRow.id, // fallback to connexionId as reference
   }).catch(err => console.error("[sessions/create] email:", err));
 
-  return NextResponse.json({ success: true, sessionId: sessionRow.id });
+  return NextResponse.json({ success: true, sessionId: sessionId ?? connexionRow.id });
 }
