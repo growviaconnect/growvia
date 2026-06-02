@@ -42,7 +42,12 @@ const STYLE_APPRENTISSAGE_OPTIONS = [
   { key: "conversational", label: "Flexible & conversational", desc: "Open discussions and organic flow" },
   { key: "practice",       label: "Practice-based exercises",  desc: "Learn by doing with real tasks" },
 ];
-const FORMAT_OPTIONS = ["Video calls", "Messages", "Both"];
+const FOLLOWUP_OPTIONS = [
+  { key: "exercises", label: "Exercises to practice", desc: "Actionable tasks to work on between sessions" },
+  { key: "questions", label: "Questions to prepare",  desc: "Reflection prompts to deepen the session" },
+  { key: "both",      label: "Both",                  desc: "A mix of exercises and questions" },
+  { key: "none",      label: "None",                  desc: "Just the video sessions, nothing extra" },
+];
 
 const QUICK_LANGUES = [
   "French", "English", "Spanish", "Portuguese", "Arabic",
@@ -76,7 +81,7 @@ type S2 = {
 };
 type S3 = {
   competences: CompetenceEntry[]; style_apprentissage: string;
-  frequence_souhaitee: string; format_prefere: string; langues: string[]; motivation: string;
+  format_prefere: string; langues: string[]; motivation: string;
 };
 type S4 = { cv_url: string };
 
@@ -88,7 +93,7 @@ function computeCompletion(s1: S1, s2: S2, s3: S3, s4: S4): number {
     !!s2.objectif_principal, s2.secteurs_vises.length > 0,
     !!s2.poste_cible.trim(), !!s2.horizon_temporel, !!s2.experiences.trim(),
     s3.competences.length > 0, !!s3.style_apprentissage,
-    !!s3.frequence_souhaitee, !!s3.format_prefere, s3.langues.length > 0,
+    !!s3.format_prefere, s3.langues.length > 0,
     !!s3.motivation.trim(), !!s4.cv_url,
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
@@ -193,8 +198,6 @@ export default function MenteeOnboarding() {
   const [cvUploading, setCvUploading] = useState(false);
 
   // Frequency
-  const [freqCount, setFreqCount] = useState(1);
-  const [freqUnit, setFreqUnit]   = useState<"week" | "month">("week");
 
   // Language other dropdown
   const [showLangDropdown, setShowLangDropdown] = useState(false);
@@ -222,7 +225,7 @@ export default function MenteeOnboarding() {
   });
   const [s3, setS3] = useState<S3>({
     competences: [], style_apprentissage: "",
-    frequence_souhaitee: "", format_prefere: "", langues: [], motivation: "",
+    format_prefere: "", langues: [], motivation: "",
   });
   const [s4, setS4] = useState<S4>({ cv_url: "" });
 
@@ -278,16 +281,9 @@ export default function MenteeOnboarding() {
           horizon_temporel:   existing.horizon_temporel   ?? "",
           experiences:        existing.experiences        ?? "",
         });
-        const freqStr = existing.frequence_souhaitee ?? "";
-        const freqMatch = freqStr.match(/^(\d+)x\/(week|month)$/);
-        if (freqMatch) {
-          setFreqCount(parseInt(freqMatch[1]));
-          setFreqUnit(freqMatch[2] as "week" | "month");
-        }
         setS3({
           competences:         existing.competences         ?? [],
           style_apprentissage: existing.style_apprentissage ?? "",
-          frequence_souhaitee: existing.frequence_souhaitee ?? "",
           format_prefere:      existing.format_prefere      ?? "",
           langues:             existing.langues             ?? [],
           motivation:          existing.motivation          ?? "",
@@ -334,13 +330,6 @@ export default function MenteeOnboarding() {
     } finally {
       setCvUploading(false);
     }
-  }
-
-  // ── Frequency ────────────────────────────────────────────────────────────────
-  function updateFreq(count: number, unit: "week" | "month") {
-    setFreqCount(count);
-    setFreqUnit(unit);
-    setS3(prev => ({ ...prev, frequence_souhaitee: `${count}x/${unit}` }));
   }
 
   // ── Competences ──────────────────────────────────────────────────────────────
@@ -432,7 +421,6 @@ export default function MenteeOnboarding() {
         experiences:         s2.experiences.trim()  || null,
         competences:         s3.competences,
         style_apprentissage: s3.style_apprentissage || null,
-        frequence_souhaitee: s3.frequence_souhaitee || null,
         format_prefere:      s3.format_prefere      || null,
         langues:             s3.langues,
         motivation:          s3.motivation.trim()   || null,
@@ -902,57 +890,22 @@ export default function MenteeOnboarding() {
                 </div>
               </div>
 
-              {/* Frequency, toggle + number */}
+              {/* Follow-up support */}
               <div>
-                <FieldLabel>Desired mentoring frequency</FieldLabel>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {/* Number select */}
-                  <div className="relative">
-                    <select
-                      value={freqCount}
-                      onChange={e => updateFreq(parseInt(e.target.value), freqUnit)}
-                      className="pl-3 pr-8 py-2.5 rounded-xl border border-white/10 bg-[#0D0A1A] text-white text-sm focus:outline-none focus:border-[#7C3AED] appearance-none cursor-pointer">
-                      {Array.from({ length: 30 }, (_, i) => i + 1).map(n => (
-                        <option key={n} value={n}>{n}</option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-white/30">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                  {/* Per week / Per month toggle */}
-                  <div className="flex rounded-xl border border-white/10 overflow-hidden">
-                    {(["week", "month"] as const).map(unit => (
-                      <button key={unit} type="button"
-                        onClick={() => updateFreq(freqCount, unit)}
-                        className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-                          freqUnit === unit
-                            ? "bg-[#7C3AED] text-white"
-                            : "text-white/50 hover:text-white/70"
-                        }`}>
-                        Per {unit}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="text-white/25 text-xs">→ {freqCount}x/{freqUnit}</span>
-                </div>
-              </div>
-
-              {/* Format */}
-              <div>
-                <FieldLabel>Preferred format</FieldLabel>
-                <div className="flex gap-2 flex-wrap">
-                  {FORMAT_OPTIONS.map(f => (
-                    <button key={f} type="button"
-                      onClick={() => setS3(prev => ({ ...prev, format_prefere: f }))}
-                      className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-colors ${
-                        s3.format_prefere === f
-                          ? "border-[#7C3AED] bg-[#7C3AED]/10 text-white"
-                          : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
+                <FieldLabel>Do you want follow-up support outside video calls?</FieldLabel>
+                <div className="space-y-2">
+                  {FOLLOWUP_OPTIONS.map(opt => (
+                    <button key={opt.key} type="button"
+                      onClick={() => setS3(prev => ({ ...prev, format_prefere: opt.key }))}
+                      className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                        s3.format_prefere === opt.key
+                          ? "border-[#7C3AED] bg-[#7C3AED]/10"
+                          : "border-white/10 hover:border-white/20"
                       }`}>
-                      {f}
+                      <p className={`text-sm font-semibold mb-0.5 ${
+                        s3.format_prefere === opt.key ? "text-white" : "text-white/60"
+                      }`}>{opt.label}</p>
+                      <p className="text-xs text-white/35">{opt.desc}</p>
                     </button>
                   ))}
                 </div>
