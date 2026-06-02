@@ -201,9 +201,8 @@ export default function FoundersPage() {
           {/* Hero photo — desktop only */}
           <div className="hidden lg:block relative rounded-2xl overflow-hidden aspect-[4/3]">
             <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&q=80"
-              alt=""
-              aria-hidden="true"
+              src="/founders-hero.webp"
+              alt="Luna et Yasmine, fondatrices de GrowVia"
               className="w-full h-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-[#7C3AED]/10" />
