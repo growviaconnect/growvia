@@ -43,7 +43,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    sendWelcomeEmail(email, nom, role).catch(() => {});
+    sendWelcomeEmail(email, nom, role).catch(err =>
+      console.error("[register] welcome email failed:", err)
+    );
 
     return NextResponse.json({ userId: data.user.id });
   } catch (err) {
