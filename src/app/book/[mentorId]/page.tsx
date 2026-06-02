@@ -32,17 +32,12 @@ const PERIOD_SLOTS: Record<string, string[]> = {
 };
 const PERIOD_ORDER = ["morning", "afternoon", "evening"];
 
-const DURATIONS: { label: string; minutes: number; multiplier: number }[] = [
-  { label: "30 min",  minutes: 30, multiplier: 0.5  },
-  { label: "45 min",  minutes: 45, multiplier: 0.75 },
-  { label: "1h",      minutes: 60, multiplier: 1.0  },
-  { label: "1h30",    minutes: 90, multiplier: 1.5  },
+const DURATIONS: { label: string; minutes: number }[] = [
+  { label: "30 min",  minutes: 30 },
+  { label: "45 min",  minutes: 45 },
+  { label: "1h",      minutes: 60 },
+  { label: "1h30",    minutes: 90 },
 ];
-
-/** Round price to nearest 0.5€, with an optional floor. */
-function roundHalf(n: number, floor = 0): number {
-  return Math.max(floor, Math.round(n * 2) / 2);
-}
 
 /** Convert JS Date.getDay() (0=Sun) to our table convention (0=Mon). */
 function jsDayToAvail(jsDay: number): number {
@@ -278,15 +273,10 @@ export default function BookingPage() {
     );
   }
 
-  const price   = mentor.session_price;
-  const canBook = !!selDate && !!selTime;
-
-  // Calculated price based on selected duration (round to nearest 0.5€, min 10€ for 30min)
-  const durMultiplier = DURATIONS.find(d => d.minutes === duration)?.multiplier ?? 1;
-  const sessionPrice  = price != null
-    ? roundHalf(price * durMultiplier, duration === 30 ? 10 : 0)
-    : null;
-  const durLabel = DURATIONS.find(d => d.minutes === duration)?.label ?? "1h";
+  const price        = mentor.session_price;
+  const sessionPrice = price;
+  const canBook      = !!selDate && !!selTime;
+  const durLabel     = DURATIONS.find(d => d.minutes === duration)?.label ?? "1h";
 
   // Languages: only what the mentor actually selected (langues column, fall back to languages)
   const langs = (mentor.langues?.length ? mentor.langues : mentor.languages) ?? [];
@@ -532,14 +522,14 @@ export default function BookingPage() {
                         }`}
                       >
                         {d.label}
-                        {price != null && (
-                          <span className={`ml-2 text-xs ${duration === d.minutes ? "text-white/70" : "text-white/30"}`}>
-                            {roundHalf(price * d.multiplier, d.minutes === 30 ? 10 : 0)}€
-                          </span>
-                        )}
                       </button>
                     ))}
                   </div>
+                  {price != null && (
+                    <p className="mt-2.5 text-xs text-white/40">
+                      Session price: <span className="text-white/70 font-semibold">{price}€</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Language */}
