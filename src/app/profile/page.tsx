@@ -1,11 +1,11 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Edit3, Save, X, Loader2,
-  AlertCircle, CheckCircle2, Check, FileText, User,
+  AlertCircle, CheckCircle2, Check, FileText, Trash2, Upload, User,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,40 +64,6 @@ interface MenteeProfile {
   competences: CompetenceEntry[]; style_apprentissage: string;
   frequence_souhaitee: string; format_prefere: string; langues: string[]; motivation: string;
   cv_url: string; survey_completed: boolean;
-}
-
-// ─── Completion helpers ─────────────────────────────────────────────────────────
-function mentorCompletion(p: MentorProfile): number {
-  // 8 required fields — all filled → 100%
-  const required = [
-    !!p.nom.trim(),
-    !!p.poste_actuel.trim(),
-    p.annees_experience !== "",
-    !!p.localisation.trim(),
-    p.secteurs.length > 0,
-    p.type_profils_aides.length > 0,  // help_with
-    !!p.motivation.trim(),
-    p.session_price != null && p.session_price > 0,  // tarif_horaire
-  ];
-  if (required.every(Boolean)) return 100;
-
-  // Partial score: required fields worth 80%, optional bonus worth 20%
-  const reqScore = Math.round((required.filter(Boolean).length / required.length) * 80);
-  const optional = [!!p.photo_url, !!p.linkedin_url.trim(), !!p.bio.trim(), !!p.cv_url];
-  const optScore = Math.round((optional.filter(Boolean).length / optional.length) * 20);
-  return Math.min(99, reqScore + optScore);
-}
-function menteeCompletion(p: MenteeProfile): number {
-  const checks = [
-    !!p.nom.trim(), !!p.photo_url, !!p.niveau_etudes, !!p.ecole.trim(),
-    !!p.localisation.trim(), !!p.bio.trim(),
-    !!p.objectif_principal, p.secteurs_vises.length > 0, !!p.poste_cible.trim(),
-    !!p.horizon_temporel, !!p.experiences.trim(),
-    p.competences.length > 0, !!p.style_apprentissage,
-    !!p.frequence_souhaitee, !!p.format_prefere, p.langues.length > 0,
-    !!p.motivation.trim(), !!p.cv_url,
-  ];
-  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
 
@@ -228,6 +194,7 @@ export default function ProfilePage() {
   const [mentee, setMentee]             = useState<MenteeProfile>(defaultMentee);
 
   const [photoPreview, setPhotoPreview] = useState("");
+  const [cvUploading,  setCvUploading]  = useState(false);
 
   // ── Toast helper ────────────────────────────────────────────────────────────
   const showToast = useCallback((type: "success" | "error") => {
@@ -343,6 +310,53 @@ export default function ProfilePage() {
     setMentee(p => ({ ...p, competences: p.competences.map(c => c.name === name ? { ...c, rating } : c) }));
   }
 
+  // ── CV upload / delete ──────────────────────────────────────────────────────
+  async function handleCvUpload(file: File) {
+    if (!userId) return;
+    setCvUploading(true);
+    try {
+      const ext  = file.name.split(".").pop() || "pdf";
+      const form = new FormData();
+      form.append("file", file);
+      form.append("bucket", "cvs");
+      form.append("path", `${userId}/cv.${ext}`);
+      const res  = await fetch("/api/mentor/upload-file", { method: "POST", body: form });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error ?? "Upload failed");
+      const storagePath = json.url as string;
+      const table = role === "mentor" ? "mentors" : "mentees";
+      await supabase.from(table).update({ cv_url: storagePath }).eq("id", userId);
+      if (role === "mentor") setMentor(p => ({ ...p, cv_url: storagePath }));
+      else                   setMentee(p => ({ ...p, cv_url: storagePath }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "CV upload failed.");
+    } finally {
+      setCvUploading(false);
+    }
+  }
+
+  async function handleCvDelete() {
+    const cvPath = role === "mentor" ? mentor.cv_url : mentee.cv_url;
+    if (!cvPath || !userId) return;
+    setCvUploading(true);
+    try {
+      await supabase.storage.from("cvs").remove([cvPath]);
+      const table = role === "mentor" ? "mentors" : "mentees";
+      await supabase.from(table).update({ cv_url: null }).eq("id", userId);
+      if (role === "mentor") setMentor(p => ({ ...p, cv_url: "" }));
+      else                   setMentee(p => ({ ...p, cv_url: "" }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete CV.");
+    } finally {
+      setCvUploading(false);
+    }
+  }
+
+  async function openCv(cvPath: string) {
+    const { data } = await supabase.storage.from("cvs").createSignedUrl(cvPath, 3600);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+  }
+
   // ── Save ────────────────────────────────────────────────────────────────────
   async function handleSave() {
     setSaving(true);
@@ -415,8 +429,6 @@ export default function ProfilePage() {
   }
 
   // ── Derived ─────────────────────────────────────────────────────────────────
-  const completion = role === "mentor" ? mentorCompletion(mentor) : role === "mentee" ? menteeCompletion(mentee) : 0;
-  const badgeColor = completion >= 75 ? "#10B981" : completion >= 40 ? "#F59E0B" : "#A78BFA";
   const profileName   = role === "mentor" ? mentor.nom  : mentee.nom;
   const photoUrl      = role === "mentor" ? mentor.photo_url : mentee.photo_url;
   const surveyDone    = role === "mentor" ? mentor.survey_completed : mentee.survey_completed;
@@ -545,19 +557,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Completion badge */}
-              <div className="flex-shrink-0 text-right">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold"
-                  style={{ background: "rgba(255,255,255,0.04)", color: badgeColor }}>
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: badgeColor }} />
-                  {completion}% complete
-                </div>
-                {/* Progress bar */}
-                <div className="mt-2 w-32 h-1 rounded-full bg-white/10 ml-auto">
-                  <div className="h-1 rounded-full transition-all duration-700"
-                    style={{ width: `${completion}%`, background: badgeColor }} />
-                </div>
-              </div>
             </div>
 
             {/* Survey CTA */}
@@ -834,31 +833,13 @@ export default function ProfilePage() {
             {/* Documents */}
             <Section>
               <SectionTitle>Documents</SectionTitle>
-              {editing ? (
-                <div>
-                  <FieldLabel optional>CV (PDF)</FieldLabel>
-                  {mentor.cv_url ? (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#7C3AED]/30"
-                      style={{ background: "rgba(124,58,237,0.08)" }}>
-                      <FileText className="w-4 h-4 text-[#A78BFA] flex-shrink-0" />
-                      <span className="text-sm text-white/70 truncate flex-1">CV uploaded</span>
-                      <a href={mentor.cv_url} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-[#A78BFA] hover:underline flex-shrink-0">View</a>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-white/30">No CV uploaded, complete the survey to add one.</p>
-                  )}
-                </div>
-              ) : (
-                mentor.cv_url
-                  ? <ViewRow label="CV">
-                      <a href={mentor.cv_url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-[#A78BFA] hover:underline">
-                        <FileText className="w-4 h-4" /> View CV
-                      </a>
-                    </ViewRow>
-                  : <p className="text-sm text-white/25">No CV uploaded yet.</p>
-              )}
+              <CvSection
+                cvUrl={mentor.cv_url}
+                uploading={cvUploading}
+                onUpload={handleCvUpload}
+                onDelete={handleCvDelete}
+                onView={openCv}
+              />
             </Section>
           </>
         )}
@@ -1126,31 +1107,13 @@ export default function ProfilePage() {
             {/* Documents */}
             <Section>
               <SectionTitle>Documents</SectionTitle>
-              {editing ? (
-                <div>
-                  <FieldLabel optional>CV (PDF)</FieldLabel>
-                  {mentee.cv_url ? (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#7C3AED]/30"
-                      style={{ background: "rgba(124,58,237,0.08)" }}>
-                      <FileText className="w-4 h-4 text-[#A78BFA] flex-shrink-0" />
-                      <span className="text-sm text-white/70 truncate flex-1">CV uploaded</span>
-                      <a href={mentee.cv_url} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-[#A78BFA] hover:underline flex-shrink-0">View</a>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-white/30">No CV uploaded, complete the survey to add one.</p>
-                  )}
-                </div>
-              ) : (
-                mentee.cv_url
-                  ? <ViewRow label="CV">
-                      <a href={mentee.cv_url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-[#A78BFA] hover:underline">
-                        <FileText className="w-4 h-4" /> View CV
-                      </a>
-                    </ViewRow>
-                  : <p className="text-sm text-white/25">No CV uploaded yet.</p>
-              )}
+              <CvSection
+                cvUrl={mentee.cv_url}
+                uploading={cvUploading}
+                onUpload={handleCvUpload}
+                onDelete={handleCvDelete}
+                onView={openCv}
+              />
             </Section>
           </>
         )}
@@ -1182,6 +1145,78 @@ function Section({ children }: { children: React.ReactNode }) {
     <div className="rounded-2xl border border-white/[0.08] p-7 mb-4"
       style={{ background: "#13111F" }}>
       {children}
+    </div>
+  );
+}
+
+// ── CV upload/view/delete section ────────────────────────────────────────────────
+function CvSection({
+  cvUrl, uploading, onUpload, onDelete, onView,
+}: {
+  cvUrl: string;
+  uploading: boolean;
+  onUpload: (file: File) => void;
+  onDelete: () => void;
+  onView: (path: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const filename = cvUrl ? cvUrl.split("/").pop() ?? "cv" : null;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-white/60">
+          CV <span className="text-white/30 font-normal text-xs ml-1">(optional · PDF or DOC)</span>
+        </p>
+      </div>
+
+      {cvUrl && filename ? (
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-xl border"
+          style={{ background: "rgba(124,58,237,0.07)", borderColor: "rgba(124,58,237,0.25)" }}
+        >
+          <FileText className="w-4 h-4 text-[#A78BFA] flex-shrink-0" />
+          <span className="text-sm text-white/75 truncate flex-1">{filename}</span>
+          <button
+            type="button"
+            onClick={() => onView(cvUrl)}
+            className="text-xs text-[#A78BFA] hover:text-white transition-colors flex-shrink-0"
+          >
+            View
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={uploading}
+            className="flex-shrink-0 p-1 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-40"
+            aria-label="Remove CV"
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => inputRef.current?.click()}
+          className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-dashed border-white/15 hover:border-white/30 text-white/40 hover:text-white/70 text-sm transition-all disabled:opacity-40 w-full"
+        >
+          {uploading
+            ? <><Loader2 className="w-4 h-4 animate-spin flex-shrink-0" /> Uploading…</>
+            : <><Upload className="w-4 h-4 flex-shrink-0" /> Upload CV</>}
+        </button>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        className="hidden"
+        onChange={e => {
+          const file = e.target.files?.[0];
+          if (file) { onUpload(file); e.target.value = ""; }
+        }}
+      />
     </div>
   );
 }
