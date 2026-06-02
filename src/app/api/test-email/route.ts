@@ -1,24 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// POST /api/test-email
-// Body: { to?: string }   — defaults to the admin address if omitted
-// Returns the raw Resend API response so you can see exactly what happened.
-// Remove this route before going to production.
-export async function POST(req: NextRequest) {
+async function runTest(to: string) {
   const key = process.env.RESEND_API_KEY ?? "";
   if (!key) {
-    return NextResponse.json(
-      { ok: false, error: "RESEND_API_KEY is not set in environment variables" },
-      { status: 500 }
-    );
+    return { ok: false as const, error: "RESEND_API_KEY is not set in environment variables" };
   }
-
-  let to = "growviaconnect@gmail.com";
-  try {
-    const body = await req.json();
-    if (typeof body?.to === "string" && body.to.includes("@")) to = body.to;
-  } catch { /* use default */ }
 
   const r = new Resend(key);
   const result = await r.emails.send({
@@ -39,9 +26,27 @@ export async function POST(req: NextRequest) {
 
   if (result.error) {
     console.error("[test-email] Resend error:", result.error);
-    return NextResponse.json({ ok: false, error: result.error }, { status: 500 });
+    return { ok: false as const, error: result.error };
   }
 
-  console.log("[test-email] sent successfully, id:", result.data?.id);
-  return NextResponse.json({ ok: true, id: result.data?.id, to });
+  console.log("[test-email] sent ok, id:", result.data?.id);
+  return { ok: true as const, id: result.data?.id, to };
+}
+
+// GET /api/test-email?to=you@example.com  — easy browser/curl test
+export async function GET(req: NextRequest) {
+  const to = req.nextUrl.searchParams.get("to") ?? "growviaconnect@gmail.com";
+  const result = await runTest(to);
+  return NextResponse.json(result, { status: result.ok ? 200 : 500 });
+}
+
+// POST /api/test-email  — body: { to?: string }
+export async function POST(req: NextRequest) {
+  let to = "growviaconnect@gmail.com";
+  try {
+    const body = await req.json();
+    if (typeof body?.to === "string" && body.to.includes("@")) to = body.to;
+  } catch { /* use default */ }
+  const result = await runTest(to);
+  return NextResponse.json(result, { status: result.ok ? 200 : 500 });
 }
