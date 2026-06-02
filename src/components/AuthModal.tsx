@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Eye, EyeOff, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { X, Eye, EyeOff, Check, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { setAuthCookie } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Role as SessionRole } from "@/lib/session";
 
 type Tab = "signin" | "signup";
 type Role = "mentee" | "mentor";
@@ -222,11 +227,19 @@ function ProgressDots({ total, current }: { total: number; current: number }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const overlayRef    = useRef<HTMLDivElement>(null);
+  const router        = useRouter();
+  const { setSession } = useAuth();
 
   // Sign-in state
   const [siEmail,    setSiEmail]    = useState("");
   const [siPassword, setSiPassword] = useState("");
+  const [siLoading,  setSiLoading]  = useState(false);
+  const [siError,    setSiError]    = useState<string | null>(null);
+
+  // Sign-up error/loading
+  const [suLoading, setSuLoading] = useState(false);
+  const [suError,   setSuError]   = useState<string | null>(null);
 
   // Sign-up — step 0
   const [suEmail,    setSuEmail]    = useState("");
@@ -304,15 +317,91 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
     return suEmail.trim() && suPassword.length >= 8 && suConfirm === suPassword && role !== null;
   }
 
-  // ── Primary submit (placeholder) ──────────────────────────────────────────
+  // ── Sign-in ────────────────────────────────────────────────────────────────
 
-  function handleSignIn(e: React.FormEvent) {
+  async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: Supabase auth
+    setSiError(null);
+    setSiLoading(true);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: siEmail.trim().toLowerCase(),
+        password: siPassword,
+      });
+      if (authError) throw authError;
+
+      const user = data.user;
+      const meta = user.user_metadata ?? {};
+      const role = (meta.role as SessionRole) || "mentee";
+      const nom  = (meta.nom  as string)      || user.email || "";
+
+      setSession({ nom, email: user.email!, role, plan: (meta.plan as "free" | "pro" | "school") || "free" });
+      setAuthCookie();
+
+      onClose();
+
+      if (role === "mentor") {
+        const { data: mentorRow } = await supabase
+          .from("mentors")
+          .select("onboarding_completed")
+          .eq("email", user.email!)
+          .single();
+        if (mentorRow && !mentorRow.onboarding_completed) {
+          router.push("/onboarding/mentor");
+          return;
+        }
+      }
+      router.push("/dashboard");
+    } catch {
+      setSiError("Incorrect email or password. Please try again.");
+    } finally {
+      setSiLoading(false);
+    }
   }
 
-  function handleFinalSubmit() {
-    // TODO: Supabase create account + profile
+  // ── Sign-up final submit ───────────────────────────────────────────────────
+
+  async function handleFinalSubmit() {
+    setSuError(null);
+    setSuLoading(true);
+    const email = suEmail.trim().toLowerCase();
+    const nom   = fullName.trim();
+    const r     = role!;
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: suPassword, role: r, nom }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        const msg = (json.error ?? "").toLowerCase();
+        if (msg.includes("already") || msg.includes("duplicate") || msg.includes("unique")) {
+          throw new Error("An account with this email already exists.");
+        }
+        throw new Error(json.error ?? "Registration failed. Please try again.");
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: suPassword });
+      if (signInError) throw signInError;
+
+      if (r === "mentor") {
+        await supabase.from("mentors").insert({ nom, email, statut: "pending" });
+      } else {
+        await supabase.from("mentees").insert({ nom, email, statut: "pending" });
+      }
+
+      setSession({ nom, email, role: r, plan: "free" });
+      setAuthCookie();
+
+      onClose();
+      router.push(r === "mentor" ? "/onboarding/mentor" : "/dashboard");
+    } catch (err: unknown) {
+      setSuError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+    } finally {
+      setSuLoading(false);
+    }
   }
 
   // ── Tier display ───────────────────────────────────────────────────────────
@@ -325,6 +414,13 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
   function renderSignIn() {
     return (
       <form onSubmit={handleSignIn} className="flex flex-col gap-3">
+        {siError && (
+          <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs text-red-400 border border-red-500/20 bg-red-500/10">
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+            {siError}
+          </div>
+        )}
+
         <div>
           <label htmlFor="si-email" style={labelStyle}>Email</label>
           <FocusInput id="si-email" type="email" placeholder="you@example.com" value={siEmail} onChange={setSiEmail} autoComplete="email" />
@@ -342,15 +438,16 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
 
         <button
           type="submit"
-          className="mt-1 w-full py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+          disabled={siLoading}
+          className="mt-1 w-full py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)", boxShadow: "0 4px 20px rgba(124,58,237,0.45)" }}
         >
-          Enter
+          {siLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</> : "Enter"}
         </button>
 
         <p className="text-center text-xs text-white/30 mt-1">
           No account yet?{" "}
-          <button type="button" onClick={() => { onTabChange("signup"); setStep(0); }} className="text-[#A78BFA] hover:text-white transition-colors">
+          <button type="button" onClick={() => { onTabChange("signup"); setStep(0); setSiError(null); }} className="text-[#A78BFA] hover:text-white transition-colors">
             Sign up
           </button>
         </p>
@@ -808,14 +905,25 @@ export default function AuthModal({ open, onClose, tab, onTabChange }: AuthModal
               </button>
 
               {isFinalStep() ? (
-                <button
-                  type="button"
-                  onClick={handleFinalSubmit}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-                  style={{ background: "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)", boxShadow: "0 4px 20px rgba(124,58,237,0.45)" }}
-                >
-                  {role === "mentor" ? "Join as Mentor" : "Join as Mentee"}
-                </button>
+                <>
+                  {suError && (
+                    <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs text-red-400 border border-red-500/20 bg-red-500/10 w-full mb-2">
+                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                      {suError}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleFinalSubmit}
+                    disabled={suLoading}
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{ background: "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)", boxShadow: "0 4px 20px rgba(124,58,237,0.45)" }}
+                  >
+                    {suLoading
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account…</>
+                      : (role === "mentor" ? "Join as Mentor" : "Join as Mentee")}
+                  </button>
+                </>
               ) : (
                 <button
                   type="button"
