@@ -423,10 +423,10 @@ function DashboardContent() {
       try {
         const { data } = await supabase
           .from("mentees")
-          .select("free_ai_match_used")
+          .select("has_used_free_ai_match")
           .eq("id", menteeDbId)
           .single();
-        if (data?.free_ai_match_used) {
+        if (data?.has_used_free_ai_match) {
           setFreeAiMatchUsed(true);
           setShowQuestionnaire(false);
         }
@@ -476,7 +476,7 @@ function DashboardContent() {
         const table = us.role === "mentor" ? "mentors" : "mentees";
         const { data: profile } = await supabase
           .from(table)
-          .select("id, statut, onboarding_completed, free_ai_match_used, free_discovery_used, field, interests, main_goal")
+          .select("id, statut, onboarding_completed, has_used_free_ai_match, free_session_used, field, interests, main_goal")
           .eq("email", us.email)
           .single();
 
@@ -497,8 +497,8 @@ function DashboardContent() {
         // Track freemium AI match state for mentees
         if (us.role === "mentee" && profile) {
           setMenteeDbId(profile.id);
-          setFreeAiMatchUsed(profile.free_ai_match_used ?? false);
-          setFreeDiscoveryUsed(profile.free_discovery_used ?? false);
+          setFreeAiMatchUsed(profile.has_used_free_ai_match ?? false);
+          setFreeDiscoveryUsed(profile.free_session_used ?? false);
           setMenteeProfile({
             field: profile.field ?? null,
             interests: profile.interests ?? null,
@@ -507,7 +507,7 @@ function DashboardContent() {
           });
 
           // Restore saved match results so returning users always see their top 3
-          if (profile.free_ai_match_used) {
+          if (profile.has_used_free_ai_match) {
             const { data: authSession } = await supabase.auth.getUser();
             if (authSession.user?.id) {
               const { data: latestResponse } = await supabase

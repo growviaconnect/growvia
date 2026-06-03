@@ -36,18 +36,19 @@ export async function POST(req: NextRequest) {
   });
 
   // ── Resolve mentee ─────────────────────────────────────────────────────────
+  // Read free_session_used (migration 014, always exists)
   const { data: menteeRow } = await client
     .from("mentees")
-    .select("id, nom, free_discovery_used")
+    .select("id, nom, free_session_used")
     .eq("email", menteeEmail)
-    .single() as { data: { id: string; nom: string; free_discovery_used: boolean } | null };
+    .single() as { data: { id: string; nom: string; free_session_used: boolean } | null };
 
   if (!menteeRow) {
     return NextResponse.json({ error: "Mentee account not found" }, { status: 404 });
   }
 
   // Guard: reject if they've already used their free discovery session
-  if (isFreeSession && menteeRow.free_discovery_used) {
+  if (isFreeSession && menteeRow.free_session_used) {
     return NextResponse.json({ error: "Free session already used" }, { status: 403 });
   }
 
@@ -86,11 +87,11 @@ export async function POST(req: NextRequest) {
   if (isFreeSession) {
     const { error: flagErr } = await client
       .from("mentees")
-      .update({ free_discovery_used: true, free_session_used: true })
+      .update({ free_session_used: true })
       .eq("id", menteeRow.id);
     if (flagErr) {
       console.error(
-        "[sessions/create] failed to mark free_discovery_used for mentee %s: %s",
+        "[sessions/create] failed to mark free_session_used for mentee %s: %s",
         menteeRow.id, JSON.stringify(flagErr),
       );
     }

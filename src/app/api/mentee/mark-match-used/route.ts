@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await admin
       .from("mentees")
-      .update({ free_ai_match_used: true, has_used_free_ai_match: true })
+      .update({ has_used_free_ai_match: true })
       .eq("id", menteeId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
   const { error } = await client
     .from("mentees")
-    .update({ free_ai_match_used: true, has_used_free_ai_match: true })
+    .update({ has_used_free_ai_match: true })
     .eq("id", menteeId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
