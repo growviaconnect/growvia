@@ -657,24 +657,15 @@ function DashboardContent() {
     setMatchLoading(true);
 
     try {
-      // Persist the free-trial flag server-side (service role key bypasses RLS)
-      if (menteeDbId) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session?.access_token ?? "";
-        await fetch("/api/mentee/mark-match-used", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ menteeId: menteeDbId }),
-        });
-      }
-      setFreeAiMatchUsed(true);
       setMenteeProfile(updatedProfile);
 
-      const { data: mentors } = await supabase
+      const { data: mentors, error: mentorsErr } = await supabase
         .from("mentors")
         .select("id, nom, job_title, specialite, industry, expertise, languages, location, bio, mentor_score, match_score_override")
         .eq("statut", "active")
         .limit(50);
+
+      if (mentorsErr) throw mentorsErr;
 
       const ranked: MatchResult[] = (mentors ?? [])
         .map((m) => {
@@ -690,8 +681,22 @@ function DashboardContent() {
 
       setMatches(ranked);
 
+      // Mark flag ONLY after matching completes successfully — fire-and-forget the API call
+      if (menteeDbId) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token ?? "";
+        fetch("/api/mentee/mark-match-used", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ menteeId: menteeDbId }),
+        }).catch(err => console.error("[dashboard] mark-match-used failed:", err));
+      }
+      setFreeAiMatchUsed(true);
+
       // Save questionnaire response + match results, fire-and-forget
       saveMatchingResponse({ ...snapshot, matchResults: ranked }).catch(() => {});
+    } catch (err) {
+      console.error("[dashboard] AI matching failed — flag NOT marked:", err);
     } finally {
       setMatchLoading(false);
     }

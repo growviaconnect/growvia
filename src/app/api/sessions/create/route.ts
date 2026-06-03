@@ -84,10 +84,16 @@ export async function POST(req: NextRequest) {
 
   // ── 2. Mark free discovery session used (after connexion is confirmed) ───────
   if (isFreeSession) {
-    await client
+    const { error: flagErr } = await client
       .from("mentees")
       .update({ free_discovery_used: true, free_session_used: true })
       .eq("id", menteeRow.id);
+    if (flagErr) {
+      console.error(
+        "[sessions/create] failed to mark free_discovery_used for mentee %s: %s",
+        menteeRow.id, JSON.stringify(flagErr),
+      );
+    }
   }
 
   // ── 3. Insert sessions row (best-effort, for mes-demandes page + payment) ──
