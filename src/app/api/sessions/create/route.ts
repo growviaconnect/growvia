@@ -80,7 +80,10 @@ export async function POST(req: NextRequest) {
 
   if (connexionErr || !connexionRow) {
     console.error("[sessions/create] connexions insert failed:", JSON.stringify(connexionErr));
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+    return NextResponse.json({
+      error: "Failed to create session",
+      detail: connexionErr,
+    }, { status: 500 });
   }
 
   // ── 2. Mark free discovery session used (after connexion is confirmed) ───────
