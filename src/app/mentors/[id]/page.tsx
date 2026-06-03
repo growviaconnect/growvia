@@ -52,13 +52,13 @@ function BookCTA({ mentorId, price, mentorScore }: {
     setSubLoading(true);
     supabase
       .from("mentees")
-      .select("id, free_discovery_used")
+      .select("id, free_session_used")
       .eq("email", session.email)
       .single()
       .then(({ data: menteeRow }) => {
-        if (!menteeRow) { setFreeSessionUsed(true); setSubLoading(false); return; }
-        const row = menteeRow as { id: string; free_discovery_used: boolean };
-        setFreeSessionUsed(row.free_discovery_used);
+        if (!menteeRow) { setFreeSessionUsed(false); setSubLoading(false); return; }
+        const row = menteeRow as { id: string; free_session_used: boolean };
+        setFreeSessionUsed(row.free_session_used);
         supabase
           .from("mentee_subscriptions")
           .select("plan, status")

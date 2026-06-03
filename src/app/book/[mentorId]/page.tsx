@@ -112,7 +112,7 @@ export default function BookingPage() {
   const session = getUserSession();
   const [subChecked,        setSubChecked]        = useState(false);
   const [hasSub,            setHasSub]            = useState(false);
-  const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(true); // pessimistic default
+  const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(false); // gate is guarded by subChecked; false is the safe default
 
   useEffect(() => {
     if (!mentorId) return;
@@ -134,11 +134,21 @@ export default function BookingPage() {
   useEffect(() => {
     if (!session?.email || session.role !== "mentee") { setSubChecked(true); return; }
     supabase
-      .from("mentees").select("id, free_discovery_used").eq("email", session.email).single()
+      .from("mentees")
+      // Use free_session_used — it has existed since migration 014 and is always kept in sync
+      .select("id, free_session_used")
+      .eq("email", session.email)
+      .single()
       .then(({ data: menteeRow }) => {
-        if (!menteeRow) { setSubChecked(true); return; }
-        const row = menteeRow as { id: string; free_discovery_used: boolean };
-        setFreeDiscoveryUsed(row.free_discovery_used);
+        if (!menteeRow) {
+          // Row not found or column error — default to false so new accounts are never blocked
+          console.warn("[booking] mentee row missing; treating free_discovery as unused");
+          setFreeDiscoveryUsed(false);
+          setSubChecked(true);
+          return;
+        }
+        const row = menteeRow as { id: string; free_session_used: boolean };
+        setFreeDiscoveryUsed(row.free_session_used ?? false);
         supabase
           .from("mentee_subscriptions")
           .select("id")
@@ -149,6 +159,11 @@ export default function BookingPage() {
             setHasSub((data?.length ?? 0) > 0);
             setSubChecked(true);
           });
+      })
+      .catch(() => {
+        console.warn("[booking] mentee fetch threw; treating free_discovery as unused");
+        setFreeDiscoveryUsed(false);
+        setSubChecked(true);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.email]);
