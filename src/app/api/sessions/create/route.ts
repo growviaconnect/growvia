@@ -38,16 +38,16 @@ export async function POST(req: NextRequest) {
   // ── Resolve mentee ─────────────────────────────────────────────────────────
   const { data: menteeRow } = await client
     .from("mentees")
-    .select("id, nom, free_session_used")
+    .select("id, nom, free_discovery_used")
     .eq("email", menteeEmail)
-    .single() as { data: { id: string; nom: string; free_session_used: boolean } | null };
+    .single() as { data: { id: string; nom: string; free_discovery_used: boolean } | null };
 
   if (!menteeRow) {
     return NextResponse.json({ error: "Mentee account not found" }, { status: 404 });
   }
 
-  // Guard: reject if they've already used their free session
-  if (isFreeSession && menteeRow.free_session_used) {
+  // Guard: reject if they've already used their free discovery session
+  if (isFreeSession && menteeRow.free_discovery_used) {
     return NextResponse.json({ error: "Free session already used" }, { status: 403 });
   }
 
@@ -82,11 +82,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
   }
 
-  // ── 2. Mark free session used (after connexion is confirmed) ───────────────
+  // ── 2. Mark free discovery session used (after connexion is confirmed) ───────
   if (isFreeSession) {
     await client
       .from("mentees")
-      .update({ free_session_used: true })
+      .update({ free_discovery_used: true, free_session_used: true })
       .eq("id", menteeRow.id);
   }
 

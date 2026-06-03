@@ -1,8 +1,6 @@
 -- 016_sessions_table.sql
 -- Creates the sessions table with full schema and RLS policies.
 -- Safe to re-run: all statements use IF NOT EXISTS / DROP IF EXISTS.
--- Run in Supabase SQL Editor:
--- https://supabase.com/dashboard/project/txpibvjktfltowjmvvmg/sql
 
 CREATE TABLE IF NOT EXISTS public.sessions (
   id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -15,8 +13,7 @@ CREATE TABLE IF NOT EXISTS public.sessions (
   language          TEXT,
   duration_minutes  INTEGER     DEFAULT 60,
   price_cents       INTEGER,
-  status            TEXT        DEFAULT 'pending'
-                      CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled')),
+  status            TEXT        DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled')),
   meet_link         TEXT,
   stripe_session_id TEXT,
   payment_intent_id TEXT,
@@ -25,7 +22,7 @@ CREATE TABLE IF NOT EXISTS public.sessions (
   created_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Idempotent: add any columns that may be missing in older schemas
+-- Idempotent: add columns that may be missing in older manually-created schemas
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS mentee_email      TEXT;
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS language          TEXT;
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS price_cents       INTEGER;

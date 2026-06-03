@@ -110,9 +110,9 @@ export default function BookingPage() {
 
   // ── Auth + subscription gate
   const session = getUserSession();
-  const [subChecked,      setSubChecked]      = useState(false);
-  const [hasSub,          setHasSub]          = useState(false);
-  const [freeSessionUsed, setFreeSessionUsed] = useState(true); // pessimistic default
+  const [subChecked,        setSubChecked]        = useState(false);
+  const [hasSub,            setHasSub]            = useState(false);
+  const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(true); // pessimistic default
 
   useEffect(() => {
     if (!mentorId) return;
@@ -130,15 +130,15 @@ export default function BookingPage() {
     });
   }, [mentorId]);
 
-  // ── Subscription + free-session gate
+  // ── Subscription + free-discovery gate
   useEffect(() => {
     if (!session?.email || session.role !== "mentee") { setSubChecked(true); return; }
     supabase
-      .from("mentees").select("id, free_session_used").eq("email", session.email).single()
+      .from("mentees").select("id, free_discovery_used").eq("email", session.email).single()
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setSubChecked(true); return; }
-        const row = menteeRow as { id: string; free_session_used: boolean };
-        setFreeSessionUsed(row.free_session_used);
+        const row = menteeRow as { id: string; free_discovery_used: boolean };
+        setFreeDiscoveryUsed(row.free_discovery_used);
         supabase
           .from("mentee_subscriptions")
           .select("id")
@@ -201,13 +201,13 @@ export default function BookingPage() {
   async function handleSubmit() {
     if (!selDate || !selTime) { setSubmitErr("Please pick a date and time."); return; }
     if (!session?.email) { router.push(`/auth/register?redirect=/book/${mentorId}`); return; }
-    // Must have either a free session available OR an active subscription
-    if (freeSessionUsed && !hasSub) { router.push("/subscribe"); return; }
+    // Must have either a free discovery session available OR an active subscription
+    if (freeDiscoveryUsed && !hasSub) { router.push("/subscribe"); return; }
 
     setSubmitting(true);
     setSubmitErr(null);
 
-    const isFreeSession = !freeSessionUsed && !hasSub;
+    const isFreeSession = !freeDiscoveryUsed && !hasSub;
 
     try {
       const res = await fetch("/api/sessions/create", {
@@ -253,8 +253,8 @@ export default function BookingPage() {
     );
   }
 
-  // Gate: block only when free session already used AND no active subscription
-  if (subChecked && freeSessionUsed && !hasSub && session?.role === "mentee") {
+  // Gate: block only when free discovery session already used AND no active subscription
+  if (subChecked && freeDiscoveryUsed && !hasSub && session?.role === "mentee") {
     return (
       <div className="min-h-screen bg-[#0D0A1A] flex flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-2xl">🚀</p>
@@ -273,9 +273,10 @@ export default function BookingPage() {
     );
   }
 
-  const price        = mentor.session_price;
-  const sessionPrice = price;
-  const canBook      = !!selDate && !!selTime;
+  const price           = mentor.session_price;
+  const sessionPrice    = price;
+  const isFreeSession   = subChecked && !freeDiscoveryUsed && !hasSub;
+  const canBook         = !!selDate && !!selTime;
   const durLabel     = DURATIONS.find(d => d.minutes === duration)?.label ?? "1h";
 
   // Languages: only what the mentor actually selected (langues column, fall back to languages)
@@ -600,12 +601,22 @@ export default function BookingPage() {
                 </div>
               )}
 
+              {/* Free discovery badge */}
+              {isFreeSession && (
+                <div
+                  className="rounded-xl px-3 py-2 mb-4 flex items-center gap-2 text-xs font-semibold"
+                  style={{ background: "rgba(16,185,129,0.10)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399" }}
+                >
+                  🎁 Free discovery session — no charge
+                </div>
+              )}
+
               {/* Price breakdown */}
               <div className="space-y-3 mb-5">
                 <div className="flex justify-between text-sm">
                   <span className="text-white/50">Session ({durLabel})</span>
-                  <span className="text-white font-semibold">
-                    {sessionPrice != null ? `${sessionPrice}€` : "–"}
+                  <span className={isFreeSession ? "text-[#34d399] font-semibold" : "text-white font-semibold"}>
+                    {isFreeSession ? "Gratuit — 0€" : sessionPrice != null ? `${sessionPrice}€` : "–"}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -614,8 +625,8 @@ export default function BookingPage() {
                 </div>
                 <div className="flex justify-between text-sm font-bold border-t border-white/[0.06] pt-3">
                   <span className="text-white">Total</span>
-                  <span className="text-white">
-                    {sessionPrice != null ? `${sessionPrice}€` : "Price on request"}
+                  <span className={isFreeSession ? "text-[#34d399]" : "text-white"}>
+                    {isFreeSession ? "0€ — Gratuit" : sessionPrice != null ? `${sessionPrice}€` : "Price on request"}
                   </span>
                 </div>
               </div>
@@ -642,7 +653,9 @@ export default function BookingPage() {
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    Request session{sessionPrice != null ? ` · ${sessionPrice}€` : ""}
+                    {isFreeSession
+                      ? "Request free session · 0€"
+                      : `Request session${sessionPrice != null ? ` · ${sessionPrice}€` : ""}`}
                   </>
                 )}
               </button>
@@ -654,7 +667,9 @@ export default function BookingPage() {
               )}
 
               <p className="text-xs text-white/25 text-center mt-3 leading-relaxed">
-                No charge now. Your saved card is billed when the mentor confirms.
+                {isFreeSession
+                  ? "This session is completely free — no card required."
+                  : "No charge now. Your saved card is billed when the mentor confirms."}
               </p>
             </Card>
           </div>
