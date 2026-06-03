@@ -43,22 +43,22 @@ function BookCTA({ mentorId, price, mentorScore }: {
   const session = getUserSession();
 
   // null = still loading
-  const [subPlan,         setSubPlan]         = useState<string | null>(null);
-  const [freeSessionUsed, setFreeSessionUsed] = useState<boolean | null>(null);
-  const [subLoading,      setSubLoading]      = useState(false);
+  const [subPlan,           setSubPlan]           = useState<string | null>(null);
+  const [freeSessionUsed,   setFreeSessionUsed]   = useState<boolean | null>(null);
+  const [subLoading,        setSubLoading]        = useState(false);
 
   useEffect(() => {
     if (session?.role !== "mentee" || !session.email) return;
     setSubLoading(true);
     supabase
       .from("mentees")
-      .select("id, free_session_used")
+      .select("id, free_discovery_used")
       .eq("email", session.email)
       .single()
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setFreeSessionUsed(true); setSubLoading(false); return; }
-        const row = menteeRow as { id: string; free_session_used: boolean };
-        setFreeSessionUsed(row.free_session_used);
+        const row = menteeRow as { id: string; free_discovery_used: boolean };
+        setFreeSessionUsed(row.free_discovery_used);
         supabase
           .from("mentee_subscriptions")
           .select("plan, status")

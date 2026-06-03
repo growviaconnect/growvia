@@ -327,8 +327,8 @@ function DashboardContent() {
   const [loading, setLoading]               = useState(true);
   const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack]       = useState(false);
-  const [hasUsedFreeMatch, setHasUsedFreeMatch] = useState(false);
-  const [freeSessionUsed, setFreeSessionUsed]   = useState(false);
+  const [freeAiMatchUsed,   setFreeAiMatchUsed]   = useState(false);
+  const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(false);
   const [menteeDbId, setMenteeDbId]         = useState<string | null>(null);
   const [menteeProfile, setMenteeProfile]   = useState<MenteeMatchProfile | null>(null);
   const [matches, setMatches]               = useState<MatchResult[]>([]);
@@ -423,11 +423,11 @@ function DashboardContent() {
       try {
         const { data } = await supabase
           .from("mentees")
-          .select("has_used_free_ai_match")
+          .select("free_ai_match_used")
           .eq("id", menteeDbId)
           .single();
-        if (data?.has_used_free_ai_match) {
-          setHasUsedFreeMatch(true);
+        if (data?.free_ai_match_used) {
+          setFreeAiMatchUsed(true);
           setShowQuestionnaire(false);
         }
       } catch {
@@ -476,7 +476,7 @@ function DashboardContent() {
         const table = us.role === "mentor" ? "mentors" : "mentees";
         const { data: profile } = await supabase
           .from(table)
-          .select("id, statut, onboarding_completed, has_used_free_ai_match, free_session_used, field, interests, main_goal")
+          .select("id, statut, onboarding_completed, free_ai_match_used, free_discovery_used, field, interests, main_goal")
           .eq("email", us.email)
           .single();
 
@@ -497,8 +497,8 @@ function DashboardContent() {
         // Track freemium AI match state for mentees
         if (us.role === "mentee" && profile) {
           setMenteeDbId(profile.id);
-          setHasUsedFreeMatch(profile.has_used_free_ai_match ?? false);
-          setFreeSessionUsed(profile.free_session_used ?? false);
+          setFreeAiMatchUsed(profile.free_ai_match_used ?? false);
+          setFreeDiscoveryUsed(profile.free_discovery_used ?? false);
           setMenteeProfile({
             field: profile.field ?? null,
             interests: profile.interests ?? null,
@@ -507,7 +507,7 @@ function DashboardContent() {
           });
 
           // Restore saved match results so returning users always see their top 3
-          if (profile.has_used_free_ai_match) {
+          if (profile.free_ai_match_used) {
             const { data: authSession } = await supabase.auth.getUser();
             if (authSession.user?.id) {
               const { data: latestResponse } = await supabase
@@ -581,7 +581,7 @@ function DashboardContent() {
 
   function handleStartMatching() {
     // Guard: free trial already used, never re-open questionnaire
-    if (hasUsedFreeMatch) {
+    if (freeAiMatchUsed) {
       setTab("matching");
       return;
     }
@@ -667,7 +667,7 @@ function DashboardContent() {
           body: JSON.stringify({ menteeId: menteeDbId }),
         });
       }
-      setHasUsedFreeMatch(true);
+      setFreeAiMatchUsed(true);
       setMenteeProfile(updatedProfile);
 
       const { data: mentors } = await supabase
@@ -1005,7 +1005,7 @@ function DashboardContent() {
                         { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
                         { label: t("dash_stat_done"),       value: past.length,          icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
                         { label: t("dash_stat_upcoming"),   value: upcoming.length,      icon: Clock,         accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                        { label: t("dash_stat_ai"),         value: user?.plan !== "free" ? "∞" : hasUsedFreeMatch ? "1" : "0", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                        { label: t("dash_stat_ai"),         value: user?.plan !== "free" ? "∞" : freeAiMatchUsed ? "1" : "0", icon: Sparkles, accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
                       ]
                   ).map((stat) => (
                     <Card key={stat.label} className="p-5">
@@ -1159,14 +1159,14 @@ function DashboardContent() {
                       />
                     )}
 
-                    {/* Trial-over banner */}
-                    {hasUsedFreeMatch && freeSessionUsed && user?.plan === "free" && (
+                    {/* Trial-over banner — shown when BOTH free trials have been used */}
+                    {freeDiscoveryUsed && freeAiMatchUsed && (
                       <div
                         className="rounded-2xl p-5 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                         style={{ background: "rgba(245,158,11,0.06)" }}
                       >
                         <div>
-                          <p className="text-white font-semibold mb-0.5">Your free trial is over.</p>
+                          <p className="text-white font-semibold mb-0.5">Free trials used.</p>
                           <p className="text-white/45 text-sm">
                             Subscribe to continue booking sessions and using AI matching.
                           </p>
@@ -1180,8 +1180,8 @@ function DashboardContent() {
                       </div>
                     )}
 
-                    {/* Free discovery session banner */}
-                    {!freeSessionUsed && (
+                    {/* Free discovery session banner — hidden once flag is set */}
+                    {!freeDiscoveryUsed && (
                       <div
                         className="rounded-2xl p-5 border border-emerald-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                         style={{ background: "rgba(16,185,129,0.06)" }}
@@ -1201,7 +1201,8 @@ function DashboardContent() {
                       </div>
                     )}
 
-                    {user?.plan === "free" && !hasUsedFreeMatch && (
+                    {/* Free AI matching banner — hidden once flag is set */}
+                    {!freeAiMatchUsed && (
                       <div className="rounded-2xl p-6 border border-[#7C3AED]/30"
                         style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1516,7 +1517,7 @@ function DashboardContent() {
                 )}
 
                 {/* ── Free trial available, entry CTA ── */}
-                {!matchLoading && !showQuestionnaire && user?.plan === "free" && !hasUsedFreeMatch && (
+                {!matchLoading && !showQuestionnaire && !freeAiMatchUsed && (
                   <Card className="p-10 text-center">
                     <div
                       className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
@@ -1552,7 +1553,7 @@ function DashboardContent() {
                 )}
 
                 {/* ── Questionnaire (shown after clicking "Use my free match") ── */}
-                {!matchLoading && showQuestionnaire && !hasUsedFreeMatch && (() => {
+                {!matchLoading && showQuestionnaire && !freeAiMatchUsed && (() => {
                   function pill(
                     label: string,
                     active: boolean,
@@ -1753,8 +1754,8 @@ function DashboardContent() {
                   </>
                 )}
 
-                {/* ── Upgrade banner, shown to free users after trial is consumed ── */}
-                {!matchLoading && user?.plan === "free" && hasUsedFreeMatch && (
+                {/* ── Upgrade banner, shown after AI matching trial is consumed ── */}
+                {!matchLoading && user?.plan === "free" && freeAiMatchUsed && (
                   <div
                     className="rounded-2xl p-6 border border-[#7C3AED]/30"
                     style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.22) 0%, rgba(76,29,149,0.18) 100%)" }}

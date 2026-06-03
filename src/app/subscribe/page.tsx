@@ -234,12 +234,12 @@ function SubscribeContent() {
     if (!session?.email || session.role !== "mentee") return;
     setPlanLoading(true);
     supabase
-      .from("mentees").select("id, free_session_used").eq("email", session.email).single()
+      .from("mentees").select("id, free_discovery_used").eq("email", session.email).single()
       .then(({ data: menteeRow }) => {
         if (!menteeRow) { setCurrentPlan("free"); setPlanLoading(false); return; }
-        const row = menteeRow as { id: string; free_session_used: boolean };
+        const row = menteeRow as { id: string; free_discovery_used: boolean };
         setMenteeId(row.id);
-        setFreeSessionUsed(row.free_session_used);
+        setFreeSessionUsed(row.free_discovery_used);
         supabase
           .from("mentee_subscriptions")
           .select("plan, status")
@@ -248,7 +248,7 @@ function SubscribeContent() {
           .order("created_at", { ascending: false })
           .limit(1)
           .then(({ data }) => {
-            setCurrentPlan((data?.[0] as { plan: string } | undefined)?.plan ?? (row.free_session_used ? null : "free"));
+            setCurrentPlan((data?.[0] as { plan: string } | undefined)?.plan ?? (row.free_discovery_used ? null : "free"));
             setPlanLoading(false);
           });
       });
