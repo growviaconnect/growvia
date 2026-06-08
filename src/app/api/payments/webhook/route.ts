@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { sendBookingConfirmation } from "@/lib/email";
+import { sendBookingConfirmation, sendSubscriptionConfirmation } from "@/lib/email";
 
 const PLAN_PRICE_MAP: Record<string, string> = {
   [process.env.STRIPE_BASIC_PRICE_ID    ?? "__none__"]: "basic",
   [process.env.STRIPE_STANDARD_PRICE_ID ?? "__none__"]: "standard",
   [process.env.STRIPE_PREMIUM_PRICE_ID  ?? "__none__"]: "premium",
+};
+
+const PLAN_EUR: Record<string, number> = {
+  basic: 4.99,
+  standard: 9.99,
+  premium: 14.99,
 };
 
 function getStripe() {
@@ -44,21 +50,18 @@ export async function POST(req: NextRequest) {
     const cs = event.data.object as Stripe.Checkout.Session;
 
     if (cs.mode === "subscription") {
-      // Subscription checkout completed → save to mentee_subscriptions
       const plan        = cs.metadata?.plan ?? "";
       const menteeEmail = cs.metadata?.mentee_email ?? cs.customer_email ?? "";
       const menteeId    = cs.metadata?.mentee_id;
       const customerId  = typeof cs.customer === "string" ? cs.customer : cs.customer?.id ?? "";
       const subId       = typeof cs.subscription === "string" ? cs.subscription : cs.subscription?.id ?? "";
 
-      // Fetch subscription to get period end
       let periodEnd: string | null = null;
       try {
         const sub = await stripe.subscriptions.retrieve(subId) as unknown as { current_period_end: number };
         periodEnd = new Date(sub.current_period_end * 1000).toISOString();
       } catch { /* non-fatal */ }
 
-      // Resolve mentee_id from email if not in metadata
       let resolvedMenteeId = menteeId;
       if (!resolvedMenteeId && menteeEmail) {
         const { data: mentee } = await client
@@ -67,7 +70,6 @@ export async function POST(req: NextRequest) {
       }
 
       if (resolvedMenteeId) {
-        // Upsert subscription record
         await client.from("mentee_subscriptions").upsert({
           mentee_id:              resolvedMenteeId,
           plan,
@@ -77,14 +79,24 @@ export async function POST(req: NextRequest) {
           current_period_end:     periodEnd,
         }, { onConflict: "mentee_id" });
 
-        // Keep local session plan in sync (mentee profile)
         await client.from("mentees").update({ plan }).eq("id", resolvedMenteeId);
+
+        if (menteeEmail && plan) {
+          const { data: menteeRow } = await client
+            .from("mentees").select("nom").eq("id", resolvedMenteeId).single() as { data: { nom: string } | null };
+          sendSubscriptionConfirmation({
+            to:              menteeEmail,
+            nom:             menteeRow?.nom ?? "there",
+            plan:            plan.charAt(0).toUpperCase() + plan.slice(1),
+            priceEur:        PLAN_EUR[plan] ?? 0,
+            nextBillingDate: periodEnd ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          }).catch(err => console.error("[webhook] subscription confirmation email:", err));
+        }
       }
     }
 
     if (cs.mode === "payment") {
-      // One-off session checkout completed → mark session paid + send emails
-      const sessionId   = cs.metadata?.session_id;
+      const sessionId = cs.metadata?.session_id;
       if (sessionId) {
         await client.from("sessions").update({ status: "paid" }).eq("id", sessionId);
 
@@ -113,12 +125,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // ── payment_intent.succeeded — safety net for booking-time charges ────────
+  if (event.type === "payment_intent.succeeded") {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    const sessionId = pi.metadata?.session_id;
+    if (sessionId) {
+      await client
+        .from("sessions")
+        .update({ status: "paid", payment_intent_id: pi.id })
+        .eq("id", sessionId)
+        .eq("status", "pending");
+    }
+  }
+
   // ── customer.subscription.updated ────────────────────────────────────────
   if (event.type === "customer.subscription.updated") {
     const sub = event.data.object as Stripe.Subscription & { current_period_end: number };
-    const subId = sub.id;
-
-    // Determine plan from price ID on the first item
     const priceId   = sub.items.data[0]?.price?.id ?? "";
     const plan      = PLAN_PRICE_MAP[priceId] ?? sub.metadata?.plan ?? "";
     const periodEnd = new Date(sub.current_period_end * 1000).toISOString();
@@ -127,7 +149,7 @@ export async function POST(req: NextRequest) {
     await client
       .from("mentee_subscriptions")
       .update({ plan: plan || undefined, status, current_period_end: periodEnd })
-      .eq("stripe_subscription_id", subId);
+      .eq("stripe_subscription_id", sub.id);
   }
 
   // ── customer.subscription.deleted ────────────────────────────────────────
@@ -144,7 +166,6 @@ export async function POST(req: NextRequest) {
     const pi = event.data.object as Stripe.PaymentIntent;
     const { sendPaymentFailedEmail } = await import("@/lib/email");
 
-    // Find the session linked to this payment intent
     const { data: sessionRow } = await client
       .from("sessions")
       .select("mentee_id, mentor_id, date, time, mentee_email")
