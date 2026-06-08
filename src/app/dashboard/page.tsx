@@ -321,6 +321,28 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
   );
 }
 
+// ── Propose-time modal helpers ──────────────────────────────────────────────────
+const PERIOD_META: Record<string, { label: string; times: string[] }> = {
+  morning:   { label: "Morning · 8h–12h",   times: ["08:00","09:00","10:00","11:00"] },
+  afternoon: { label: "Afternoon · 13h–18h", times: ["13:00","14:00","15:00","16:00","17:00"] },
+  evening:   { label: "Evening · 19h–22h",  times: ["19:00","20:00","21:00"] },
+};
+const CAL_DAYS    = ["Mo","Tu","We","Th","Fr","Sa","Su"];
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function calWeeks(year: number, month: number): (number | null)[][] {
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+  const days     = new Date(year, month + 1, 0).getDate();
+  const cells: (number | null)[] = Array<null>(firstDow).fill(null);
+  for (let d = 1; d <= days; d++) cells.push(d);
+  while (cells.length % 7) cells.push(null);
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  return weeks;
+}
+
+function jsDowToAvail(jsDay: number) { return (jsDay + 6) % 7; }
+
 // ── Main dashboard ─────────────────────────────────────────────────────────────
 
 function DashboardContent() {
@@ -362,6 +384,10 @@ function DashboardContent() {
   const [proposeDate, setProposeDate]     = useState("");
   const [proposeTime, setProposeTime]     = useState("");
   const [proposeLoading, setProposeLoading] = useState(false);
+  const [availSlots, setAvailSlots]         = useState<{day_of_week: number; period: string}[]>([]);
+  const [availLoading, setAvailLoading]     = useState(false);
+  const [proposeCal, setProposeCal]         = useState<{ year: number; month: number }>({ year: new Date().getFullYear(), month: new Date().getMonth() });
+  const [proposePeriod, setProposePeriod]   = useState<string | null>(null);
 
   // Nav items, defined inside component so they react to lang changes
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
@@ -778,6 +804,21 @@ function DashboardContent() {
     return () => { supabase.removeChannel(channel).catch(() => {}); };
   }, [menteeDbId, mentorDbId, user?.role]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fetch mentor availability when propose modal opens
+  useEffect(() => {
+    if (!proposeModal) { setAvailSlots([]); setProposePeriod(null); return; }
+    if (!mentorDbId) return;
+    const now = new Date();
+    setProposeCal({ year: now.getFullYear(), month: now.getMonth() });
+    setProposePeriod(null);
+    setAvailLoading(true);
+    supabase
+      .from("mentor_availability")
+      .select("day_of_week, period")
+      .eq("mentor_id", mentorDbId)
+      .then(({ data }) => { setAvailSlots(data ?? []); setAvailLoading(false); });
+  }, [proposeModal, mentorDbId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Derived data
   const upcoming = connexions.filter(
     (c) => ["pending", "active", "rescheduled"].includes(c.statut) && new Date(c.date) >= new Date()
@@ -922,50 +963,146 @@ function DashboardContent() {
     <div className="min-h-screen bg-[#0D0A1A]">
 
       {/* ── Propose new time modal ─────────────────────────────────────── */}
-      {proposeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}>
-          <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] p-6"
-            style={{ background: "#1a1530" }}>
-            <h2 className="font-bold text-white text-lg mb-1">Propose a new time</h2>
-            <p className="text-white/40 text-sm mb-5">The mentee will receive an email to accept or decline.</p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-white/50 mb-1.5">Date</label>
-                <input
-                  type="date"
-                  value={proposeDate}
-                  onChange={e => setProposeDate(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#7C3AED]"
-                />
+      {proposeModal && (() => {
+        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+        const availDow   = proposeDate ? jsDowToAvail(new Date(proposeDate + "T12:00:00").getDay()) : null;
+        const availPeriods = availDow !== null
+          ? (["morning","afternoon","evening"] as const).filter(p =>
+              availSlots.some(s => s.day_of_week === availDow && s.period === p))
+          : [];
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}>
+            <div className="w-full max-w-md rounded-2xl border border-white/[0.08] p-6"
+              style={{ background: "#1a1530" }}>
+              <h2 className="font-bold text-white text-lg mb-1">Propose a new time</h2>
+              <p className="text-white/40 text-sm mb-5">Pick from your available slots. The mentee can accept or decline.</p>
+
+              {availLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#7C3AED]" />
+                </div>
+              ) : (
+                <>
+                  {/* ── Month calendar ── */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <button
+                        onClick={() => setProposeCal(c => { const d = new Date(c.year, c.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-base">
+                        ‹
+                      </button>
+                      <span className="text-sm font-semibold text-white">
+                        {MONTH_NAMES[proposeCal.month]} {proposeCal.year}
+                      </span>
+                      <button
+                        onClick={() => setProposeCal(c => { const d = new Date(c.year, c.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors text-base">
+                        ›
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-7 mb-0.5">
+                      {CAL_DAYS.map(d => (
+                        <div key={d} className="text-center text-[10px] font-semibold text-white/25 py-1">{d}</div>
+                      ))}
+                    </div>
+                    {calWeeks(proposeCal.year, proposeCal.month).map((week, wi) => (
+                      <div key={wi} className="grid grid-cols-7">
+                        {week.map((day, di) => {
+                          if (!day) return <div key={di} />;
+                          const dateStr = `${proposeCal.year}-${String(proposeCal.month + 1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                          const dow     = jsDowToAvail(new Date(proposeCal.year, proposeCal.month, day).getDay());
+                          const hasAvail = availSlots.some(s => s.day_of_week === dow);
+                          const isPast   = new Date(proposeCal.year, proposeCal.month, day) < todayStart;
+                          const isSelected = proposeDate === dateStr;
+                          const disabled   = !hasAvail || isPast;
+                          return (
+                            <button
+                              key={di}
+                              disabled={disabled}
+                              onClick={() => { setProposeDate(dateStr); setProposePeriod(null); setProposeTime(""); }}
+                              className={[
+                                "aspect-square flex items-center justify-center text-xs rounded-lg m-0.5 transition-colors font-medium",
+                                isSelected ? "bg-[#7C3AED] text-white"
+                                  : disabled ? "text-white/15 cursor-not-allowed"
+                                  : "text-white hover:bg-white/10 cursor-pointer",
+                              ].join(" ")}>
+                              {day}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* ── Period chips ── */}
+                  {proposeDate && (
+                    <div className="mb-4">
+                      <label className="block text-xs font-semibold text-white/50 mb-2">Available periods</label>
+                      {availPeriods.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {availPeriods.map(p => (
+                            <button
+                              key={p}
+                              onClick={() => { setProposePeriod(p); setProposeTime(""); }}
+                              className={[
+                                "text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors",
+                                proposePeriod === p
+                                  ? "bg-[#7C3AED]/20 border-[#7C3AED] text-[#A78BFA]"
+                                  : "border-white/10 text-white/60 hover:border-white/20 hover:text-white",
+                              ].join(" ")}>
+                              {PERIOD_META[p].label}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-amber-400/70">No availability set for this day. Try another date.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Time slots ── */}
+                  {proposePeriod && (
+                    <div className="mb-4">
+                      <label className="block text-xs font-semibold text-white/50 mb-2">Pick a time</label>
+                      <div className="flex flex-wrap gap-2">
+                        {PERIOD_META[proposePeriod].times.map(t => (
+                          <button
+                            key={t}
+                            onClick={() => setProposeTime(t)}
+                            className={[
+                              "text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors",
+                              proposeTime === t
+                                ? "bg-[#7C3AED]/20 border-[#7C3AED] text-[#A78BFA]"
+                                : "border-white/10 text-white/60 hover:border-white/20 hover:text-white",
+                            ].join(" ")}>
+                            {t}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="flex gap-3 mt-2">
+                <button
+                  onClick={() => setProposeModal(null)}
+                  className="flex-1 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+                  Cancel
+                </button>
+                <button
+                  onClick={handleProposeTime}
+                  disabled={!proposeDate || !proposeTime || proposeLoading}
+                  className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  {proposeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Send proposal
+                </button>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-white/50 mb-1.5">Time</label>
-                <input
-                  type="time"
-                  value={proposeTime}
-                  onChange={e => setProposeTime(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#7C3AED]"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setProposeModal(null)}
-                className="flex-1 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
-                Cancel
-              </button>
-              <button
-                onClick={handleProposeTime}
-                disabled={!proposeDate || !proposeTime || proposeLoading}
-                className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                {proposeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Send proposal
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-6">
