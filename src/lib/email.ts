@@ -87,6 +87,28 @@ function badge(color: string, text: string): string {
   return `<span style="display:inline-block;background:${color};color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">${text}</span>`;
 }
 
+/** Builds a "Add to Google Calendar" URL for a session. */
+function gcalLink(params: {
+  title: string;
+  startIso: string;
+  durationMinutes: number;
+  description?: string;
+  location?: string;
+}): string {
+  const { title, startIso, durationMinutes, description = "", location = "" } = params;
+  const start = new Date(startIso);
+  const end   = new Date(start.getTime() + durationMinutes * 60_000);
+  const fmt   = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(".000", "");
+  const qs = new URLSearchParams({
+    action:  "TEMPLATE",
+    text:    title,
+    dates:   `${fmt(start)}/${fmt(end)}`,
+    details: description,
+    location,
+  });
+  return `https://calendar.google.com/calendar/render?${qs.toString()}`;
+}
+
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleString("en-GB", {
@@ -230,17 +252,20 @@ export async function sendSessionStatusNotification(params: StatusParams) {
 // ─── 4 & 5. Session reminders (24h and 2h) ──────────────────────────────────
 
 export type ReminderParams = {
-  email:      string;
-  nom:        string;
-  otherNom:   string;
-  date:       string;
-  role:       "mentor" | "mentee";
-  hoursUntil: 24 | 2;
-  scheduledAt?: string; // ISO string, lets Resend deliver at the right time
+  email:           string;
+  nom:             string;
+  otherNom:        string;
+  date:            string;
+  role:            "mentor" | "mentee";
+  hoursUntil:      24 | 2;
+  meetLink?:       string;
+  topic?:          string;
+  durationMinutes?: number;
+  scheduledAt?:    string; // ISO string, lets Resend deliver at the right time
 };
 
 export async function sendSessionReminder(params: ReminderParams) {
-  const { email, nom, otherNom, date, role, hoursUntil, scheduledAt } = params;
+  const { email, nom, otherNom, date, role, hoursUntil, meetLink, topic, durationMinutes = 60, scheduledAt } = params;
   const formattedDate = formatDate(date);
   const dashUrl = `${BASE_URL}/dashboard`;
 
@@ -251,6 +276,24 @@ export async function sendSessionReminder(params: ReminderParams) {
     ? "Think about your key advice and prepare actionable takeaways for your mentee."
     : "Come prepared with your questions to make the most of your session.";
 
+  const calLink = gcalLink({
+    title:           `GrowVia session with ${otherNom}`,
+    startIso:        date,
+    durationMinutes,
+    description:     topic || "Mentoring session on GrowVia" + (meetLink ? `\n\nJoin: ${meetLink}` : ""),
+    location:        meetLink ?? "",
+  });
+
+  const meetRow = meetLink
+    ? highlight("Google Meet", `<a href="${meetLink}" style="color:#7C3AED;word-break:break-all;">${meetLink}</a>`)
+    : "";
+
+  const joinBtn = meetLink
+    ? `<a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;">Join session →</a>`
+    : btn("View session →", dashUrl);
+
+  const calBtn = `<a href="${calLink}" style="display:inline-block;background:#ffffff;color:#7C3AED;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;margin-left:8px;border:2px solid #7C3AED;">📅 Add to Calendar</a>`;
+
   const body = `
     ${urgBadge}
     <br/><br/>
@@ -258,10 +301,11 @@ export async function sendSessionReminder(params: ReminderParams) {
     ${p(`Hi ${nom}, just a heads-up, your mentoring session is coming up ${timeLabel}.`)}
     ${infoBox(
       highlight("Date & time", formattedDate) +
-      highlight(role === "mentor" ? "Mentee" : "Mentor", otherNom)
+      highlight(role === "mentor" ? "Mentee" : "Mentor", otherNom) +
+      meetRow
     )}
     ${p(tipRole)}
-    ${btn("View session →", dashUrl)}
+    ${joinBtn}${calBtn}
   `;
 
   const subject = isUrgent
@@ -338,16 +382,28 @@ export type ConfirmWithMeetParams = {
   menteeNom:   string;
   date:        string;
   meetLink?:   string;
+  topic?:      string;
+  durationMinutes?: number;
 };
 
 export async function sendConfirmationWithMeet(params: ConfirmWithMeetParams) {
-  const { mentorEmail, mentorNom, menteeEmail, menteeNom, date, meetLink } = params;
+  const { mentorEmail, mentorNom, menteeEmail, menteeNom, date, meetLink, topic, durationMinutes = 60 } = params;
   const formattedDate = formatDate(date);
   const dashUrl = `${BASE_URL}/dashboard`;
+
+  const calLink = gcalLink({
+    title:           `GrowVia: ${mentorNom} × ${menteeNom}`,
+    startIso:        date,
+    durationMinutes,
+    description:     topic || "Mentoring session on GrowVia" + (meetLink ? `\n\nJoin: ${meetLink}` : ""),
+    location:        meetLink ?? "",
+  });
 
   const joinBtn = meetLink
     ? `<a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;">Join session →</a>`
     : btn("View dashboard →", dashUrl);
+
+  const calBtn = `<a href="${calLink}" style="display:inline-block;background:#ffffff;color:#7C3AED;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;margin-left:8px;border:2px solid #7C3AED;">📅 Add to Calendar</a>`;
 
   const meetRow = meetLink
     ? highlight("Google Meet", `<a href="${meetLink}" style="color:#7C3AED;word-break:break-all;">${meetLink}</a>`)
@@ -363,7 +419,7 @@ export async function sendConfirmationWithMeet(params: ConfirmWithMeetParams) {
       highlight("Mentee",      menteeNom) +
       meetRow
     )}
-    ${joinBtn}
+    ${joinBtn}${calBtn}
   `;
 
   const menteeBody = `
@@ -376,7 +432,7 @@ export async function sendConfirmationWithMeet(params: ConfirmWithMeetParams) {
       highlight("Mentor",      mentorNom) +
       meetRow
     )}
-    ${joinBtn}
+    ${joinBtn}${calBtn}
   `;
 
   const subject = "Your GrowVia session is confirmed ✅";
@@ -393,15 +449,18 @@ export async function sendConfirmationWithMeet(params: ConfirmWithMeetParams) {
 // at the calculated future timestamp, no cron job required.
 
 export type ScheduleRemindersParams = {
-  mentorEmail: string;
-  mentorNom:   string;
-  menteeEmail: string;
-  menteeNom:   string;
-  sessionDate: string; // ISO string of the session start time
+  mentorEmail:      string;
+  mentorNom:        string;
+  menteeEmail:      string;
+  menteeNom:        string;
+  sessionDate:      string; // ISO string of the session start time
+  meetLink?:        string;
+  topic?:           string;
+  durationMinutes?: number;
 };
 
 export async function scheduleSessionReminders(params: ScheduleRemindersParams) {
-  const { mentorEmail, mentorNom, menteeEmail, menteeNom, sessionDate } = params;
+  const { mentorEmail, mentorNom, menteeEmail, menteeNom, sessionDate, meetLink, topic, durationMinutes } = params;
   const session = new Date(sessionDate);
   const now     = Date.now();
 
@@ -414,8 +473,8 @@ export async function scheduleSessionReminders(params: ScheduleRemindersParams) 
   if (remind24.getTime() > now + 60_000) {
     const at24 = remind24.toISOString();
     sends.push(
-      sendSessionReminder({ email: mentorEmail, nom: mentorNom, otherNom: menteeNom, date: sessionDate, role: "mentor", hoursUntil: 24, scheduledAt: at24 }),
-      sendSessionReminder({ email: menteeEmail, nom: menteeNom, otherNom: mentorNom, date: sessionDate, role: "mentee", hoursUntil: 24, scheduledAt: at24 }),
+      sendSessionReminder({ email: mentorEmail, nom: mentorNom, otherNom: menteeNom, date: sessionDate, role: "mentor", hoursUntil: 24, meetLink, topic, durationMinutes, scheduledAt: at24 }),
+      sendSessionReminder({ email: menteeEmail, nom: menteeNom, otherNom: mentorNom, date: sessionDate, role: "mentee", hoursUntil: 24, meetLink, topic, durationMinutes, scheduledAt: at24 }),
     );
   }
 
@@ -423,8 +482,8 @@ export async function scheduleSessionReminders(params: ScheduleRemindersParams) 
   if (remind2.getTime() > now + 60_000) {
     const at2 = remind2.toISOString();
     sends.push(
-      sendSessionReminder({ email: mentorEmail, nom: mentorNom, otherNom: menteeNom, date: sessionDate, role: "mentor", hoursUntil: 2, scheduledAt: at2 }),
-      sendSessionReminder({ email: menteeEmail, nom: menteeNom, otherNom: mentorNom, date: sessionDate, role: "mentee", hoursUntil: 2, scheduledAt: at2 }),
+      sendSessionReminder({ email: mentorEmail, nom: mentorNom, otherNom: menteeNom, date: sessionDate, role: "mentor", hoursUntil: 2, meetLink, topic, durationMinutes, scheduledAt: at2 }),
+      sendSessionReminder({ email: menteeEmail, nom: menteeNom, otherNom: mentorNom, date: sessionDate, role: "mentee", hoursUntil: 2, meetLink, topic, durationMinutes, scheduledAt: at2 }),
     );
   }
 

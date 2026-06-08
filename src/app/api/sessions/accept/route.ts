@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { createMeetSession } from "@/lib/google-calendar";
-import { sendConfirmationWithMeet, sendPaymentFailedEmail } from "@/lib/email";
+import { sendConfirmationWithMeet, sendPaymentFailedEmail, scheduleSessionReminders } from "@/lib/email";
 
 type ConnexionRow = {
   id:        string;
@@ -170,15 +170,23 @@ export async function POST(req: NextRequest) {
       .eq("mentee_id", conn.mentee_id);
   }
 
-  // ── 8. Send confirmation emails with Meet link ────────────────────────────
-  sendConfirmationWithMeet({
+  // ── 8. Send confirmation emails with Meet link + schedule reminders ─────
+  const emailBase = {
     mentorEmail: conn.mentors?.email ?? "",
     mentorNom:   conn.mentors?.nom   ?? "Mentor",
     menteeEmail: conn.mentees?.email ?? "",
     menteeNom:   conn.mentees?.nom   ?? "Mentee",
     date:        conn.date,
     meetLink:    meetLink || undefined,
-  }).catch(err => console.error("[accept] email send failed:", err));
+  };
+
+  sendConfirmationWithMeet(emailBase)
+    .catch(err => console.error("[accept] confirmation email failed:", err));
+
+  scheduleSessionReminders({
+    ...emailBase,
+    sessionDate: conn.date,
+  }).catch(err => console.error("[accept] reminder scheduling failed:", err));
 
   return NextResponse.json({ success: true, meetLink: meetLink || null });
 }
