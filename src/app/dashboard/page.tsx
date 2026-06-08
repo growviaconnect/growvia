@@ -22,6 +22,8 @@ type Connexion = {
   date: string;
   statut: "pending" | "active" | "completed" | "cancelled" | "rescheduled";
   meet_link?: string | null;
+  proposed_date?: string | null;
+  proposed_time?: string | null;
   mentor_id: string | null;
   mentors: { nom: string; email: string; specialite: string | null } | null;
   mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
@@ -480,7 +482,7 @@ function DashboardContent() {
     const idField = role === "mentor" ? "mentor_id" : "mentee_id";
     const { data: rows } = await supabase
       .from("connexions")
-      .select("id, date, statut, meet_link, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
+      .select("id, date, statut, meet_link, proposed_date, proposed_time, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
       .eq(idField, dbId)
       .order("date", { ascending: true });
     setConnexions((rows ?? []) as unknown as Connexion[]);
@@ -1414,8 +1416,10 @@ function DashboardContent() {
                                       <Video className="w-3.5 h-3.5" /> Join
                                     </button>
                                   )}
-                                  <button className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
-                                    Reschedule
+                                  <button
+                                    onClick={() => { setProposeDate(""); setProposeTime(""); setProposeModal(c.id); }}
+                                    className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+                                    <CalendarRange className="w-3.5 h-3.5" /> Reschedule
                                   </button>
                                 </div>
                               </div>

@@ -528,14 +528,24 @@ export async function sendPaymentFailedEmail(params: PaymentFailedParams) {
 // ─── 9. Mentor proposes a new session time ────────────────────────────────────
 
 export async function sendProposeNewTime(params: {
-  menteeEmail: string;
-  menteeNom:   string;
-  mentorNom:   string;
-  newDateIso:  string;
+  menteeEmail:      string;
+  menteeNom:        string;
+  mentorNom:        string;
+  newDateIso:       string;
+  durationMinutes?: number;
 }) {
-  const { menteeEmail, menteeNom, mentorNom, newDateIso } = params;
+  const { menteeEmail, menteeNom, mentorNom, newDateIso, durationMinutes = 60 } = params;
   const formattedDate = formatDate(newDateIso);
   const dashUrl       = `${BASE_URL}/dashboard`;
+
+  const calLink = gcalLink({
+    title:           `GrowVia session with ${mentorNom}`,
+    startIso:        newDateIso,
+    durationMinutes,
+    description:     "Mentoring session on GrowVia — accept or decline this time on your dashboard",
+  });
+
+  const calBtn = `<a href="${calLink}" style="display:inline-block;background:#ffffff;color:#7C3AED;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;margin-left:8px;border:2px solid #7C3AED;">📅 Preview in Calendar</a>`;
 
   const body = `
     ${badge("#F59E0B", "New time proposed")}
@@ -544,8 +554,8 @@ export async function sendProposeNewTime(params: {
     ${p(`Hi ${menteeNom}, <strong>${mentorNom}</strong> has suggested a different time for your session.`)}
     ${infoBox(highlight("Proposed date & time", formattedDate))}
     ${p("Go to your dashboard to accept or decline the new time.")}
-    ${btn("View on dashboard →", dashUrl)}
-    <br/>
+    ${btn("View on dashboard →", dashUrl)}${calBtn}
+    <br/><br/>
     ${p(`If you decline, your session request will be cancelled and you'll be free to book with another mentor.`)}
   `;
 
@@ -557,6 +567,75 @@ export async function sendProposeNewTime(params: {
     subject: `${mentorNom} proposed a new session time`,
     html:    layout(body),
   });
+}
+
+// ─── 10a. Mentee accepted the retime — notify mentor ─────────────────────────
+
+export async function sendRetimeAccepted(params: {
+  mentorEmail:      string;
+  mentorNom:        string;
+  menteeNom:        string;
+  newDateIso:       string;
+  meetLink?:        string;
+  durationMinutes?: number;
+}) {
+  const { mentorEmail, mentorNom, menteeNom, newDateIso, meetLink, durationMinutes = 60 } = params;
+  const formattedDate = formatDate(newDateIso);
+  const dashUrl       = `${BASE_URL}/dashboard`;
+
+  const calLink = gcalLink({
+    title:           `GrowVia: ${mentorNom} × ${menteeNom}`,
+    startIso:        newDateIso,
+    durationMinutes,
+    description:     "Mentoring session on GrowVia" + (meetLink ? `\n\nJoin: ${meetLink}` : ""),
+    location:        meetLink ?? "",
+  });
+
+  const joinBtn = meetLink
+    ? `<a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;">Join session →</a>`
+    : btn("View dashboard →", dashUrl);
+  const calBtn  = `<a href="${calLink}" style="display:inline-block;background:#ffffff;color:#7C3AED;font-size:14px;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:10px;margin-top:8px;margin-left:8px;border:2px solid #7C3AED;">📅 Add to Calendar</a>`;
+
+  const body = `
+    ${badge("#059669", "New time accepted ✓")}
+    <br/><br/>
+    ${h1("Your proposed time was accepted!")}
+    ${p(`Great news! <strong>${menteeNom}</strong> accepted the new session time you proposed.`)}
+    ${infoBox(
+      highlight("New date & time", formattedDate) +
+      highlight("Mentee", menteeNom) +
+      (meetLink ? highlight("Google Meet", `<a href="${meetLink}" style="color:#7C3AED;word-break:break-all;">${meetLink}</a>`) : "")
+    )}
+    ${joinBtn}${calBtn}
+  `;
+
+  const r = getResend();
+  if (!r) return;
+  return r.emails.send({ from: FROM, to: mentorEmail, subject: `${menteeNom} accepted your proposed time ✅`, html: layout(body) });
+}
+
+// ─── 10b. Mentee declined the retime — notify mentor ─────────────────────────
+
+export async function sendRetimeDeclined(params: {
+  mentorEmail: string;
+  mentorNom:   string;
+  menteeNom:   string;
+}) {
+  const { mentorEmail, mentorNom, menteeNom } = params;
+  const dashUrl = `${BASE_URL}/dashboard`;
+
+  const body = `
+    ${badge("#dc2626", "Proposed time declined")}
+    <br/><br/>
+    ${h1("Your proposed time was declined")}
+    ${p(`Hi ${mentorNom}, <strong>${menteeNom}</strong> declined the new session time you proposed. The session has been cancelled.`)}
+    ${p("The mentee is free to rebook with you or another mentor at any time.")}
+    ${btn("View dashboard →", dashUrl)}
+  `;
+
+  const r = getResend();
+  if (!r) return;
+  return r.emails.send({ from: FROM, to: mentorEmail, subject: `${menteeNom} declined your proposed time`, html: layout(body) });
 }
 
 // ─── 10. Subscription confirmation ────────────────────────────────────────────

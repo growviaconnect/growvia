@@ -37,24 +37,41 @@ export async function POST(req: NextRequest) {
 
   const newDateTimeIso = `${newDate}T${newTime}:00`;
 
-  // Mark connexion as rescheduled (awaiting mentee acceptance)
-  await client.from("connexions").update({ statut: "rescheduled" }).eq("id", connexionId);
+  // Fetch session row to get duration (for calendar link)
+  const { data: sessionRow } = await client
+    .from("sessions")
+    .select("duration_minutes")
+    .eq("mentor_id", conn.mentor_id)
+    .eq("mentee_id", conn.mentee_id)
+    .in("status", ["pending", "confirmed"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle() as { data: { duration_minutes: number | null } | null };
 
-  // Store proposed time on the session row
+  const durationMinutes = sessionRow?.duration_minutes ?? 60;
+
+  // Mark connexion as rescheduled and store proposed time
+  await client
+    .from("connexions")
+    .update({ statut: "rescheduled", proposed_date: newDate, proposed_time: newTime })
+    .eq("id", connexionId);
+
+  // Mirror proposed time to the sessions row
   await client
     .from("sessions")
     .update({ status: "rescheduled", proposed_date: newDate, proposed_time: newTime })
     .eq("mentor_id", conn.mentor_id)
     .eq("mentee_id", conn.mentee_id)
-    .in("status", ["pending"]);
+    .in("status", ["pending", "confirmed"]);
 
-  // Email mentee
+  // Email mentee with calendar link for the proposed new time
   if (conn.mentees?.email) {
     sendProposeNewTime({
-      menteeEmail: conn.mentees.email,
-      menteeNom:   conn.mentees.nom   ?? "there",
-      mentorNom:   conn.mentors?.nom  ?? "Your mentor",
-      newDateIso:  newDateTimeIso,
+      menteeEmail:      conn.mentees.email,
+      menteeNom:        conn.mentees.nom   ?? "there",
+      mentorNom:        conn.mentors?.nom  ?? "Your mentor",
+      newDateIso:       newDateTimeIso,
+      durationMinutes,
     }).catch(err => console.error("[modify] email:", err));
   }
 
