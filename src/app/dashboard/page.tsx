@@ -498,14 +498,47 @@ function DashboardContent() {
       // Only check onboarding for mentees and mentors, not school_admin
       if (us.role !== "school_admin") {
         const table = us.role === "mentor" ? "mentors" : "mentees";
-        const { data: profile, error: profileErr } = await supabase
-          .from(table)
-          .select("id, statut, onboarding_completed, has_used_free_ai_match, free_session_used, field, interests, main_goal")
-          .eq("email", us.email)
-          .single();
 
-        console.log("[dashboard] profile lookup →", { table, email: us.email, id: profile?.id ?? null, error: profileErr ?? null });
+        // Use role-specific column lists — columns differ between mentors and mentees.
+        // Requesting a non-existent column causes PostgREST PGRST204 which makes the
+        // entire query return null (profile.id = null → fetchConnexions never runs).
+        const selectCols = us.role === "mentor"
+          ? "id, statut, onboarding_completed"
+          : "id, statut, survey_completed, has_used_free_ai_match, free_session_used, objectif_principal, secteurs_vises";
+
+        const { data: profileRaw, error: profileErr } = await supabase
+          .from(table)
+          .select(selectCols)
+          .eq("email", us.email)
+          .single() as {
+            data: {
+              id: string;
+              statut: string | null;
+              onboarding_completed?: boolean | null;
+              survey_completed?: boolean | null;
+              has_used_free_ai_match?: boolean | null;
+              free_session_used?: boolean | null;
+              objectif_principal?: string | null;
+              secteurs_vises?: string[] | null;
+            } | null;
+            error: unknown;
+          };
+
+        console.log("[dashboard] profile lookup →", { table, email: us.email, id: profileRaw?.id ?? null, error: profileErr ?? null });
         if (profileErr) console.error("[dashboard] profile fetch failed:", JSON.stringify(profileErr));
+
+        // Normalise into a consistent shape the rest of loadData can use
+        const profile = profileRaw == null ? null : {
+          id:                    profileRaw.id,
+          statut:                profileRaw.statut,
+          onboarding_completed:  profileRaw.onboarding_completed ?? null,
+          has_used_free_ai_match:profileRaw.has_used_free_ai_match ?? false,
+          free_session_used:     profileRaw.free_session_used ?? false,
+          // Map mentee column names to the names the AI-matching code expects
+          field:     profileRaw.objectif_principal ?? null,
+          interests: profileRaw.secteurs_vises     ?? null,
+          main_goal: profileRaw.objectif_principal ?? null,
+        };
 
         // Only redirect to onboarding when we have a valid profile row that
         // explicitly lacks onboarding_completed — never redirect on a null result
@@ -527,7 +560,7 @@ function DashboardContent() {
           setFreeAiMatchUsed(profile.has_used_free_ai_match ?? false);
           setFreeDiscoveryUsed(profile.free_session_used ?? false);
           setMenteeProfile({
-            field: profile.field ?? null,
+            field:     profile.field ?? null,
             interests: profile.interests ?? null,
             main_goal: profile.main_goal ?? null,
             languages: null,
