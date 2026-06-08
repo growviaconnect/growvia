@@ -1139,6 +1139,11 @@ function DashboardContent() {
                                     : <XCircle className="w-3.5 h-3.5" />
                                   } Decline
                                 </button>
+                                <button
+                                  onClick={() => { setProposeDate(""); setProposeTime(""); setProposeModal(c.id); }}
+                                  className="flex items-center gap-1.5 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                                  <CalendarRange className="w-3.5 h-3.5" /> Modify
+                                </button>
                               </div>
                             </div>
                           ))}
