@@ -480,11 +480,15 @@ function DashboardContent() {
 
   async function fetchConnexions(dbId: string, role: string) {
     const idField = role === "mentor" ? "mentor_id" : "mentee_id";
-    const { data: rows } = await supabase
+    const { data: rows, error } = await supabase
       .from("connexions")
-      .select("id, date, statut, meet_link, proposed_date, proposed_time, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
+      .select("id, date, statut, meet_link, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
       .eq(idField, dbId)
       .order("date", { ascending: true });
+    if (error) {
+      console.error("[dashboard] fetchConnexions failed:", JSON.stringify(error), { dbId, role, idField });
+    }
+    console.log("[dashboard] fetchConnexions →", { dbId, role, count: rows?.length ?? 0, error });
     setConnexions((rows ?? []) as unknown as Connexion[]);
   }
 
@@ -494,11 +498,14 @@ function DashboardContent() {
       // Only check onboarding for mentees and mentors, not school_admin
       if (us.role !== "school_admin") {
         const table = us.role === "mentor" ? "mentors" : "mentees";
-        const { data: profile } = await supabase
+        const { data: profile, error: profileErr } = await supabase
           .from(table)
           .select("id, statut, onboarding_completed, has_used_free_ai_match, free_session_used, field, interests, main_goal")
           .eq("email", us.email)
           .single();
+
+        console.log("[dashboard] profile lookup →", { table, email: us.email, id: profile?.id ?? null, error: profileErr ?? null });
+        if (profileErr) console.error("[dashboard] profile fetch failed:", JSON.stringify(profileErr));
 
         // Only redirect to onboarding when we have a valid profile row that
         // explicitly lacks onboarding_completed — never redirect on a null result
