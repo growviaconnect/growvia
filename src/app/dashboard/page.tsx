@@ -215,9 +215,16 @@ function SessionCard({ conn, userRole }: { conn: Connexion; userRole: string }) 
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {!isPast && (
-          <button className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-            <Video className="w-3.5 h-3.5" /> {t("dash_join")}
-          </button>
+          conn.meet_link ? (
+            <a href={conn.meet_link} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+              <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+            </a>
+          ) : (
+            <button className="flex items-center gap-1.5 bg-[#7C3AED]/60 text-white/60 text-xs font-semibold px-4 py-2 rounded-xl cursor-default" disabled title="Meet link will appear once the mentor accepts">
+              <Video className="w-3.5 h-3.5" /> {t("dash_join")}
+            </button>
+          )
         )}
         <span
           className="text-xs font-medium px-2.5 py-1 rounded-full"
@@ -317,7 +324,8 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialized = useRef(false);
+  const initialized      = useRef(false);
+  const realtimeChannel  = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const { session: authSession, setSession: setAuthSession, clearSession } = useAuth();
   const { t, lang } = useLang();
 
@@ -468,6 +476,16 @@ function DashboardContent() {
     loadData(us, justOnboarded);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  async function fetchConnexions(dbId: string, role: string) {
+    const idField = role === "mentor" ? "mentor_id" : "mentee_id";
+    const { data: rows } = await supabase
+      .from("connexions")
+      .select("id, date, statut, meet_link, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
+      .eq(idField, dbId)
+      .order("date", { ascending: true });
+    setConnexions((rows ?? []) as unknown as Connexion[]);
+  }
+
   async function loadData(us: UserSession, justOnboarded: boolean) {
     setLoading(true);
     try {
@@ -530,14 +548,7 @@ function DashboardContent() {
 
         // Load their sessions using the DB row id
         if (profile?.id) {
-          const idField = us.role === "mentor" ? "mentor_id" : "mentee_id";
-          const { data: rows } = await supabase
-            .from("connexions")
-            .select("id, date, statut, meet_link, mentor_id, mentors(nom, email, specialite), mentees(id, nom, email, objectif, photo_url)")
-            .eq(idField, profile.id)
-            .order("date", { ascending: true });
-
-          setConnexions((rows ?? []) as unknown as Connexion[]);
+          await fetchConnexions(profile.id, us.role);
         }
       }
     } finally {
@@ -701,6 +712,29 @@ function DashboardContent() {
       setMatchLoading(false);
     }
   }
+
+  // Real-time subscription — re-fetch connexions whenever any row changes for this user
+  useEffect(() => {
+    const dbId = user?.role === "mentor" ? mentorDbId : menteeDbId;
+    if (!dbId || !user) return;
+
+    if (realtimeChannel.current) {
+      supabase.removeChannel(realtimeChannel.current).catch(() => {});
+    }
+
+    const idField = user.role === "mentor" ? "mentor_id" : "mentee_id";
+    const channel = supabase
+      .channel(`connexions_${dbId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "connexions", filter: `${idField}=eq.${dbId}` },
+        () => { fetchConnexions(dbId, user.role); }
+      )
+      .subscribe();
+
+    realtimeChannel.current = channel;
+    return () => { supabase.removeChannel(channel).catch(() => {}); };
+  }, [menteeDbId, mentorDbId, user?.role]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derived data
   const upcoming = connexions.filter(
@@ -1230,9 +1264,20 @@ function DashboardContent() {
             {/* MY SESSIONS */}
             {tab === "sessions" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">
-                  {user?.role === "mentor" ? "My Sessions" : t("dash_sessions_title")}
-                </h1>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                    {user?.role === "mentor" ? "My Sessions" : t("dash_sessions_title")}
+                  </h1>
+                  <button
+                    onClick={() => {
+                      const dbId = user?.role === "mentor" ? mentorDbId : menteeDbId;
+                      if (dbId && user) fetchConnexions(dbId, user.role);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-white/35 hover:text-white transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                  </button>
+                </div>
 
                 {/* ── Mentor 3-tab sessions view ──────────────────────────── */}
                 {user?.role === "mentor" ? (
