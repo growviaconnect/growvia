@@ -1,13 +1,17 @@
 import { google } from "googleapis";
 
-const SCOPES = ["https://www.googleapis.com/auth/calendar"];
-
 function getCalendarClient() {
-  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!json) throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON not set");
-  const credentials = JSON.parse(json) as object;
-  const auth = new google.auth.GoogleAuth({ credentials, scopes: SCOPES });
-  return google.calendar({ version: "v3", auth });
+  const clientId     = process.env.GOOGLE_CLIENT_ID     ?? "";
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET ?? "";
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN ?? "";
+
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error("GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN must all be set");
+  }
+
+  const oauth2 = new google.auth.OAuth2(clientId, clientSecret);
+  oauth2.setCredentials({ refresh_token: refreshToken });
+  return google.calendar({ version: "v3", auth: oauth2 });
 }
 
 export interface MeetSessionParams {
