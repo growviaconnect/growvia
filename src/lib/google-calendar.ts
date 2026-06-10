@@ -16,7 +16,7 @@ export async function createMeetSession(params: MeetSessionParams): Promise<stri
   const apiKey = process.env.WHEREBY_API_KEY ?? "";
   if (!apiKey) throw new Error("WHEREBY_API_KEY is not set");
 
-  const startDate = new Date(startIso);
+  const startDate = new Date(Math.max(Date.now(), new Date(startIso).getTime()));
   const endDate   = new Date(startDate.getTime() + durationMinutes * 60_000);
 
   const res = await fetch("https://api.whereby.dev/v1/meetings", {
