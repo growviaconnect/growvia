@@ -45,6 +45,7 @@ export async function createMeetSession(params: MeetSessionParams): Promise<stri
       description: topic || "Mentoring session on GrowVia",
       start: { dateTime: start.toISOString(), timeZone: "UTC" },
       end:   { dateTime: end.toISOString(),   timeZone: "UTC" },
+      organizer: { email: mentorEmail, displayName: mentorName },
       attendees: [
         { email: mentorEmail, displayName: mentorName },
         { email: menteeEmail, displayName: menteeName },
