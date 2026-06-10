@@ -22,8 +22,8 @@ export async function GET() {
     STRIPE_PREMIUM_PRICE_ID:         check("STRIPE_PREMIUM_PRICE_ID"),
     // Email
     RESEND_API_KEY:                  check("RESEND_API_KEY"),
-    // Google Meet
-    GOOGLE_SERVICE_ACCOUNT_JSON:     check("GOOGLE_SERVICE_ACCOUNT_JSON"),
+    // Video meetings
+    WHEREBY_API_KEY:                 check("WHEREBY_API_KEY"),
     // AI
     ANTHROPIC_API_KEY:               check("ANTHROPIC_API_KEY"),
   };
