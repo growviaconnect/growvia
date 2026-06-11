@@ -51,22 +51,23 @@ export async function POST(req: NextRequest) {
   // ── 2. Find matching session row to get price ─────────────────────────────
   const { data: sessionRow } = await client
     .from("sessions")
-    .select("id, price_cents, mentee_email")
+    .select("id, price_cents, mentee_email, payment_intent_id")
     .eq("mentor_id", conn.mentor_id)
     .eq("mentee_id", conn.mentee_id)
-    .in("status", ["pending", "rescheduled"])
+    .in("status", ["pending", "paid", "rescheduled"])
     .order("created_at", { ascending: false })
     .limit(1)
     .single() as {
-      data: { id: string; price_cents: number | null; mentee_email: string | null } | null
+      data: { id: string; price_cents: number | null; mentee_email: string | null; payment_intent_id: string | null } | null
     };
 
-  // ── 3. Charge mentee via saved card (if price set and Stripe configured) ──
+  // ── 3. Charge mentee via saved card (skip if already charged at booking) ──
   const stripe = getStripe();
-  let paymentIntentId: string | null = null;
+  let paymentIntentId: string | null = sessionRow?.payment_intent_id ?? null;
   let paymentOk = true;
 
-  if (stripe && sessionRow?.price_cents && sessionRow.price_cents > 0) {
+  // Only charge if: price > 0 AND not already paid at booking time
+  if (stripe && sessionRow?.price_cents && sessionRow.price_cents > 0 && !sessionRow.payment_intent_id) {
     // Look up mentee's Stripe customer ID from their active subscription
     const { data: subRow } = await client
       .from("mentee_subscriptions")

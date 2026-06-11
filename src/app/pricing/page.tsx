@@ -336,7 +336,7 @@ export default function PricingPage() {
     if (!session) { router.push("/auth/register"); return; }
     setLoadingPlan(planKey);
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res = await fetch("/api/subscriptions/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey.toLowerCase(), email: session.email }),
