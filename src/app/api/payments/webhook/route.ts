@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
 
   const client = getServiceClient();
 
-  // ── checkout.session.completed ────────────────────────────────────────────
   if (event.type === "checkout.session.completed") {
     const cs = event.data.object as Stripe.Checkout.Session;
 
@@ -125,7 +124,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── payment_intent.succeeded — safety net for booking-time charges ────────
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
     const sessionId = pi.metadata?.session_id;
@@ -138,7 +136,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── customer.subscription.updated ────────────────────────────────────────
   if (event.type === "customer.subscription.updated") {
     const sub = event.data.object as Stripe.Subscription & { current_period_end: number };
     const priceId   = sub.items.data[0]?.price?.id ?? "";
@@ -152,7 +149,6 @@ export async function POST(req: NextRequest) {
       .eq("stripe_subscription_id", sub.id);
   }
 
-  // ── customer.subscription.deleted ────────────────────────────────────────
   if (event.type === "customer.subscription.deleted") {
     const sub = event.data.object as Stripe.Subscription & { id: string };
     await client
@@ -161,7 +157,6 @@ export async function POST(req: NextRequest) {
       .eq("stripe_subscription_id", sub.id);
   }
 
-  // ── payment_intent.payment_failed ─────────────────────────────────────────
   if (event.type === "payment_intent.payment_failed") {
     const pi = event.data.object as Stripe.PaymentIntent;
     const { sendPaymentFailedEmail } = await import("@/lib/email");

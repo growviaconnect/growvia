@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS public.mentee_subscriptions (
   created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Primary key
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -44,7 +43,6 @@ BEGIN
   END IF;
 END $$;
 
--- FK → mentees
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -57,7 +55,6 @@ BEGIN
   END IF;
 END $$;
 
--- UNIQUE on mentee_id (required for upsert onConflict)
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -68,7 +65,6 @@ BEGIN
   END IF;
 END $$;
 
--- Status CHECK
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -81,7 +77,6 @@ BEGIN
   END IF;
 END $$;
 
--- Idempotent column additions
 ALTER TABLE public.mentee_subscriptions ADD COLUMN IF NOT EXISTS plan                   TEXT;
 ALTER TABLE public.mentee_subscriptions ADD COLUMN IF NOT EXISTS stripe_customer_id     TEXT;
 ALTER TABLE public.mentee_subscriptions ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;

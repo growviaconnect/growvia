@@ -16,6 +16,7 @@ export async function createMeetSession(params: MeetSessionParams): Promise<stri
   const apiKey = process.env.WHEREBY_API_KEY ?? "";
   if (!apiKey) throw new Error("WHEREBY_API_KEY is not set");
 
+  // Clamp to now if the session date is in the past (Whereby rejects past startDate)
   const startDate = new Date(Math.max(Date.now(), new Date(startIso).getTime()));
   const endDate   = new Date(startDate.getTime() + durationMinutes * 60_000);
 
@@ -26,12 +27,12 @@ export async function createMeetSession(params: MeetSessionParams): Promise<stri
       "Content-Type":  "application/json",
     },
     body: JSON.stringify({
-      roomNamePrefix:   "growvia",
-      roomMode:         "group",
-      startDate:        startDate.toISOString(),
-      endDate:          endDate.toISOString(),
-      fields:           ["hostRoomUrl"],
-      roomNamePattern:  "uuid",
+      roomNamePrefix:  "growvia",
+      roomMode:        "group",
+      startDate:       startDate.toISOString(),
+      endDate:         endDate.toISOString(),
+      fields:          ["hostRoomUrl"],
+      roomNamePattern: "uuid",
       ...(topic || mentorName || menteeName
         ? { meetingName: topic || `${mentorName} × ${menteeName}` }
         : {}),

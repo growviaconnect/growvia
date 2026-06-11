@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-// Stripe fee: 1.4% + €0.25 — GrowVia absorbs this cost.
-// Mentee is charged the mentor's full rate; net payout to GrowVia is rate minus fee.
 export const STRIPE_FEE_RATE  = 0.014;
 export const STRIPE_FEE_FIXED = 25; // cents
 
@@ -83,7 +81,7 @@ export async function POST(req: NextRequest) {
     stripeCustomerId = subRow.stripe_customer_id;
   }
 
-  // ── 3. Create session record (status=pending until payment confirmed) ─────
+  // ── 3. Create session record ──────────────────────────────────────────────
   const priceCents = isFreeSession ? 0 : Math.round(price * 100);
 
   const { data: sessionRow, error: sessionErr } = await client
@@ -157,11 +155,7 @@ export async function POST(req: NextRequest) {
       }
 
       paymentIntentId = pi.id;
-
-      await client
-        .from("sessions")
-        .update({ status: "paid", payment_intent_id: pi.id })
-        .eq("id", sessionRow.id);
+      await client.from("sessions").update({ status: "paid", payment_intent_id: pi.id }).eq("id", sessionRow.id);
 
     } catch (stripeErr) {
       console.error("[create-checkout] Stripe charge error:", stripeErr);

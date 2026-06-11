@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
     const client = getServiceClient();
     const origin = req.headers.get("origin") ?? "https://growviaconnect.com";
 
-    // Re-use existing Stripe customer if mentee already subscribed before
     let customerId: string | undefined;
     if (menteeId) {
       const { data: existingSub } = await client
@@ -75,7 +74,6 @@ export async function POST(req: NextRequest) {
       subscription_data: {
         metadata: { plan, mentee_email: email, ...(menteeId ? { mentee_id: menteeId } : {}) },
       },
-      // Save card for future off-session charges (session payments)
       payment_method_collection: "always",
       metadata: { plan, mentee_email: email, ...(menteeId ? { mentee_id: menteeId } : {}) },
       success_url: `${origin}/subscribe/success?plan=${plan}${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ""}`,
