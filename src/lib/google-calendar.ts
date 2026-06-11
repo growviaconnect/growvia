@@ -16,7 +16,6 @@ export async function createMeetSession(params: MeetSessionParams): Promise<stri
   const apiKey = process.env.WHEREBY_API_KEY ?? "";
   if (!apiKey) throw new Error("WHEREBY_API_KEY is not set");
 
-  // Clamp to now if the session date is in the past (Whereby rejects past startDate)
   const startDate = new Date(Math.max(Date.now(), new Date(startIso).getTime()));
   const endDate   = new Date(startDate.getTime() + durationMinutes * 60_000);
 

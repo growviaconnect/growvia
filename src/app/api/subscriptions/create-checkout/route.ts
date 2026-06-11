@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
         .order("created_at", { ascending: false })
         .limit(1)
         .single() as { data: { stripe_customer_id: string } | null };
-
       customerId = existingSub?.stripe_customer_id;
     }
 

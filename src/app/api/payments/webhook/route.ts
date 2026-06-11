@@ -142,7 +142,6 @@ export async function POST(req: NextRequest) {
     const plan      = PLAN_PRICE_MAP[priceId] ?? sub.metadata?.plan ?? "";
     const periodEnd = new Date(sub.current_period_end * 1000).toISOString();
     const status    = sub.status === "active" || sub.status === "trialing" ? "active" : sub.status;
-
     await client
       .from("mentee_subscriptions")
       .update({ plan: plan || undefined, status, current_period_end: periodEnd })
@@ -160,7 +159,6 @@ export async function POST(req: NextRequest) {
   if (event.type === "payment_intent.payment_failed") {
     const pi = event.data.object as Stripe.PaymentIntent;
     const { sendPaymentFailedEmail } = await import("@/lib/email");
-
     const { data: sessionRow } = await client
       .from("sessions")
       .select("mentee_id, mentor_id, date, time, mentee_email")
@@ -168,12 +166,10 @@ export async function POST(req: NextRequest) {
       .single() as {
         data: { mentee_id: string; mentor_id: string; date: string; time: string; mentee_email: string | null } | null
       };
-
     if (sessionRow) {
       const menteeEmail = sessionRow.mentee_email ?? "";
       const { data: menteeRow } = await client
         .from("mentees").select("nom").eq("id", sessionRow.mentee_id).single() as { data: { nom: string } | null };
-
       if (menteeEmail) {
         sendPaymentFailedEmail({
           menteeEmail,

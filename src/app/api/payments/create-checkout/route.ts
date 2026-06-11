@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
 export const STRIPE_FEE_RATE  = 0.014;
-export const STRIPE_FEE_FIXED = 25; // cents
+export const STRIPE_FEE_FIXED = 25;
 
 export function calcStripeFee(amountCents: number): number {
   return Math.ceil(amountCents * STRIPE_FEE_RATE + STRIPE_FEE_FIXED);
@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
   const client = getServiceClient();
   const origin = req.headers.get("origin") ?? "https://growviaconnect.com";
 
-  // ── 1. Look up mentee + eligibility ──────────────────────────────────────
   const { data: menteeRow } = await client
     .from("mentees")
     .select("id, nom, free_discovery_used")
@@ -59,7 +58,6 @@ export async function POST(req: NextRequest) {
 
   const isFreeSession = !menteeRow.free_discovery_used;
 
-  // ── 2. For paid sessions: require active subscription + saved card ────────
   let stripeCustomerId: string | null = null;
   if (!isFreeSession) {
     const { data: subRow } = await client
@@ -81,7 +79,6 @@ export async function POST(req: NextRequest) {
     stripeCustomerId = subRow.stripe_customer_id;
   }
 
-  // ── 3. Create session record ──────────────────────────────────────────────
   const priceCents = isFreeSession ? 0 : Math.round(price * 100);
 
   const { data: sessionRow, error: sessionErr } = await client
@@ -106,7 +103,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
   }
 
-  // ── 4. Charge via saved card for paid sessions ────────────────────────────
   let paymentIntentId: string | null = null;
 
   if (!isFreeSession && priceCents > 0 && stripeCustomerId) {
@@ -160,7 +156,6 @@ export async function POST(req: NextRequest) {
     } catch (stripeErr) {
       console.error("[create-checkout] Stripe charge error:", stripeErr);
       await client.from("sessions").update({ status: "cancelled" }).eq("id", sessionRow.id);
-
       const isCardDecline = stripeErr instanceof Stripe.errors.StripeCardError;
       return NextResponse.json({
         error:       isCardDecline ? "CARD_DECLINED" : "PAYMENT_FAILED",
@@ -172,7 +167,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── 5. Create connexion for dashboard visibility ──────────────────────────
   await client.from("connexions").insert({
     mentor_id: mentorId,
     mentee_id: menteeRow.id,
@@ -180,12 +174,10 @@ export async function POST(req: NextRequest) {
     date:      `${date}T${time}:00`,
   });
 
-  // ── 6. Mark free session as used ─────────────────────────────────────────
   if (isFreeSession) {
     await client.from("mentees").update({ free_discovery_used: true }).eq("id", menteeRow.id);
   }
 
-  // ── 7. Success ────────────────────────────────────────────────────────────
   const successUrl = isFreeSession
     ? `${origin}/booking/success?free=true&session_id=${sessionRow.id}`
     : `${origin}/booking/success?session_id=${sessionRow.id}`;
