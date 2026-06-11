@@ -1,19 +1,3 @@
-import { google } from "googleapis";
-
-function getCalendarClient() {
-  const clientId     = process.env.GOOGLE_CLIENT_ID     ?? "";
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET ?? "";
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN ?? "";
-
-  if (!clientId || !clientSecret || !refreshToken) {
-    throw new Error("GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN must all be set");
-  }
-
-  const oauth2 = new google.auth.OAuth2(clientId, clientSecret);
-  oauth2.setCredentials({ refresh_token: refreshToken });
-  return google.calendar({ version: "v3", auth: oauth2 });
-}
-
 export interface MeetSessionParams {
   mentorName: string;
   mentorEmail: string;
@@ -25,41 +9,44 @@ export interface MeetSessionParams {
   topic?: string;
 }
 
-/** Creates a Google Calendar event with a Meet link and returns the hangout URL. */
+/** Creates a Whereby meeting room and returns the host roomUrl. */
 export async function createMeetSession(params: MeetSessionParams): Promise<string> {
-  const {
-    mentorName, mentorEmail, menteeName, menteeEmail,
-    startIso, durationMinutes = 60, topic = "",
-  } = params;
+  const { mentorName, menteeName, startIso, durationMinutes = 60, topic = "" } = params;
 
-  const calendar = getCalendarClient();
+  const apiKey = process.env.WHEREBY_API_KEY ?? "";
+  if (!apiKey) throw new Error("WHEREBY_API_KEY is not set");
 
-  const start = new Date(startIso);
-  const end   = new Date(start.getTime() + durationMinutes * 60_000);
+  // Clamp to now if the session date is in the past (Whereby rejects past startDate)
+  const startDate = new Date(Math.max(Date.now(), new Date(startIso).getTime()));
+  const endDate   = new Date(startDate.getTime() + durationMinutes * 60_000);
 
-  const { data } = await calendar.events.insert({
-    calendarId: "primary",
-    conferenceDataVersion: 1,
-    requestBody: {
-      summary:     `GrowVia: ${mentorName} × ${menteeName}`,
-      description: topic || "Mentoring session on GrowVia",
-      start: { dateTime: start.toISOString(), timeZone: "UTC" },
-      end:   { dateTime: end.toISOString(),   timeZone: "UTC" },
-      attendees: [
-        { email: mentorEmail, displayName: mentorName },
-        { email: menteeEmail, displayName: menteeName },
-      ],
-      conferenceData: {
-        createRequest: {
-          requestId: `growvia-${Date.now()}`,
-          conferenceSolutionKey: { type: "hangoutsMeet" },
-        },
-      },
+  const res = await fetch("https://api.whereby.dev/v1/meetings", {
+    method:  "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type":  "application/json",
     },
+    body: JSON.stringify({
+      roomNamePrefix:  "growvia",
+      roomMode:        "group",
+      startDate:       startDate.toISOString(),
+      endDate:         endDate.toISOString(),
+      fields:          ["hostRoomUrl"],
+      roomNamePattern: "uuid",
+      ...(topic || mentorName || menteeName
+        ? { meetingName: topic || `${mentorName} × ${menteeName}` }
+        : {}),
+    }),
   });
 
-  const meetLink = data.hangoutLink;
-  if (!meetLink) throw new Error("Google Calendar did not return a Meet link");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Whereby API error ${res.status}: ${text}`);
+  }
 
-  return meetLink;
+  const data = await res.json() as { roomUrl: string; hostRoomUrl: string };
+  const roomUrl = data.hostRoomUrl ?? data.roomUrl;
+  if (!roomUrl) throw new Error("Whereby did not return a roomUrl");
+
+  return roomUrl;
 }
