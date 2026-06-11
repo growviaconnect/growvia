@@ -232,7 +232,7 @@ export default function FoundersPage() {
           <div ref={missionStatsRef} className="flex flex-col justify-center gap-10">
             <div className="relative rounded-2xl overflow-hidden aspect-video w-full hidden lg:block">
               <img
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80"
+                src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=900&q=80"
                 alt="Une session de mentorat entre deux professionnels"
                 className="w-full h-full object-cover"
                 style={{ filter: "brightness(0.7) saturate(0.6)" }}
