@@ -279,7 +279,7 @@ export default function ExplorePage() {
       id: "platform",
       badge: t("explore_badge_platform"),
       title: t("explore_title_platform"),
-      image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=900&q=80",
       links: [
         { label: t("explore_link_who"),     href: "/who-is-it-for" },
         { label: t("explore_link_how"),     href: "/how-it-works" },
