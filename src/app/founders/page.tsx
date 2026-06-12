@@ -357,17 +357,29 @@ export default function FoundersPage() {
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <div
             ref={historyRef}
-            className="max-w-[700px] mx-auto text-center"
+            className="grid lg:grid-cols-2 gap-16 items-center"
           >
-            <p className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-8">
-              {t("founders_history_label")}
-            </p>
-            <p
-              className="text-xl text-white/70 leading-relaxed"
-              style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}
-            >
-              {t("founders_history_text")}
-            </p>
+            {/* Left column */}
+            <div className="lg:border-r lg:border-[#7C3AED]/40 lg:pr-16">
+              <p className="text-xs font-bold text-[#A78BFA] uppercase tracking-[0.28em] mb-5">
+                {t("founders_history_label")}
+              </p>
+              <h2
+                className="font-extrabold text-white tracking-tight"
+                style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)" }}
+              >
+                {t("founders_history_title")}
+              </h2>
+            </div>
+            {/* Right column */}
+            <div>
+              <p
+                className="text-xl text-white/70 leading-relaxed"
+                style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}
+              >
+                {t("founders_history_text")}
+              </p>
+            </div>
           </div>
         </div>
       </section>
