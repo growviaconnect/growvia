@@ -230,7 +230,7 @@ export default function FoundersPage() {
             </div>
           </div>
           <div ref={missionStatsRef} className="flex flex-col justify-center gap-10">
-            <div className="relative rounded-2xl overflow-hidden aspect-video w-full hidden lg:block">
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] w-full hidden lg:block">
               <img
                 src="https://images.unsplash.com/photo-1543269865-cbf427effbad?w=900&q=80"
                 alt="Une session de mentorat entre deux professionnels"
@@ -238,24 +238,6 @@ export default function FoundersPage() {
                 style={{ filter: "brightness(0.7) saturate(0.6)" }}
               />
               <div className="absolute inset-0 bg-[#7C3AED]/20" />
-            </div>
-            <div className="flex flex-wrap gap-x-0 gap-y-4">
-              {[
-                { value: "2025",                        label: t("founders_stat_founded") },
-                { value: t("founders_stat_hq_value"),  label: t("founders_stat_hq") },
-                { value: "3+",                          label: t("founders_stat_langs") },
-                { value: "Global",                      label: t("founders_stat_vision") },
-              ].map((stat, i, arr) => (
-                <div key={stat.label} className="flex items-center">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-bold text-white/50 uppercase tracking-widest">{stat.value}</span>
-                    <span className="text-[10px] text-white/30 uppercase tracking-widest">{stat.label}</span>
-                  </div>
-                  {i < arr.length - 1 && (
-                    <span className="mx-5 text-[#7C3AED] select-none" aria-hidden="true">·</span>
-                  )}
-                </div>
-              ))}
             </div>
           </div>
         </div>
