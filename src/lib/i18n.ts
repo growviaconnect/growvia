@@ -1,4 +1,4 @@
-﻿export type Locale = 'en' | 'fr' | 'es' | 'de' | 'nl' | 'pl' | 'tr' | 'pt' | 'pt-BR' | 'it' | 'zh' | 'ar' | 'ar-EG' | 'ar-LB' | 'ar-SA' | 'ar-MA' | 'ru' | 'ja' | 'ko';
+export type Locale = 'en' | 'fr' | 'es' | 'de' | 'nl' | 'pl' | 'tr' | 'pt' | 'pt-BR' | 'it' | 'zh' | 'ar' | 'ar-EG' | 'ar-LB' | 'ar-SA' | 'ar-MA' | 'ru' | 'ja' | 'ko';
 
 export const locales: Locale[] = ['en', 'fr', 'es', 'de', 'nl', 'pl', 'tr', 'pt', 'pt-BR', 'it', 'zh', 'ar', 'ar-EG', 'ar-LB', 'ar-SA', 'ar-MA', 'ru', 'ja', 'ko'];
 
@@ -172,8 +172,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Matched in minutes',
     stats_proof3_badge: 'Pricing',
-    stats_proof3_num: 'From 9.99€',
-    stats_proof3_desc: 'Intro session · No commitment',
+    stats_proof3_num: 'From 4.99€',
+    stats_proof3_desc: 'Per month · No commitment',
 
     // CTA section
     cta_label: 'Get Started',
@@ -1263,8 +1263,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Mis en relation en quelques minutes',
     stats_proof3_badge: 'Tarif',
-    stats_proof3_num: 'Dès 9,99€',
-    stats_proof3_desc: 'Session découverte sans engagement',
+    stats_proof3_num: 'Dès 4,99€',
+    stats_proof3_desc: 'Par mois sans engagement',
 
     // CTA section
     cta_label: 'Commencer',
@@ -2354,8 +2354,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Emparejado en minutos',
     stats_proof3_badge: 'Precio',
-    stats_proof3_num: 'Desde 9,99€',
-    stats_proof3_desc: 'Sesión de descubrimiento sin compromiso',
+    stats_proof3_num: 'Desde 4,99€',
+    stats_proof3_desc: 'Por mes sin compromiso',
 
     // CTA section
     cta_label: 'Empezar',
@@ -3445,8 +3445,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'In Minuten zusammengeführt',
     stats_proof3_badge: 'Preis',
-    stats_proof3_num: 'Ab 9,99€',
-    stats_proof3_desc: 'Entdeckungssession · Ohne Verpflichtung',
+    stats_proof3_num: 'Ab 4,99€',
+    stats_proof3_desc: 'Pro Monat · Ohne Verpflichtung',
 
     // CTA section
     cta_label: 'Loslegen',
@@ -4536,8 +4536,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Ligação em minutos',
     stats_proof3_badge: 'Preço',
-    stats_proof3_num: 'A partir de 9,99€',
-    stats_proof3_desc: 'Sessão de descoberta sem compromisso',
+    stats_proof3_num: 'A partir de 4,99€',
+    stats_proof3_desc: 'Por mês sem compromisso',
 
     // CTA section
     cta_label: 'Começar',
@@ -5627,8 +5627,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Conexão em minutos',
     stats_proof3_badge: 'Preço',
-    stats_proof3_num: 'A partir de 9,99€',
-    stats_proof3_desc: 'Sessão de descoberta sem compromisso',
+    stats_proof3_num: 'A partir de 4,99€',
+    stats_proof3_desc: 'Por mês sem compromisso',
 
     // CTA section
     cta_label: 'Começar',
@@ -6718,8 +6718,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Abbinato in pochi minuti',
     stats_proof3_badge: 'Prezzi',
-    stats_proof3_num: 'Da 9,99€',
-    stats_proof3_desc: 'Sessione intro · Senza impegno',
+    stats_proof3_num: 'Da 4,99€',
+    stats_proof3_desc: 'Al mese · Senza impegno',
 
     // CTA section
     cta_label: 'Inizia ora',
@@ -7809,8 +7809,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '5分以内',
     stats_proof2_desc: '数分でマッチング完了',
     stats_proof3_badge: '料金',
-    stats_proof3_num: '9.99€から',
-    stats_proof3_desc: '体験セッション · コミットメント不要',
+    stats_proof3_num: '4.99€から',
+    stats_proof3_desc: '月額 · コミットメント不要',
 
     // CTA section
     cta_label: '始めよう',
@@ -8900,8 +8900,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '5분 이내',
     stats_proof2_desc: '몇 분 만에 매칭됩니다',
     stats_proof3_badge: '요금',
-    stats_proof3_num: '9.99€부터',
-    stats_proof3_desc: '탐색 세션 · 약속 없음',
+    stats_proof3_num: '4.99€부터',
+    stats_proof3_desc: '월간 · 약속 없음',
 
     // CTA section
     cta_label: '시작하기',
@@ -9991,8 +9991,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 мин',
     stats_proof2_desc: 'Подбор за считанные минуты',
     stats_proof3_badge: 'Цена',
-    stats_proof3_num: 'От 9,99€',
-    stats_proof3_desc: 'Вводная сессия · Без обязательств',
+    stats_proof3_num: 'От 4,99€',
+    stats_proof3_desc: 'В месяц · Без обязательств',
 
     // CTA section
     cta_label: 'Начать',
@@ -11024,7 +11024,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_badge_success: 'نجاح', stats_desc_success: 'معدل الرضا',
     stats_proof1_badge: 'بشري', stats_proof1_num: '١٠٠٪ موثق', stats_proof1_desc: 'كل مرشد يُوثَّق يدويًا',
     stats_proof2_badge: 'مطابقة ذكاء اصطناعي', stats_proof2_num: '< ٥ دقائق', stats_proof2_desc: 'مطابقة في دقائق',
-    stats_proof3_badge: 'الأسعار', stats_proof3_num: 'من ٩٫٩٩€', stats_proof3_desc: 'جلسة تعريفية · بلا التزام',
+    stats_proof3_badge: 'الأسعار', stats_proof3_num: 'من ٤٫٩٩€', stats_proof3_desc: 'شهرياً · بلا التزام',
     cta_label: 'ابدأ الآن', cta_title_1: 'ابنِ مستقبلك،', cta_title_2: 'ابتداءً من اليوم.',
     cta_sub: 'الوصول المبكر مفتوح. انضم إلى GrowVia وشكّل مستقبل الإرشاد.',
     cta_find: 'ابحث عن مرشدي', cta_apply: 'تقدم كمرشد',
@@ -11598,8 +11598,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 分钟',
     stats_proof2_desc: '数分钟内完成匹配',
     stats_proof3_badge: '价格',
-    stats_proof3_num: '低至 9.99€',
-    stats_proof3_desc: '入门课程 · 无需承诺',
+    stats_proof3_num: '低至 4.99€',
+    stats_proof3_desc: '每月 · 无需承诺',
 
     // CTA section
     cta_label: '立即开始',
@@ -12689,8 +12689,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Gematcht in enkele minuten',
     stats_proof3_badge: 'Prijs',
-    stats_proof3_num: 'Vanaf €9,99',
-    stats_proof3_desc: 'Kennismakingssessie · Geen verplichting',
+    stats_proof3_num: 'Vanaf €4,99',
+    stats_proof3_desc: 'Per maand · Geen verplichting',
 
     // CTA section
     cta_label: 'Aan de slag',
@@ -13780,8 +13780,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 min',
     stats_proof2_desc: 'Dopasowanie w kilka minut',
     stats_proof3_badge: 'Cena',
-    stats_proof3_num: 'Od €9,99',
-    stats_proof3_desc: 'Sesja odkrywcza · Bez zobowiązań',
+    stats_proof3_num: 'Od €4,99',
+    stats_proof3_desc: 'Miesięcznie · Bez zobowiązań',
 
     // CTA section
     cta_label: 'Zacznij',
@@ -14871,8 +14871,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     stats_proof2_num: '< 5 dk',
     stats_proof2_desc: 'Dakikalar içinde eşleştirildi',
     stats_proof3_badge: 'Fiyat',
-    stats_proof3_num: '9,99€\'dan itibaren',
-    stats_proof3_desc: 'Keşif oturumu · Taahhütsüz',
+    stats_proof3_num: '4,99€\'dan itibaren',
+    stats_proof3_desc: 'Aylık · Taahhütsüz',
 
     // CTA section
     cta_label: 'Başla',
