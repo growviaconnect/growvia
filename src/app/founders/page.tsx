@@ -320,22 +320,28 @@ export default function FoundersPage() {
               {t("founders_values_title")}
             </h2>
           </div>
-          <div ref={valuesWrapRef} className="border-t border-white/10">
+          <div ref={valuesWrapRef}>
             {values.map((v, i) => (
               <div
                 key={v.num}
                 ref={(el) => { valueCardRefs.current[i] = el; }}
-                className="group grid grid-cols-[80px_1fr_1fr] lg:grid-cols-[120px_1fr_1fr] items-center gap-8 py-8 border-b border-white/10 hover:border-[#7C3AED] transition-colors duration-300 cursor-default"
+                className="group relative overflow-hidden border-t border-white/10 py-12 pl-0 hover:border-l-2 hover:border-l-[#7C3AED] transition-all duration-300 cursor-default"
               >
-                <span className="text-6xl font-extrabold text-white/20 leading-none select-none">
+                <span
+                  className="absolute right-0 top-1/2 -translate-y-1/2 font-extrabold leading-none select-none pointer-events-none text-white/[0.04] group-hover:text-white/[0.08] transition-opacity duration-300"
+                  style={{ fontSize: "clamp(8rem, 20vw, 18rem)", fontWeight: 800 }}
+                  aria-hidden="true"
+                >
                   {v.num}
                 </span>
-                <h3 className="text-xl lg:text-2xl font-bold text-white inline-block transition-transform duration-300 ease-out group-hover:scale-105 origin-left">
-                  {v.title}
-                </h3>
-                <p className="text-sm text-white/50 leading-relaxed">
-                  {v.desc}
-                </p>
+                <div className="relative z-10 max-w-2xl">
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    {v.title}
+                  </h3>
+                  <p className="text-sm text-white/50 leading-relaxed">
+                    {v.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
