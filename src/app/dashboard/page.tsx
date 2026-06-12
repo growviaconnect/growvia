@@ -394,22 +394,22 @@ function DashboardContent() {
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] =
     user?.role === "mentor"
       ? [
-          { id: "overview",   label: t("dash_nav_overview"), icon: TrendingUp    },
-          { id: "sessions",   label: "My Sessions",           icon: CalendarCheck },
-          { id: "workspace",  label: "Workspace",             icon: Briefcase     },
-          { id: "mentees",    label: "My Mentees",            icon: Users         },
-          { id: "calendar",   label: "Calendar",              icon: CalendarRange },
+          { id: "overview",   label: t("dash_nav_overview"),  icon: TrendingUp    },
+          { id: "sessions",   label: t("dash_nav_sessions"),  icon: CalendarCheck },
+          { id: "workspace",  label: t("dash_nav_workspace"), icon: Briefcase     },
+          { id: "mentees",    label: t("dash_nav_mentees"),   icon: Users         },
+          { id: "calendar",   label: t("dash_nav_calendar"),  icon: CalendarRange },
         ]
       : [
-          { id: "overview",   label: t("dash_nav_overview"), icon: TrendingUp    },
-          { id: "sessions",   label: t("dash_nav_sessions"), icon: CalendarCheck },
-          { id: "workspace",  label: "Workspace",            icon: Briefcase     },
-          { id: "matching",   label: t("dash_nav_matching"), icon: Sparkles      },
+          { id: "overview",   label: t("dash_nav_overview"),  icon: TrendingUp    },
+          { id: "sessions",   label: t("dash_nav_sessions"),  icon: CalendarCheck },
+          { id: "workspace",  label: t("dash_nav_workspace"), icon: Briefcase     },
+          { id: "matching",   label: t("dash_nav_matching"),  icon: Sparkles      },
         ];
   const secondaryNav = [
     ...(user?.role !== "mentor" ? [
-      { href: "/dashboard/saved-mentors", label: "Saved Mentors", icon: Heart },
-      { href: "/dashboard/mes-demandes",  label: "Mes Demandes",  icon: Clock },
+      { href: "/dashboard/saved-mentors", label: t("dash_nav_saved"),     icon: Heart },
+      { href: "/dashboard/mes-demandes",  label: t("dash_nav_requests"),  icon: Clock },
     ] : []),
     { href: "/profile",  label: t("dash_nav_profile"),  icon: User     },
     { href: "/settings", label: t("dash_nav_settings"), icon: Settings },
@@ -1236,7 +1236,7 @@ function DashboardContent() {
                         { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
                         { label: t("dash_stat_done"),       value: mentorPast.length,    icon: Video,         accent: "rgba(16,185,129,0.12)", iconColor: "text-emerald-400" },
                         { label: t("dash_stat_upcoming"),   value: mentorUpcoming.length, icon: Clock,        accent: "rgba(236,72,153,0.12)", iconColor: "text-pink-400" },
-                        { label: "My Mentees",              value: myMentees.length,     icon: Users,         accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
+                        { label: t("dash_nav_mentees"),              value: myMentees.length,     icon: Users,         accent: "rgba(245,158,11,0.12)", iconColor: "text-amber-400" },
                       ]
                     : [
                         { label: t("dash_stat_booked"),    value: connexions.length,    icon: CalendarCheck, accent: "rgba(124,58,237,0.15)", iconColor: "text-[#A78BFA]" },
@@ -2088,7 +2088,7 @@ function DashboardContent() {
             {/* MY MENTEES */}
             {tab === "mentees" && user?.role === "mentor" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">My Mentees</h1>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">{t("dash_nav_mentees")}</h1>
                 {myMentees.length > 0 ? (
                   <div className="space-y-3">
                     {myMentees.map(mentee => {
