@@ -56,26 +56,26 @@ export default function Footer() {
   const hideHeadline = pathname === "/how-it-works";
 
   const navLinks = [
-    { label: "Accueil",          href: "/"                },
-    { label: "Explorer",         href: "/explore"         },
-    { label: "Devenir Mentor",   href: "/become-a-mentor" },
-    { label: "Fonctionnement",   href: "/how-it-works"    },
-    { label: "Tarifs",           href: "/pricing"         },
-    { label: "Notre Histoire",   href: "/founders"        },
+    { label: t("footer_link_home"),          href: "/"                },
+    { label: t("footer_link_explore"),       href: "/explore"         },
+    { label: t("for_you_mentor_cta"),        href: "/become-a-mentor" },
+    { label: t("nav_how"),                   href: "/how-it-works"    },
+    { label: t("footer_link_pricing"),       href: "/pricing"         },
+    { label: t("footer_link_founders"),      href: "/founders"        },
   ];
 
   const platformLinks = [
-    { label: "Trouver un Mentor",     href: "/explore/find-a-mentor"  },
-    { label: "Matching IA",           href: "/ai-smart-matching"      },
-    { label: "Certification Mentor",  href: "/mentor-certification"   },
-    { label: "Pour les Écoles",       href: "/for-schools"            },
+    { label: t("nav_find_mentor"),           href: "/explore/find-a-mentor"  },
+    { label: t("footer_link_ai_matching"),   href: "/ai-smart-matching"      },
+    { label: t("footer_link_mentor_cert"),   href: "/mentor-certification"   },
+    { label: t("nav_schools"),               href: "/for-schools"            },
   ];
 
   const companyLinks = [
-    { label: "FAQ",                        href: "/faq"             },
-    { label: "Sécurité & Confiance",       href: "/safety-trust"   },
-    { label: "Contact",                    href: "/contact"         },
-    { label: "Politique de confidentialité", href: "/legal/privacy" },
+    { label: t("nav_faq"),                   href: "/faq"             },
+    { label: t("nav_safety"),                href: "/safety-trust"    },
+    { label: t("footer_link_contact"),       href: "/contact"         },
+    { label: t("footer_link_privacy"),       href: "/legal/privacy"   },
   ];
 
   const cities = [
@@ -119,7 +119,7 @@ export default function Footer() {
             {/* NAVIGATION */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                Navigation
+                {t("footer_nav_label")}
               </p>
               <ul className="space-y-3.5">
                 {navLinks.map((l) => (
@@ -138,7 +138,7 @@ export default function Footer() {
             {/* PLATEFORME */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                Plateforme
+                {t("footer_platform_label")}
               </p>
               <ul className="space-y-3.5">
                 {platformLinks.map((l) => (
@@ -157,7 +157,7 @@ export default function Footer() {
             {/* ENTREPRISE */}
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#4C1D95] mb-6">
-                Entreprise
+                {t("footer_company_label")}
               </p>
               <ul className="space-y-3.5">
                 {companyLinks.map((l) => (

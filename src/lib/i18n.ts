@@ -1,4 +1,4 @@
-export type Locale = 'en' | 'fr' | 'es' | 'de' | 'nl' | 'pl' | 'tr' | 'pt' | 'pt-BR' | 'it' | 'zh' | 'ar' | 'ar-EG' | 'ar-LB' | 'ar-SA' | 'ar-MA' | 'ru' | 'ja' | 'ko';
+﻿export type Locale = 'en' | 'fr' | 'es' | 'de' | 'nl' | 'pl' | 'tr' | 'pt' | 'pt-BR' | 'it' | 'zh' | 'ar' | 'ar-EG' | 'ar-LB' | 'ar-SA' | 'ar-MA' | 'ru' | 'ja' | 'ko';
 
 export const locales: Locale[] = ['en', 'fr', 'es', 'de', 'nl', 'pl', 'tr', 'pt', 'pt-BR', 'it', 'zh', 'ar', 'ar-EG', 'ar-LB', 'ar-SA', 'ar-MA', 'ru', 'ja', 'ko'];
 
@@ -189,6 +189,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'guide',
     footer_headline_3: '.',
     footer_nav_label: 'Navigation',
+    footer_platform_label: 'Platform',
+    footer_link_ai_matching: 'AI Matching',
+    footer_link_mentor_cert: 'Mentor Certification',
     footer_company_label: 'Company',
     footer_link_home: 'Home',
     footer_link_explore: 'Explore',
@@ -986,6 +989,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Calendar',
     dash_nav_settings: 'Settings',
     dash_nav_signout: 'Sign out',
+    dash_nav_workspace: 'Workspace',
+    dash_nav_mentees: 'My Mentees',
+    dash_nav_requests: 'My Requests',
 
     // Dashboard, stats
     dash_stat_booked: 'Sessions Booked',
@@ -1274,6 +1280,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'guide',
     footer_headline_3: '.',
     footer_nav_label: 'Navigation',
+    footer_platform_label: 'Plateforme',
+    footer_link_ai_matching: 'Matching IA',
+    footer_link_mentor_cert: 'Certification Mentor',
     footer_company_label: 'Entreprise',
     footer_link_home: 'Accueil',
     footer_link_explore: 'Explorer',
@@ -2071,6 +2080,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Calendrier',
     dash_nav_settings: 'Paramètres',
     dash_nav_signout: 'Déconnexion',
+    dash_nav_workspace: 'Espace de Travail',
+    dash_nav_mentees: 'Mes Mentorés',
+    dash_nav_requests: 'Mes Demandes',
 
     // Dashboard, statistiques
     dash_stat_booked: 'Sessions Réservées',
@@ -2359,6 +2371,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'guía',
     footer_headline_3: '.',
     footer_nav_label: 'Navegación',
+    footer_platform_label: 'Plataforma',
+    footer_link_ai_matching: 'Matching IA',
+    footer_link_mentor_cert: 'Certificación Mentor',
     footer_company_label: 'Empresa',
     footer_link_home: 'Inicio',
     footer_link_explore: 'Explorar',
@@ -3156,6 +3171,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Calendario',
     dash_nav_settings: 'Configuración',
     dash_nav_signout: 'Cerrar sesión',
+    dash_nav_workspace: 'Área de Trabajo',
+    dash_nav_mentees: 'Mis Aprendices',
+    dash_nav_requests: 'Mis Solicitudes',
 
     // Dashboard, estadísticas
     dash_stat_booked: 'Sesiones Reservadas',
@@ -3444,6 +3462,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'Wegweiser hat',
     footer_headline_3: '.',
     footer_nav_label: 'Navigation',
+    footer_platform_label: 'Plattform',
+    footer_link_ai_matching: 'KI-Matching',
+    footer_link_mentor_cert: 'Mentor-Zertifizierung',
     footer_company_label: 'Unternehmen',
     footer_link_home: 'Startseite',
     footer_link_explore: 'Entdecken',
@@ -4241,6 +4262,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Kalender',
     dash_nav_settings: 'Einstellungen',
     dash_nav_signout: 'Abmelden',
+    dash_nav_workspace: 'Arbeitsbereich',
+    dash_nav_mentees: 'Meine Mentees',
+    dash_nav_requests: 'Meine Anfragen',
 
     // Dashboard, stats
     dash_stat_booked: 'Gebuchte Sessions',
@@ -4529,6 +4553,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'guia',
     footer_headline_3: '.',
     footer_nav_label: 'Navegação',
+    footer_platform_label: 'Plataforma',
+    footer_link_ai_matching: 'Matching IA',
+    footer_link_mentor_cert: 'Certificação Mentor',
     footer_company_label: 'Empresa',
     footer_link_home: 'Início',
     footer_link_explore: 'Explorar',
@@ -5326,6 +5353,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Calendário',
     dash_nav_settings: 'Definições',
     dash_nav_signout: 'Terminar sessão',
+    dash_nav_workspace: 'Área de Trabalho',
+    dash_nav_mentees: 'Meus Mentorandos',
+    dash_nav_requests: 'Meus Pedidos',
 
     // Dashboard, stats
     dash_stat_booked: 'Sessões Reservadas',
@@ -5614,6 +5644,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'guia',
     footer_headline_3: '.',
     footer_nav_label: 'Navegação',
+    footer_platform_label: 'Plataforma',
+    footer_link_ai_matching: 'Matching IA',
+    footer_link_mentor_cert: 'Certificação Mentor',
     footer_company_label: 'Empresa',
     footer_link_home: 'Início',
     footer_link_explore: 'Explorar',
@@ -6411,6 +6444,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Calendário',
     dash_nav_settings: 'Configurações',
     dash_nav_signout: 'Sair',
+    dash_nav_workspace: 'Área de Trabalho',
+    dash_nav_mentees: 'Meus Mentorandos',
+    dash_nav_requests: 'Meus Pedidos',
 
     // Dashboard, stats
     dash_stat_booked: 'Sessões Agendadas',
@@ -6699,6 +6735,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'guida',
     footer_headline_3: '.',
     footer_nav_label: 'Navigazione',
+    footer_platform_label: 'Piattaforma',
+    footer_link_ai_matching: 'Matching IA',
+    footer_link_mentor_cert: 'Certificazione Mentor',
     footer_company_label: 'Azienda',
     footer_link_home: 'Home',
     footer_link_explore: 'Esplora',
@@ -7496,6 +7535,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Calendario',
     dash_nav_settings: 'Impostazioni',
     dash_nav_signout: 'Disconnettiti',
+    dash_nav_workspace: 'Area di Lavoro',
+    dash_nav_mentees: 'I Miei Mentee',
+    dash_nav_requests: 'Le Mie Richieste',
 
     // Dashboard, stats
     dash_stat_booked: 'Sessioni prenotate',
@@ -7784,6 +7826,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'ガイド',
     footer_headline_3: 'がいる。',
     footer_nav_label: 'ナビゲーション',
+    footer_platform_label: 'プラットフォーム',
+    footer_link_ai_matching: 'AIマッチング',
+    footer_link_mentor_cert: 'メンター認定',
     footer_company_label: '会社情報',
     footer_link_home: 'ホーム',
     footer_link_explore: '探す',
@@ -8581,6 +8626,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'カレンダー',
     dash_nav_settings: '設定',
     dash_nav_signout: 'ログアウト',
+    dash_nav_workspace: 'ワークスペース',
+    dash_nav_mentees: '担当メンティー',
+    dash_nav_requests: 'マイリクエスト',
 
     // Dashboard, stats
     dash_stat_booked: '予約済みセッション',
@@ -8869,6 +8917,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: '안내자',
     footer_headline_3: '가 있습니다.',
     footer_nav_label: '내비게이션',
+    footer_platform_label: '플랫폼',
+    footer_link_ai_matching: 'AI 매칭',
+    footer_link_mentor_cert: '멘토 인증',
     footer_company_label: '회사',
     footer_link_home: '홈',
     footer_link_explore: '탐색',
@@ -9666,6 +9717,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: '캘린더',
     dash_nav_settings: '설정',
     dash_nav_signout: '로그아웃',
+    dash_nav_workspace: '워크스페이스',
+    dash_nav_mentees: '내 멘티',
+    dash_nav_requests: '내 요청',
 
     // Dashboard, stats
     dash_stat_booked: '예약된 세션',
@@ -9954,6 +10008,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'проводник',
     footer_headline_3: '.',
     footer_nav_label: 'Навигация',
+    footer_platform_label: 'Платформа',
+    footer_link_ai_matching: 'ИИ-подбор',
+    footer_link_mentor_cert: 'Сертификация ментора',
     footer_company_label: 'Компания',
     footer_link_home: 'Главная',
     footer_link_explore: 'Изучить',
@@ -10751,6 +10808,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Календарь',
     dash_nav_settings: 'Настройки',
     dash_nav_signout: 'Выйти',
+    dash_nav_workspace: 'Рабочее пространство',
+    dash_nav_mentees: 'Мои подопечные',
+    dash_nav_requests: 'Мои запросы',
 
     // Dashboard, stats
     dash_stat_booked: 'Забронировано',
@@ -10970,7 +11030,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     cta_find: 'ابحث عن مرشدي', cta_apply: 'تقدم كمرشد',
     cta_footnote: 'بلا التزام · جلسة اكتشاف من ٩٫٩٩€',
     footer_headline_1: 'حيث يملك مستقبلك', footer_headline_2: 'دليلًا', footer_headline_3: '.',
-    footer_nav_label: 'التنقل', footer_company_label: 'الشركة',
+    footer_nav_label: 'التنقل', footer_platform_label: 'المنصة', footer_link_ai_matching: 'المطابقة بالذكاء الاصطناعي', footer_link_mentor_cert: 'شهادة المرشد', footer_company_label: 'الشركة',
     footer_link_home: 'الرئيسية', footer_link_explore: 'استكشف', footer_link_founders: 'المؤسسون',
     footer_link_stories: 'القصص', footer_link_pricing: 'الأسعار', footer_link_manifesto: 'البيان',
     footer_link_careers: 'وظائف', footer_link_contact: 'تواصل معنا', footer_link_privacy: 'سياسة الخصوصية',
@@ -11348,7 +11408,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_role_mentor: 'مرشد', dash_role_school: 'مشرف المدرسة', dash_role_mentee: 'متدرب',
     dash_nav_overview: 'نظرة عامة', dash_nav_sessions: 'جلساتي', dash_nav_saved: 'المرشدون المحفوظون',
     dash_nav_matching: 'المطابقة الذكية', dash_nav_profile: 'الملف الشخصي', dash_nav_calendar: 'التقويم',
-    dash_nav_settings: 'الإعدادات', dash_nav_signout: 'تسجيل الخروج',
+    dash_nav_settings: 'الإعدادات', dash_nav_signout: 'تسجيل الخروج', dash_nav_workspace: 'مساحة العمل', dash_nav_mentees: 'متدربي', dash_nav_requests: 'طلباتي',
     dash_stat_booked: 'جلسات محجوزة', dash_stat_done: 'جلسات مكتملة', dash_stat_upcoming: 'القادمة', dash_stat_ai: 'مطابقات ذكاء اصطناعي',
     dash_welcome_new: 'مرحبًا بك في GrowVia، ', dash_welcome_return: 'أهلًا بعودتك، ',
     dash_overview_sub: 'إليك نظرتك العامة على الإرشاد.',
@@ -11555,6 +11615,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: '引路人',
     footer_headline_3: '。',
     footer_nav_label: '导航',
+    footer_platform_label: '平台',
+    footer_link_ai_matching: 'AI 匹配',
+    footer_link_mentor_cert: '导师认证',
     footer_company_label: '公司',
     footer_link_home: '首页',
     footer_link_explore: '探索',
@@ -12352,6 +12415,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: '日历',
     dash_nav_settings: '设置',
     dash_nav_signout: '退出登录',
+    dash_nav_workspace: '工作区',
+    dash_nav_mentees: '我的学员',
+    dash_nav_requests: '我的请求',
 
     // Dashboard, stats
     dash_stat_booked: '已预约课程',
@@ -12640,6 +12706,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'gids',
     footer_headline_3: ' heeft.',
     footer_nav_label: 'Navigatie',
+    footer_platform_label: 'Platform',
+    footer_link_ai_matching: 'AI-matching',
+    footer_link_mentor_cert: 'Mentorcertificering',
     footer_company_label: 'Bedrijf',
     footer_link_home: 'Home',
     footer_link_explore: 'Ontdekken',
@@ -13437,6 +13506,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Kalender',
     dash_nav_settings: 'Instellingen',
     dash_nav_signout: 'Uitloggen',
+    dash_nav_workspace: 'Werkruimte',
+    dash_nav_mentees: 'Mijn mentees',
+    dash_nav_requests: 'Mijn verzoeken',
 
     // Dashboard, stats
     dash_stat_booked: 'Geboekte Sessies',
@@ -13725,6 +13797,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'przewodnika',
     footer_headline_3: '.',
     footer_nav_label: 'Nawigacja',
+    footer_platform_label: 'Platforma',
+    footer_link_ai_matching: 'Dopasowanie AI',
+    footer_link_mentor_cert: 'Certyfikacja Mentora',
     footer_company_label: 'Firma',
     footer_link_home: 'Strona główna',
     footer_link_explore: 'Odkryj',
@@ -14522,6 +14597,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Kalendarz',
     dash_nav_settings: 'Ustawienia',
     dash_nav_signout: 'Wyloguj się',
+    dash_nav_workspace: 'Przestrzeń robocza',
+    dash_nav_mentees: 'Podopieczni',
+    dash_nav_requests: 'Moje wnioski',
 
     // Dashboard, stats
     dash_stat_booked: 'Zarezerwowane Sesje',
@@ -14810,6 +14888,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     footer_headline_2: 'rehberi var',
     footer_headline_3: '.',
     footer_nav_label: 'Gezinti',
+    footer_platform_label: 'Platform',
+    footer_link_ai_matching: 'AI Eşleştirme',
+    footer_link_mentor_cert: 'Mentor Sertifikası',
     footer_company_label: 'Şirket',
     footer_link_home: 'Ana Sayfa',
     footer_link_explore: 'Keşfet',
@@ -15607,6 +15688,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     dash_nav_calendar: 'Takvim',
     dash_nav_settings: 'Ayarlar',
     dash_nav_signout: 'Çıkış Yap',
+    dash_nav_workspace: 'Çalışma Alanı',
+    dash_nav_mentees: 'Öğrencilerim',
+    dash_nav_requests: 'Taleplerim',
 
     // Dashboard, stats
     dash_stat_booked: 'Rezerve Edilen Oturumlar',
