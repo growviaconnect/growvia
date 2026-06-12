@@ -275,11 +275,11 @@ export default function FoundersPage() {
         </div>
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
-            <div className="lg:py-8">
+            <div className="lg:py-8 lg:pl-8">
               <p className="text-sm font-bold text-[#7C3AED] uppercase tracking-[0.3em] mb-10">
                 {t("founders_vision_label")}
               </p>
-              <blockquote>
+              <blockquote style={{ borderLeft: "3px solid #7C3AED", paddingLeft: "2rem" }}>
                 <p
                   className="text-3xl md:text-4xl text-white/85 leading-snug max-w-3xl"
                   style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}
@@ -293,7 +293,7 @@ export default function FoundersPage() {
                 <div
                   key={card.title}
                   ref={(el) => { visionCardRefs.current[i] = el; }}
-                  className="grid grid-cols-[56px_1fr] gap-6 py-7 border-b border-white/10"
+                  className="grid grid-cols-[56px_1fr] gap-6 py-7 border-b border-white/10 hover:border-[#7C3AED] transition-colors duration-300"
                 >
                   <span className="text-5xl font-extrabold text-white/15 leading-none select-none">
                     {card.num}
