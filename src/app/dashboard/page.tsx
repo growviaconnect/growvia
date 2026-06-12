@@ -376,6 +376,7 @@ function DashboardContent() {
 
   // Mentor-specific state
   const [mentorSessionTab, setMentorSessionTab] = useState<"pending" | "upcoming" | "past">("pending");
+  const [menteeSessionTab, setMenteeSessionTab] = useState<"pending" | "upcoming" | "past">("upcoming");
   const [actionLoading, setActionLoading]       = useState<string | null>(null);
   const [mentorDbId, setMentorDbId]             = useState<string | null>(null);
 
@@ -827,6 +828,11 @@ function DashboardContent() {
     (c) => c.statut === "completed" || (c.statut !== "cancelled" && new Date(c.date) < new Date())
   );
 
+  // Mentee-derived data for sub-tabs
+  const menteePending  = connexions.filter(c => c.statut === "pending");
+  const menteeUpcoming = connexions.filter(c => c.statut === "active" && new Date(c.date) >= new Date());
+  const menteePast     = connexions.filter(c => c.statut === "completed" || (c.statut !== "cancelled" && new Date(c.date) < new Date()));
+
   // Mentor-derived data
   const mentorPending     = connexions.filter(c => c.statut === "pending");
   const mentorRescheduled = connexions.filter(c => c.statut === "rescheduled");
@@ -943,6 +949,19 @@ function DashboardContent() {
       setConnexions(prev => prev.filter(c => c.id !== connId));
     } catch (err) {
       console.error("[decline-retime]", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleMenteeCancelSession(connId: string) {
+    if (!window.confirm("Cancel this session request?")) return;
+    setActionLoading(connId);
+    try {
+      await supabase.from("connexions").update({ statut: "cancelled" }).eq("id", connId);
+      setConnexions(prev => prev.filter(c => c.id !== connId));
+    } catch (err) {
+      console.error("[mentee-cancel]", err);
     } finally {
       setActionLoading(null);
     }
@@ -1644,12 +1663,27 @@ function DashboardContent() {
                 ) : (
                   /* ── Mentee sessions view ───────────────────────────────── */
                   <>
-                    {/* Rescheduled — awaiting mentee response */}
-                    {upcoming.filter(c => c.statut === "rescheduled").length > 0 && (
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">New time proposed</p>
+                    {/* Tab bar */}
+                    <div className="flex gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit">
+                      {(["pending", "upcoming", "past"] as const).map((st) => (
+                        <button key={st} onClick={() => setMenteeSessionTab(st)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            menteeSessionTab === st
+                              ? "bg-[#7C3AED] text-white"
+                              : "text-white/45 hover:text-white"
+                          }`}>
+                          {st === "pending"
+                            ? `Pending requests${menteePending.length > 0 ? ` (${menteePending.length})` : ""}`
+                            : st === "upcoming" ? "Upcoming" : "Past sessions"}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Pending requests */}
+                    {menteeSessionTab === "pending" && (
+                      menteePending.length > 0 ? (
                         <div className="space-y-3">
-                          {upcoming.filter(c => c.statut === "rescheduled").map(c => (
+                          {menteePending.map(c => (
                             <Card key={c.id} className="p-5">
                               <div className="flex items-start gap-4">
                                 <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
@@ -1657,60 +1691,98 @@ function DashboardContent() {
                                   {initials(c.mentors?.nom ?? "?")}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="font-semibold text-white text-sm">{c.mentors?.nom ?? "Mentor"}</span>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                                      style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
-                                      New time proposed
-                                    </span>
-                                  </div>
+                                  <div className="font-semibold text-white">{c.mentors?.nom ?? "Mentor"}</div>
                                   <div className="text-xs text-white/40 mt-0.5 mb-3">
                                     {c.mentors?.specialite ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
                                   </div>
-                                  <div className="flex gap-2">
-                                    <button onClick={() => handleAcceptRetime(c.id)} disabled={actionLoading === c.id}
-                                      className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                      Accept new time
-                                    </button>
-                                    <button onClick={() => handleDeclineRetime(c.id)} disabled={actionLoading === c.id}
-                                      className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                                      {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
-                                      Decline
-                                    </button>
-                                  </div>
+                                  <button
+                                    onClick={() => handleMenteeCancelSession(c.id)}
+                                    disabled={actionLoading === c.id}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-400/60 hover:text-red-400 border border-red-400/15 hover:border-red-400/30 transition-colors disabled:opacity-40"
+                                  >
+                                    {actionLoading === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                                    Cancel request
+                                  </button>
                                 </div>
                               </div>
                             </Card>
                           ))}
                         </div>
-                      </div>
+                      ) : (
+                        <EmptyState icon={CalendarCheck} title="No pending requests" desc="Session requests you send to mentors will appear here." />
+                      )
                     )}
 
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_upcoming_label")}</p>
-                      {upcoming.filter(c => c.statut !== "rescheduled").length > 0 ? (
+                    {/* Upcoming confirmed + rescheduled */}
+                    {menteeSessionTab === "upcoming" && (
+                      <>
+                        {upcoming.filter(c => c.statut === "rescheduled").length > 0 && (
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">New time proposed</p>
+                            <div className="space-y-3">
+                              {upcoming.filter(c => c.statut === "rescheduled").map(c => (
+                                <Card key={c.id} className="p-5">
+                                  <div className="flex items-start gap-4">
+                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                                      style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%)" }}>
+                                      {initials(c.mentors?.nom ?? "?")}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 mb-0.5">
+                                        <span className="font-semibold text-white text-sm">{c.mentors?.nom ?? "Mentor"}</span>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                          style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
+                                          New time proposed
+                                        </span>
+                                      </div>
+                                      <div className="text-xs text-white/40 mt-0.5 mb-3">
+                                        {c.mentors?.specialite ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <button onClick={() => handleAcceptRetime(c.id)} disabled={actionLoading === c.id}
+                                          className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                          {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                          Accept new time
+                                        </button>
+                                        <button onClick={() => handleDeclineRetime(c.id)} disabled={actionLoading === c.id}
+                                          className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                          {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                                          Decline
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {menteeUpcoming.length > 0 ? (
+                          <div className="space-y-3">
+                            {menteeUpcoming.map((c) => <SessionCard key={c.id} conn={c} userRole="mentee" />)}
+                          </div>
+                        ) : upcoming.filter(c => c.statut === "rescheduled").length === 0 ? (
+                          <EmptyState icon={CalendarCheck} title={t("dash_no_sessions")} desc={t("dash_no_sessions_desc")}
+                            action={
+                              <Link href="/explore/find-a-mentor"
+                                className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+                                <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
+                              </Link>
+                            }
+                          />
+                        ) : null}
+                      </>
+                    )}
+
+                    {/* Past sessions */}
+                    {menteeSessionTab === "past" && (
+                      menteePast.length > 0 ? (
                         <div className="space-y-3">
-                          {upcoming.filter(c => c.statut !== "rescheduled").map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
+                          {menteePast.map((c) => <SessionCard key={c.id} conn={c} userRole="mentee" />)}
                         </div>
                       ) : (
-                        <EmptyState icon={CalendarCheck} title={t("dash_no_sessions")} desc={t("dash_no_sessions_desc")}
-                          action={
-                            <Link href="/explore/find-a-mentor"
-                              className="inline-flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
-                              <BookOpen className="w-4 h-4" /> {t("dash_find_mentor")}
-                            </Link>
-                          }
-                        />
-                      )}
-                    </div>
-                    {past.length > 0 && (
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/30 mb-3">{t("dash_past_label")}</p>
-                        <div className="space-y-3">
-                          {past.map((c) => <SessionCard key={c.id} conn={c} userRole={user?.role ?? "mentee"} />)}
-                        </div>
-                      </div>
+                        <EmptyState icon={Video} title="No past sessions yet" desc="Completed sessions will show here." />
+                      )
                     )}
                   </>
                 )}
