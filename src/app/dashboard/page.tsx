@@ -955,7 +955,7 @@ function DashboardContent() {
   }
 
   async function handleMenteeCancelSession(connId: string) {
-    if (!window.confirm("Cancel this session request?")) return;
+    if (!window.confirm(t("dash_confirm_cancel"))) return;
     setActionLoading(connId);
     try {
       await supabase.from("connexions").update({ statut: "cancelled" }).eq("id", connId);
@@ -1108,14 +1108,14 @@ function DashboardContent() {
                 <button
                   onClick={() => setProposeModal(null)}
                   className="flex-1 border border-white/10 hover:border-white/20 text-white/50 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
-                  Cancel
+                  {t("dash_cancel")}
                 </button>
                 <button
                   onClick={handleProposeTime}
                   disabled={!proposeDate || !proposeTime || proposeLoading}
                   className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                   {proposeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  Send proposal
+                  {t("dash_send_proposal")}
                 </button>
               </div>
             </div>
@@ -1210,7 +1210,7 @@ function DashboardContent() {
                     <div className="w-2 h-2 rounded-full bg-[#A78BFA] flex-shrink-0" />
                     <span className="text-[#C4B5FD] text-sm font-medium">
                       {user?.role === "mentor"
-                        ? "Profile complete! Mentees can now find and book sessions with you."
+                        ? t("dash_mentor_profile_complete")
                         : t("dash_profile_complete")}
                     </span>
                   </div>
@@ -1262,9 +1262,9 @@ function DashboardContent() {
                     {mentorPending.length > 0 && (
                       <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">Pending Requests</h2>
+                          <h2 className="font-bold text-white text-sm uppercase tracking-[0.12em]">{t("dash_pending_requests_label")}</h2>
                           <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full">
-                            {mentorPending.length} new
+                            {mentorPending.length} {t("dash_new_badge")}
                           </span>
                         </div>
                         <div className="divide-y divide-white/[0.06]">
@@ -1277,7 +1277,7 @@ function DashboardContent() {
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
                                 <div className="text-xs text-white/40 mt-0.5">
-                                  {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} {fmtTime(c.date, lang)}
+                                  {c.mentees?.objectif ?? t("dash_session_default")} · {fmtDate(c.date, t, lang)} {fmtTime(c.date, lang)}
                                 </div>
                               </div>
                               <div className="flex gap-2 flex-shrink-0">
@@ -1286,14 +1286,14 @@ function DashboardContent() {
                                   {actionLoading === c.id
                                     ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     : <CheckCircle className="w-3.5 h-3.5" />
-                                  } Accept
+                                  } {t("dash_accept")}
                                 </button>
                                 <button onClick={() => handleDeclineSession(c.id)} disabled={actionLoading === c.id}
                                   className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
                                   {actionLoading === c.id
                                     ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     : <XCircle className="w-3.5 h-3.5" />
-                                  } Decline
+                                  } {t("dash_decline")}
                                 </button>
                                 <button
                                   onClick={() => { setProposeDate(""); setProposeTime(""); setProposeModal(c.id); }}
@@ -1327,7 +1327,7 @@ function DashboardContent() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</div>
-                                <div className="text-xs text-white/35 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                <div className="text-xs text-white/35 mt-0.5">{c.mentees?.objectif ?? t("dash_session_default")}</div>
                               </div>
                               <div className="text-right flex-shrink-0 hidden sm:block">
                                 <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
@@ -1343,8 +1343,8 @@ function DashboardContent() {
                     ) : mentorPending.length === 0 && (
                       <EmptyState
                         icon={CalendarCheck}
-                        title="No upcoming sessions"
-                        desc="Your schedule is clear. Once a mentee books a session it will appear here."
+                        title={t("dash_no_upcoming")}
+                        desc={t("dash_empty_no_upcoming_mentor_desc")}
                       />
                     )}
                   </>
@@ -1408,16 +1408,16 @@ function DashboardContent() {
                         style={{ background: "rgba(245,158,11,0.06)" }}
                       >
                         <div>
-                          <p className="text-white font-semibold mb-0.5">Free trials used.</p>
+                          <p className="text-white font-semibold mb-0.5">{t("dash_trial_title")}</p>
                           <p className="text-white/45 text-sm">
-                            Subscribe to continue booking sessions and using AI matching.
+                            {t("dash_trial_desc")}
                           </p>
                         </div>
                         <Link
                           href="/subscribe"
                           className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap"
                         >
-                          Subscribe →
+                          {t("dash_trial_cta")} →
                         </Link>
                       </div>
                     )}
@@ -1495,8 +1495,8 @@ function DashboardContent() {
                               : "text-white/45 hover:text-white"
                           }`}>
                           {st === "pending"
-                            ? `Pending requests${mentorPending.length > 0 ? ` (${mentorPending.length})` : ""}`
-                            : st === "upcoming" ? "Upcoming" : "Past sessions"}
+                            ? `${t("dash_pending_requests")}${mentorPending.length > 0 ? ` (${mentorPending.length})` : ""}`
+                            : st === "upcoming" ? t("dash_upcoming_label") : t("dash_past_label")}
                         </button>
                       ))}
                     </div>
@@ -1522,11 +1522,11 @@ function DashboardContent() {
                                           <span className="font-semibold text-white text-sm">{c.mentees?.nom ?? "Mentee"}</span>
                                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                             style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
-                                            New time proposed
+                                            {t("dash_new_time_proposed")}
                                           </span>
                                         </div>
                                         <div className="text-xs text-white/40 mt-0.5">
-                                          {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                          {c.mentees?.objectif ?? t("dash_session_default")} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
                                         </div>
                                       </div>
                                     </div>
@@ -1551,18 +1551,18 @@ function DashboardContent() {
                                 <div className="flex-1 min-w-0">
                                   <div className="font-semibold text-white">{c.mentees?.nom ?? "Mentee"}</div>
                                   <div className="text-xs text-white/40 mt-0.5 mb-3">
-                                    {c.mentees?.objectif ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                    {c.mentees?.objectif ?? t("dash_session_default")} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
                                   </div>
                                   <div className="flex gap-2 flex-wrap">
                                     <button onClick={() => handleAcceptSession(c.id)} disabled={actionLoading === c.id}
                                       className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
                                       {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                      Accept
+                                      {t("dash_accept")}
                                     </button>
                                     <button onClick={() => handleDeclineSession(c.id)} disabled={actionLoading === c.id}
                                       className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
                                       {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
-                                      Decline
+                                      {t("dash_decline")}
                                     </button>
                                     <button
                                       onClick={() => { setProposeDate(""); setProposeTime(""); setProposeModal(c.id); }}
@@ -1579,7 +1579,7 @@ function DashboardContent() {
                           )}
                         </div>
                       ) : (
-                        <EmptyState icon={CalendarCheck} title="No pending requests" desc="New session requests from mentees will appear here." />
+                        <EmptyState icon={CalendarCheck} title={t("dash_empty_no_pending")} desc={t("dash_empty_no_pending_mentor_desc")} />
                       )
                     )}
 
@@ -1596,7 +1596,7 @@ function DashboardContent() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="font-semibold text-white">{c.mentees?.nom ?? "Mentee"}</div>
-                                  <div className="text-xs text-white/40 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                  <div className="text-xs text-white/40 mt-0.5">{c.mentees?.objectif ?? t("dash_session_default")}</div>
                                 </div>
                                 <div className="text-right flex-shrink-0 hidden sm:block mr-4">
                                   <div className="text-sm font-semibold text-white">{fmtDate(c.date, t, lang)}</div>
@@ -1628,7 +1628,7 @@ function DashboardContent() {
                           ))}
                         </div>
                       ) : (
-                        <EmptyState icon={Clock} title="No upcoming sessions" desc="Confirmed sessions will appear here once a request is accepted." />
+                        <EmptyState icon={Clock} title={t("dash_no_upcoming")} desc={t("dash_empty_no_upcoming_confirmed_desc")} />
                       )
                     )}
 
@@ -1645,7 +1645,7 @@ function DashboardContent() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="font-semibold text-white/70">{c.mentees?.nom ?? "Mentee"}</div>
-                                  <div className="text-xs text-white/30 mt-0.5">{c.mentees?.objectif ?? "Mentoring session"}</div>
+                                  <div className="text-xs text-white/30 mt-0.5">{c.mentees?.objectif ?? t("dash_session_default")}</div>
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                   <div className="text-sm font-medium text-white/50">{fmtDate(c.date, t, lang)}</div>
@@ -1656,7 +1656,7 @@ function DashboardContent() {
                           ))}
                         </div>
                       ) : (
-                        <EmptyState icon={Video} title="No past sessions yet" desc="Completed sessions will show here." />
+                        <EmptyState icon={Video} title={t("dash_empty_no_past")} desc={t("dash_empty_no_past_desc")} />
                       )
                     )}
                   </>
@@ -1673,8 +1673,8 @@ function DashboardContent() {
                               : "text-white/45 hover:text-white"
                           }`}>
                           {st === "pending"
-                            ? `Pending requests${menteePending.length > 0 ? ` (${menteePending.length})` : ""}`
-                            : st === "upcoming" ? "Upcoming" : "Past sessions"}
+                            ? `${t("dash_pending_requests")}${menteePending.length > 0 ? ` (${menteePending.length})` : ""}`
+                            : st === "upcoming" ? t("dash_upcoming_label") : t("dash_past_label")}
                         </button>
                       ))}
                     </div>
@@ -1693,7 +1693,7 @@ function DashboardContent() {
                                 <div className="flex-1 min-w-0">
                                   <div className="font-semibold text-white">{c.mentors?.nom ?? "Mentor"}</div>
                                   <div className="text-xs text-white/40 mt-0.5 mb-3">
-                                    {c.mentors?.specialite ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                    {c.mentors?.specialite ?? t("dash_session_default")} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
                                   </div>
                                   <button
                                     onClick={() => handleMenteeCancelSession(c.id)}
@@ -1701,7 +1701,7 @@ function DashboardContent() {
                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-400/60 hover:text-red-400 border border-red-400/15 hover:border-red-400/30 transition-colors disabled:opacity-40"
                                   >
                                     {actionLoading === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
-                                    Cancel request
+                                    {t("dash_cancel_request")}
                                   </button>
                                 </div>
                               </div>
@@ -1709,7 +1709,7 @@ function DashboardContent() {
                           ))}
                         </div>
                       ) : (
-                        <EmptyState icon={CalendarCheck} title="No pending requests" desc="Session requests you send to mentors will appear here." />
+                        <EmptyState icon={CalendarCheck} title={t("dash_empty_no_pending")} desc={t("dash_empty_no_pending_mentee_desc")} />
                       )
                     )}
 
@@ -1732,22 +1732,22 @@ function DashboardContent() {
                                         <span className="font-semibold text-white text-sm">{c.mentors?.nom ?? "Mentor"}</span>
                                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                           style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B" }}>
-                                          New time proposed
+                                          {t("dash_new_time_proposed")}
                                         </span>
                                       </div>
                                       <div className="text-xs text-white/40 mt-0.5 mb-3">
-                                        {c.mentors?.specialite ?? "Mentoring session"} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
+                                        {c.mentors?.specialite ?? t("dash_session_default")} · {fmtDate(c.date, t, lang)} at {fmtTime(c.date, lang)}
                                       </div>
                                       <div className="flex gap-2">
                                         <button onClick={() => handleAcceptRetime(c.id)} disabled={actionLoading === c.id}
                                           className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
                                           {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                          Accept new time
+                                          {t("dash_accept_new_time")}
                                         </button>
                                         <button onClick={() => handleDeclineRetime(c.id)} disabled={actionLoading === c.id}
                                           className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
                                           {actionLoading === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
-                                          Decline
+                                          {t("dash_decline")}
                                         </button>
                                       </div>
                                     </div>
@@ -1781,7 +1781,7 @@ function DashboardContent() {
                           {menteePast.map((c) => <SessionCard key={c.id} conn={c} userRole="mentee" />)}
                         </div>
                       ) : (
-                        <EmptyState icon={Video} title="No past sessions yet" desc="Completed sessions will show here." />
+                        <EmptyState icon={Video} title={t("dash_empty_no_past")} desc={t("dash_empty_no_past_desc")} />
                       )
                     )}
                   </>
@@ -2121,8 +2121,8 @@ function DashboardContent() {
                 ) : (
                   <EmptyState
                     icon={Users}
-                    title="No mentees yet"
-                    desc="Mentees who have active or completed sessions with you will appear here."
+                    title={t("dash_empty_no_mentees")}
+                    desc={t("dash_empty_no_mentees_desc")}
                   />
                 )}
               </div>
@@ -2325,10 +2325,10 @@ function MentorCalendar({
         {/* Legend */}
         <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-5 pt-4 border-t border-white/[0.06]">
           {[
-            { color: "#C4B5FD", label: "Available slots" },
-            { color: "#4ADE80", label: "Confirmed" },
-            { color: "#F472B6", label: "Pending" },
-            { color: "#60A5FA", label: "Completed" },
+            { color: "#C4B5FD", label: t("dash_cal_available") },
+            { color: "#4ADE80", label: t("dash_cal_confirmed_legend") },
+            { color: "#F472B6", label: t("dash_cal_pending_legend") },
+            { color: "#60A5FA", label: t("dash_cal_completed_legend") },
           ].map(({ color, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
