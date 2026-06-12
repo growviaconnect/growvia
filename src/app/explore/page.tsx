@@ -290,7 +290,7 @@ export default function ExplorePage() {
       id: "mentees",
       badge: t("explore_badge_mentees"),
       title: t("explore_title_mentees"),
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
+      image: "/explore-mentores.jpg",
       links: [
         { label: t("explore_link_find_mentors"), href: "/explore/find-a-mentor" },
         { label: t("explore_link_ai"),           href: "/ai-smart-matching" },
