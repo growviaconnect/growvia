@@ -78,9 +78,11 @@ export default function Navbar() {
               className="flex items-center gap-2.5 flex-shrink-0 select-none"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-icon.svg" alt="" width={36} height={36} aria-hidden="true" />
-              <span className="text-white font-extrabold text-lg tracking-tight leading-none">
-                GrowVia<span style={{ color: "#A855F7" }}>Connect</span>
+              <img src="/logo-icon.svg" alt="GrowVia Connect" width={40} height={40} />
+              <span className="hidden sm:block w-px h-7 bg-white/15 mx-0.5" aria-hidden="true" />
+              <span className="hidden sm:flex flex-col leading-none">
+                <span className="text-white font-extrabold text-base tracking-tight">GrowVia</span>
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase mt-0.5" style={{ color: "#A855F7" }}>Connect</span>
               </span>
             </Link>
 

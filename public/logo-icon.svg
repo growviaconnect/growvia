@@ -1,19 +1,49 @@
-<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#C084FC"/>
-      <stop offset="0.55" stop-color="#9333EA"/>
-      <stop offset="1" stop-color="#4C1D95"/>
+    <!-- Main gradient: light purple top-left → deep purple bottom-right -->
+    <linearGradient id="grad" x1="15" y1="8" x2="85" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#B27AFE"/>
+      <stop offset="38%"  stop-color="#8B3CF7"/>
+      <stop offset="100%" stop-color="#3B0764"/>
+    </linearGradient>
+    <!-- Highlight gradient for inner face of ribbon -->
+    <linearGradient id="hi" x1="15" y1="8" x2="85" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#D8B4FE" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
     </linearGradient>
   </defs>
-  <!-- G ring: circle with ~60° gap centered at 3 o'clock -->
-  <!-- radius=14.5, circumference≈91.1, gap≈15.2 (60°), filled≈75.9 -->
-  <circle cx="20" cy="20" r="14.5"
-    stroke="url(#g)" stroke-width="5.5" stroke-linecap="round"
-    stroke-dasharray="75.9 15.2" stroke-dashoffset="-7.6"
-    transform="rotate(-90 20 20)"/>
-  <!-- G horizontal bar extending inward from right -->
-  <path d="M35 20H24" stroke="url(#g)" stroke-width="5.5" stroke-linecap="round"/>
-  <!-- V chevron inside -->
-  <path d="M13 14L20 26L27 14" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!--
+    G ring: circle r=34, stroke-width=18, gap ~60° centred at 3 o'clock.
+    Circumference = 2π×34 ≈ 213.6
+    60° gap = 213.6×(60/360) ≈ 35.6
+    Filled arc = 213.6 − 35.6 = 178
+    dashoffset = −(30/360)×213.6 ≈ −17.8  (centres gap at 3 o'clock after rotate-90)
+  -->
+  <circle cx="50" cy="50" r="34"
+    stroke="url(#grad)" stroke-width="18"
+    stroke-linecap="round"
+    stroke-dasharray="178 35.6"
+    stroke-dashoffset="-17.8"
+    transform="rotate(-90 50 50)"/>
+
+  <!-- Inner highlight pass (lighter stripe on upper-inner face of ribbon) -->
+  <circle cx="50" cy="50" r="34"
+    stroke="url(#hi)" stroke-width="7"
+    stroke-linecap="round"
+    stroke-dasharray="178 35.6"
+    stroke-dashoffset="-17.8"
+    transform="rotate(-90 50 50)"/>
+
+  <!-- G horizontal bar (extends rightward from inner ring at y=50) -->
+  <path d="M86 50H55" stroke="url(#grad)" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Bar inner highlight -->
+  <path d="M86 50H55" stroke="url(#hi)" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- V chevron (white) -->
+  <path d="M31 35L50 67L69 35"
+    stroke="white" stroke-width="7.5"
+    stroke-linecap="round" stroke-linejoin="round"
+    fill="none"/>
 </svg>
