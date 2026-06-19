@@ -73,17 +73,21 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16">
 
             {/* Left: Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2.5 flex-shrink-0 select-none"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-icon.svg" alt="GrowVia Connect" width={40} height={40} />
-              <span className="hidden sm:block w-px h-7 bg-white/15 mx-0.5" aria-hidden="true" />
-              <span className="hidden sm:flex flex-col leading-none">
-                <span className="text-white font-extrabold text-base tracking-tight">GrowVia</span>
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase mt-0.5" style={{ color: "#A855F7" }}>Connect</span>
+            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 select-none">
+              {/* Icon in white pill so the white-bg PNG blends on dark navbar */}
+              <span className="flex items-center justify-center rounded-lg bg-white p-[5px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-icon.png" alt="GrowVia Connect" width={30} height={30} className="block" />
               </span>
+              {/* Full horizontal logo (hidden on mobile to save space) */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo-horizontal.png"
+                alt="GrowVia Connect"
+                width={130}
+                height={40}
+                className="hidden sm:block object-contain"
+              />
             </Link>
 
             {/* Center: Nav links (desktop) */}
