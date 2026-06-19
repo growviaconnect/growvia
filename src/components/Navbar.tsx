@@ -74,20 +74,11 @@ export default function Navbar() {
 
             {/* Left: Logo */}
             <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 select-none">
-              {/* Icon in white pill so the white-bg PNG blends on dark navbar */}
-              <span className="flex items-center justify-center rounded-lg bg-white p-[5px]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-icon.png" alt="GrowVia Connect" width={30} height={30} className="block" />
-              </span>
-              {/* Full horizontal logo (hidden on mobile to save space) */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo-horizontal.png"
-                alt="GrowVia Connect"
-                width={130}
-                height={40}
-                className="hidden sm:block object-contain"
-              />
+              <img src="/logo-icon.png" alt="" width={36} height={36} aria-hidden="true" />
+              <span className="text-white font-extrabold text-lg tracking-tight leading-none">
+                GrowVia<span style={{ color: "#A855F7" }}>Connect</span>
+              </span>
             </Link>
 
             {/* Center: Nav links (desktop) */}
