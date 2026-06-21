@@ -11,15 +11,30 @@ export type VideoItem = {
 };
 
 export const DOMAIN_COLORS: Record<string, string> = {
-  Startups:    "#7C3AED",
-  Tech:        "#2563EB",
-  Medicine:    "#059669",
-  Law:         "#B45309",
-  Art:         "#DB2777",
-  Finance:     "#0891B2",
-  Consulting:  "#0D9488",
+  Startups:      "#7C3AED",
+  Tech:          "#2563EB",
+  Medicine:      "#059669",
+  Law:           "#B45309",
+  Art:           "#DB2777",
+  Finance:       "#0891B2",
+  Consulting:    "#0D9488",
   "Real Estate": "#C2410C",
+  Marketing:     "#EA580C",
+  Design:        "#0EA5E9",
+  Others:        "#6B7280",
 };
+
+/** Domains that get their own filter button (everything else → Others) */
+export const PRIMARY_DOMAINS = [
+  "Startups",
+  "Tech",
+  "Finance",
+  "Marketing",
+  "Design",
+  "Medicine",
+  "Law",
+  "Consulting",
+] as const;
 
 export const VIDEOS: VideoItem[] = [
   {
@@ -112,6 +127,36 @@ export const VIDEOS: VideoItem[] = [
     quote: "First deal at 24 with no capital of my own",
     src: "https://videos.pexels.com/video-files/7578043/7578043-hd_1280_720_25fps.mp4",
     poster: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+  },
+  {
+    id: "v13", domain: "Marketing",
+    name: "Jade L.", role: "Growth Marketer",
+    quote: "Scaled a brand from 0 to 1M users in 12 months",
+    src: "https://videos.pexels.com/video-files/3192154/3192154-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80",
+  },
+  {
+    id: "v14", domain: "Marketing",
+    name: "Lena K.", role: "Brand Strategist",
+    quote: "Building brands that actually stick",
+    src: "https://videos.pexels.com/video-files/7578544/7578544-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80",
+    tall: true,
+  },
+  {
+    id: "v15", domain: "Design",
+    name: "Carlos M.", role: "UX Lead",
+    quote: "Designing products used by millions",
+    src: "https://videos.pexels.com/video-files/7578579/7578579-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&q=80",
+    tall: true,
+  },
+  {
+    id: "v16", domain: "Design",
+    name: "Sofia R.", role: "Product Designer",
+    quote: "From Figma to funding: design as a superpower",
+    src: "https://videos.pexels.com/video-files/3571264/3571264-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1545235617-9465d2a55698?w=600&q=80",
   },
 ];
 

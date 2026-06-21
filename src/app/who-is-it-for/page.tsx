@@ -6,15 +6,20 @@ import VideoCard from "@/components/VideoCard";
 import VideoModal from "@/components/VideoModal";
 import AnimatedHeroBg from "@/components/AnimatedHeroBg";
 import type { VideoItem } from "@/lib/video-data";
-import { VIDEOS, DOMAIN_COLORS } from "@/lib/video-data";
+import { VIDEOS, DOMAIN_COLORS, PRIMARY_DOMAINS } from "@/lib/video-data";
 
-const ALL_DOMAINS = ["All", ...Array.from(new Set(VIDEOS.map(v => v.domain)))];
+// Fixed, ordered filter tabs: All → primary domains → Others (catchall)
+const FILTER_TABS = ["All", ...PRIMARY_DOMAINS, "Others"] as const;
+type FilterTab = (typeof FILTER_TABS)[number];
 
 export default function WhoIsItForPage() {
-  const [active, setActive] = useState("All");
+  const [active, setActive] = useState<FilterTab>("All");
   const [modal, setModal] = useState<VideoItem | null>(null);
 
-  const filtered = active === "All" ? VIDEOS : VIDEOS.filter(v => v.domain === active);
+  const filtered =
+    active === "All"     ? VIDEOS :
+    active === "Others"  ? VIDEOS.filter(v => !(PRIMARY_DOMAINS as readonly string[]).includes(v.domain)) :
+                           VIDEOS.filter(v => v.domain === active);
 
   // Build 4 columns for filtered results
   const cols: VideoItem[][] = [[], [], [], []];
@@ -58,22 +63,22 @@ export default function WhoIsItForPage() {
         {/* Domain filter */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 mb-10">
           <div className="flex flex-wrap gap-2 justify-center">
-            {ALL_DOMAINS.map(domain => (
+            {FILTER_TABS.map(tab => (
               <button
-                key={domain}
-                onClick={() => setActive(domain)}
+                key={tab}
+                onClick={() => setActive(tab)}
                 className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
                 style={{
-                  background: active === domain
-                    ? (DOMAIN_COLORS[domain] ?? "#7C3AED")
+                  background: active === tab
+                    ? (DOMAIN_COLORS[tab] ?? "#7C3AED")
                     : "rgba(255,255,255,0.06)",
-                  color: active === domain ? "#fff" : "rgba(255,255,255,0.5)",
-                  border: active === domain
+                  color: active === tab ? "#fff" : "rgba(255,255,255,0.5)",
+                  border: active === tab
                     ? "1px solid transparent"
                     : "1px solid rgba(255,255,255,0.08)",
                 }}
               >
-                {domain}
+                {tab}
               </button>
             ))}
           </div>
