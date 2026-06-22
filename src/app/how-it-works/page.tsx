@@ -29,11 +29,50 @@ const CARD_BG = [
 const stepImages = [
   "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=900&q=80", // 01 — Créez votre profil
   "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&q=80", // 02 — Matching IA
-  "https://images.unsplash.com/photo-1551434678-e076c223a692?w=900&q=80",    // 03 — Explorez vos matches
-  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80", // 04 — Contactez votre mentor
-  "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=900&q=80", // 05 — Réservez votre session
-  "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=900&q=80", // 06 — Votre session
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",    // 07 — Continuez votre croissance
+  "https://images.unsplash.com/photo-1551434678-e076c223a692?w=900&q=80",    // 03 — Book Discovery Session
+  "https://images.unsplash.com/photo-1553484771-371a605b060b?w=900&q=80",    // 04 — Find your plan (NEW)
+  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&q=80", // 05 — Choose your mentor
+  "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=900&q=80", // 06 — Book your session
+  "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=900&q=80", // 07 — Your session
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80",    // 08 — Continue your growth
+];
+
+type Plan = {
+  name:     string;
+  price:    string;
+  color:    string;
+  bg:       string;
+  border:   string;
+  features: string[];
+  badge?:   string;
+};
+
+const PLANS: Plan[] = [
+  {
+    name:     "Discovery Session",
+    price:    "Free",
+    color:    "#10b981",
+    bg:       "rgba(16,185,129,0.08)",
+    border:   "rgba(16,185,129,0.22)",
+    features: ["Short intro session", "No commitment required"],
+  },
+  {
+    name:     "Basic",
+    price:    "19.99€ / month",
+    color:    ACCENT_LIGHT,
+    bg:       "rgba(124,58,237,0.08)",
+    border:   "rgba(124,58,237,0.22)",
+    features: ["Access to all mentors", "2 sessions per month"],
+  },
+  {
+    name:     "Premium",
+    price:    "39.99€ / month",
+    color:    "#C4B5FD",
+    bg:       "rgba(167,139,250,0.1)",
+    border:   "rgba(167,139,250,0.3)",
+    badge:    "Most popular",
+    features: ["Unlimited sessions", "Priority matching", "Advanced features"],
+  },
 ];
 
 export default function HowItWorksPage() {
@@ -47,7 +86,9 @@ export default function HowItWorksPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const steps = [
+  const steps: (
+    { num: string; title: string; desc: string; detail: string[]; image: string; plans?: Plan[] }
+  )[] = [
     {
       num: "01", title: t("hiw_s1_title"), desc: t("hiw_s1_desc"),
       detail: [t("hiw_s1_d1"), t("hiw_s1_d2"), t("hiw_s1_d3")],
@@ -64,24 +105,30 @@ export default function HowItWorksPage() {
       image: stepImages[2],
     },
     {
-      num: "04", title: t("hiw_s4_title"), desc: t("hiw_s4_desc"),
-      detail: [t("hiw_s4_d1"), t("hiw_s4_d2"), t("hiw_s4_d3")],
+      num: "04", title: t("hiw_plan_title"), desc: t("hiw_plan_desc"),
+      detail: [],
       image: stepImages[3],
+      plans: PLANS,
     },
     {
-      num: "05", title: t("hiw_s5_title"), desc: t("hiw_s5_desc"),
-      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3"), t("hiw_s5_d4")],
+      num: "05", title: t("hiw_s4_title"), desc: t("hiw_s4_desc"),
+      detail: [t("hiw_s4_d1"), t("hiw_s4_d2"), t("hiw_s4_d3")],
       image: stepImages[4],
     },
     {
-      num: "06", title: t("hiw_s6_title"), desc: t("hiw_s6_desc"),
-      detail: [t("hiw_s6_d1"), t("hiw_s6_d2"), t("hiw_s6_d3")],
+      num: "06", title: t("hiw_s5_title"), desc: t("hiw_s5_desc"),
+      detail: [t("hiw_s5_d1"), t("hiw_s5_d2"), t("hiw_s5_d3"), t("hiw_s5_d4")],
       image: stepImages[5],
     },
     {
-      num: "07", title: t("hiw_s7_title"), desc: t("hiw_s7_desc"),
-      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3"), t("hiw_s7_d4")],
+      num: "07", title: t("hiw_s6_title"), desc: t("hiw_s6_desc"),
+      detail: [t("hiw_s6_d1"), t("hiw_s6_d2"), t("hiw_s6_d3")],
       image: stepImages[6],
+    },
+    {
+      num: "08", title: t("hiw_s7_title"), desc: t("hiw_s7_desc"),
+      detail: [t("hiw_s7_d1"), t("hiw_s7_d2"), t("hiw_s7_d3"), t("hiw_s7_d4")],
+      image: stepImages[7],
     },
   ];
 
@@ -215,26 +262,68 @@ export default function HowItWorksPage() {
                     }}>
                       {step.desc}
                     </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
-                      {step.detail.map((d) => (
-                        <div key={d} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                          <span style={{
-                            width: 18, height: 18, borderRadius: "50%",
-                            background: "rgba(124,58,237,0.15)",
-                            border: "1px solid rgba(124,58,237,0.35)",
-                            flexShrink: 0, marginTop: 1,
-                            display: "flex", alignItems: "center", justifyContent: "center",
+                    {step.plans ? (
+                      /* Plan cards */
+                      <div style={{ display: "flex", flexDirection: "column", gap: 9, position: "relative", zIndex: 1 }}>
+                        {step.plans.map((plan) => (
+                          <div key={plan.name} style={{
+                            background: plan.bg,
+                            border: `1px solid ${plan.border}`,
+                            borderRadius: 12,
+                            padding: "11px 15px",
+                            position: "relative",
                           }}>
-                            <svg width="8" height="7" viewBox="0 0 8 7" fill="none" aria-hidden="true">
-                              <path d="M1 3.5L3 5.5L7 1.5" stroke={ACCENT_LIGHT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </span>
-                          <span style={{ fontSize: 13, color: "rgba(255,255,255,0.48)", lineHeight: 1.6 }}>
-                            {d}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                            {plan.badge && (
+                              <span style={{
+                                position: "absolute", top: -9, right: 14,
+                                background: ACCENT, color: "#fff",
+                                fontSize: 9, fontWeight: 700,
+                                padding: "2px 9px", borderRadius: 20,
+                                letterSpacing: "0.08em", textTransform: "uppercase",
+                              }}>
+                                {plan.badge}
+                              </span>
+                            )}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                              <span style={{ fontWeight: 700, color: "#fff", fontSize: 14 }}>{plan.name}</span>
+                              <span style={{ fontWeight: 800, color: plan.color, fontSize: 14 }}>{plan.price}</span>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              {plan.features.map((f) => (
+                                <div key={f} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                  <svg width="8" height="7" viewBox="0 0 8 7" fill="none" aria-hidden="true">
+                                    <path d="M1 3.5L3 5.5L7 1.5" stroke={plan.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{f}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Bullet list */
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", zIndex: 1 }}>
+                        {step.detail.map((d) => (
+                          <div key={d} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                            <span style={{
+                              width: 18, height: 18, borderRadius: "50%",
+                              background: "rgba(124,58,237,0.15)",
+                              border: "1px solid rgba(124,58,237,0.35)",
+                              flexShrink: 0, marginTop: 1,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}>
+                              <svg width="8" height="7" viewBox="0 0 8 7" fill="none" aria-hidden="true">
+                                <path d="M1 3.5L3 5.5L7 1.5" stroke={ACCENT_LIGHT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </span>
+                            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.48)", lineHeight: 1.6 }}>
+                              {d}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -341,16 +430,54 @@ export default function HowItWorksPage() {
               <p style={{ fontSize: 15, color: "rgba(255,255,255,0.48)", lineHeight: 1.75, margin: "0 0 20px" }}>
                 {step.desc}
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {step.detail.map((d) => (
-                  <div key={d} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <span style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.35)", flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="7" height="6" viewBox="0 0 8 7" fill="none"><path d="M1 3.5L3 5.5L7 1.5" stroke={ACCENT_LIGHT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </span>
-                    <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>{d}</span>
-                  </div>
-                ))}
-              </div>
+              {step.plans ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {step.plans.map((plan) => (
+                    <div key={plan.name} style={{
+                      background: plan.bg,
+                      border: `1px solid ${plan.border}`,
+                      borderRadius: 10,
+                      padding: "10px 14px",
+                      position: "relative",
+                    }}>
+                      {plan.badge && (
+                        <span style={{
+                          position: "absolute", top: -8, right: 12,
+                          background: ACCENT, color: "#fff",
+                          fontSize: 9, fontWeight: 700,
+                          padding: "2px 8px", borderRadius: 20,
+                          letterSpacing: "0.08em", textTransform: "uppercase",
+                        }}>
+                          {plan.badge}
+                        </span>
+                      )}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ fontWeight: 700, color: "#fff", fontSize: 13 }}>{plan.name}</span>
+                        <span style={{ fontWeight: 800, color: plan.color, fontSize: 13 }}>{plan.price}</span>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                        {plan.features.map((f) => (
+                          <div key={f} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <svg width="7" height="6" viewBox="0 0 8 7" fill="none"><path d="M1 3.5L3 5.5L7 1.5" stroke={plan.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{f}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {step.detail.map((d) => (
+                    <div key={d} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                      <span style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.35)", flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="7" height="6" viewBox="0 0 8 7" fill="none"><path d="M1 3.5L3 5.5L7 1.5" stroke={ACCENT_LIGHT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      </span>
+                      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>{d}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </section>
