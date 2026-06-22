@@ -910,3 +910,98 @@ export async function sendAccountSuspended(params: AccountSuspendedParams) {
   else              console.log(`[email] sendAccountSuspended sent (id=${result.data?.id}) → ${to}`);
   return result;
 }
+
+// ─── 15. Contact form ─────────────────────────────────────────────────────────
+
+export type ContactFormParams = {
+  name:    string;
+  email:   string;
+  subject: string;
+  message: string;
+};
+
+const SUBJECT_LABELS: Record<string, string> = {
+  general:   "General Question",
+  mentoring: "Mentoring & Sessions",
+  schools:   "School Partnership",
+  billing:   "Billing & Payments",
+  safety:    "Safety & Trust",
+  other:     "Other",
+};
+
+export async function sendContactNotification(params: ContactFormParams) {
+  const { name, email, subject, message } = params;
+  const subjectLabel = SUBJECT_LABELS[subject] ?? subject;
+  const safeMessage  = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const body = `
+    ${h1("New contact form submission")}
+    ${infoBox(
+      highlight("Name",    name)         +
+      highlight("Email",   email)        +
+      highlight("Subject", subjectLabel),
+    )}
+    <div style="margin-top:20px;">
+      <p style="margin:0 0 8px;color:#6b7280;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Message</p>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;color:#374151;font-size:15px;line-height:1.7;white-space:pre-wrap;">${safeMessage}</div>
+    </div>
+    <br/>
+    ${p(`<em>Hit Reply to respond directly to ${name}.</em>`)}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendContactNotification: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  const result = await r.emails.send({
+    from:    FROM,
+    to:      "contact@growviaconnect.com",
+    replyTo: `${name} <${email}>`,
+    subject: `[Contact] ${subjectLabel} — ${name}`,
+    html:    layout(body),
+  });
+  if (result.error) console.error("[email] sendContactNotification failed:", result.error);
+  else              console.log(`[email] sendContactNotification sent (id=${result.data?.id})`);
+  return result;
+}
+
+export async function sendContactConfirmation(params: ContactFormParams) {
+  const { name, email, subject, message } = params;
+  const subjectLabel = SUBJECT_LABELS[subject] ?? subject;
+  const safeMessage  = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const body = `
+    ${h1(`We got your message, ${name} 👋`)}
+    ${p("Thanks for reaching out. We've received your message and will get back to you <strong>within 24 hours</strong>.")}
+    ${infoBox(
+      highlight("Your name",     name)           +
+      highlight("Subject",       subjectLabel)   +
+      highlight("Response time", "Within 24 hours"),
+    )}
+    <div style="margin-top:20px;">
+      <p style="margin:0 0 8px;color:#6b7280;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Your message</p>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;color:#374151;font-size:15px;line-height:1.7;white-space:pre-wrap;">${safeMessage}</div>
+    </div>
+    <br/>
+    ${p(`In the meantime, feel free to explore our mentors or read our <a href="${BASE_URL}/how-it-works" style="color:#7C3AED;text-decoration:none;">How It Works</a> guide.`)}
+    ${btn("Browse mentors →", `${BASE_URL}/mentors`)}
+    <br/>
+    ${p("If you didn't send this message, you can safely ignore this email.")}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendContactConfirmation: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  const result = await r.emails.send({
+    from:    FROM,
+    to:      email,
+    subject: "We received your message — GrowVia",
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendContactConfirmation failed for ${email}:`, result.error);
+  else              console.log(`[email] sendContactConfirmation sent (id=${result.data?.id}) → ${email}`);
+  return result;
+}
