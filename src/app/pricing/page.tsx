@@ -272,8 +272,6 @@ export default function PricingPage() {
     },
   ];
   const freeFeatures = [t("pricing_free_f1"), t("pricing_free_f2"), t("pricing_free_f3"), t("pricing_free_f4")];
-  const mentorPerks  = [t("pricing_mentor_p1"), t("pricing_mentor_p2"), t("pricing_mentor_p3"), t("pricing_mentor_p4")];
-
   // IntersectionObserver — plan sections
   useEffect(() => {
     const obs = new IntersectionObserver((entries) => {
@@ -867,108 +865,6 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* ── MENTOR SECTION ────────────────────────────────────────── */}
-        <div
-          ref={(el) => { extraRefs.current[1] = el; }}
-          style={{
-            padding: isMobile ? "80px 24px 100px" : "130px clamp(48px, 8vw, 120px)",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-            position: "relative", overflow: "hidden",
-            background: "#08060F",
-          }}
-        >
-          {/* Faint horizontal floor line at mid-section */}
-          <div style={{
-            position: "absolute", top: "50%", left: 0, right: 0, height: 1,
-            background: "rgba(124,58,237,0.06)", pointerEvents: "none",
-          }} />
-          <div style={{
-            display: "flex", flexDirection: isMobile ? "column" : "row",
-            alignItems: "center", gap: "clamp(48px, 8vw, 100px)",
-            maxWidth: 1100, margin: "0 auto", position: "relative",
-          }}>
-
-            {/* Content */}
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: ACCENT_LIGHT, marginBottom: 16, ...fadeUp(extraVis[1], 0) }}>
-                {t("pricing_mentor_label")}
-              </p>
-              <h2 style={{ fontSize: "clamp(28px, 4.5vw, 52px)", fontWeight: 800, color: "white", lineHeight: 1.15, margin: "0 0 16px", ...fadeUp(extraVis[1], 0.07) }}>
-                {t("pricing_mentor_title")}
-              </h2>
-              <p style={{ fontSize: "clamp(15px, 1.8vw, 18px)", color: "rgba(255,255,255,0.42)", lineHeight: 1.75, margin: "0 0 32px", ...fadeUp(extraVis[1], 0.13) }}>
-                {t("pricing_mentor_sub")}
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 40 }}>
-                {mentorPerks.map((perk, i) => (
-                  <div key={perk} style={{
-                    ...featureAnim(extraVis[1], i),
-                    paddingLeft: 16, paddingTop: 11, paddingBottom: 11,
-                    borderLeft: "2px solid rgba(124,58,237,0.3)",
-                    fontSize: 14, color: "rgba(255,255,255,0.55)",
-                  }}>
-                    {perk}
-                  </div>
-                ))}
-              </div>
-              <div style={fadeUp(extraVis[1], 0.42)}>
-                <Link href="/auth/register?role=mentor" style={{
-                  display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
-                  background: ACCENT, color: "white", border: "none",
-                  borderRadius: 12, padding: "14px 28px", fontSize: 14, fontWeight: 600,
-                }}>
-                  {t("pricing_mentor_cta")} <ArrowRight style={{ width: 16, height: 16 }} />
-                </Link>
-              </div>
-            </div>
-
-            {/* 20% — free-floating deal display + commission flow */}
-            <div style={{
-              flexShrink: 0, display: "flex", alignItems: "center", gap: 40,
-              ...fadeUp(extraVis[1], 0.16),
-            }}>
-              {/* Text block — no card, numbers float free */}
-              <div>
-                <p style={{
-                  fontSize: "clamp(52px, 8vw, 80px)", fontWeight: 800, color: "white",
-                  lineHeight: 1, margin: 0, letterSpacing: "-0.03em",
-                }}>
-                  20%
-                </p>
-                <p style={{
-                  fontSize: 14, color: "rgba(255,255,255,0.3)",
-                  letterSpacing: "0.2em", textTransform: "uppercase", margin: "6px 0 0",
-                }}>
-                  par session
-                </p>
-                <div style={{
-                  width: 60, height: 1,
-                  background: "linear-gradient(to right, #7C3AED, transparent)",
-                  margin: "12px 0",
-                }} />
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0 }}>
-                  seulement quand vous gagnez
-                </p>
-              </div>
-
-              {/* Commission flow — dot travels down a vertical line */}
-              <div style={{ position: "relative", width: 20, height: 120, display: "flex", justifyContent: "center" }}>
-                <div style={{
-                  width: 1, height: "100%",
-                  background: "linear-gradient(to bottom, transparent, #7C3AED, transparent)",
-                }} />
-                <div style={{
-                  position: "absolute", top: 0, left: "50%",
-                  width: 6, height: 6, marginLeft: -3,
-                  borderRadius: "50%", background: "white",
-                  boxShadow: "0 0 6px #A78BFA",
-                  animation: "pricing-flow-dot 1.8s linear infinite",
-                }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
 
       <style>{`
@@ -1029,13 +925,6 @@ export default function PricingPage() {
         /* Section 2 — free CTA button hover */
         .pricing-free-cta:hover { background: rgba(167,139,250,0.08) !important; }
 
-        /* Section 3 — commission flow dot */
-        @keyframes pricing-flow-dot {
-          0%   { transform: translateY(0px);   opacity: 0; }
-          10%  { opacity: 1; }
-          90%  { opacity: 1; }
-          100% { transform: translateY(120px); opacity: 0; }
-        }
       `}</style>
     </>
   );
