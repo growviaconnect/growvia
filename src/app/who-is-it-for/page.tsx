@@ -12,14 +12,36 @@ import { VIDEOS, DOMAIN_COLORS, PRIMARY_DOMAINS } from "@/lib/video-data";
 const FILTER_TABS = ["All", ...PRIMARY_DOMAINS, "Others"] as const;
 type FilterTab = (typeof FILTER_TABS)[number];
 
+const PRIMARY_SET = new Set<string>(PRIMARY_DOMAINS);
+
+// Sub-domains that fall under "Others" — derived from video data, sorted
+const OTHERS_DOMAINS = Array.from(
+  new Set(VIDEOS.filter(v => !PRIMARY_SET.has(v.domain)).map(v => v.domain))
+).sort();
+
 export default function WhoIsItForPage() {
-  const [active, setActive] = useState<FilterTab>("All");
-  const [modal, setModal] = useState<VideoItem | null>(null);
+  const [active,    setActive]    = useState<FilterTab>("All");
+  const [subDomain, setSubDomain] = useState<string | null>(null);
+  const [modal,     setModal]     = useState<VideoItem | null>(null);
+
+  function handleTabClick(tab: FilterTab) {
+    setActive(tab);
+    setSubDomain(null); // reset sub-filter whenever main tab changes
+  }
+
+  function handleSubClick(domain: string) {
+    // toggle: clicking active sub deselects it
+    setSubDomain(prev => (prev === domain ? null : domain));
+  }
 
   const filtered =
-    active === "All"     ? VIDEOS :
-    active === "Others"  ? VIDEOS.filter(v => !(PRIMARY_DOMAINS as readonly string[]).includes(v.domain)) :
-                           VIDEOS.filter(v => v.domain === active);
+    active === "All"    ? VIDEOS :
+    active === "Others" ? (
+      subDomain
+        ? VIDEOS.filter(v => v.domain === subDomain)
+        : VIDEOS.filter(v => !PRIMARY_SET.has(v.domain))
+    ) :
+    VIDEOS.filter(v => v.domain === active);
 
   // Build 4 columns for filtered results
   const cols: VideoItem[][] = [[], [], [], []];
@@ -60,13 +82,15 @@ export default function WhoIsItForPage() {
           </div>
         </section>
 
-        {/* Domain filter */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 mb-10">
+        {/* ── Filters ── */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 mb-10 space-y-3">
+
+          {/* Main domain tabs */}
           <div className="flex flex-wrap gap-2 justify-center">
             {FILTER_TABS.map(tab => (
               <button
                 key={tab}
-                onClick={() => setActive(tab)}
+                onClick={() => handleTabClick(tab)}
                 className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
                 style={{
                   background: active === tab
@@ -82,6 +106,33 @@ export default function WhoIsItForPage() {
               </button>
             ))}
           </div>
+
+          {/* Sub-domain pills — visible only when "Others" is active */}
+          {active === "Others" && OTHERS_DOMAINS.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center pt-1">
+              <span className="w-full text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/25 mb-0.5">
+                Refine by field
+              </span>
+              {OTHERS_DOMAINS.map(domain => (
+                <button
+                  key={domain}
+                  onClick={() => handleSubClick(domain)}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
+                  style={{
+                    background: subDomain === domain
+                      ? (DOMAIN_COLORS[domain] ?? "#6B7280")
+                      : "rgba(255,255,255,0.04)",
+                    color: subDomain === domain ? "#fff" : "rgba(255,255,255,0.38)",
+                    border: subDomain === domain
+                      ? "1px solid transparent"
+                      : "1px solid rgba(255,255,255,0.07)",
+                  }}
+                >
+                  {domain}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Gallery */}
