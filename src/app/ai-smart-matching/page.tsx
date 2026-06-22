@@ -76,8 +76,6 @@ export default function AISmartMatchingPage() {
   ];
 
   const bullets = [t("ai_f1"), t("ai_f2"), t("ai_f3"), t("ai_f4")];
-  const discFeatures = [t("ai_disc_f1"), t("ai_disc_f2"), t("ai_disc_f3")];
-  const premFeatures = [t("ai_prem_f1"), t("ai_prem_f2"), t("ai_prem_f3"), t("ai_prem_f4")];
 
   return (
     <>
@@ -348,79 +346,51 @@ export default function AISmartMatchingPage() {
 
       {/* ── CTA / PRICING ────────────────────────────────────────────── */}
       <section ref={ctaRef} style={{ background: BG, padding: "clamp(60px, 8vw, 100px) 0", borderTop: "1px solid rgba(124,58,237,0.08)" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 clamp(20px, 5vw, 48px)" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, ...fadeUp(ctaVisible, 0) }}
-            className="max-md:grid-cols-1-ai">
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 clamp(20px, 5vw, 48px)" }}>
+          <div style={{ textAlign: "center", marginBottom: 36, ...fadeUp(ctaVisible, 0) }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: ACCENT_L, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>Choose your plan</p>
+            <h2 style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 800, color: "white", margin: 0 }}>Start your AI-powered journey</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, ...fadeUp(ctaVisible, 0.05) }}
+            className="cta-plans-grid">
 
-            {/* Discovery card */}
-            <div style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(157,141,241,0.18)",
-              borderRadius: 18, padding: 28,
-              display: "flex", flexDirection: "column",
-              ...fadeUp(ctaVisible, 0.05),
-            }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: ACCENT_L, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 10 }}>{t("ai_disc_label")}</p>
-              <p style={{ fontSize: 34, fontWeight: 900, color: "white", margin: "0 0 4px" }}>9.99€</p>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", marginBottom: 22 }}>{t("ai_disc_ai")}</p>
-              <ul style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24, flex: 1 }}>
-                {discFeatures.map((f) => (
-                  <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
-                    <CheckCircle style={{ width: 15, height: 15, color: ACCENT_L, flexShrink: 0 }} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/auth/register"
-                className="ai-cta-btn"
-                style={{ display: "block", textAlign: "center", background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT_L})`, color: "white", fontWeight: 700, fontSize: 14, padding: "12px 20px", borderRadius: 50, textDecoration: "none" }}
-              >
-                {t("ai_disc_btn")}
+            {/* Basic */}
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(157,141,241,0.18)", borderRadius: 16, padding: "22px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: ACCENT_L, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Basic</p>
+                <p style={{ fontSize: 26, fontWeight: 900, color: "white", margin: 0 }}>4.99€<span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.4)" }}>/month</span></p>
+              </div>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, margin: 0, flex: 1 }}>More AI matches, standard sessions</p>
+              <Link href="/pricing" className="ai-ghost-btn" style={{ display: "block", textAlign: "center", border: "1px solid rgba(157,141,241,0.3)", color: ACCENT_L, fontWeight: 600, fontSize: 13, padding: "10px 16px", borderRadius: 50, textDecoration: "none", background: "transparent" }}>
+                Get started
               </Link>
             </div>
 
-            {/* Premium card */}
-            <div style={{
-              background: "rgba(124,58,237,0.08)",
-              border: "1px solid rgba(157,141,241,0.35)",
-              borderRadius: 18, padding: 28,
-              display: "flex", flexDirection: "column",
-              boxShadow: "0 0 40px rgba(124,58,237,0.15)",
-              ...fadeUp(ctaVisible, 0.1),
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: ACCENT_L, letterSpacing: "0.12em", textTransform: "uppercase" }}>{t("ai_prem_label")}</p>
-                <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(157,141,241,0.15)", border: "1px solid rgba(157,141,241,0.4)", color: ACCENT_L, padding: "2px 8px", borderRadius: 50, letterSpacing: "0.08em" }}>
-                  ✦ PREMIUM
-                </span>
+            {/* Standard */}
+            <div style={{ background: "rgba(124,58,237,0.1)", border: "1px solid rgba(157,141,241,0.4)", borderRadius: 16, padding: "22px 20px", display: "flex", flexDirection: "column", gap: 14, boxShadow: "0 0 30px rgba(124,58,237,0.12)" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: ACCENT_L, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>Standard</p>
+                  <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(157,141,241,0.15)", border: "1px solid rgba(157,141,241,0.4)", color: ACCENT_L, padding: "2px 7px", borderRadius: 50, letterSpacing: "0.06em" }}>Most Popular</span>
+                </div>
+                <p style={{ fontSize: 26, fontWeight: 900, color: "white", margin: 0 }}>9.99€<span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.4)" }}>/month</span></p>
               </div>
-              <p style={{ fontSize: 34, fontWeight: 900, color: "white", margin: "0 0 4px" }}>{t("ai_prem_value")}</p>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", marginBottom: 22 }}>{t("ai_prem_sub")}</p>
-              <ul style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24, flex: 1 }}>
-                {premFeatures.map((f) => (
-                  <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "rgba(255,255,255,0.7)" }}>
-                    <CheckCircle style={{ width: 15, height: 15, color: ACCENT_L, flexShrink: 0 }} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <Link
-                  href="/pricing"
-                  className="ai-cta-btn"
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT_L})`, color: "white", fontWeight: 700, fontSize: 14, padding: "12px 20px", borderRadius: 50, textDecoration: "none" }}
-                >
-                  {t("ai_prem_btn")} <ArrowRight style={{ width: 15, height: 15 }} />
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="ai-ghost-btn"
-                  style={{ display: "block", textAlign: "center", border: "1px solid rgba(157,141,241,0.3)", color: ACCENT_L, fontWeight: 600, fontSize: 13, padding: "11px 20px", borderRadius: 50, textDecoration: "none", background: "transparent" }}
-                >
-                  Voir les tarifs
-                </Link>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.5, margin: 0, flex: 1 }}>Extended matching, certified mentors</p>
+              <Link href="/pricing" className="ai-cta-btn" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT_L})`, color: "white", fontWeight: 700, fontSize: 13, padding: "10px 16px", borderRadius: 50, textDecoration: "none" }}>
+                Get started <ArrowRight style={{ width: 14, height: 14 }} />
+              </Link>
+            </div>
+
+            {/* Premium */}
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(157,141,241,0.18)", borderRadius: 16, padding: "22px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#F0ABFC", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>Premium</p>
+                <p style={{ fontSize: 26, fontWeight: 900, color: "white", margin: 0 }}>14.99€<span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.4)" }}>/month</span></p>
               </div>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, margin: 0, flex: 1 }}>Unlimited matches, exclusive mentors</p>
+              <Link href="/pricing" className="ai-ghost-btn" style={{ display: "block", textAlign: "center", border: "1px solid rgba(157,141,241,0.3)", color: ACCENT_L, fontWeight: 600, fontSize: 13, padding: "10px 16px", borderRadius: 50, textDecoration: "none", background: "transparent" }}>
+                Get started
+              </Link>
             </div>
 
           </div>
@@ -431,6 +401,7 @@ export default function AISmartMatchingPage() {
       <style>{`
         @media (max-width: 900px) {
           .max-lg\\:grid-cols-1-ai { grid-template-columns: 1fr !important; }
+          .cta-plans-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 640px) {
           .max-md\\:grid-cols-1-ai { grid-template-columns: 1fr !important; }
