@@ -94,27 +94,19 @@ export default function ContactPage() {
     },
     {
       icon: MessageSquare,
-      label: "Co-fondatrice Luna Davin",
-      value: "lunadavin@growviaconnect.com",
-      href: "mailto:lunadavin@growviaconnect.com",
+      label: "Luna Davin (Co-fondatrice)",
+      rows: [
+        { icon: Mail,  value: "lunadavin@growviaconnect.com", href: "mailto:lunadavin@growviaconnect.com" },
+        { icon: Phone, value: "+33 7 67 50 81 19",           href: "tel:+33767508119" },
+      ],
     },
     {
       icon: MessageSquare,
-      label: "Co-fondatrice Yasmine Chunon",
-      value: "yasminchunon@growviaconnect.com",
-      href: "mailto:yasminchunon@growviaconnect.com",
-    },
-    {
-      icon: Phone,
-      label: "Co-fondatrice Luna Davin",
-      value: "+33 7 67 50 81 19",
-      href: "tel:+33767508119",
-    },
-    {
-      icon: Phone,
-      label: "Co-fondatrice Yasmine Tunon",
-      value: "+33 7 81 89 20 21",
-      href: "tel:+33781892021",
+      label: "Yasmine Tunon (Co-fondatrice)",
+      rows: [
+        { icon: Mail,  value: "yasminchunon@growviaconnect.com", href: "mailto:yasminchunon@growviaconnect.com" },
+        { icon: Phone, value: "+33 7 81 89 20 21",              href: "tel:+33781892021" },
+      ],
     },
     {
       icon: Clock,
@@ -332,11 +324,22 @@ export default function ContactPage() {
                   }}>
                     <card.icon style={{ width: 16, height: 16, color: ACCENT_L }} />
                   </div>
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>
                       {card.label}
                     </div>
-                    {card.href ? (
+                    {card.rows ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 4 }}>
+                        {card.rows.map((row) => (
+                          <div key={row.value} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <row.icon style={{ width: 13, height: 13, color: "rgba(167,139,250,0.55)", flexShrink: 0 }} />
+                            <a href={row.href} style={{ fontSize: 13, fontWeight: 600, color: ACCENT_L, textDecoration: "none", wordBreak: "break-all" }}>
+                              {row.value}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : card.href ? (
                       <a href={card.href} style={{ fontSize: 13, fontWeight: 600, color: ACCENT_L, textDecoration: "none", wordBreak: "break-all" }}>
                         {card.value}
                       </a>
