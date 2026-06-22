@@ -410,7 +410,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'We make sure you never miss a session or an important update. From booking to follow-up, GrowVia keeps you in the loop.',
     hiw_n1: 'Email confirmation after booking',
     hiw_n2: 'Reminder 24 hours before your session',
-    hiw_n3: 'Reminder 1 hour before your session',
+    hiw_n3: 'Reminder 2 hours before your session',
     hiw_n4: 'Session summary and next steps',
     hiw_cta_label: 'Get Started',
     hiw_cta_title1: 'Ready to take the',
@@ -420,7 +420,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Session confirmed with Sophie Chen',
     hiw_notif_reminder24: 'Reminder: session in 24 hours',
     hiw_notif_reminder1: 'Your session starts in 1 hour',
-    hiw_notif_join: 'Join session via Google Meet',
+    hiw_notif_join: 'Join session via Whereby',
 
     // Pricing page
     pricing_label: 'Pricing',
@@ -1531,7 +1531,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: "Nous nous assurons que vous ne manquez jamais une session ou une mise à jour importante. De la réservation au suivi, GrowVia vous tient informé.",
     hiw_n1: 'Confirmation par email après la réservation',
     hiw_n2: 'Rappel 24 heures avant votre session',
-    hiw_n3: 'Rappel 1 heure avant votre session',
+    hiw_n3: 'Rappel 2 heures avant votre session',
     hiw_n4: 'Résumé de session et prochaines étapes',
     hiw_cta_label: 'Commencer',
     hiw_cta_title1: 'Prêt à faire le',
@@ -1541,7 +1541,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Session confirmée avec Sophie Chen',
     hiw_notif_reminder24: 'Rappel : session dans 24 heures',
     hiw_notif_reminder1: 'Votre session commence dans 1 heure',
-    hiw_notif_join: 'Rejoindre la session via Google Meet',
+    hiw_notif_join: 'Rejoindre la session via Whereby',
 
     // Pricing page
     pricing_label: 'Tarifs',
@@ -2726,7 +2726,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Nos aseguramos de que nunca pierdas una sesión o una actualización importante.',
     hiw_n1: 'Confirmación por correo al reservar',
     hiw_n2: 'Recordatorio 24 horas antes de tu sesión',
-    hiw_n3: 'Recordatorio 1 hora antes de tu sesión',
+    hiw_n3: 'Recordatorio 2 horas antes de tu sesión',
     hiw_n4: 'Resumen de sesión y próximos pasos',
     hiw_cta_label: 'Empezar',
     hiw_cta_title1: 'Listo para dar el',
@@ -2736,7 +2736,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sesión confirmada con Sophie Chen',
     hiw_notif_reminder24: 'Recordatorio: sesión en 24 horas',
     hiw_notif_reminder1: 'Tu sesión comienza en 1 hora',
-    hiw_notif_join: 'Únete a la sesión via Google Meet',
+    hiw_notif_join: 'Únete a la sesión via Whereby',
 
     // Pricing page
     pricing_label: 'Precios',
@@ -3773,7 +3773,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Wir sorgen dafür, dass du keine Session und keine wichtige Aktualisierung verpasst. Von der Buchung bis zur Nachbereitung hält GrowVia dich informiert.',
     hiw_n1: 'E-Mail-Bestätigung nach der Buchung',
     hiw_n2: 'Erinnerung 24 Stunden vor deiner Session',
-    hiw_n3: 'Erinnerung 1 Stunde vor deiner Session',
+    hiw_n3: 'Erinnerung 2 Stunden vor deiner Session',
     hiw_n4: 'Session-Zusammenfassung und nächste Schritte',
     hiw_cta_label: 'Loslegen',
     hiw_cta_title1: 'Bereit für den',
@@ -3783,7 +3783,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Session mit Sophie Chen bestätigt',
     hiw_notif_reminder24: 'Erinnerung: Session in 24 Stunden',
     hiw_notif_reminder1: 'Deine Session beginnt in 1 Stunde',
-    hiw_notif_join: 'Session via Google Meet beitreten',
+    hiw_notif_join: 'Session via Whereby beitreten',
 
     // Pricing page
     pricing_label: 'Preise',
@@ -4894,7 +4894,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Garantimos que nunca perdes uma sessão ou uma actualização importante. Da reserva ao seguimento, a GrowVia mantém-te a par de tudo.',
     hiw_n1: 'Confirmação por email após a reserva',
     hiw_n2: 'Lembrete 24 horas antes da tua sessão',
-    hiw_n3: 'Lembrete 1 hora antes da tua sessão',
+    hiw_n3: 'Lembrete 2 horas antes da tua sessão',
     hiw_n4: 'Resumo da sessão e próximos passos',
     hiw_cta_label: 'Começar',
     hiw_cta_title1: 'Pronto para dar o',
@@ -4904,7 +4904,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sessão confirmada com Sophie Chen',
     hiw_notif_reminder24: 'Lembrete: sessão em 24 horas',
     hiw_notif_reminder1: 'A tua sessão começa em 1 hora',
-    hiw_notif_join: 'Entrar na sessão via Google Meet',
+    hiw_notif_join: 'Entrar na sessão via Whereby',
 
     // Pricing page
     pricing_label: 'Preços',
@@ -6015,7 +6015,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Garantimos que você nunca perca uma sessão ou uma atualização importante. Do agendamento ao acompanhamento, a GrowVia mantém você a par de tudo.',
     hiw_n1: 'Confirmação por e-mail após o agendamento',
     hiw_n2: 'Lembrete 24 horas antes da sua sessão',
-    hiw_n3: 'Lembrete 1 hora antes da sua sessão',
+    hiw_n3: 'Lembrete 2 horas antes da sua sessão',
     hiw_n4: 'Resumo da sessão e próximos passos',
     hiw_cta_label: 'Começar',
     hiw_cta_title1: 'Pronto para dar o',
@@ -7136,7 +7136,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Ci assicuriamo che tu non perda mai una sessione o un aggiornamento importante. Dalla prenotazione al follow-up, GrowVia ti tiene aggiornato.',
     hiw_n1: 'Conferma email dopo la prenotazione',
     hiw_n2: 'Promemoria 24 ore prima della sessione',
-    hiw_n3: 'Promemoria 1 ora prima della sessione',
+    hiw_n3: 'Promemoria 2 ore prima della sessione',
     hiw_n4: 'Riepilogo della sessione e prossimi passi',
     hiw_cta_label: 'Inizia ora',
     hiw_cta_title1: 'Pronto a fare il',
@@ -7146,7 +7146,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sessione confermata con Sophie Chen',
     hiw_notif_reminder24: 'Promemoria: sessione tra 24 ore',
     hiw_notif_reminder1: 'La tua sessione inizia tra 1 ora',
-    hiw_notif_join: 'Accedi alla sessione via Google Meet',
+    hiw_notif_join: 'Accedi alla sessione via Whereby',
 
     // Pricing page
     pricing_label: 'Prezzi',
@@ -8257,7 +8257,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'セッションや重要な更新を見逃さないようにサポートします。予約からフォローアップまで、GrowViaが常にお知らせします。',
     hiw_n1: '予約後にメール確認',
     hiw_n2: 'セッション24時間前にリマインダー',
-    hiw_n3: 'セッション1時間前にリマインダー',
+    hiw_n3: 'セッション2時間前にリマインダー',
     hiw_n4: 'セッションのまとめと次のステップ',
     hiw_cta_label: '始めよう',
     hiw_cta_title1: '最初の一歩を',
@@ -8267,7 +8267,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sophie Chenとのセッションが確定しました',
     hiw_notif_reminder24: 'リマインダー: セッションまで24時間',
     hiw_notif_reminder1: 'セッションは1時間後に始まります',
-    hiw_notif_join: 'Google Meetでセッションに参加',
+    hiw_notif_join: 'Wherebyでセッションに参加',
 
     // Pricing page
     pricing_label: '料金',
@@ -9378,7 +9378,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: '세션이나 중요한 업데이트를 절대 놓치지 않도록 합니다. 예약부터 후속 조치까지 GrowVia가 알려드립니다.',
     hiw_n1: '예약 후 이메일 확인',
     hiw_n2: '세션 24시간 전 알림',
-    hiw_n3: '세션 1시간 전 알림',
+    hiw_n3: '세션 2시간 전 알림',
     hiw_n4: '세션 요약 및 다음 단계',
     hiw_cta_label: '시작하기',
     hiw_cta_title1: '첫 번째',
@@ -9388,7 +9388,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: '소피 첸과 세션이 확정되었습니다',
     hiw_notif_reminder24: '알림: 24시간 후 세션',
     hiw_notif_reminder1: '세션이 1시간 후 시작됩니다',
-    hiw_notif_join: 'Google Meet으로 세션 참여',
+    hiw_notif_join: 'Whereby로 세션 참여',
 
     // Pricing page
     pricing_label: '요금제',
@@ -10499,7 +10499,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Мы гарантируем, что ты никогда не пропустишь сессию или важное обновление. От бронирования до итогов, GrowVia держит тебя в курсе.',
     hiw_n1: 'Подтверждение по email после бронирования',
     hiw_n2: 'Напоминание за 24 часа до сессии',
-    hiw_n3: 'Напоминание за 1 час до сессии',
+    hiw_n3: 'Напоминание за 2 часа до сессии',
     hiw_n4: 'Итоги сессии и следующие шаги',
     hiw_cta_label: 'Начать',
     hiw_cta_title1: 'Готов сделать',
@@ -10509,7 +10509,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Сессия подтверждена с Софи Чен',
     hiw_notif_reminder24: 'Напоминание: сессия через 24 часа',
     hiw_notif_reminder1: 'Твоя сессия начнётся через 1 час',
-    hiw_notif_join: 'Войти в сессию через Google Meet',
+    hiw_notif_join: 'Войти в сессию через Whereby',
 
     // Pricing page
     pricing_label: 'Тарифы',
@@ -11453,12 +11453,12 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_label: 'إشعارات', hiw_notif_title1: 'ابقَ على اطلاع في', hiw_notif_title2: 'كل خطوة.',
     hiw_notif_sub: 'نضمن ألا تفوتك جلسة أو تحديث مهم. من الحجز إلى المتابعة، GrowVia تبقيك على اطلاع.',
     hiw_n1: 'تأكيد البريد الإلكتروني بعد الحجز', hiw_n2: 'تذكير قبل جلستك بـ ٢٤ ساعة',
-    hiw_n3: 'تذكير قبل جلستك بساعة واحدة', hiw_n4: 'ملخص الجلسة والخطوات التالية',
+    hiw_n3: 'تذكير قبل جلستك بساعتين', hiw_n4: 'ملخص الجلسة والخطوات التالية',
     hiw_cta_label: 'ابدأ الآن', hiw_cta_title1: 'مستعد لاتخاذ', hiw_cta_title2: 'الخطوة الأولى؟',
     hiw_cta_sub: 'أنشئ ملفك، احصل على مطابقة ذكاء اصطناعي، واحجز جلسة اكتشافك الأولى. بلا التزام طويل الأمد.',
     hiw_cta_btn: 'ابحث عن مرشدي',
     hiw_notif_confirmed: 'الجلسة مؤكدة مع سوفي تشن', hiw_notif_reminder24: 'تذكير: الجلسة بعد ٢٤ ساعة',
-    hiw_notif_reminder1: 'جلستك تبدأ بعد ساعة واحدة', hiw_notif_join: 'انضم للجلسة عبر Google Meet',
+    hiw_notif_reminder1: 'جلستك تبدأ بعد ساعة واحدة', hiw_notif_join: 'انضم للجلسة عبر Whereby',
     pricing_label: 'الأسعار', pricing_title1: 'أسعار بسيطة،', pricing_title2: 'بلا مفاجآت.',
     pricing_sub: 'خطط واضحة للمتدربين. مجاني للمرشدين. بلا رسوم خفية.',
     pricing_mentees_label: 'للمتدربين', pricing_choose: 'اختر خطتك.', pricing_monthly: 'جميع الخطط تُفوتَر شهريًا. إلغاء في أي وقت.',
@@ -12146,7 +12146,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: '我们确保你不会错过任何课程或重要更新。从预约到跟进，GrowVia 全程为你保持同步。',
     hiw_n1: '预约后收到邮件确认',
     hiw_n2: '课程前 24 小时发送提醒',
-    hiw_n3: '课程前 1 小时发送提醒',
+    hiw_n3: '课程前 2 小时发送提醒',
     hiw_n4: '课程摘要和后续步骤',
     hiw_cta_label: '立即开始',
     hiw_cta_title1: '准备好迈出',
@@ -12156,7 +12156,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: '与 Sophie Chen 的课程已确认',
     hiw_notif_reminder24: '提醒：课程将在 24 小时后开始',
     hiw_notif_reminder1: '你的课程将在 1 小时后开始',
-    hiw_notif_join: '通过 Google Meet 加入课程',
+    hiw_notif_join: '通过 Whereby 加入课程',
 
     // Pricing page
     pricing_label: '价格',
@@ -13267,7 +13267,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'We zorgen ervoor dat je nooit een sessie of een belangrijke update mist. Van boeking tot follow-up houdt GrowVia je op de hoogte.',
     hiw_n1: 'E-mailbevestiging na boeking',
     hiw_n2: 'Herinnering 24 uur voor je sessie',
-    hiw_n3: 'Herinnering 1 uur voor je sessie',
+    hiw_n3: 'Herinnering 2 uur voor je sessie',
     hiw_n4: 'Sessiesamenvatting en volgende stappen',
     hiw_cta_label: 'Aan de slag',
     hiw_cta_title1: 'Klaar voor de',
@@ -13277,7 +13277,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sessie bevestigd met Sophie Chen',
     hiw_notif_reminder24: 'Herinnering: sessie over 24 uur',
     hiw_notif_reminder1: 'Je sessie begint over 1 uur',
-    hiw_notif_join: 'Deelnemen aan sessie via Google Meet',
+    hiw_notif_join: 'Deelnemen aan sessie via Whereby',
 
     // Pricing page
     pricing_label: 'Prijzen',
@@ -14388,7 +14388,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Dbamy o to, abyś nigdy nie przegapił sesji ani ważnej aktualizacji. Od rezerwacji po follow-up, GrowVia trzyma cię w pętli.',
     hiw_n1: 'Potwierdzenie e-mail po rezerwacji',
     hiw_n2: 'Przypomnienie 24 godziny przed sesją',
-    hiw_n3: 'Przypomnienie 1 godzinę przed sesją',
+    hiw_n3: 'Przypomnienie 2 godziny przed sesją',
     hiw_n4: 'Podsumowanie sesji i kolejne kroki',
     hiw_cta_label: 'Zacznij',
     hiw_cta_title1: 'Gotowy na',
@@ -14398,7 +14398,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sesja potwierdzona z Sophie Chen',
     hiw_notif_reminder24: 'Przypomnienie: sesja za 24 godziny',
     hiw_notif_reminder1: 'Twoja sesja zaczyna się za 1 godzinę',
-    hiw_notif_join: 'Dołącz do sesji przez Google Meet',
+    hiw_notif_join: 'Dołącz do sesji przez Whereby',
 
     // Pricing page
     pricing_label: 'Cennik',
@@ -15509,7 +15509,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_sub: 'Hiçbir oturumu ya da önemli güncellemeyi kaçırmaman için buradayız. Rezervasyondan takibe kadar GrowVia seni döngüde tutar.',
     hiw_n1: 'Rezervasyondan sonra e-posta onayı',
     hiw_n2: 'Oturumundan 24 saat önce hatırlatma',
-    hiw_n3: 'Oturumundan 1 saat önce hatırlatma',
+    hiw_n3: 'Oturumundan 2 saat önce hatırlatma',
     hiw_n4: 'Oturum özeti ve sonraki adımlar',
     hiw_cta_label: 'Başla',
     hiw_cta_title1: 'İlk adımı atmaya',
@@ -15519,7 +15519,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     hiw_notif_confirmed: 'Sophie Chen ile oturum onaylandı',
     hiw_notif_reminder24: 'Hatırlatma: oturum 24 saat sonra',
     hiw_notif_reminder1: 'Oturumun 1 saat sonra başlıyor',
-    hiw_notif_join: 'Google Meet üzerinden oturuma katıl',
+    hiw_notif_join: 'Whereby üzerinden oturuma katıl',
 
     // Pricing page
     pricing_label: 'Fiyatlar',
