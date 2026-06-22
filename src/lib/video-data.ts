@@ -21,6 +21,10 @@ export const DOMAIN_COLORS: Record<string, string> = {
   "Real Estate": "#C2410C",
   Marketing:     "#EA580C",
   Design:        "#0EA5E9",
+  Sport:         "#16A34A",
+  Architecture:  "#7C3AED",
+  Education:     "#9333EA",
+  HR:            "#E11D48",
   Others:        "#6B7280",
 };
 
@@ -157,6 +161,36 @@ export const VIDEOS: VideoItem[] = [
     quote: "From Figma to funding: design as a superpower",
     src: "https://videos.pexels.com/video-files/3571264/3571264-hd_1280_720_25fps.mp4",
     poster: "https://images.unsplash.com/photo-1545235617-9465d2a55698?w=600&q=80",
+  },
+  {
+    id: "v17", domain: "Sport",
+    name: "Marcus T.", role: "Sports Agent",
+    quote: "Turned my passion into a 7-figure career",
+    src: "https://videos.pexels.com/video-files/4763819/4763819-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
+    tall: true,
+  },
+  {
+    id: "v18", domain: "Architecture",
+    name: "Yasmine B.", role: "Principal Architect",
+    quote: "Building spaces that shape how people feel",
+    src: "https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80",
+  },
+  {
+    id: "v19", domain: "Education",
+    name: "Fatima A.", role: "EdTech Founder",
+    quote: "Making quality education accessible to all",
+    src: "https://videos.pexels.com/video-files/3214172/3214172-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80",
+  },
+  {
+    id: "v20", domain: "HR",
+    name: "Diana M.", role: "Chief People Officer",
+    quote: "Building teams that actually want to stay",
+    src: "https://videos.pexels.com/video-files/7516866/7516866-hd_1280_720_25fps.mp4",
+    poster: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80",
+    tall: true,
   },
 ];
 
