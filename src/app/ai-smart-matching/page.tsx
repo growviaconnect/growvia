@@ -55,10 +55,73 @@ export default function AISmartMatchingPage() {
   const { ref: featuresRef,  visible: featuresVisible  } = useVisible(0.1);
   const { ref: stepsRef,     visible: stepsVisible     } = useVisible(0.1);
   const { ref: ctaRef,       visible: ctaVisible       } = useVisible(0.1);
+  const particleCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setHeroVisible(true), 80);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const canvas = particleCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const DPR = window.devicePixelRatio || 1;
+    let animId: number;
+    type P = { x: number; y: number; vx: number; vy: number; r: number; a: number };
+    let pts: P[] = [];
+
+    const resize = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      canvas.width  = w * DPR;
+      canvas.height = h * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      pts = Array.from({ length: 60 }, () => ({
+        x: Math.random() * w, y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.42, vy: (Math.random() - 0.5) * 0.42,
+        r: Math.random() * 1.6 + 0.5, a: Math.random() * 0.45 + 0.25,
+      }));
+    };
+
+    const draw = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      pts.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.vx = Math.abs(p.vx);
+        if (p.x > w) p.vx = -Math.abs(p.vx);
+        if (p.y < 0) p.vy = Math.abs(p.vy);
+        if (p.y > h) p.vy = -Math.abs(p.vy);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(167,139,250,${p.a})`;
+        ctx.fill();
+      });
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x;
+          const dy = pts[i].y - pts[j].y;
+          const d  = Math.sqrt(dx * dx + dy * dy);
+          if (d < 140) {
+            ctx.beginPath();
+            ctx.moveTo(pts[i].x, pts[i].y);
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.strokeStyle = `rgba(124,58,237,${(1 - d / 140) * 0.25})`;
+            ctx.lineWidth = 0.75;
+            ctx.stroke();
+          }
+        }
+      }
+      animId = requestAnimationFrame(draw);
+    };
+
+    resize();
+    draw();
+    window.addEventListener("resize", resize);
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
   }, []);
 
   const features = [
@@ -308,8 +371,12 @@ export default function AISmartMatchingPage() {
       </section>
 
       {/* ── STEPS ────────────────────────────────────────────────────── */}
-      <section ref={stepsRef} style={{ background: BG, padding: "clamp(60px, 8vw, 100px) 0", borderTop: "1px solid rgba(124,58,237,0.08)" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 clamp(20px, 5vw, 48px)" }}>
+      <section ref={stepsRef} style={{ background: BG, padding: "clamp(60px, 8vw, 100px) 0", borderTop: "1px solid rgba(124,58,237,0.08)", position: "relative", overflow: "hidden" }}>
+        {/* Particle network animation */}
+        <canvas ref={particleCanvasRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }} />
+        {/* Semi-transparent overlay to keep text readable */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,10,26,0.82) 0%, rgba(13,10,26,0.62) 50%, rgba(13,10,26,0.82) 100%)", pointerEvents: "none" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", padding: "0 clamp(20px, 5vw, 48px)" }}>
           <div style={{ textAlign: "center", marginBottom: 48, ...fadeUp(stepsVisible, 0) }}>
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 42px)", fontWeight: 800, color: "white", letterSpacing: "-0.022em", margin: 0 }}>
               {t("ai_steps_title")}
