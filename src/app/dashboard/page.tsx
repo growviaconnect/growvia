@@ -958,7 +958,12 @@ function DashboardContent() {
     if (!window.confirm(t("dash_confirm_cancel"))) return;
     setActionLoading(connId);
     try {
-      await supabase.from("connexions").update({ statut: "cancelled" }).eq("id", connId);
+      const res = await fetch("/api/sessions/mentee-cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connexionId: connId }),
+      });
+      if (!res.ok) throw new Error("Cancel failed");
       setConnexions(prev => prev.filter(c => c.id !== connId));
     } catch (err) {
       console.error("[mentee-cancel]", err);

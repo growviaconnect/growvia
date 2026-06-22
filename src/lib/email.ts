@@ -191,6 +191,11 @@ export async function sendBookingConfirmation(params: BookingParams) {
       highlight("Mentor",      mentorNom) +
       highlight("Session ID",  sessionId)
     )}
+    <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;background:#fffbeb;border-radius:10px;border:1px solid #fde68a;margin:16px 0;">
+      <tr><td style="padding:14px 16px;color:#92400e;font-size:13px;line-height:1.65;">
+        <strong>Cancellation policy:</strong> You may cancel your session up to <strong>2 hours before it starts</strong> for a full refund. Cancellations made less than 2 hours before the session will not be refunded.
+      </td></tr>
+    </table>
     ${p("In the meantime, make the most of your free plan to explore more mentors.")}
     ${btn("View my dashboard →", dashUrl)}
   `;
@@ -799,7 +804,68 @@ export async function sendSubscriptionCancelled(params: SubscriptionCancelledPar
   return result;
 }
 
-// ─── 13. Account suspended (mentor) ───────────────────────────────────────────
+// ─── 13. Session cancellation confirmation (mentee) ───────────────────────────
+
+export type SessionCancellationParams = {
+  menteeEmail:    string;
+  menteeNom:      string;
+  mentorNom:      string;
+  sessionDate:    string; // ISO string
+  refundEligible: boolean;
+};
+
+export async function sendSessionCancellationEmail(params: SessionCancellationParams) {
+  const { menteeEmail, menteeNom, mentorNom, sessionDate, refundEligible } = params;
+  const formattedDate = formatDate(sessionDate);
+  const dashUrl = `${BASE_URL}/dashboard`;
+
+  const refundNote = refundEligible
+    ? `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;background:#ecfdf5;border-radius:10px;border:1px solid #6ee7b7;margin:16px 0;">
+        <tr><td style="padding:14px 16px;color:#065f46;font-size:13px;line-height:1.65;">
+          ✅ <strong>Refund eligible:</strong> Your cancellation was made more than 2 hours before the session. A full refund will be processed to your original payment method within 5–10 business days.
+        </td></tr>
+      </table>`
+    : `<table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;background:#fef2f2;border-radius:10px;border:1px solid #fca5a5;margin:16px 0;">
+        <tr><td style="padding:14px 16px;color:#991b1b;font-size:13px;line-height:1.65;">
+          ⚠️ <strong>No refund:</strong> This cancellation was made less than 2 hours before the session start time. Per our cancellation policy, no refund will be issued.
+        </td></tr>
+      </table>`;
+
+  const body = `
+    ${badge("#6b7280", "Session cancelled")}
+    <br/><br/>
+    ${h1("Your session has been cancelled")}
+    ${p(`Hi ${menteeNom}, your session with <strong>${mentorNom}</strong> has been successfully cancelled.`)}
+    ${infoBox(
+      highlight("Mentor",     mentorNom) +
+      highlight("Date & time", formattedDate) +
+      highlight("Status",     "Cancelled")
+    )}
+    ${refundNote}
+    ${p("You're free to book a new session at any time.")}
+    ${btn("Find a mentor →", `${BASE_URL}/explore/find-a-mentor`)}
+    <br/>
+    ${p(`Questions? Contact us at <a href="mailto:contact@growviaconnect.com" style="color:#7C3AED;text-decoration:none;">contact@growviaconnect.com</a>`)}
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendSessionCancellationEmail: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendSessionCancellationEmail → ${menteeEmail}`);
+  const result = await r.emails.send({
+    from:    FROM,
+    to:      menteeEmail,
+    subject: "Your session has been cancelled",
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendSessionCancellationEmail failed for ${menteeEmail}:`, result.error);
+  else              console.log(`[email] sendSessionCancellationEmail sent (id=${result.data?.id}) → ${menteeEmail}`);
+  return result;
+}
+
+// ─── 14. Account suspended (mentor) ───────────────────────────────────────────
 
 export type AccountSuspendedParams = {
   to:  string;
