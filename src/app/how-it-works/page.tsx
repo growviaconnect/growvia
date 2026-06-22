@@ -49,29 +49,47 @@ type Plan = {
 
 const PLANS: Plan[] = [
   {
-    name:     "Discovery Session",
-    price:    "Free",
-    color:    "#10b981",
-    bg:       "rgba(16,185,129,0.08)",
-    border:   "rgba(16,185,129,0.22)",
-    features: ["Short intro session", "No commitment required"],
-  },
-  {
     name:     "Basic",
-    price:    "19.99€ / month",
+    price:    "4,99€ / mois",
     color:    ACCENT_LIGHT,
     bg:       "rgba(124,58,237,0.08)",
     border:   "rgba(124,58,237,0.22)",
-    features: ["Access to all mentors", "2 sessions per month"],
+    features: [
+      "Accès à plus de mentors",
+      "2-3 matchings IA / mois",
+      "Sessions de mentorat standard",
+      "Filtres de recherche de base",
+      "Support par email",
+    ],
   },
   {
-    name:     "Premium",
-    price:    "39.99€ / month",
+    name:     "Standard",
+    price:    "9,99€ / mois",
     color:    "#C4B5FD",
     bg:       "rgba(167,139,250,0.1)",
     border:   "rgba(167,139,250,0.3)",
-    badge:    "Most popular",
-    features: ["Unlimited sessions", "Priority matching", "Advanced features"],
+    badge:    "Le plus populaire",
+    features: [
+      "Accès à la majorité des mentors",
+      "Matching IA étendu",
+      "Accès aux mentors certifiés",
+      "Filtres avancés & recommandations",
+      "Support prioritaire par email",
+    ],
+  },
+  {
+    name:     "Premium",
+    price:    "14,99€ / mois",
+    color:    "#F0ABFC",
+    bg:       "rgba(240,171,252,0.08)",
+    border:   "rgba(240,171,252,0.22)",
+    features: [
+      "Accès à TOUS les mentors",
+      "Matching IA illimité",
+      "Réservation prioritaire",
+      "Meilleurs mentors exclusifs",
+      "Contenu exclusif & ateliers",
+    ],
   },
 ];
 
