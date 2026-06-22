@@ -38,58 +38,40 @@ const stepImages = [
 ];
 
 type Plan = {
-  name:     string;
-  price:    string;
-  color:    string;
-  bg:       string;
-  border:   string;
-  features: string[];
-  badge?:   string;
+  name:   string;
+  price:  string;
+  desc:   string;
+  color:  string;
+  bg:     string;
+  border: string;
+  badge?: string;
 };
 
 const PLANS: Plan[] = [
   {
-    name:     "Basic",
-    price:    "4,99€ / mois",
-    color:    ACCENT_LIGHT,
-    bg:       "rgba(124,58,237,0.08)",
-    border:   "rgba(124,58,237,0.22)",
-    features: [
-      "Accès à plus de mentors",
-      "2-3 matchings IA / mois",
-      "Sessions de mentorat standard",
-      "Filtres de recherche de base",
-      "Support par email",
-    ],
+    name:   "Basic",
+    price:  "4.99€ / month",
+    desc:   "Essential access to start your mentorship journey",
+    color:  ACCENT_LIGHT,
+    bg:     "rgba(124,58,237,0.08)",
+    border: "rgba(124,58,237,0.22)",
   },
   {
-    name:     "Standard",
-    price:    "9,99€ / mois",
-    color:    "#C4B5FD",
-    bg:       "rgba(167,139,250,0.1)",
-    border:   "rgba(167,139,250,0.3)",
-    badge:    "Le plus populaire",
-    features: [
-      "Accès à la majorité des mentors",
-      "Matching IA étendu",
-      "Accès aux mentors certifiés",
-      "Filtres avancés & recommandations",
-      "Support prioritaire par email",
-    ],
+    name:   "Standard",
+    price:  "9.99€ / month",
+    desc:   "Serious growth with advanced matching and certified mentors",
+    color:  "#C4B5FD",
+    bg:     "rgba(167,139,250,0.1)",
+    border: "rgba(167,139,250,0.3)",
+    badge:  "Most Popular",
   },
   {
-    name:     "Premium",
-    price:    "14,99€ / mois",
-    color:    "#F0ABFC",
-    bg:       "rgba(240,171,252,0.08)",
-    border:   "rgba(240,171,252,0.22)",
-    features: [
-      "Accès à TOUS les mentors",
-      "Matching IA illimité",
-      "Réservation prioritaire",
-      "Meilleurs mentors exclusifs",
-      "Contenu exclusif & ateliers",
-    ],
+    name:   "Premium",
+    price:  "14.99€ / month",
+    desc:   "Maximum access, exclusive mentors, unlimited sessions",
+    color:  "#F0ABFC",
+    bg:     "rgba(240,171,252,0.08)",
+    border: "rgba(240,171,252,0.22)",
   },
 ];
 
@@ -306,16 +288,7 @@ export default function HowItWorksPage() {
                               <span style={{ fontWeight: 700, color: "#fff", fontSize: 14 }}>{plan.name}</span>
                               <span style={{ fontWeight: 800, color: plan.color, fontSize: 14 }}>{plan.price}</span>
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                              {plan.features.map((f) => (
-                                <div key={f} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                                  <svg width="8" height="7" viewBox="0 0 8 7" fill="none" aria-hidden="true">
-                                    <path d="M1 3.5L3 5.5L7 1.5" stroke={plan.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{f}</span>
-                                </div>
-                              ))}
-                            </div>
+                            <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.55 }}>{plan.desc}</p>
                           </div>
                         ))}
                       </div>
@@ -473,14 +446,7 @@ export default function HowItWorksPage() {
                         <span style={{ fontWeight: 700, color: "#fff", fontSize: 13 }}>{plan.name}</span>
                         <span style={{ fontWeight: 800, color: plan.color, fontSize: 13 }}>{plan.price}</span>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                        {plan.features.map((f) => (
-                          <div key={f} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <svg width="7" height="6" viewBox="0 0 8 7" fill="none"><path d="M1 3.5L3 5.5L7 1.5" stroke={plan.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{f}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.55 }}>{plan.desc}</p>
                     </div>
                   ))}
                 </div>
