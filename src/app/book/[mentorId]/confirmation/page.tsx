@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle, CalendarCheck, ArrowRight } from "lucide-react";
+import { CheckCircle, CalendarCheck, ArrowRight, Info } from "lucide-react";
 
 export default function BookingConfirmationPage() {
   return (
@@ -27,7 +27,7 @@ export default function BookingConfirmationPage() {
 
         {/* Info card */}
         <div
-          className="rounded-2xl p-5 mb-8 text-left space-y-3"
+          className="rounded-2xl p-5 mb-4 text-left space-y-3"
           style={{ background: "#13111F", border: "1px solid rgba(255,255,255,0.06)" }}
         >
           <div className="flex items-start gap-3">
@@ -36,10 +36,23 @@ export default function BookingConfirmationPage() {
               <p className="text-sm font-semibold text-white">Et maintenant ?</p>
               <p className="text-xs text-white/40 mt-1 leading-relaxed">
                 Le mentor répond généralement sous 24h. Une fois confirmé,
-                vous recevrez un lien Google Meet par email.
+                vous recevrez un lien Whereby par email.
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Cancellation policy note */}
+        <div
+          className="rounded-2xl p-4 mb-8 text-left flex items-start gap-3"
+          style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.2)" }}
+        >
+          <Info className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-amber-200/70 leading-relaxed">
+            <span className="font-semibold text-amber-300">Cancellation policy:</span>{" "}
+            Sessions can be cancelled up to <strong className="text-amber-200">2 hours before the start time</strong> for a full refund.
+            After that, no refund will be issued.
+          </p>
         </div>
 
         {/* CTAs */}
