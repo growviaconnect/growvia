@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import React from "react";
-import { usePathname } from "next/navigation";
 import { useLang } from "@/contexts/LangContext";
 
 /* ── Custom social SVG icons ──────────────────────────────────── */
@@ -51,9 +50,7 @@ const socials: SocialLink[] = [
 
 /* ── Footer component ─────────────────────────────────────────── */
 export default function Footer() {
-  const pathname = usePathname();
   const { t } = useLang();
-  const hideHeadline = pathname === "/how-it-works";
 
   const navLinks = [
     { label: t("footer_link_home"),          href: "/"                },
@@ -88,28 +85,26 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* ── Big headline ───────────────────────────────────── */}
-        {!hideHeadline && (
-          <div className="reveal mb-16 lg:mb-20">
-            <h2 className="font-extrabold text-white leading-[0.88] tracking-tight text-5xl md:text-7xl lg:text-[7.5rem]">
-              {t("footer_headline_1")}{" "}
-              <span
-                style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontStyle: "italic",
-                  fontWeight: 400,
-                  textShadow: "0 0 80px rgba(124,58,237,0.35)",
-                  textDecoration: "underline",
-                  textDecorationColor: "rgba(76,29,149,0.55)",
-                  textDecorationThickness: "2px",
-                  textUnderlineOffset: "8px",
-                }}
-              >
-                {t("footer_headline_2")}
-              </span>
-              {t("footer_headline_3")}
-            </h2>
-          </div>
-        )}
+        <div className="reveal mb-16 lg:mb-20">
+          <h2 className="font-extrabold text-white leading-[0.88] tracking-tight text-5xl md:text-7xl lg:text-[7.5rem]">
+            {t("footer_headline_1")}{" "}
+            <span
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontStyle: "italic",
+                fontWeight: 400,
+                textShadow: "0 0 80px rgba(124,58,237,0.35)",
+                textDecoration: "underline",
+                textDecorationColor: "rgba(76,29,149,0.55)",
+                textDecorationThickness: "2px",
+                textUnderlineOffset: "8px",
+              }}
+            >
+              {t("footer_headline_2")}
+            </span>
+            {t("footer_headline_3")}
+          </h2>
+        </div>
 
         {/* ── Links + cities row ─────────────────────────────── */}
         <div className="reveal reveal-delay-1 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-14 mb-16">
