@@ -67,6 +67,8 @@ function fadeUp(visible: boolean, delay: number): React.CSSProperties {
 export default function ContactPage() {
   const { t } = useLang();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm]           = useState({ name: "", email: "", subject: "", message: "" });
   const [focused, setFocused]     = useState<string | null>(null);
   const [isMobile, setIsMobile]   = useState(false);
@@ -80,9 +82,23 @@ export default function ContactPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setFormError(null);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Send failed");
+      setSubmitted(true);
+    } catch {
+      setFormError("Something went wrong. Please try again or email us at contact@growviaconnect.com");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const contactCards = [
@@ -529,6 +545,7 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
+                    disabled={loading}
                     className="contact-submit"
                     style={{
                       width: "100%",
@@ -539,17 +556,24 @@ export default function ContactPage() {
                       padding: "15px 24px",
                       borderRadius: 50,
                       border: "none",
-                      cursor: "pointer",
+                      cursor: loading ? "not-allowed" : "pointer",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: 8,
-                      transition: "background 0.25s ease",
+                      opacity: loading ? 0.7 : 1,
+                      transition: "background 0.25s ease, opacity 0.2s ease",
                       letterSpacing: "0.01em",
                     }}
                   >
-                    {t("contact_form_submit")} <Send style={{ width: 16, height: 16 }} />
+                    {loading ? "Sending…" : <>{t("contact_form_submit")} <Send style={{ width: 16, height: 16 }} /></>}
                   </button>
+
+                  {formError && (
+                    <p style={{ fontSize: 12, color: "#f87171", textAlign: "center", margin: 0 }}>
+                      {formError}
+                    </p>
+                  )}
 
                   <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", textAlign: "center", margin: 0 }}>
                     {t("contact_form_privacy")}
