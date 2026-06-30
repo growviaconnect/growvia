@@ -6,7 +6,7 @@ import {
   Lock, ArrowRight, AlertCircle, LogOut, RefreshCw, Loader2,
   Users, UserCheck, Cpu, CalendarClock, CalendarCheck2, CalendarX2, ChevronRight, ChevronDown,
 } from "lucide-react";
-import { supabase, type Mentor, type Mentee, type Connexion } from "@/lib/supabase";
+import { supabase, type Mentor, type Mentee } from "@/lib/supabase";
 
 type AIMatchResponse = {
   id:              string;
@@ -17,6 +17,37 @@ type AIMatchResponse = {
   attempt_number:  number | null;
   match_results:   unknown;
   created_at:      string;
+};
+
+type SessionRow = {
+  id:                string;
+  mentor_id:         string | null;
+  mentee_id:         string | null;
+  topic:             string | null;
+  date:              string | null;          // YYYY-MM-DD
+  time:              string | null;          // HH:MM:SS
+  duration_minutes:  number | null;
+  status:            string | null;
+  meet_link:         string | null;
+  mentee_email:      string | null;
+  language:          string | null;
+  price_cents:       number | null;
+  stripe_session_id: string | null;
+  payment_intent_id: string | null;
+  created_at:        string | null;
+  mentors?:          { nom: string; email: string } | null;
+  mentees?:          { nom: string; email: string } | null;
+};
+
+type MenteeSubscription = {
+  id:                     string;
+  mentee_id:              string;
+  plan:                   string;             // "basic" | "standard" | "premium" | ...
+  status:                 string | null;      // "active" | "trialing" | "canceled" | ...
+  stripe_customer_id:     string | null;
+  stripe_subscription_id: string | null;
+  current_period_end:     string | null;
+  created_at:             string | null;
 };
 import { isAdminEmail, adminDisplayName } from "@/lib/admin-auth";
 
@@ -158,6 +189,91 @@ function DataTable({
   );
 }
 
+/* ── Plan helpers ────────────────────────────────────────────────────────── */
+
+const PLAN_STYLES: Record<string, { bg: string; fg: string; border: string }> = {
+  free:      { bg: "rgba(148,163,184,0.12)", fg: "#94A3B8", border: "rgba(148,163,184,0.30)" },
+  basic:     { bg: "rgba(124,58,237,0.12)",  fg: "#A78BFA", border: "rgba(124,58,237,0.30)" },
+  standard:  { bg: "rgba(167,139,250,0.16)", fg: "#C4B5FD", border: "rgba(167,139,250,0.40)" },
+  premium:   { bg: "rgba(240,171,252,0.14)", fg: "#F0ABFC", border: "rgba(240,171,252,0.40)" },
+};
+
+function planKey(plan: string | null | undefined): keyof typeof PLAN_STYLES {
+  const p = (plan ?? "").toLowerCase();
+  if (p === "basic" || p === "standard" || p === "premium") return p;
+  return "free";
+}
+
+function PlanBadge({ plan }: { plan: string | null | undefined }) {
+  const key = planKey(plan);
+  const s = PLAN_STYLES[key];
+  const label = key.charAt(0).toUpperCase() + key.slice(1);
+  return (
+    <span style={{
+      display: "inline-block", padding: "2px 8px", borderRadius: 999,
+      fontSize: 11, fontWeight: 700, letterSpacing: "0.04em",
+      background: s.bg, color: s.fg, border: `1px solid ${s.border}`,
+    }}>{label}</span>
+  );
+}
+
+type Subscription = {
+  mentee_id: string;
+  plan: string;
+  status: string | null;
+  created_at: string | null;
+  current_period_end: string | null;
+};
+
+/**
+ * Returns the active plan for `menteeId` at a given moment.
+ * If `atIso` is omitted, uses "now".
+ * Falls back to "free" when no subscription matches.
+ */
+function planFor(
+  menteeId: string | null | undefined,
+  subs: Subscription[],
+  atIso?: string | null,
+): string {
+  if (!menteeId) return "free";
+  const at = atIso ? new Date(atIso).getTime() : Date.now();
+  const candidates = subs
+    .filter(s => s.mentee_id === menteeId)
+    .filter(s => {
+      const status = (s.status ?? "").toLowerCase();
+      return status === "active" || status === "trialing" || status === "past_due";
+    })
+    .filter(s => {
+      const startMs = s.created_at ? new Date(s.created_at).getTime() : 0;
+      const endMs   = s.current_period_end ? new Date(s.current_period_end).getTime() : Number.POSITIVE_INFINITY;
+      return startMs <= at && at <= endMs;
+    })
+    .sort((a, b) => (new Date(b.created_at ?? 0).getTime()) - (new Date(a.created_at ?? 0).getTime()));
+  return candidates[0]?.plan ?? "free";
+}
+
+/** Classify session billing: Discovery (free, no plan), Included (free, in-plan), Paid (€X). */
+function sessionBilling(s: { price_cents: number | null }, plan: string): { label: string; price: string; color: string } {
+  const cents = s.price_cents ?? 0;
+  if (cents > 0) {
+    return { label: "Paid",      price: `€${(cents / 100).toFixed(2)}`, color: "#FBBF24" };
+  }
+  if (planKey(plan) !== "free") {
+    return { label: "Included",  price: "€0.00",                         color: "#A78BFA" };
+  }
+  return   { label: "Discovery", price: "Free",                          color: "#34D399" };
+}
+
+function BillingBadge({ label, color }: { label: string; color: string }) {
+  return (
+    <span style={{
+      display: "inline-block", padding: "2px 8px", borderRadius: 999,
+      fontSize: 11, fontWeight: 700, letterSpacing: "0.04em",
+      background: `${color}1f`, color, border: `1px solid ${color}55`,
+    }}>{label}</span>
+  );
+}
+
 /* ── Main ────────────────────────────────────────────────────────────────── */
 
 type DrillView = null | "mentors" | "mentees" | "matchings" |
@@ -184,7 +300,8 @@ export default function AdminPage() {
   const [mentors, setMentors]       = useState<Mentor[]>([]);
   const [mentees, setMentees]       = useState<Mentee[]>([]);
   const [matchings, setMatchings]   = useState<AIMatchResponse[]>([]);
-  const [connexions, setConnexions] = useState<Connexion[]>([]);
+  const [sessions, setSessions]     = useState<SessionRow[]>([]);
+  const [subs, setSubs]             = useState<MenteeSubscription[]>([]);
   const [lastSeenAt, setLastSeenAt] = useState<string | null>(null);
 
   // UI state
@@ -218,22 +335,25 @@ export default function AdminPage() {
   const fetchData = useCallback(async (email: string) => {
     setLoading(true); setFetchErr(null);
     try {
-      const [r1, r2, r3, r4, r5] = await Promise.all([
+      const [r1, r2, r3, r4, r5, r6] = await Promise.all([
         supabase.from("mentors").select("*").order("created_at", { ascending: false }),
         supabase.from("mentees").select("*").order("created_at", { ascending: false }),
         supabase.from("ai_matching_responses").select("id, user_id, full_name, role, industry, attempt_number, match_results, created_at").order("created_at", { ascending: false }),
-        supabase.from("connexions").select("*, mentors(nom,email), mentees(nom,email)").order("date", { ascending: false }),
+        supabase.from("sessions").select("*, mentors(nom,email), mentees(nom,email)").order("date", { ascending: false }),
+        supabase.from("mentee_subscriptions").select("*").order("created_at", { ascending: false }),
         supabase.from("admin_visits").select("last_seen_at").eq("email", email).maybeSingle(),
       ]);
       if (r1.error) throw r1.error;
       if (r2.error) throw r2.error;
       if (r3.error) throw r3.error;
       if (r4.error) throw r4.error;
+      if (r5.error) throw r5.error;
       setMentors((r1.data as Mentor[]) ?? []);
       setMentees((r2.data as Mentee[]) ?? []);
       setMatchings((r3.data as AIMatchResponse[]) ?? []);
-      setConnexions((r4.data as Connexion[]) ?? []);
-      const prevLastSeen = (r5.data as { last_seen_at: string } | null)?.last_seen_at ?? null;
+      setSessions((r4.data as SessionRow[]) ?? []);
+      setSubs((r5.data as MenteeSubscription[]) ?? []);
+      const prevLastSeen = (r6.data as { last_seen_at: string } | null)?.last_seen_at ?? null;
       setLastSeenAt(prevLastSeen);
 
       // Upsert current visit timestamp (best-effort; never blocks the page)
@@ -259,18 +379,23 @@ export default function AdminPage() {
     const isNew = (createdAt: string | null | undefined) =>
       sinceTs && createdAt ? new Date(createdAt).getTime() > sinceTs : false;
 
-    const now = Date.now();
-    const upcoming: Connexion[] = [];
-    const pending:  Connexion[] = [];
-    const past:     Connexion[] = [];
-    for (const c of connexions) {
-      const t = c.date ? new Date(c.date).getTime() : NaN;
-      const s = c.statut;
-      if (s === "pending") pending.push(c);
-      else if (s === "cancelled") past.push(c);
-      else if (s === "completed") past.push(c);
-      else if (!Number.isNaN(t) && t < now) past.push(c);
-      else upcoming.push(c);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+    const upcoming: SessionRow[] = [];
+    const pending:  SessionRow[] = [];
+    const past:     SessionRow[] = [];
+    for (const s of sessions) {
+      const st = (s.status ?? "").toLowerCase();
+      const dt = s.date ? new Date(s.date).getTime() : NaN;
+      if (st === "pending" || st === "pending_payment" || st === "rescheduled") {
+        pending.push(s);
+      } else if (st === "completed" || st === "cancelled" || st === "canceled" || st === "refunded") {
+        past.push(s);
+      } else if (!Number.isNaN(dt) && dt < todayMs) {
+        past.push(s);
+      } else {
+        upcoming.push(s);
+      }
     }
 
     return {
@@ -285,7 +410,7 @@ export default function AdminPage() {
       sessionsPast:     past.length,
       lists: { upcoming, pending, past },
     };
-  }, [mentors, mentees, matchings, connexions, lastSeenAt]);
+  }, [mentors, mentees, matchings, sessions, lastSeenAt]);
 
   /* ── Handlers ── */
   function toggleDrill(view: DrillView) {
@@ -457,23 +582,42 @@ export default function AdminPage() {
   function matchCount(mr: unknown): string {
     return Array.isArray(mr) ? String(mr.length) : "0";
   }
-  const matchingRows = matchings.map(m => ({
-    user:    m.full_name ?? "—",
-    role:    m.role ?? "—",
-    industry: m.industry ?? "—",
-    attempt: m.attempt_number ?? 1,
-    matches: matchCount(m.match_results),
-    top:     topScore(m.match_results),
-    created: formatDate(m.created_at),
-  }));
+  const matchingRows = matchings.map(m => {
+    // user_id on ai_matching_responses maps to auth.users.id; in this app that's also mentees.id.
+    const planAtMatch = planFor(m.user_id, subs, m.created_at);
+    return {
+      user:     m.full_name ?? "—",
+      plan:     <PlanBadge plan={planAtMatch} />,
+      role:     m.role ?? "—",
+      industry: m.industry ?? "—",
+      attempt:  m.attempt_number ?? 1,
+      matches:  matchCount(m.match_results),
+      top:      topScore(m.match_results),
+      created:  formatDate(m.created_at),
+    };
+  });
 
-  function sessionRows(list: Connexion[]) {
-    return list.map(c => ({
-      mentor:  c.mentors?.nom  ?? "—",
-      mentee:  c.mentees?.nom  ?? "—",
-      date:    formatDate(c.date),
-      status:  statusLabel(c.statut),
-    }));
+  function sessionDateTime(s: SessionRow): string {
+    if (!s.date) return "—";
+    const dateStr = new Date(s.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    return s.time ? `${dateStr} · ${s.time.slice(0, 5)}` : dateStr;
+  }
+
+  function sessionRows(list: SessionRow[]) {
+    return list.map(s => {
+      const plan = planFor(s.mentee_id, subs, s.created_at);
+      const bill = sessionBilling(s, plan);
+      return {
+        mentor:   s.mentors?.nom ?? "—",
+        mentee:   s.mentees?.nom ?? s.mentee_email ?? "—",
+        plan:     <PlanBadge plan={plan} />,
+        type:     <BillingBadge label={bill.label} color={bill.color} />,
+        price:    bill.price,
+        date:     sessionDateTime(s),
+        duration: s.duration_minutes != null ? `${s.duration_minutes} min` : "—",
+        status:   statusLabel(s.status),
+      };
+    });
   }
 
   const mentorRows = mentors.map(m => ({
@@ -483,12 +627,19 @@ export default function AdminPage() {
     joined:  formatDate(m.created_at),
   }));
 
-  const menteeRows = mentees.map(m => ({
-    name:    m.nom,
-    email:   m.email,
-    status:  statusLabel(m.statut),
-    joined:  formatDate(m.created_at),
-  }));
+  const menteeRows = mentees.map(m => {
+    const plan = planFor(m.id, subs);
+    const sub  = subs.find(s => s.mentee_id === m.id);
+    return {
+      name:        m.nom,
+      email:       m.email,
+      plan:        <PlanBadge plan={plan} />,
+      sub_status:  sub?.status ?? (plan === "free" ? "—" : "—"),
+      sub_since:   sub?.created_at ? formatDate(sub.created_at) : "—",
+      status:      statusLabel(m.statut),
+      joined:      formatDate(m.created_at),
+    };
+  });
 
   return (
     <div className="min-h-screen" style={{ background: "#0D0A1A" }}>
@@ -585,10 +736,13 @@ export default function AdminPage() {
           <div className="rounded-2xl p-4 md:p-5" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <DataTable
               columns={[
-                { key: "name",   label: "Name" },
-                { key: "email",  label: "Email" },
-                { key: "status", label: "Status" },
-                { key: "joined", label: "Joined" },
+                { key: "name",       label: "Name" },
+                { key: "email",      label: "Email" },
+                { key: "plan",       label: "Plan" },
+                { key: "sub_status", label: "Subscription" },
+                { key: "sub_since",  label: "Since" },
+                { key: "status",     label: "Account" },
+                { key: "joined",     label: "Joined" },
               ]}
               rows={menteeRows}
               empty="No mentees yet."
@@ -616,10 +770,14 @@ export default function AdminPage() {
             <div className="mt-5">
               <DataTable
                 columns={[
-                  { key: "mentor", label: "Mentor" },
-                  { key: "mentee", label: "Mentee" },
-                  { key: "date",   label: "Date" },
-                  { key: "status", label: "Status" },
+                  { key: "mentor",   label: "Mentor" },
+                  { key: "mentee",   label: "Mentee" },
+                  { key: "plan",     label: "Plan" },
+                  { key: "type",     label: "Type" },
+                  { key: "price",    label: "Price" },
+                  { key: "date",     label: "Date & time" },
+                  { key: "duration", label: "Duration" },
+                  { key: "status",   label: "Status" },
                 ]}
                 rows={sessionRows(counts.lists.upcoming)}
                 empty="No upcoming sessions."
@@ -630,10 +788,14 @@ export default function AdminPage() {
             <div className="mt-5">
               <DataTable
                 columns={[
-                  { key: "mentor", label: "Mentor" },
-                  { key: "mentee", label: "Mentee" },
-                  { key: "date",   label: "Date" },
-                  { key: "status", label: "Status" },
+                  { key: "mentor",   label: "Mentor" },
+                  { key: "mentee",   label: "Mentee" },
+                  { key: "plan",     label: "Plan" },
+                  { key: "type",     label: "Type" },
+                  { key: "price",    label: "Price" },
+                  { key: "date",     label: "Date & time" },
+                  { key: "duration", label: "Duration" },
+                  { key: "status",   label: "Status" },
                 ]}
                 rows={sessionRows(counts.lists.pending)}
                 empty="No pending sessions."
@@ -644,10 +806,14 @@ export default function AdminPage() {
             <div className="mt-5">
               <DataTable
                 columns={[
-                  { key: "mentor", label: "Mentor" },
-                  { key: "mentee", label: "Mentee" },
-                  { key: "date",   label: "Date" },
-                  { key: "status", label: "Status" },
+                  { key: "mentor",   label: "Mentor" },
+                  { key: "mentee",   label: "Mentee" },
+                  { key: "plan",     label: "Plan" },
+                  { key: "type",     label: "Type" },
+                  { key: "price",    label: "Price" },
+                  { key: "date",     label: "Date & time" },
+                  { key: "duration", label: "Duration" },
+                  { key: "status",   label: "Status" },
                 ]}
                 rows={sessionRows(counts.lists.past)}
                 empty="No past sessions."
@@ -670,13 +836,14 @@ export default function AdminPage() {
           <div className="rounded-2xl p-4 md:p-5" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <DataTable
               columns={[
-                { key: "user",    label: "User" },
-                { key: "role",    label: "Role" },
+                { key: "user",     label: "User" },
+                { key: "plan",     label: "Plan (at match)" },
+                { key: "role",     label: "Role" },
                 { key: "industry", label: "Industry" },
-                { key: "attempt", label: "Attempt #" },
-                { key: "matches", label: "Matches" },
-                { key: "top",     label: "Top score" },
-                { key: "created", label: "Created" },
+                { key: "attempt",  label: "Attempt #" },
+                { key: "matches",  label: "Matches" },
+                { key: "top",      label: "Top score" },
+                { key: "created",  label: "Created" },
               ]}
               rows={matchingRows}
               empty="No AI matchings yet."
