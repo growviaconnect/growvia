@@ -4,7 +4,7 @@
 
 export const ADMIN_EMAILS: ReadonlyArray<string> = [
   "lunadavin@growviaconnect.com",
-  "yasminchunon@growviaconnect.com",
+  "yasminetunon@growviaconnect.com",
 ];
 
 export function isAdminEmail(email: string | null | undefined): boolean {
@@ -15,6 +15,6 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 export function adminDisplayName(email: string | null | undefined): string {
   const e = email?.trim().toLowerCase();
   if (e === "lunadavin@growviaconnect.com")    return "Luna Davin";
-  if (e === "yasminchunon@growviaconnect.com") return "Yasmine Tunon";
+  if (e === "yasminetunon@growviaconnect.com") return "Yasmine Tunon";
   return "Admin";
 }

@@ -33,7 +33,7 @@ const admin = createClient(url, key, { auth: { persistSession: false, autoRefres
 
 const seeds = [
   { name: "Luna Davin",    email: "lunadavin@growviaconnect.com",    pwd: process.env.LUNA_INIT_PASSWORD    },
-  { name: "Yasmine Tunon", email: "yasminchunon@growviaconnect.com", pwd: process.env.YASMINE_INIT_PASSWORD },
+  { name: "Yasmine Tunon", email: "yasminetunon@growviaconnect.com", pwd: process.env.YASMINE_INIT_PASSWORD },
 ];
 
 for (const s of seeds) {
