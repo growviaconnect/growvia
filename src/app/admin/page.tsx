@@ -6,7 +6,18 @@ import {
   Lock, ArrowRight, AlertCircle, LogOut, RefreshCw, Loader2,
   Users, UserCheck, Cpu, CalendarClock, CalendarCheck2, CalendarX2, ChevronRight, ChevronDown,
 } from "lucide-react";
-import { supabase, type Mentor, type Mentee, type AIMatching, type Connexion } from "@/lib/supabase";
+import { supabase, type Mentor, type Mentee, type Connexion } from "@/lib/supabase";
+
+type AIMatchResponse = {
+  id:              string;
+  user_id:         string | null;
+  full_name:       string | null;
+  role:            string | null;
+  industry:        string | null;
+  attempt_number:  number | null;
+  match_results:   unknown;
+  created_at:      string;
+};
 import { isAdminEmail, adminDisplayName } from "@/lib/admin-auth";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
@@ -172,7 +183,7 @@ export default function AdminPage() {
   const [fetchErr, setFetchErr]     = useState<string | null>(null);
   const [mentors, setMentors]       = useState<Mentor[]>([]);
   const [mentees, setMentees]       = useState<Mentee[]>([]);
-  const [matchings, setMatchings]   = useState<AIMatching[]>([]);
+  const [matchings, setMatchings]   = useState<AIMatchResponse[]>([]);
   const [connexions, setConnexions] = useState<Connexion[]>([]);
   const [lastSeenAt, setLastSeenAt] = useState<string | null>(null);
 
@@ -210,7 +221,7 @@ export default function AdminPage() {
       const [r1, r2, r3, r4, r5] = await Promise.all([
         supabase.from("mentors").select("*").order("created_at", { ascending: false }),
         supabase.from("mentees").select("*").order("created_at", { ascending: false }),
-        supabase.from("matchings").select("*, mentors(nom,email), mentees(nom,email)").order("created_at", { ascending: false }),
+        supabase.from("ai_matching_responses").select("id, user_id, full_name, role, industry, attempt_number, match_results, created_at").order("created_at", { ascending: false }),
         supabase.from("connexions").select("*, mentors(nom,email), mentees(nom,email)").order("date", { ascending: false }),
         supabase.from("admin_visits").select("last_seen_at").eq("email", email).maybeSingle(),
       ]);
@@ -220,7 +231,7 @@ export default function AdminPage() {
       if (r4.error) throw r4.error;
       setMentors((r1.data as Mentor[]) ?? []);
       setMentees((r2.data as Mentee[]) ?? []);
-      setMatchings((r3.data as AIMatching[]) ?? []);
+      setMatchings((r3.data as AIMatchResponse[]) ?? []);
       setConnexions((r4.data as Connexion[]) ?? []);
       const prevLastSeen = (r5.data as { last_seen_at: string } | null)?.last_seen_at ?? null;
       setLastSeenAt(prevLastSeen);
@@ -435,11 +446,24 @@ export default function AdminPage() {
   const displayName = adminDisplayName(authedEmail);
 
   /* Drill-down rows */
+  function topScore(mr: unknown): string {
+    if (!Array.isArray(mr) || mr.length === 0) return "—";
+    const scores = mr
+      .map(x => (typeof x === "object" && x !== null && "score" in x ? (x as { score: unknown }).score : null))
+      .filter((s): s is number => typeof s === "number");
+    if (scores.length === 0) return "—";
+    return `${Math.round(Math.max(...scores))}%`;
+  }
+  function matchCount(mr: unknown): string {
+    return Array.isArray(mr) ? String(mr.length) : "0";
+  }
   const matchingRows = matchings.map(m => ({
-    mentor:  m.mentors?.nom  ?? "—",
-    mentee:  m.mentees?.nom  ?? "—",
-    score:   m.score != null ? `${Math.round(m.score)}%` : "—",
-    status:  statusLabel(m.statut),
+    user:    m.full_name ?? "—",
+    role:    m.role ?? "—",
+    industry: m.industry ?? "—",
+    attempt: m.attempt_number ?? 1,
+    matches: matchCount(m.match_results),
+    top:     topScore(m.match_results),
     created: formatDate(m.created_at),
   }));
 
@@ -646,10 +670,12 @@ export default function AdminPage() {
           <div className="rounded-2xl p-4 md:p-5" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <DataTable
               columns={[
-                { key: "mentor",  label: "Mentor" },
-                { key: "mentee",  label: "Mentee" },
-                { key: "score",   label: "Score" },
-                { key: "status",  label: "Status" },
+                { key: "user",    label: "User" },
+                { key: "role",    label: "Role" },
+                { key: "industry", label: "Industry" },
+                { key: "attempt", label: "Attempt #" },
+                { key: "matches", label: "Matches" },
+                { key: "top",     label: "Top score" },
                 { key: "created", label: "Created" },
               ]}
               rows={matchingRows}
