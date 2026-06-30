@@ -34,6 +34,12 @@ const STYLE_OPTIONS = [
 ];
 const FORMAT_OPTIONS = ["Video calls", "Messages", "Both"];
 
+const HOBBIES_OPTIONS = [
+  "Sport", "Art", "Music", "Fashion", "Travel", "Photography",
+  "Gaming", "Cooking", "Reading", "Entrepreneurship",
+  "Technology", "Cinema", "Yoga & Wellness",
+];
+
 const QUICK_LANGUES = [
   "French", "English", "Spanish", "Portuguese", "Arabic",
   "German", "Italian", "Japanese", "Korean", "Mandarin", "Russian",
@@ -64,6 +70,7 @@ type S2 = { secteurs: string[]; competences: CompetenceEntry[]; type_profils_aid
 type S3 = {
   style_mentorat: string; disponibilite_heures: string; max_mentees: number;
   format_prefere: string; langues: string[]; motivation: string;
+  hobbies: string[];
 };
 type S4 = { cv_url: string };
 
@@ -243,8 +250,13 @@ export default function MentorOnboarding() {
   const [s3, setS3] = useState<S3>({
     style_mentorat: "", disponibilite_heures: "", max_mentees: 3,
     format_prefere: "", langues: [], motivation: "",
+    hobbies: [],
   });
   const [s4, setS4] = useState<S4>({ cv_url: "" });
+
+  // Terms acceptance (required at final submit)
+  const [termsAccepted,      setTermsAccepted]      = useState(false);
+  const [termsSubmitAttempt, setTermsSubmitAttempt] = useState(false);
 
   // Close lang dropdown on outside click
   useEffect(() => {
@@ -333,9 +345,11 @@ export default function MentorOnboarding() {
           format_prefere:      existing.format_prefere ?? "",
           langues:             existing.langues         ?? [],
           motivation:          existing.motivation      ?? "",
+          hobbies:             existing.hobbies         ?? [],
         });
         setS4({ cv_url: existing.cv_url ?? "" });
         if (existing.cv_url) setCvFileName("CV uploaded");
+        if (existing.terms_accepted_at) setTermsAccepted(true);
       } else {
         setS1(prev => ({ ...prev, nom: metaName }));
       }
@@ -466,6 +480,12 @@ export default function MentorOnboarding() {
       langues: prev.langues.includes(val) ? prev.langues.filter(v => v !== val) : [...prev.langues, val],
     }));
   }
+  function toggleHobby(val: string) {
+    setS3(prev => ({
+      ...prev,
+      hobbies: prev.hobbies.includes(val) ? prev.hobbies.filter(v => v !== val) : [...prev.hobbies, val],
+    }));
+  }
 
   // ── Can proceed ──────────────────────────────────────────────────────────────
   function canProceed(): boolean {
@@ -477,6 +497,13 @@ export default function MentorOnboarding() {
 
   // ── Upsert all fields on each step ───────────────────────────────────────────
   async function handleNext() {
+    // Final-step: require Terms & Conditions acceptance before doing anything.
+    if (step === TOTAL_STEPS && !termsAccepted) {
+      setTermsSubmitAttempt(true);
+      setError("You must accept the Terms and Conditions to continue.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -504,7 +531,9 @@ export default function MentorOnboarding() {
         format_prefere:      s3.format_prefere      || null,
         langues:             s3.langues,
         motivation:          s3.motivation.trim()   || null,
+        hobbies:             s3.hobbies,
         cv_url:              s4.cv_url              || null,
+        ...(termsAccepted ? { terms_accepted_at: new Date().toISOString() } : {}),
       };
 
       if (step === TOTAL_STEPS) {
@@ -1196,6 +1225,21 @@ export default function MentorOnboarding() {
                   onChange={e => setS3(prev => ({ ...prev, motivation: e.target.value }))}
                   placeholder="Sharing what I learned the hard way, opening doors I wish had been opened for me…" />
               </div>
+
+              {/* Hobbies & Interests */}
+              <div>
+                <FieldLabel optional>
+                  Hobbies &amp; Interests
+                  <span className="ml-1.5 text-white/30 font-normal text-xs">
+                    shown on your public profile, helps mentees connect
+                  </span>
+                </FieldLabel>
+                <div className="flex flex-wrap gap-2">
+                  {HOBBIES_OPTIONS.map(h => (
+                    <Chip key={h} label={h} selected={s3.hobbies.includes(h)} onClick={() => toggleHobby(h)} />
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1286,6 +1330,56 @@ export default function MentorOnboarding() {
               <p className="text-xs text-white/25 text-center">
                 Your CV is private and only shared with matched mentees.
               </p>
+
+              {/* ─── Terms & Conditions (required) ─────────────────── */}
+              <label
+                className={`mt-4 flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+                  termsSubmitAttempt && !termsAccepted
+                    ? "border-red-500 bg-red-500/[0.06]"
+                    : termsAccepted
+                      ? "border-[#7C3AED]/40 bg-[#7C3AED]/[0.05]"
+                      : "border-white/10 hover:border-white/20"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={e => {
+                    setTermsAccepted(e.target.checked);
+                    if (e.target.checked) setTermsSubmitAttempt(false);
+                  }}
+                  className="mt-0.5 w-4 h-4 rounded accent-[#7C3AED] flex-shrink-0 cursor-pointer"
+                />
+                <span className="text-sm text-white/70 leading-relaxed">
+                  I have read and agree to the{" "}
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="text-[#A78BFA] hover:text-white underline-offset-2 hover:underline transition-colors"
+                  >
+                    Terms and Conditions
+                  </a>
+                  {" "}and{" "}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="text-[#A78BFA] hover:text-white underline-offset-2 hover:underline transition-colors"
+                  >
+                    Privacy Policy
+                  </a>
+                  {" "}of GrowVia Connect.
+                </span>
+              </label>
+              {termsSubmitAttempt && !termsAccepted && (
+                <p className="text-xs text-red-400 -mt-2 ml-1 flex items-center gap-1.5">
+                  <AlertCircle className="w-3 h-3" />
+                  You must accept the Terms and Conditions to continue.
+                </p>
+              )}
             </div>
           )}
 
