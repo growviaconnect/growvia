@@ -404,7 +404,12 @@ export default function FoundersPage() {
                   <h3
                     className="text-5xl font-extrabold text-white transition-colors duration-300 group-hover:text-[#A78BFA] leading-none mb-3"
                   >
-                    {f.name}
+                    <Link
+                      href="/admin"
+                      style={{ color: "inherit", textDecoration: "inherit", cursor: "inherit" }}
+                    >
+                      {f.name}
+                    </Link>
                   </h3>
                   <p className="text-xs font-bold text-[#7C3AED] uppercase tracking-widest">
                     {f.role}
