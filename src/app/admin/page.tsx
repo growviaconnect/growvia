@@ -476,6 +476,7 @@ function TransactionTable({
 
 type DrillView = null | "mentors" | "mentees" | "matchings" | "discovery_all" |
                  "sessions_upcoming" | "sessions_pending" | "sessions_past" |
+                 "payment_history" |
                  "pay_today_subs" | "pay_today_disc"  | "pay_today_paid"  | "pay_today_all"  |
                  "pay_month_subs" | "pay_month_disc"  | "pay_month_paid"  | "pay_month_all";
 
@@ -598,8 +599,11 @@ export default function AdminPage() {
       }
     }
 
-    // Discovery sessions = sessions table where price_cents = 0 (or null)
-    const discoveryAll = sessions.filter(s => (s.price_cents ?? 0) === 0);
+    // Discovery sessions = rows in the `sessions` table where the mentee was NOT
+    // charged. We treat both price_cents=0 and price_cents=NULL as Discovery
+    // (older rows from before the column was non-null had no price set at all).
+    const isDiscovery = (s: SessionRow) => s.price_cents == null || s.price_cents === 0;
+    const discoveryAll = sessions.filter(isDiscovery);
 
     return {
       mentorsTotal:    mentors.length,
@@ -633,9 +637,9 @@ export default function AdminPage() {
     const paidIn = (startMs: number) =>
       sessions.filter(s => (s.price_cents ?? 0) > 0 && ts(s.created_at) >= startMs);
 
-    // Discovery sessions (free) in the period — €0 revenue but tracked count
+    // Discovery sessions (free — price_cents = 0 OR NULL) in the period.
     const discIn = (startMs: number) =>
-      sessions.filter(s => (s.price_cents ?? 0) === 0 && ts(s.created_at) >= startMs);
+      sessions.filter(s => (s.price_cents == null || s.price_cents === 0) && ts(s.created_at) >= startMs);
 
     function aggregate(startMs: number) {
       const subList  = subsIn(startMs);
@@ -938,7 +942,30 @@ export default function AdminPage() {
           {lastSeenAt && (
             <p className="text-xs text-white/40 mt-2">Last visit: {formatDate(lastSeenAt)}</p>
           )}
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => toggleDrill("payment_history")}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg,#7C3AED,#A78BFA)" }}
+            >
+              Payment History
+              {drill === "payment_history"
+                ? <ChevronDown className="w-4 h-4" />
+                : <ChevronRight className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
+
+        {drill === "payment_history" && (
+          <TransactionTable
+            subs={subs}
+            sessions={sessions}
+            mentees={mentees}
+            sessionsAll={sessions}
+            subsAll={subs}
+          />
+        )}
 
         {/* Top-level cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
