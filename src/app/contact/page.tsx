@@ -120,7 +120,7 @@ export default function ContactPage() {
       icon: MessageSquare,
       label: "Yasmine Tunon (Co-fondatrice)",
       rows: [
-        { icon: Mail,  value: "yasminchunon@growviaconnect.com", href: "mailto:yasminchunon@growviaconnect.com" },
+        { icon: Mail,  value: "yasminetunon@growviaconnect.com", href: "mailto:yasminetunon@growviaconnect.com" },
         { icon: Phone, value: "+33 7 81 89 20 21",              href: "tel:+33781892021" },
       ],
     },
