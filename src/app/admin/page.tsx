@@ -210,7 +210,7 @@ export default function AdminPage() {
       const [r1, r2, r3, r4, r5] = await Promise.all([
         supabase.from("mentors").select("*").order("created_at", { ascending: false }),
         supabase.from("mentees").select("*").order("created_at", { ascending: false }),
-        supabase.from("ai_matchings").select("*, mentors(nom,email), mentees(nom,email)").order("created_at", { ascending: false }),
+        supabase.from("matchings").select("*, mentors(nom,email), mentees(nom,email)").order("created_at", { ascending: false }),
         supabase.from("connexions").select("*, mentors(nom,email), mentees(nom,email)").order("date", { ascending: false }),
         supabase.from("admin_visits").select("last_seen_at").eq("email", email).maybeSingle(),
       ]);
