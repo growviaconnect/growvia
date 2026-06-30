@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Lock, ArrowRight, AlertCircle, LogOut, RefreshCw, Loader2,
-  Users, UserCheck, Cpu, CalendarClock, CalendarCheck2, CalendarX2, ChevronRight, ChevronDown,
+  Users, UserCheck, Cpu, Gift, CalendarClock, CalendarCheck2, CalendarX2, ChevronRight, ChevronDown,
 } from "lucide-react";
 import { supabase, type Mentor, type Mentee } from "@/lib/supabase";
 
@@ -474,7 +474,7 @@ function TransactionTable({
 
 /* ── Main ────────────────────────────────────────────────────────────────── */
 
-type DrillView = null | "mentors" | "mentees" | "matchings" |
+type DrillView = null | "mentors" | "mentees" | "matchings" | "discovery_all" |
                  "sessions_upcoming" | "sessions_pending" | "sessions_past" |
                  "pay_today_subs" | "pay_today_disc"  | "pay_today_paid"  | "pay_today_all"  |
                  "pay_month_subs" | "pay_month_disc"  | "pay_month_paid"  | "pay_month_all";
@@ -598,6 +598,9 @@ export default function AdminPage() {
       }
     }
 
+    // Discovery sessions = sessions table where price_cents = 0 (or null)
+    const discoveryAll = sessions.filter(s => (s.price_cents ?? 0) === 0);
+
     return {
       mentorsTotal:    mentors.length,
       mentorsNew:      mentors.filter(m => isNew(m.created_at)).length,
@@ -605,10 +608,12 @@ export default function AdminPage() {
       menteesNew:      mentees.filter(m => isNew(m.created_at)).length,
       matchingsTotal:  matchings.length,
       matchingsNew:    matchings.filter(m => isNew(m.created_at)).length,
+      discoveryTotal:  discoveryAll.length,
+      discoveryNew:    discoveryAll.filter(s => isNew(s.created_at)).length,
       sessionsUpcoming: upcoming.length,
       sessionsPending:  pending.length,
       sessionsPast:     past.length,
-      lists: { upcoming, pending, past },
+      lists: { upcoming, pending, past, discovery: discoveryAll },
     };
   }, [mentors, mentees, matchings, sessions, lastSeenAt]);
 
@@ -1087,6 +1092,57 @@ export default function AdminPage() {
               ]}
               rows={matchingRows}
               empty="No AI matchings yet."
+            />
+          </div>
+        )}
+
+        {/* ── DISCOVERY SESSIONS (free first-session history) ───────── */}
+        <StatCard
+          icon={Gift}
+          label="Discovery sessions (history)"
+          value={counts.discoveryTotal}
+          accent="#34D399"
+          newCount={counts.discoveryNew}
+          onClick={() => toggleDrill("discovery_all")}
+          expanded={drill === "discovery_all"}
+        />
+        {drill === "discovery_all" && (
+          <div className="rounded-2xl p-4 md:p-5" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <DataTable
+              columns={[
+                { key: "mentee",   label: "Mentee" },
+                { key: "mentor",   label: "Mentor" },
+                { key: "date",     label: "Session date" },
+                { key: "duration", label: "Duration" },
+                { key: "status",   label: "Status" },
+                { key: "type",     label: "Billing" },
+              ]}
+              rows={counts.lists.discovery.map(s => {
+                const raw = (s.status ?? "").toLowerCase();
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const dt = s.date ? new Date(s.date).getTime() : NaN;
+                let mapped: "completed" | "cancelled" | "pending" | "upcoming" | "past";
+                if (raw === "completed")                                      mapped = "completed";
+                else if (raw === "cancelled" || raw === "canceled")           mapped = "cancelled";
+                else if (raw === "pending" || raw === "pending_payment")      mapped = "pending";
+                else if (!Number.isNaN(dt) && dt < today.getTime())           mapped = "past";
+                else                                                           mapped = "upcoming";
+                const statusColor =
+                  mapped === "completed" ? "#34D399" :
+                  mapped === "cancelled" ? "#94A3B8" :
+                  mapped === "pending"   ? "#FBBF24" :
+                  mapped === "past"      ? "#94A3B8" :
+                                           "#A78BFA";
+                return {
+                  mentee:   s.mentees?.nom ?? s.mentee_email ?? "—",
+                  mentor:   s.mentors?.nom ?? "—",
+                  date:     sessionDateTime(s),
+                  duration: s.duration_minutes != null ? `${s.duration_minutes} min` : "—",
+                  status:   <BillingBadge label={mapped} color={statusColor} />,
+                  type:     <BillingBadge label="Free" color="#34D399" />,
+                };
+              })}
+              empty="No Discovery sessions yet."
             />
           </div>
         )}
