@@ -189,6 +189,10 @@ function DataTable({
   );
 }
 
+/* ── Pricing constants (mirrors src/app/api/payments/webhook/route.ts) ──── */
+const PLAN_PRICE_EUR: Record<string, number> = { basic: 4.99, standard: 9.99, premium: 14.99 };
+const fmtEur = (n: number) => `€${n.toFixed(2)}`;
+
 /* ── Plan helpers ────────────────────────────────────────────────────────── */
 
 const PLAN_STYLES: Record<string, { bg: string; fg: string; border: string }> = {
@@ -274,10 +278,206 @@ function BillingBadge({ label, color }: { label: string; color: string }) {
   );
 }
 
+/* ── Payments period card ─────────────────────────────────────────────────
+   Shows one period (Today or This month) with total + 3 sub-categories.
+   Each sub-stat is clickable to drill into the matching transaction list.   */
+
+type PeriodAggregate = {
+  total:     { count: number; revenue: number };
+  subs:      { count: number; revenue: number };
+  paid:      { count: number; revenue: number };
+  discovery: { count: number; revenue: number };
+};
+
+type PaymentDrillIds = {
+  all:  DrillView;
+  subs: DrillView;
+  disc: DrillView;
+  paid: DrillView;
+};
+
+function PaymentPeriodCard({
+  period, data, drill, onClick, ids,
+}: {
+  period: string;
+  data:   PeriodAggregate;
+  drill:  DrillView;
+  onClick: (view: DrillView) => void;
+  ids:    PaymentDrillIds;
+}) {
+  return (
+    <div className="rounded-2xl p-5"
+         style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h3 className="text-base font-bold text-white">{period}</h3>
+        <p className="text-xs text-white/40">Click a category to see transactions</p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <PaymentStat label="Total"        count={data.total.count}     revenue={data.total.revenue}
+                     accent="#A78BFA" active={drill === ids.all}  onClick={() => onClick(ids.all)}  showRevenue />
+        <PaymentStat label="Subscriptions" count={data.subs.count}      revenue={data.subs.revenue}
+                     accent="#C4B5FD" active={drill === ids.subs} onClick={() => onClick(ids.subs)} showRevenue />
+        <PaymentStat label="Discovery"    count={data.discovery.count} revenue={0}
+                     accent="#34D399" active={drill === ids.disc} onClick={() => onClick(ids.disc)} />
+        <PaymentStat label="À la carte"   count={data.paid.count}      revenue={data.paid.revenue}
+                     accent="#FBBF24" active={drill === ids.paid} onClick={() => onClick(ids.paid)} showRevenue />
+      </div>
+    </div>
+  );
+}
+
+function PaymentStat({
+  label, count, revenue, accent, active, onClick, showRevenue,
+}: {
+  label: string;
+  count: number;
+  revenue: number;
+  accent: string;
+  active: boolean;
+  onClick: () => void;
+  showRevenue?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-left rounded-xl p-4 transition-all hover:bg-white/[0.04]"
+      style={{
+        background: active ? "rgba(124,58,237,0.10)" : "rgba(255,255,255,0.02)",
+        border: `1px solid ${active ? "rgba(124,58,237,0.40)" : "rgba(255,255,255,0.08)"}`,
+      }}
+    >
+      <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>{label}</span>
+      <p className="text-2xl font-extrabold text-white mt-1.5">
+        {showRevenue ? fmtEur(revenue) : count}
+      </p>
+      <p className="text-[11px] text-white/40 mt-0.5">
+        {showRevenue ? `${count} ${count === 1 ? "payment" : "payments"}` : `${count} sessions`}
+      </p>
+    </button>
+  );
+}
+
+/* ── Transactions table ───────────────────────────────────────────────── */
+
+function stripeStatusForSession(s: SessionRow): string {
+  // sessions.status values set by the webhook: paid, pending, refunded, cancelled, completed, confirmed
+  const st = (s.status ?? "").toLowerCase();
+  if (st === "paid" || st === "completed" || st === "confirmed") return "succeeded";
+  if (st === "refunded")                                          return "refunded";
+  if (st === "pending" || st === "pending_payment")               return "pending";
+  if (st === "cancelled" || st === "canceled")                    return "cancelled";
+  return st || "—";
+}
+
+function stripeStatusForSub(s: MenteeSubscription): string {
+  const st = (s.status ?? "").toLowerCase();
+  if (st === "active" || st === "trialing") return "succeeded";
+  if (st === "cancelled" || st === "canceled" || st === "incomplete_expired") return "cancelled";
+  if (st === "past_due" || st === "unpaid") return "failed";
+  return st || "—";
+}
+
+function StripeBadge({ status }: { status: string }) {
+  const color = status === "succeeded" ? "#34D399"
+              : status === "pending"   ? "#FBBF24"
+              : status === "refunded"  ? "#94A3B8"
+              : status === "failed"    ? "#EF4444"
+              : status === "cancelled" ? "#94A3B8"
+              :                          "#94A3B8";
+  return (
+    <span style={{
+      display: "inline-block", padding: "2px 8px", borderRadius: 999,
+      fontSize: 11, fontWeight: 700, letterSpacing: "0.04em",
+      background: `${color}1f`, color, border: `1px solid ${color}55`,
+    }}>{status}</span>
+  );
+}
+
+function fmtDateTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("en-GB", {
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch { return iso; }
+}
+
+function TransactionTable({
+  subs, sessions, mentees,
+}: {
+  subs:     MenteeSubscription[];
+  sessions: SessionRow[];
+  mentees:  Mentee[];
+  /** Kept on signature for future enrichments — not used currently. */
+  sessionsAll?: SessionRow[];
+  /** Kept on signature for future enrichments — not used currently. */
+  subsAll?:     MenteeSubscription[];
+}) {
+  const menteeName = (id: string | null | undefined): string => {
+    if (!id) return "—";
+    return mentees.find(m => m.id === id)?.nom ?? "—";
+  };
+
+  type Row = {
+    when:    string;
+    mentee:  string;
+    type:    string;
+    plan:    React.ReactNode;
+    amount:  string;
+    status:  React.ReactNode;
+  };
+
+  const subRows: Row[] = subs.map(s => ({
+    when:   fmtDateTime(s.created_at),
+    mentee: menteeName(s.mentee_id),
+    type:   "Subscription",
+    plan:   <PlanBadge plan={s.plan} />,
+    amount: fmtEur(PLAN_PRICE_EUR[(s.plan ?? "").toLowerCase()] ?? 0),
+    status: <StripeBadge status={stripeStatusForSub(s)} />,
+  }));
+
+  const sessRows: Row[] = sessions.map(s => {
+    const isPaid = (s.price_cents ?? 0) > 0;
+    return {
+      when:   fmtDateTime(s.created_at),
+      mentee: s.mentees?.nom ?? menteeName(s.mentee_id) ?? s.mentee_email ?? "—",
+      type:   isPaid ? "Session (à la carte)" : "Session (Discovery)",
+      plan:   <span className="text-white/50 text-xs">{s.topic ?? "—"}</span>,
+      amount: isPaid ? fmtEur((s.price_cents ?? 0) / 100) : "€0.00",
+      status: <StripeBadge status={stripeStatusForSession(s)} />,
+    };
+  });
+
+  // Sort combined rows by date descending (newest first)
+  const all = [...subRows, ...sessRows].sort((a, b) => b.when.localeCompare(a.when));
+
+  return (
+    <div className="rounded-2xl p-4 md:p-5"
+         style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <DataTable
+        columns={[
+          { key: "when",   label: "Date & time" },
+          { key: "mentee", label: "Mentee" },
+          { key: "type",   label: "Type" },
+          { key: "plan",   label: "Plan / topic" },
+          { key: "amount", label: "Amount" },
+          { key: "status", label: "Stripe status" },
+        ]}
+        rows={all}
+        empty="No transactions in this period."
+      />
+    </div>
+  );
+}
+
 /* ── Main ────────────────────────────────────────────────────────────────── */
 
 type DrillView = null | "mentors" | "mentees" | "matchings" |
-                 "sessions_upcoming" | "sessions_pending" | "sessions_past";
+                 "sessions_upcoming" | "sessions_pending" | "sessions_past" |
+                 "pay_today_subs" | "pay_today_disc"  | "pay_today_paid"  | "pay_today_all"  |
+                 "pay_month_subs" | "pay_month_disc"  | "pay_month_paid"  | "pay_month_all";
 
 export default function AdminPage() {
   // Auth state
@@ -411,6 +611,46 @@ export default function AdminPage() {
       lists: { upcoming, pending, past },
     };
   }, [mentors, mentees, matchings, sessions, lastSeenAt]);
+
+  /* ── Payments aggregations (Phase 2) ── */
+  const payments = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const ts = (iso: string | null | undefined): number => iso ? new Date(iso).getTime() : 0;
+
+    // Subscriptions purchased in the period (count + revenue from PLAN_PRICE)
+    const subsIn = (startMs: number) =>
+      subs.filter(s => ts(s.created_at) >= startMs);
+
+    // Paid à-la-carte sessions in the period (price_cents > 0)
+    const paidIn = (startMs: number) =>
+      sessions.filter(s => (s.price_cents ?? 0) > 0 && ts(s.created_at) >= startMs);
+
+    // Discovery sessions (free) in the period — €0 revenue but tracked count
+    const discIn = (startMs: number) =>
+      sessions.filter(s => (s.price_cents ?? 0) === 0 && ts(s.created_at) >= startMs);
+
+    function aggregate(startMs: number) {
+      const subList  = subsIn(startMs);
+      const paidList = paidIn(startMs);
+      const discList = discIn(startMs);
+      const subsRevenue = subList.reduce((sum, s) => sum + (PLAN_PRICE_EUR[(s.plan ?? "").toLowerCase()] ?? 0), 0);
+      const paidRevenue = paidList.reduce((sum, s) => sum + (s.price_cents ?? 0) / 100, 0);
+      return {
+        total:     { count: subList.length + paidList.length, revenue: subsRevenue + paidRevenue },
+        subs:      { count: subList.length,  revenue: subsRevenue, list: subList },
+        paid:      { count: paidList.length, revenue: paidRevenue, list: paidList },
+        discovery: { count: discList.length, revenue: 0,           list: discList },
+      };
+    }
+
+    return {
+      today: aggregate(startOfToday.getTime()),
+      month: aggregate(startOfMonth.getTime()),
+    };
+  }, [subs, sessions]);
 
   /* ── Handlers ── */
   function toggleDrill(view: DrillView) {
@@ -850,6 +1090,36 @@ export default function AdminPage() {
             />
           </div>
         )}
+
+        {/* ── PAYMENTS (Phase 2) ─────────────────────────────────────── */}
+        <div className="pt-4">
+          <p className="text-xs font-bold tracking-[0.22em] uppercase text-[#A78BFA] mb-2">Payments</p>
+          <h2 className="text-xl md:text-2xl font-extrabold text-white">Revenue &amp; transactions</h2>
+        </div>
+
+        <PaymentPeriodCard
+          period="Today"
+          data={payments.today}
+          drill={drill}
+          onClick={(view) => toggleDrill(view)}
+          ids={{ all: "pay_today_all", subs: "pay_today_subs", disc: "pay_today_disc", paid: "pay_today_paid" }}
+        />
+        {drill === "pay_today_all"  && <TransactionTable subs={payments.today.subs.list}  sessions={[...payments.today.paid.list, ...payments.today.discovery.list]} mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+        {drill === "pay_today_subs" && <TransactionTable subs={payments.today.subs.list}  sessions={[]} mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+        {drill === "pay_today_disc" && <TransactionTable subs={[]} sessions={payments.today.discovery.list} mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+        {drill === "pay_today_paid" && <TransactionTable subs={[]} sessions={payments.today.paid.list}      mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+
+        <PaymentPeriodCard
+          period="This month"
+          data={payments.month}
+          drill={drill}
+          onClick={(view) => toggleDrill(view)}
+          ids={{ all: "pay_month_all", subs: "pay_month_subs", disc: "pay_month_disc", paid: "pay_month_paid" }}
+        />
+        {drill === "pay_month_all"  && <TransactionTable subs={payments.month.subs.list}  sessions={[...payments.month.paid.list, ...payments.month.discovery.list]} mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+        {drill === "pay_month_subs" && <TransactionTable subs={payments.month.subs.list}  sessions={[]} mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+        {drill === "pay_month_disc" && <TransactionTable subs={[]} sessions={payments.month.discovery.list} mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
+        {drill === "pay_month_paid" && <TransactionTable subs={[]} sessions={payments.month.paid.list}      mentees={mentees} sessionsAll={sessions} subsAll={subs} />}
 
         {loading && (
           <div className="flex items-center justify-center py-6 text-white/30">
