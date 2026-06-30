@@ -324,12 +324,20 @@ export default function AdminPage() {
         return;
       }
       const redirectTo = `${window.location.origin}/admin/reset-password`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      console.log("[admin/forgot] calling resetPasswordForEmail", { email, redirectTo });
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      console.log("[admin/forgot] response", { data, error });
       if (error) {
-        setForgotMsg({ ok: false, text: error.message });
+        setForgotMsg({ ok: false, text: `${error.message} (status ${error.status ?? "?"})` });
         return;
       }
-      setForgotMsg({ ok: true, text: "If this email is registered, a reset link has been sent." });
+      setForgotMsg({
+        ok: true,
+        text: `Request accepted by Supabase. Check ${email} (and the spam folder) within 1–2 minutes. Reset link will redirect to ${redirectTo}.`,
+      });
+    } catch (err: unknown) {
+      console.error("[admin/forgot] threw:", err);
+      setForgotMsg({ ok: false, text: err instanceof Error ? err.message : "Unknown error" });
     } finally {
       setForgotBusy(false);
     }
