@@ -102,6 +102,8 @@ export type Mentee = {
   linkedin_url?: string | null;
   motivation?: string | null;
   survey_completed?: boolean | null;
+  hobbies?: string[] | null;
+  terms_accepted_at?: string | null;
 };
 
 export type Connexion = {
