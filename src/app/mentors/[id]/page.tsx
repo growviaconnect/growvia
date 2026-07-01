@@ -440,6 +440,15 @@ export default function MentorProfilePage() {
             </Section>
           )}
 
+          {/* Hobbies & interests */}
+          {mentor.hobbies && mentor.hobbies.length > 0 && (
+            <Section title="Hobbies & interests">
+              <div className="flex flex-wrap gap-2">
+                {mentor.hobbies.map(h => <Tag key={h}>{h}</Tag>)}
+              </div>
+            </Section>
+          )}
+
           {/* Preferred format */}
           {mentor.format_prefere && (
             <Section title="Preferred format">

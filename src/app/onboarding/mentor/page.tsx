@@ -298,8 +298,12 @@ export default function MentorOnboarding() {
       const { data: existing } = await supabase
         .from("mentors").select("*").eq("id", user.id).single();
 
-      // Already completed — never show the form again
-      if (existing?.onboarding_completed === true) {
+      // Already completed — never show the form again UNLESS the user came
+      // here explicitly to update their profile (banner CTA on the dashboard,
+      // links from settings, etc). ?update=1 bypasses the guard so existing
+      // mentors can re-run the questionnaire and fill in newly-added fields.
+      const isUpdate = new URLSearchParams(window.location.search).get("update") === "1";
+      if (existing?.onboarding_completed === true && !isUpdate) {
         window.location.href = "/dashboard";
         return;
       }

@@ -53,6 +53,8 @@ export type Mentor = {
   motivation?: string | null;
   format_prefere?: string | null;
   survey_completed?: boolean | null;
+  hobbies?: string[] | null;
+  terms_accepted_at?: string | null;
   // legacy fields
   location?: string | null;
   mentoring_experience?: string | null;
