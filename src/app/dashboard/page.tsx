@@ -359,6 +359,7 @@ function DashboardContent() {
   const [loading, setLoading]               = useState(true);
   const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack]       = useState(false);
+  const [mentorNeedsProfileUpdate, setMentorNeedsProfileUpdate] = useState(false);
   const [freeAiMatchUsed,   setFreeAiMatchUsed]   = useState(false);
   const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(false);
   const [menteeDbId, setMenteeDbId]         = useState<string | null>(null);
@@ -530,7 +531,7 @@ function DashboardContent() {
         // Requesting a non-existent column causes PostgREST PGRST204 which makes the
         // entire query return null (profile.id = null → fetchConnexions never runs).
         const selectCols = us.role === "mentor"
-          ? "id, statut, onboarding_completed"
+          ? "id, statut, onboarding_completed, hobbies, terms_accepted_at"
           : "id, statut, survey_completed, has_used_free_ai_match, free_session_used, objectif_principal, secteurs_vises";
 
         const { data: profileRaw, error: profileErr } = await supabase
@@ -547,6 +548,8 @@ function DashboardContent() {
               free_session_used?: boolean | null;
               objectif_principal?: string | null;
               secteurs_vises?: string[] | null;
+              hobbies?: string[] | null;
+              terms_accepted_at?: string | null;
             } | null;
             error: unknown;
           };
@@ -573,6 +576,14 @@ function DashboardContent() {
         if (us.role === "mentor" && !justOnboarded && profile && !profile.onboarding_completed) {
           router.push("/onboarding/mentor");
           return;
+        }
+
+        // Mentor: flag whether the profile is missing any of the fields we added
+        // after their original onboarding (currently: hobbies + terms acceptance).
+        if (us.role === "mentor" && profile && profile.onboarding_completed) {
+          const missingHobbies = !profileRaw?.hobbies || profileRaw.hobbies.length === 0;
+          const missingTerms   = !profileRaw?.terms_accepted_at;
+          setMentorNeedsProfileUpdate(missingHobbies || missingTerms);
         }
 
         // Other roles: redirect pending profiles (first-time onboarding)
@@ -1205,6 +1216,26 @@ function DashboardContent() {
                     {welcomeBack ? t("dash_welcome_sub") : t("dash_overview_sub")}
                   </p>
                 </div>
+
+                {/* New profile fields available — mentor only */}
+                {user?.role === "mentor" && mentorNeedsProfileUpdate && (
+                  <div
+                    className="rounded-2xl p-4 border border-amber-400/25 flex items-center gap-3 flex-wrap"
+                    style={{ background: "rgba(251,191,36,0.08)" }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                    <span className="text-amber-200 text-sm font-medium flex-1 min-w-0">
+                      Your profile has new fields to complete (hobbies &amp; terms).
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { window.location.href = "/onboarding/mentor?update=1"; }}
+                      className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-400 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      Update profile →
+                    </button>
+                  </div>
+                )}
 
                 {/* Onboarding complete toast */}
                 {welcomeBack && (
