@@ -6,6 +6,7 @@ import type { UserSession } from "@/lib/session";
 import {
   ChevronLeft, ChevronRight, Send, Plus, CheckSquare, Square,
   Calendar, X, Loader2, MessageSquare, ClipboardList, Trash2,
+  Upload, FileText, Download, CheckCircle2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -19,14 +20,21 @@ export type WorkspaceConnexion = {
   mentees: { id: string; nom: string; email: string; objectif: string | null; photo_url: string | null } | null;
 };
 
+type AssignmentStatus = "pending" | "in_progress" | "completed" | "done";
+
 type Assignment = {
   id: string;
   connexion_id: string;
+  mentor_id: string | null;
+  mentee_id: string | null;
   title: string;
   description: string | null;
   file_url: string | null;
+  response_file_url: string | null;
+  response_file_name: string | null;
+  response_submitted_at: string | null;
   due_date: string | null;
-  status: "pending" | "done";
+  status: AssignmentStatus;
   created_at: string;
 };
 
@@ -240,31 +248,110 @@ function WorkspaceDetail({ connexion, user, onBack }: {
         .from("assignments")
         .insert({
           connexion_id: connexion.id,
-          title: aTitle.trim(),
-          description: aDesc.trim() || null,
-          due_date: aDue || null,
-          status: "pending",
+          mentor_id:    connexion.mentor_id,
+          mentee_id:    connexion.mentees?.id ?? null,
+          title:        aTitle.trim(),
+          description:  aDesc.trim() || null,
+          due_date:     aDue || null,
+          status:       "pending",
         })
         .select()
         .single();
-      if (!error && data) {
+
+      if (error) {
+        console.error("[workspace/addAssignment] insert failed:", error);
+        alert(`Failed to add assignment: ${error.message}`);
+        return;
+      }
+      if (data) {
         setAssignments(prev => [...prev, data as Assignment]);
         setATitle(""); setADesc(""); setADue(""); setShowForm(false);
+
+        // Fire-and-forget email notification to the mentee.
+        if (connexion.mentees?.email) {
+          fetch("/api/workspace/notify-assignment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              menteeEmail: connexion.mentees.email,
+              menteeNom:   connexion.mentees.nom ?? "there",
+              mentorNom:   user.nom,
+              title:       aTitle.trim(),
+            }),
+          }).catch(err => console.error("[workspace/notify-assignment] error:", err));
+        }
       }
     } finally {
       setALoading(false);
     }
   }
 
-  async function toggleAssignment(a: Assignment) {
-    const status: Assignment["status"] = a.status === "done" ? "pending" : "done";
+  async function updateStatus(a: Assignment, status: AssignmentStatus) {
     setAssignments(prev => prev.map(x => x.id === a.id ? { ...x, status } : x));
-    await supabase.from("assignments").update({ status }).eq("id", a.id);
+    const { error } = await supabase.from("assignments").update({ status, updated_at: new Date().toISOString() }).eq("id", a.id);
+    if (error) console.error("[workspace/updateStatus] failed:", error);
   }
 
   async function deleteAssignment(id: string) {
     setAssignments(prev => prev.filter(a => a.id !== id));
     await supabase.from("assignments").delete().eq("id", id);
+  }
+
+  // ── Mentee response upload ────────────────────────────────────────────────
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const responseInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  async function handleResponseUpload(a: Assignment, file: File) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("File too large — max 10 MB.");
+      return;
+    }
+    setUploadError(null);
+    setUploadingId(a.id);
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `${a.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("assignment-files").upload(path, file, { upsert: true });
+      if (upErr) throw new Error(upErr.message);
+      const { data: signed } = await supabase.storage.from("assignment-files").createSignedUrl(path, 60 * 60 * 24 * 30);
+      const fileUrl = signed?.signedUrl ?? path;
+
+      const nowIso = new Date().toISOString();
+      const { error: updErr } = await supabase.from("assignments").update({
+        response_file_url:     fileUrl,
+        response_file_name:    file.name,
+        response_submitted_at: nowIso,
+        status:                "completed",
+        updated_at:            nowIso,
+      }).eq("id", a.id);
+      if (updErr) throw new Error(updErr.message);
+
+      setAssignments(prev => prev.map(x => x.id === a.id
+        ? { ...x, response_file_url: fileUrl, response_file_name: file.name, response_submitted_at: nowIso, status: "completed" }
+        : x));
+
+      // Fire-and-forget email notification to the mentor.
+      if (connexion.mentors?.email) {
+        fetch("/api/workspace/notify-response", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mentorEmail: connexion.mentors.email,
+            mentorNom:   connexion.mentors.nom ?? "there",
+            menteeNom:   user.nom,
+            title:       a.title,
+          }),
+        }).catch(err => console.error("[workspace/notify-response] error:", err));
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      console.error("[workspace/response upload]", msg);
+      setUploadError(msg);
+    } finally {
+      setUploadingId(null);
+    }
   }
 
   async function sendMessage() {
@@ -288,12 +375,21 @@ function WorkspaceDetail({ connexion, user, onBack }: {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .insert({ connexion_id: connexion.id, sender_email: user.email, sender_nom: user.nom, content })
+        .insert({
+          connexion_id:   connexion.id,
+          sender_email:   user.email,
+          sender_nom:     user.nom,
+          receiver_email: partnerEmail,
+          content,
+        })
         .select()
         .single();
+      if (error) console.error("[workspace/sendMessage] insert failed:", error);
       if (!error && data) {
         setMessages(prev => prev.map(m => m.id === tempId ? (data as Message) : m));
       }
+      // The notify endpoint skips the email if the recipient's last_active_at
+      // is within the presence window (see /api/workspace/notify).
       if (partnerEmail) {
         fetch("/api/workspace/notify", {
           method: "POST",
@@ -415,52 +511,119 @@ function WorkspaceDetail({ connexion, user, onBack }: {
             </div>
           )}
 
+          {uploadError && (
+            <div className="text-xs text-red-400 px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              {uploadError}
+            </div>
+          )}
+
           {/* Assignment list */}
-          <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "288px" }}>
+          <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "360px" }}>
             {assignments.length === 0 ? (
               <div className="text-center py-8 text-white/30 text-sm">
                 {isMentor ? "Add your first assignment above" : "No assignments yet"}
               </div>
             ) : (
-              assignments.map(a => (
-                <div
-                  key={a.id}
-                  className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.06] group"
-                  style={{ background: a.status === "done" ? "rgba(16,185,129,0.05)" : "rgba(255,255,255,0.02)" }}
-                >
-                  <button
-                    onClick={() => toggleAssignment(a)}
-                    className="mt-0.5 flex-shrink-0 transition-colors"
-                    style={{ color: a.status === "done" ? "#34d399" : "rgba(255,255,255,0.25)" }}
+              assignments.map(a => {
+                const done = a.status === "completed" || a.status === "done";
+                const badgeColor =
+                  done                             ? { fg: "#34d399", bg: "rgba(16,185,129,0.14)", border: "rgba(16,185,129,0.30)", label: "Completed" } :
+                  a.status === "in_progress"       ? { fg: "#FBBF24", bg: "rgba(251,191,36,0.14)", border: "rgba(251,191,36,0.30)", label: "In progress" } :
+                                                    { fg: "#A78BFA", bg: "rgba(124,58,237,0.14)", border: "rgba(124,58,237,0.30)", label: "New" };
+                const isUploading = uploadingId === a.id;
+                return (
+                  <div
+                    key={a.id}
+                    className="flex flex-col gap-3 p-3 rounded-xl border border-white/[0.06] group"
+                    style={{ background: done ? "rgba(16,185,129,0.05)" : "rgba(255,255,255,0.02)" }}
                   >
-                    {a.status === "done"
-                      ? <CheckSquare className="w-4 h-4" />
-                      : <Square className="w-4 h-4" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-medium leading-snug ${a.status === "done" ? "text-white/35 line-through" : "text-white"}`}>
-                      {a.title}
+                    <div className="flex items-start gap-3">
+                      <button
+                        onClick={() => updateStatus(a, done ? "pending" : "completed")}
+                        className="mt-0.5 flex-shrink-0 transition-colors"
+                        style={{ color: done ? "#34d399" : "rgba(255,255,255,0.25)" }}
+                        aria-label="Toggle completed"
+                      >
+                        {done ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className={`text-sm font-medium leading-snug ${done ? "text-white/35 line-through" : "text-white"}`}>
+                            {a.title}
+                          </div>
+                          <span
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                            style={{ background: badgeColor.bg, color: badgeColor.fg, border: `1px solid ${badgeColor.border}` }}
+                          >
+                            {badgeColor.label}
+                          </span>
+                        </div>
+                        {a.description && (
+                          <div className="text-xs text-white/35 mt-0.5 leading-relaxed">{a.description}</div>
+                        )}
+                        {a.due_date && (
+                          <div className="flex items-center gap-1 mt-1.5 text-xs text-white/30">
+                            <Calendar className="w-3 h-3" />
+                            Due {new Date(a.due_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                          </div>
+                        )}
+                      </div>
+                      {isMentor && (
+                        <button
+                          onClick={() => deleteAssignment(a.id)}
+                          className="opacity-0 group-hover:opacity-100 flex-shrink-0 text-white/30 hover:text-red-400 transition-all"
+                          aria-label="Delete assignment"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
-                    {a.description && (
-                      <div className="text-xs text-white/35 mt-0.5 leading-relaxed">{a.description}</div>
-                    )}
-                    {a.due_date && (
-                      <div className="flex items-center gap-1 mt-1.5 text-xs text-white/30">
-                        <Calendar className="w-3 h-3" />
-                        Due {new Date(a.due_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+
+                    {/* ── Response section — mentee upload / mentor view ── */}
+                    {a.response_file_url ? (
+                      <div className="flex items-center gap-2 pl-7">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        <FileText className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+                        <a
+                          href={a.response_file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#A78BFA] hover:text-white truncate transition-colors"
+                        >
+                          {a.response_file_name ?? "Response document"}
+                        </a>
+                        <span className="text-[10px] text-white/25 flex-shrink-0">
+                          {a.response_submitted_at ? new Date(a.response_submitted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : ""}
+                        </span>
+                        <Download className="w-3 h-3 text-white/25 flex-shrink-0" />
+                      </div>
+                    ) : !isMentor && (
+                      <div className="pl-7">
+                        <input
+                          ref={el => { responseInputRefs.current[a.id] = el; }}
+                          type="file"
+                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
+                          className="hidden"
+                          onChange={e => {
+                            const f = e.target.files?.[0];
+                            if (f) handleResponseUpload(a, f);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          onClick={() => responseInputRefs.current[a.id]?.click()}
+                          disabled={isUploading}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A78BFA] hover:text-white transition-colors disabled:opacity-50"
+                        >
+                          {isUploading
+                            ? <><Loader2 className="w-3 h-3 animate-spin" /> Uploading…</>
+                            : <><Upload className="w-3 h-3" /> Upload response (PDF, Word, image · max 10 MB)</>}
+                        </button>
                       </div>
                     )}
                   </div>
-                  {isMentor && (
-                    <button
-                      onClick={() => deleteAssignment(a.id)}
-                      className="opacity-0 group-hover:opacity-100 flex-shrink-0 text-white/30 hover:text-red-400 transition-all"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </Card>
