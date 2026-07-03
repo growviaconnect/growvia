@@ -360,6 +360,7 @@ function DashboardContent() {
   const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack]       = useState(false);
   const [profileNeedsUpdate, setProfileNeedsUpdate] = useState(false);
+  const [workspaceUnread, setWorkspaceUnread]       = useState(0);
   const [freeAiMatchUsed,   setFreeAiMatchUsed]   = useState(false);
   const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(false);
   const [menteeDbId, setMenteeDbId]         = useState<string | null>(null);
@@ -505,6 +506,66 @@ function DashboardContent() {
 
     loadData(us, justOnboarded);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Presence heartbeat (drives "notify only when offline" logic) ──────────
+  useEffect(() => {
+    if (!user?.email) return;
+    const ping = () => {
+      fetch("/api/workspace/presence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+        keepalive: true,
+      }).catch(() => {});
+    };
+    ping();
+    const id = setInterval(ping, 30_000);
+    return () => clearInterval(id);
+  }, [user?.email]);
+
+  // ── Workspace unread count for the sidebar red dot ─────────────────────────
+  useEffect(() => {
+    if (!user?.email) return;
+    let cancelled = false;
+
+    async function refreshUnread() {
+      const [msgs, asgs] = await Promise.all([
+        supabase.from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("receiver_email", user!.email)
+          .is("read_at", null),
+        // Mentee only: count assignments they still owe a response to.
+        user!.role === "mentee"
+          ? supabase.from("assignments")
+              .select("id", { count: "exact", head: true })
+              .eq("mentee_id", menteeDbId)
+              .is("response_file_url", null)
+              .neq("status", "completed")
+          : Promise.resolve({ count: 0 } as { count: number | null }),
+      ]);
+      if (cancelled) return;
+      const total = (msgs.count ?? 0) + (asgs.count ?? 0);
+      setWorkspaceUnread(total);
+    }
+
+    refreshUnread();
+    // Subscribe to realtime message inserts to bump the counter live.
+    const ch = supabase
+      .channel(`ws-unread-${user.email}`)
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `receiver_email=eq.${user.email}` },
+        () => { if (tab !== "workspace") setWorkspaceUnread(n => n + 1); })
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "assignments" },
+        () => { if (tab !== "workspace" && user!.role === "mentee") refreshUnread(); })
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [user?.email, user?.role, menteeDbId, tab]);
+
+  // Reset badge to 0 when the user opens the Workspace tab (they've "seen" it).
+  useEffect(() => {
+    if (tab === "workspace") setWorkspaceUnread(0);
+  }, [tab]);
 
   async function fetchConnexions(dbId: string, role: string) {
     const idField = role === "mentor" ? "mentor_id" : "mentee_id";
@@ -1176,7 +1237,12 @@ function DashboardContent() {
                     }`}
                   >
                     <item.icon className="w-4 h-4 flex-shrink-0" />
-                    {item.label}
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {item.id === "workspace" && workspaceUnread > 0 && (
+                      <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                        {workspaceUnread > 9 ? "9+" : workspaceUnread}
+                      </span>
+                    )}
                   </button>
                 ))}
               </nav>
