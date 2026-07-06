@@ -11,12 +11,13 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://growviaconnect.com";
 
 // Description defaults to English; the French version stays available under
 // `alternates.languages` so localised previews render correctly.
-const DESCRIPTION_EN = "The mentorship platform for students and young professionals";
+const TITLE_EN       = "GrowVia Connect - Grow Faster, Find Your Mentor";
+const DESCRIPTION_EN = "GrowVia Connect is the mentorship platform connecting students and young professionals with verified mentors across every field. Find your mentor, grow faster.";
 const DESCRIPTION_FR = "La plateforme de mentorat pour étudiants et jeunes professionnels";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: "GrowVia Connect",
+  title: TITLE_EN,
   description: DESCRIPTION_EN,
   keywords: "mentorship, career guidance, mentoring platform, AI matching, career coaching",
   icons: {
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     type:        "website",
     siteName:    "GrowVia Connect",
-    title:       "GrowVia Connect",
+    title:       TITLE_EN,
     description: DESCRIPTION_EN,
     url:         APP_URL,
     locale:      "en_US",
@@ -46,13 +47,13 @@ export const metadata: Metadata = {
         url:    "/og-image.png",
         width:  1200,
         height: 630,
-        alt:    "GrowVia Connect — mentorship platform",
+        alt:    "GrowVia Connect — Grow Faster, Find Your Mentor",
       },
     ],
   },
   twitter: {
     card:        "summary_large_image",
-    title:       "GrowVia Connect",
+    title:       TITLE_EN,
     description: DESCRIPTION_EN,
     images:      ["/og-image.png"],
   },
