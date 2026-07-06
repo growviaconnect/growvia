@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare, MapPin, Monitor, Crown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Languages, Calendar, Briefcase, Clock, MessageSquare, MapPin, Monitor, Crown, Users } from "lucide-react";
 import { supabase, type Mentor } from "@/lib/supabase";
 import { getUserSession } from "@/lib/session";
 import SaveMentorButton from "@/components/SaveMentorButton";
@@ -420,6 +420,58 @@ export default function MentorProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {skills.map(s => <Tag key={s}>{s}</Tag>)}
               </div>
+            </Section>
+          )}
+
+          {/* Profiles the mentor can help — with distinctive "power" badges
+              for job-hunt / networking capabilities so mentees see them at
+              a glance. */}
+          {mentor.type_profils_aides && mentor.type_profils_aides.length > 0 && (
+            <Section title="Profiles I help">
+              {(() => {
+                const CAPABILITY_BADGES: Record<string, { icon: typeof Briefcase; fg: string; bg: string; border: string }> = {
+                  "Job & internship opportunities": {
+                    icon: Briefcase,
+                    fg: "#FBBF24",
+                    bg: "rgba(251,191,36,0.10)",
+                    border: "rgba(251,191,36,0.35)",
+                  },
+                  "Network & introductions": {
+                    icon: Users,
+                    fg: "#34D399",
+                    bg: "rgba(52,211,153,0.10)",
+                    border: "rgba(52,211,153,0.35)",
+                  },
+                };
+                const highlighted = mentor.type_profils_aides.filter(p => CAPABILITY_BADGES[p]);
+                const regular     = mentor.type_profils_aides.filter(p => !CAPABILITY_BADGES[p]);
+                return (
+                  <div className="space-y-3">
+                    {highlighted.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {highlighted.map(p => {
+                          const b = CAPABILITY_BADGES[p];
+                          return (
+                            <span
+                              key={p}
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border"
+                              style={{ background: b.bg, color: b.fg, borderColor: b.border }}
+                            >
+                              <b.icon className="w-4 h-4" />
+                              {p}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {regular.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {regular.map(p => <Tag key={p}>{p}</Tag>)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </Section>
           )}
 

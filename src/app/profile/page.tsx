@@ -18,7 +18,7 @@ import AvailabilitySelector from "@/components/AvailabilitySelector";
 const SECTEURS_OPTIONS      = ["Tech","Finance","Marketing","Consulting","Startup","Healthcare","Education","Law","Design","HR","Other"];
 const COMPETENCES_OPTIONS   = ["Leadership","Communication","Strategy","Technical skills","Sales","Product","Data","Creative","Operations","Coaching"];
 const COMPETENCES_MENTEE    = ["Leadership","Communication","Strategy","Technical skills","Sales","Product","Data","Creative","Operations"];
-const TYPE_PROFILS_OPTIONS  = ["First job","Career change","Promotion","Entrepreneurship","Specific skills"];
+const TYPE_PROFILS_OPTIONS  = ["First job","Career change","Promotion","Entrepreneurship","Specific skills","Job & internship opportunities","Network & introductions"];
 const STYLE_MENTOR_OPTIONS  = [
   { key: "directive",   label: "Directive coach",  desc: "Clear direction and action plans" },
   { key: "facilitator", label: "Facilitator",       desc: "Help mentees find their own path" },

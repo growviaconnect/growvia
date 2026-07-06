@@ -25,6 +25,7 @@ const COMPETENCES_OPTIONS = [
 ];
 const TYPE_PROFILS_OPTIONS = [
   "First job", "Career change", "Promotion", "Entrepreneurship", "Specific skills",
+  "Job & internship opportunities", "Network & introductions",
 ];
 const STYLE_OPTIONS = [
   { key: "directive",   label: "Directive coach",  desc: "Clear direction and action plans" },
