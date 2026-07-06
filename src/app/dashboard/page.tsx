@@ -360,6 +360,7 @@ function DashboardContent() {
   const [planUpgraded, setPlanUpgraded]     = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack]       = useState(false);
   const [profileNeedsUpdate, setProfileNeedsUpdate] = useState(false);
+  const [mentorNeedsNetworkFields, setMentorNeedsNetworkFields] = useState(false);
   const [workspaceUnread, setWorkspaceUnread]       = useState(0);
   const [freeAiMatchUsed,   setFreeAiMatchUsed]   = useState(false);
   const [freeDiscoveryUsed, setFreeDiscoveryUsed] = useState(false);
@@ -640,7 +641,7 @@ function DashboardContent() {
         // Requesting a non-existent column causes PostgREST PGRST204 which makes the
         // entire query return null (profile.id = null → fetchConnexions never runs).
         const selectCols = us.role === "mentor"
-          ? "id, statut, onboarding_completed, hobbies, terms_accepted_at"
+          ? "id, statut, onboarding_completed, hobbies, terms_accepted_at, type_profils_aides"
           : "id, statut, survey_completed, has_used_free_ai_match, free_session_used, objectif_principal, secteurs_vises, hobbies, terms_accepted_at";
 
         const { data: profileRaw, error: profileErr } = await supabase
@@ -659,6 +660,7 @@ function DashboardContent() {
               secteurs_vises?: string[] | null;
               hobbies?: string[] | null;
               terms_accepted_at?: string | null;
+              type_profils_aides?: string[] | null;
             } | null;
             error: unknown;
           };
@@ -698,6 +700,17 @@ function DashboardContent() {
           const missingHobbies = !profileRaw?.hobbies || profileRaw.hobbies.length === 0;
           const missingTerms   = !profileRaw?.terms_accepted_at;
           setProfileNeedsUpdate(missingHobbies || missingTerms);
+        }
+
+        // Mentor-specific: prompt to answer the two new "job / network" options
+        // added to Type of profiles I help. Banner clears the moment they pick
+        // either option and save.
+        if (us.role === "mentor" && profile?.onboarding_completed) {
+          const picks = profileRaw?.type_profils_aides ?? [];
+          const answered =
+            picks.includes("Job & internship opportunities") ||
+            picks.includes("Network & introductions");
+          setMentorNeedsNetworkFields(!answered);
         }
 
         // Other roles: redirect pending profiles (first-time onboarding)
@@ -1335,6 +1348,28 @@ function DashboardContent() {
                     {welcomeBack ? t("dash_welcome_sub") : t("dash_overview_sub")}
                   </p>
                 </div>
+
+                {/* Mentor-only: prompt to answer the two new "job / network"
+                    options in field 11 of the questionnaire. */}
+                {user?.role === "mentor" && mentorNeedsNetworkFields && (
+                  <div
+                    className="rounded-2xl p-4 border border-[#7C3AED]/30 flex items-center gap-3 flex-wrap"
+                    style={{ background: "rgba(124,58,237,0.10)" }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#A78BFA] flex-shrink-0" />
+                    <span className="text-[#DDD6FE] text-sm font-medium flex-1 min-w-0">
+                      New fields available — Please update your profile to indicate if you can help
+                      with job opportunities or network introductions.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { window.location.href = "/onboarding/mentor?update=1&step=2"; }}
+                      className="text-xs font-bold text-white bg-[#7C3AED] hover:bg-[#9d8df1] px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      Update my profile →
+                    </button>
+                  </div>
+                )}
 
                 {/* New profile fields available — mentor or mentee */}
                 {profileNeedsUpdate && (user?.role === "mentor" || user?.role === "mentee") && (
