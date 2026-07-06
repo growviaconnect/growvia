@@ -303,7 +303,10 @@ export default function MentorOnboarding() {
       // here explicitly to update their profile (banner CTA on the dashboard,
       // links from settings, etc). ?update=1 bypasses the guard so existing
       // mentors can re-run the questionnaire and fill in newly-added fields.
-      const isUpdate = new URLSearchParams(window.location.search).get("update") === "1";
+      const params    = new URLSearchParams(window.location.search);
+      const isUpdate  = params.get("update") === "1";
+      const targetStep = Math.max(1, Math.min(TOTAL_STEPS, parseInt(params.get("step") ?? "1")));
+      if (Number.isFinite(targetStep) && targetStep > 1) setStep(targetStep);
       if (existing?.onboarding_completed === true && !isUpdate) {
         window.location.href = "/dashboard";
         return;
