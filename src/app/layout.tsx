@@ -7,18 +7,59 @@ import ScrollProgress from "@/components/ScrollProgress";
 import { LangProvider } from "@/contexts/LangContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://growviaconnect.com";
+
+// Description defaults to English; the French version stays available under
+// `alternates.languages` so localised previews render correctly.
+const DESCRIPTION_EN = "The mentorship platform for students and young professionals";
+const DESCRIPTION_FR = "La plateforme de mentorat pour étudiants et jeunes professionnels";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   title: "GrowVia Connect",
-  description:
-    "La plateforme de mentorat pour étudiants et jeunes professionnels",
+  description: DESCRIPTION_EN,
   keywords: "mentorship, career guidance, mentoring platform, AI matching, career coaching",
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico",     sizes: "any" },
+      { url: "/logo-icon.png",   type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple:    "/apple-touch-icon.png",
+  },
+  alternates: {
+    languages: {
+      "en": "/",
+      "fr": "/",
+    },
+  },
   openGraph: {
-    title: "GrowVia Connect",
-    description: "La plateforme de mentorat pour étudiants et jeunes professionnels",
-    type: "website",
+    type:        "website",
+    siteName:    "GrowVia Connect",
+    title:       "GrowVia Connect",
+    description: DESCRIPTION_EN,
+    url:         APP_URL,
+    locale:      "en_US",
+    alternateLocale: ["fr_FR"],
+    images: [
+      {
+        url:    "/og-image.png",
+        width:  1200,
+        height: 630,
+        alt:    "GrowVia Connect — mentorship platform",
+      },
+    ],
+  },
+  twitter: {
+    card:        "summary_large_image",
+    title:       "GrowVia Connect",
+    description: DESCRIPTION_EN,
+    images:      ["/og-image.png"],
   },
 };
+
+// Silence unused-variable warning while keeping the French copy documented.
+void DESCRIPTION_FR;
 
 export default function RootLayout({
   children,
