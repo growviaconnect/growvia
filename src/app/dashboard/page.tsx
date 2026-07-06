@@ -534,13 +534,12 @@ function DashboardContent() {
           .select("id", { count: "exact", head: true })
           .eq("receiver_email", user!.email)
           .is("read_at", null),
-        // Mentee only: count assignments they still owe a response to.
+        // Mentee-only: count assignments they haven't opened the workspace on yet.
         user!.role === "mentee"
           ? supabase.from("assignments")
               .select("id", { count: "exact", head: true })
               .eq("mentee_id", menteeDbId)
-              .is("response_file_url", null)
-              .neq("status", "completed")
+              .is("seen_at", null)
           : Promise.resolve({ count: 0 } as { count: number | null }),
       ]);
       if (cancelled) return;
@@ -554,18 +553,67 @@ function DashboardContent() {
       .channel(`ws-unread-${user.email}`)
       .on("postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `receiver_email=eq.${user.email}` },
-        () => { if (tab !== "workspace") setWorkspaceUnread(n => n + 1); })
+        (payload) => {
+          if (tab === "workspace") {
+            // Already viewing — mark it read immediately so the badge doesn't
+            // resurrect if they navigate away and come back.
+            const mid = (payload.new as { id?: string })?.id;
+            if (mid) {
+              supabase.from("messages").update({ read_at: new Date().toISOString() }).eq("id", mid)
+                .then(({ error }) => { if (error) console.error("[workspace] mark read (realtime) failed:", error); });
+            }
+          } else {
+            setWorkspaceUnread(n => n + 1);
+          }
+        })
       .on("postgres_changes",
         { event: "INSERT", schema: "public", table: "assignments" },
-        () => { if (tab !== "workspace" && user!.role === "mentee") refreshUnread(); })
+        (payload) => {
+          if (user!.role !== "mentee") return;
+          if (tab === "workspace") {
+            const aid = (payload.new as { id?: string })?.id;
+            if (aid) {
+              supabase.from("assignments").update({ seen_at: new Date().toISOString() }).eq("id", aid)
+                .then(({ error }) => { if (error) console.error("[workspace] mark seen (realtime) failed:", error); });
+            }
+          } else {
+            refreshUnread();
+          }
+        })
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [user?.email, user?.role, menteeDbId, tab]);
 
-  // Reset badge to 0 when the user opens the Workspace tab (they've "seen" it).
+  // Reset badge + mark everything as read/seen the moment the user opens the
+  // Workspace tab. Notifications don't persist past "I've opened the page".
   useEffect(() => {
-    if (tab === "workspace") setWorkspaceUnread(0);
-  }, [tab]);
+    if (tab !== "workspace" || !user?.email) return;
+    setWorkspaceUnread(0);
+
+    const nowIso = new Date().toISOString();
+
+    // Mark all messages targeting me as read.
+    supabase
+      .from("messages")
+      .update({ read_at: nowIso })
+      .eq("receiver_email", user.email)
+      .is("read_at", null)
+      .then(({ error }) => {
+        if (error) console.error("[workspace] mark messages read failed:", error);
+      });
+
+    // Mentee only: mark all their assignments as seen.
+    if (user.role === "mentee" && menteeDbId) {
+      supabase
+        .from("assignments")
+        .update({ seen_at: nowIso })
+        .eq("mentee_id", menteeDbId)
+        .is("seen_at", null)
+        .then(({ error }) => {
+          if (error) console.error("[workspace] mark assignments seen failed:", error);
+        });
+    }
+  }, [tab, user?.email, user?.role, menteeDbId]);
 
   async function fetchConnexions(dbId: string, role: string) {
     const idField = role === "mentor" ? "mentor_id" : "mentee_id";
