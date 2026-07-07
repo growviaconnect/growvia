@@ -707,7 +707,15 @@ export default function SettingsPage() {
             </div>
             <div>
               <p className="font-bold text-white text-base">{session.nom}</p>
-              <p className="text-sm" style={{ color: T.muted }}>{session.email}</p>
+              <p
+                className="text-[10px] font-bold uppercase tracking-[0.14em] mt-0.5"
+                style={{ color: T.purpleL }}
+              >
+                {session.role === "mentor"       ? "Mentor" :
+                 session.role === "mentee"       ? "Mentee" :
+                 session.role === "school_admin" ? "School admin" : "User"}
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: T.muted }}>{session.email}</p>
               {/* Plan badge with tooltip */}
               <div className="relative group inline-block mt-1.5">
                 <span
