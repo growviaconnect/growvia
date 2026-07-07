@@ -23,57 +23,18 @@ function LoginContent() {
   const [error, setError]               = useState<string | null>(null);
   const [form, setForm] = useState({ email: "", password: "" });
 
-  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
-  const [resendBusy,       setResendBusy]       = useState(false);
-  const [resendMsg,        setResendMsg]        = useState<string | null>(null);
-
-  async function handleResendConfirmation() {
-    if (!unconfirmedEmail) return;
-    setResendBusy(true);
-    setResendMsg(null);
-    try {
-      const res = await fetch("/api/auth/resend-confirmation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: unconfirmedEmail }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Impossible d'envoyer l'email.");
-      setResendMsg("Email envoyé — vérifie ta boîte de réception.");
-    } catch (err: unknown) {
-      setResendMsg(err instanceof Error ? err.message : "Impossible d'envoyer l'email.");
-    } finally {
-      setResendBusy(false);
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setUnconfirmedEmail(null);
-    setResendMsg(null);
 
     try {
-      const email = form.email.trim().toLowerCase();
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: form.email.trim().toLowerCase(),
         password: form.password,
       });
 
-      if (authError) {
-        // Supabase surfaces this as either error.code === "email_not_confirmed"
-        // (newer SDK) or as a message containing "Email not confirmed".
-        const code = (authError as { code?: string }).code ?? "";
-        const msg  = (authError.message ?? "").toLowerCase();
-        if (code === "email_not_confirmed" || msg.includes("email not confirmed") || msg.includes("not confirmed")) {
-          setUnconfirmedEmail(email);
-          setError("Vérifie ton email pour activer ton compte.");
-          setLoading(false);
-          return;
-        }
-        throw authError;
-      }
+      if (authError) throw authError;
 
       const user = data.user;
       const meta = user.user_metadata ?? {};
@@ -137,46 +98,10 @@ function LoginContent() {
             </div>
           )}
 
-          {error && !unconfirmedEmail && (
+          {error && (
             <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-5">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               {error}
-            </div>
-          )}
-
-          {unconfirmedEmail && (
-            <div
-              className="rounded-xl p-4 mb-5 border"
-              style={{ background: "rgba(251,191,36,0.08)", borderColor: "rgba(251,191,36,0.25)" }}
-            >
-              <div className="flex items-start gap-3 mb-3">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
-                <p className="text-sm text-amber-200 leading-relaxed">
-                  Vérifie ton email pour activer ton compte.<br/>
-                  <span className="text-amber-200/60 text-xs">
-                    Un lien de confirmation a été envoyé à{" "}
-                    <span className="font-semibold">{unconfirmedEmail}</span>.
-                  </span>
-                </p>
-              </div>
-              {resendMsg && (
-                <div className={`text-xs px-3 py-2 rounded-lg mb-2 ${
-                  resendMsg.toLowerCase().includes("envoyé")
-                    ? "bg-emerald-500/10 text-emerald-300"
-                    : "bg-red-500/10 text-red-300"
-                }`}>
-                  {resendMsg}
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={handleResendConfirmation}
-                disabled={resendBusy}
-                className="w-full text-xs font-semibold text-white bg-amber-500 hover:bg-amber-400 py-2 rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {resendBusy && <Loader2 className="w-3 h-3 animate-spin" />}
-                Renvoyer le lien de confirmation
-              </button>
             </div>
           )}
 

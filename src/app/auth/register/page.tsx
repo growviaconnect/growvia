@@ -1,16 +1,21 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle, Mail, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { setAuthCookie } from "@/lib/auth";
 import { useLang } from "@/contexts/LangContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Role = "mentee" | "mentor" | "school_admin";
 
 function RegisterContent() {
   const { t } = useLang();
+  const router      = useRouter();
   const searchParams = useSearchParams();
+  const { setSession } = useAuth();
   const paramRole   = searchParams.get("role") as Role | null;
   const validRoles: Role[] = ["mentee", "mentor", "school_admin"];
   const defaultRole: Role  = paramRole && validRoles.includes(paramRole) ? paramRole : "mentee";
@@ -21,9 +26,6 @@ function RegisterContent() {
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
-  const [checkEmail,      setCheckEmail]      = useState(false);
-  const [resendBusy,      setResendBusy]      = useState(false);
-  const [resendMsg,       setResendMsg]       = useState<string | null>(null);
 
   const roles: { value: Role; label: string }[] = [
     { value: "mentee",       label: t("reg_role_mentee") },
@@ -49,9 +51,8 @@ function RegisterContent() {
     const nom   = form.name.trim();
 
     try {
-      // Server creates the auth user (unconfirmed), inserts the domain row
-      // with statut='active', and triggers Supabase to send the confirmation
-      // email through the configured SMTP.
+      // Server creates the auth user pre-confirmed (email_confirm: true) and
+      // inserts the domain row with statut='active'.
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,32 +67,21 @@ function RegisterContent() {
         throw new Error(json.error ?? t("reg_error_generic"));
       }
 
-      // Don't sign in — the user must click the confirmation link in their
-      // inbox first. Show a "check your email" screen instead.
-      setCheckEmail(true);
+      // Sign in immediately — no email verification gate.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: form.password,
+      });
+      if (signInError) throw signInError;
+
+      setSession({ nom, email, role, plan: "free" });
+      setAuthCookie();
+
+      router.push(role === "mentor" ? "/onboarding/mentor" : "/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("reg_error_generic"));
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleResend() {
-    setResendBusy(true);
-    setResendMsg(null);
-    try {
-      const res = await fetch("/api/auth/resend-confirmation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email.trim().toLowerCase() }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Could not resend the email.");
-      setResendMsg("Confirmation email sent — check your inbox.");
-    } catch (err: unknown) {
-      setResendMsg(err instanceof Error ? err.message : "Could not resend the email. Please try again.");
-    } finally {
-      setResendBusy(false);
     }
   }
 
@@ -119,55 +109,6 @@ function RegisterContent() {
           className="rounded-2xl p-8 border border-white/[0.08]"
           style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}
         >
-          {checkEmail ? (
-            <div className="text-center space-y-5">
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
-                style={{ background: "rgba(124,58,237,0.15)" }}
-              >
-                <Mail className="w-7 h-7 text-[#A78BFA]" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-xl font-extrabold text-white">Check your email</h2>
-                <p className="text-sm text-white/50 leading-relaxed">
-                  We just sent a confirmation link to{" "}
-                  <span className="text-white font-semibold">{form.email.trim().toLowerCase()}</span>.
-                  Click it to activate your account, then sign in.
-                </p>
-              </div>
-              {resendMsg && (
-                <div className={`flex items-start gap-2 text-xs px-3 py-2.5 rounded-lg ${
-                  resendMsg.toLowerCase().includes("sent")
-                    ? "bg-emerald-500/10 text-emerald-300"
-                    : "bg-red-500/10 text-red-300"
-                }`}>
-                  {resendMsg.toLowerCase().includes("sent")
-                    ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                    : <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />}
-                  <span className="flex-1 text-left">{resendMsg}</span>
-                </div>
-              )}
-              <div className="flex flex-col gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resendBusy}
-                  className="w-full font-semibold py-3 rounded-xl text-white text-sm flex items-center justify-center gap-2 disabled:opacity-60 hover:opacity-90 transition-opacity"
-                  style={{ background: "#7C3AED" }}
-                >
-                  {resendBusy && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Resend confirmation email
-                </button>
-                <Link
-                  href="/auth/login"
-                  className="text-xs text-white/40 hover:text-white/70 transition-colors"
-                >
-                  Back to sign-in
-                </Link>
-              </div>
-            </div>
-          ) : (
-          <>
           {error && (
             <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-5">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -283,8 +224,6 @@ function RegisterContent() {
               <Link href="/legal/privacy" className="text-[#A78BFA] hover:text-white transition-colors">{t("bam_privacy")}</Link>
             </p>
           </form>
-          </>
-          )}
         </div>
 
         <p className="text-center text-sm text-white/40 mt-6">
