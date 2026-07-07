@@ -1055,7 +1055,7 @@ export default function MentorOnboarding() {
                 </div>
               </div>
 
-              {/* Max mentees */}
+              {/* Max mentees — "10+" (stored as 11) means "more than 10" */}
               <div>
                 <FieldLabel>Max simultaneous mentees</FieldLabel>
                 <div className="flex gap-2 flex-wrap">
@@ -1070,6 +1070,18 @@ export default function MentorOnboarding() {
                       {n}
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => setS3(prev => ({ ...prev, max_mentees: 11 }))}
+                    className={`h-10 min-w-10 px-3 rounded-xl border-2 text-sm font-semibold transition-colors ${
+                      s3.max_mentees >= 11
+                        ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white"
+                        : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
+                    }`}
+                    title="More than 10 mentees at the same time"
+                  >
+                    10+
+                  </button>
                 </div>
               </div>
 
