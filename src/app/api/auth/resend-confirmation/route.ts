@@ -49,11 +49,15 @@ export async function POST(req: NextRequest) {
     const nom  = (user.user_metadata?.nom  as string | undefined) ?? "there";
     const role = (user.user_metadata?.role as string | undefined) ?? "mentee";
 
-    // Generate a fresh confirmation link.
+    // Generate a fresh confirmation link. The `password` field is required by
+    // GenerateSignupLinkParams' TS type, but Supabase ignores it at runtime
+    // when the user already exists (which is the only case this endpoint is
+    // ever called from — see the listUsers lookup above).
     const redirectTo = `${appUrl}/auth/login?confirmed=1`;
     const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
       type:     "signup",
       email,
+      password: "",
       options:  { redirectTo },
     });
     if (linkErr || !linkData?.properties?.action_link) {

@@ -1,20 +1,16 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle, Mail, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { useLang } from "@/contexts/LangContext";
-import { useAuth } from "@/contexts/AuthContext";
 
 type Role = "mentee" | "mentor" | "school_admin";
 
 function RegisterContent() {
   const { t } = useLang();
-  const router      = useRouter();
   const searchParams = useSearchParams();
-  useAuth();
   const paramRole   = searchParams.get("role") as Role | null;
   const validRoles: Role[] = ["mentee", "mentor", "school_admin"];
   const defaultRole: Role  = paramRole && validRoles.includes(paramRole) ? paramRole : "mentee";
