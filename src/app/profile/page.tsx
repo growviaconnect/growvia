@@ -776,6 +776,14 @@ export default function ProfilePage() {
                           {n}
                         </button>
                       ))}
+                      <button
+                        type="button"
+                        onClick={() => setMentor(p => ({ ...p, max_mentees: 11 }))}
+                        className={`h-10 min-w-10 px-3 rounded-xl border-2 text-sm font-semibold transition-colors ${mentor.max_mentees >= 11 ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white" : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"}`}
+                        title="More than 10 mentees at the same time"
+                      >
+                        10+
+                      </button>
                     </div>
                   </div>
                   <div>
@@ -814,7 +822,7 @@ export default function ProfilePage() {
                     </ViewRow>
                   )}
                   {mentor.disponibilite_heures > 0 && <ViewRow label="Availability">{mentor.disponibilite_heures}h / week</ViewRow>}
-                  {mentor.max_mentees > 0 && <ViewRow label="Max mentees">{mentor.max_mentees}</ViewRow>}
+                  {mentor.max_mentees > 0 && <ViewRow label="Max mentees">{mentor.max_mentees >= 11 ? "10+" : mentor.max_mentees}</ViewRow>}
                   {mentor.format_prefere && <ViewRow label="Format">{mentor.format_prefere}</ViewRow>}
                   {mentor.langues.length > 0 && (
                     <ViewRow label="Languages">
