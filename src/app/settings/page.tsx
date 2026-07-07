@@ -296,6 +296,20 @@ export default function SettingsPage() {
     }
   }, []);
 
+  /* ── Route-level guard: mentors can't land on the Subscription tab ── */
+  useEffect(() => {
+    if (session?.role === "mentor" && tab === "subscription") {
+      setTab("profile");
+      // Also strip ?tab=subscription from the URL so hard-refresh keeps the fix
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "subscription") {
+        params.delete("tab");
+        const q = params.toString();
+        window.history.replaceState({}, "", `/settings${q ? `?${q}` : ""}`);
+      }
+    }
+  }, [session?.role, tab]);
+
   /* ── Tab switch ─────────────────────────────────────────────── */
   function switchTab(next: Tab) {
     if (next === tab) return;
@@ -483,11 +497,14 @@ export default function SettingsPage() {
   const strength = pwdStrength(pwdForm.next);
   const { onFocus, onBlur } = useFocusStyle();
 
+  const isMentor = session.role === "mentor";
+
   const tabs: { id: Tab; label: string; Icon: React.ElementType }[] = [
-    { id: "profile",      label: "Profil",         Icon: User },
-    { id: "password",     label: "Mot de passe",   Icon: Lock },
-    { id: "subscription", label: "Abonnement",      Icon: CreditCard },
-    ...(session.role === "mentor" ? [{ id: "availability" as Tab, label: "Disponibilité", Icon: CalendarRange }] : []),
+    { id: "profile",   label: "Profil",       Icon: User },
+    { id: "password",  label: "Mot de passe", Icon: Lock },
+    // Mentors set their own per-session price via onboarding — no subscription.
+    ...(!isMentor ? [{ id: "subscription" as Tab, label: "Abonnement",   Icon: CreditCard }]  : []),
+    ...(isMentor  ? [{ id: "availability"  as Tab, label: "Disponibilité", Icon: CalendarRange }] : []),
   ];
 
   return (
@@ -1140,7 +1157,7 @@ export default function SettingsPage() {
           )}
 
           {/* ══ SUBSCRIPTION ══════════════════════════════════════ */}
-          {tab === "subscription" && (
+          {tab === "subscription" && !isMentor && (
             <div className="space-y-4">
               {subLoading ? (
                 <div className="rounded-2xl p-10 flex items-center justify-center"
