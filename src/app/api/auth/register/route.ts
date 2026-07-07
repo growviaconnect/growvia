@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendSignupConfirmation } from "@/lib/email";
 
 /**
  * Signup flow:
  *   1. Create the auth user via admin API with email_confirm = FALSE so
  *      auth.users.email_confirmed_at stays NULL until the user clicks the
- *      confirmation link. No manual admin validation step exists.
- *   2. Insert the domain row (mentors/mentees) with statut='active' so it's
- *      immediately usable once the email is verified.
- *   3. Trigger Supabase to send the confirmation email through the project's
- *      configured SMTP (Resend) via admin.generateLink({ type: 'signup' }).
+ *      confirmation link. No manual admin validation step.
+ *   2. Insert the domain row (mentors / mentees) with statut='active'
+ *      keyed by auth.users.id.
+ *   3. Ask Supabase for the signup confirmation URL via admin.generateLink,
+ *      but send the email OURSELVES through Resend REST (rather than
+ *      Supabase's SMTP path) so every attempt is traceable in the Resend
+ *      dashboard alongside every other transactional email.
  */
 export async function POST(req: NextRequest) {
   const env = process.env;
@@ -44,9 +47,7 @@ export async function POST(req: NextRequest) {
 
     const userId = data.user.id;
 
-    // 2. Insert the domain row keyed by auth.users.id so the onboarding flow
-    //    can find it on first login. statut='active' by table default; setting
-    //    it explicitly documents intent.
+    // 2. Insert the domain row keyed by auth.users.id.
     const table = role === "mentor" ? "mentors" : role === "mentee" ? "mentees" : null;
     if (table) {
       const { error: insertErr } = await admin.from(table).insert({
@@ -55,16 +56,27 @@ export async function POST(req: NextRequest) {
       if (insertErr) console.error("[register] domain insert warning:", insertErr.message);
     }
 
-    // 3. Trigger the Supabase-managed confirmation email via generateLink.
-    //    Uses the project's "Confirmation" email template + configured SMTP.
+    // 3. Generate the confirmation URL and send it OURSELVES via Resend REST.
     const redirectTo = `${appUrl}/auth/login?confirmed=1`;
-    const { error: linkErr } = await admin.auth.admin.generateLink({
-      type:  "signup",
+    const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+      type:     "signup",
       email,
       password,
-      options: { redirectTo },
+      options:  { redirectTo },
     });
-    if (linkErr) console.error("[register] generateLink warning:", linkErr.message);
+    if (linkErr || !linkData?.properties?.action_link) {
+      console.error("[register] generateLink failed:", linkErr?.message);
+      return NextResponse.json({ error: "Could not generate confirmation link" }, { status: 500 });
+    }
+    const confirmationUrl = linkData.properties.action_link;
+
+    const { error: mailErr } = await sendSignupConfirmation({
+      to: email, nom, role, confirmationUrl,
+    });
+    if (mailErr) {
+      console.error("[register] Resend send failed:", mailErr);
+      return NextResponse.json({ error: "Confirmation email failed to send" }, { status: 500 });
+    }
 
     return NextResponse.json({ userId, requiresEmailConfirmation: true });
   } catch (err) {

@@ -32,12 +32,13 @@ function LoginContent() {
     setResendBusy(true);
     setResendMsg(null);
     try {
-      const { error: err } = await supabase.auth.resend({
-        type:  "signup",
-        email: unconfirmedEmail,
-        options: { emailRedirectTo: `${window.location.origin}/auth/login?confirmed=1` },
+      const res = await fetch("/api/auth/resend-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: unconfirmedEmail }),
       });
-      if (err) throw err;
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Impossible d'envoyer l'email.");
       setResendMsg("Email envoyé — vérifie ta boîte de réception.");
     } catch (err: unknown) {
       setResendMsg(err instanceof Error ? err.message : "Impossible d'envoyer l'email.");

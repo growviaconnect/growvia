@@ -1,20 +1,16 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle, Mail, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { useLang } from "@/contexts/LangContext";
-import { useAuth } from "@/contexts/AuthContext";
 
 type Role = "mentee" | "mentor" | "school_admin";
 
 function RegisterContent() {
   const { t } = useLang();
-  const router      = useRouter();
   const searchParams = useSearchParams();
-  useAuth();
   const paramRole   = searchParams.get("role") as Role | null;
   const validRoles: Role[] = ["mentee", "mentor", "school_admin"];
   const defaultRole: Role  = paramRole && validRoles.includes(paramRole) ? paramRole : "mentee";
@@ -84,12 +80,13 @@ function RegisterContent() {
     setResendBusy(true);
     setResendMsg(null);
     try {
-      const { error: err } = await supabase.auth.resend({
-        type:  "signup",
-        email: form.email.trim().toLowerCase(),
-        options: { emailRedirectTo: `${window.location.origin}/auth/login?confirmed=1` },
+      const res = await fetch("/api/auth/resend-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email.trim().toLowerCase() }),
       });
-      if (err) throw err;
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Could not resend the email.");
       setResendMsg("Confirmation email sent — check your inbox.");
     } catch (err: unknown) {
       setResendMsg(err instanceof Error ? err.message : "Could not resend the email. Please try again.");
