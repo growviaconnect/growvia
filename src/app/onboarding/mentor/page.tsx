@@ -98,13 +98,16 @@ async function uploadToStorage(bucket: string, path: string, file: File): Promis
 }
 
 // ─── Pricing grid ──────────────────────────────────────────────────────────────
+// Pricing tiers use neutral, positive labels so a first-time mentor never
+// sees a demeaning term like "Beginner" or "Junior". The floor is 20€ and
+// the ceiling is 90€ per session.
 const PRICING_GRID = [
-  { maxScore: 20,  level: "Débutant",      priceMin: 20, priceMax: 30  },
-  { maxScore: 40,  level: "Junior",         priceMin: 30, priceMax: 45  },
-  { maxScore: 60,  level: "Intermédiaire",  priceMin: 45, priceMax: 65  },
-  { maxScore: 75,  level: "Confirmé",       priceMin: 65, priceMax: 80  },
-  { maxScore: 90,  level: "Expert",         priceMin: 80, priceMax: 95  },
-  { maxScore: 100, level: "Top Mentor",     priceMin: 95, priceMax: 100 },
+  { maxScore: 20,  level: "Accessible",   priceMin: 20, priceMax: 30 },
+  { maxScore: 40,  level: "Émergent",     priceMin: 30, priceMax: 40 },
+  { maxScore: 60,  level: "Confirmé",     priceMin: 40, priceMax: 50 },
+  { maxScore: 75,  level: "Expérimenté",  priceMin: 50, priceMax: 65 },
+  { maxScore: 90,  level: "Expert",       priceMin: 65, priceMax: 80 },
+  { maxScore: 100, level: "Référence",    priceMin: 80, priceMax: 90 },
 ] as const;
 
 type PricingTier = typeof PRICING_GRID[number];
@@ -600,7 +603,7 @@ export default function MentorOnboarding() {
   if (phase === "scoring") {
     const tier      = getPricingTier(mentorScore);
     const recommended   = midPrice(tier);
-    const sliderFillPct = ((sliderPrice - 20) / (100 - 20)) * 100;
+    const sliderFillPct = ((sliderPrice - 20) / (90 - 20)) * 100;
 
     const ringColor =
       mentorScore >= 91 ? "#A78BFA" :
@@ -697,7 +700,7 @@ export default function MentorOnboarding() {
                     <span className="text-sm text-white/40 font-normal"> / session</span>
                   </span>
                 </div>
-                <input type="range" min={20} max={100} step={5} value={sliderPrice}
+                <input type="range" min={20} max={90} step={5} value={sliderPrice}
                   onChange={e => setSliderPrice(Number(e.target.value))}
                   className="w-full h-2 rounded-full appearance-none cursor-pointer"
                   style={{
@@ -707,7 +710,7 @@ export default function MentorOnboarding() {
                 <div className="flex justify-between mt-2 text-xs">
                   <span className="text-white/30">20€</span>
                   <span className="text-[#A78BFA]">Recommandé : {tier.priceMin}€–{tier.priceMax}€</span>
-                  <span className="text-white/30">100€</span>
+                  <span className="text-white/30">90€</span>
                 </div>
                 <button onClick={() => handleSavePrice(sliderPrice)} disabled={savingPrice}
                   className="w-full mt-5 text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm disabled:opacity-60"

@@ -166,12 +166,12 @@ type Tier = {
 };
 
 const TIERS: Tier[] = [
-  { label: "Débutant",      range: "9 – 19 €/h",   color: "#6B7280" },
-  { label: "Junior",        range: "20 – 34 €/h",  color: "#3B82F6" },
-  { label: "Intermédiaire", range: "35 – 49 €/h",  color: "#10B981" },
-  { label: "Senior",        range: "50 – 74 €/h",  color: "#F59E0B" },
-  { label: "Expert",        range: "75 – 99 €/h",  color: "#EF4444" },
-  { label: "Top Mentor",    range: "100 €+/h",      color: "#7C3AED" },
+  { label: "Accessible",   range: "20 – 30 €/session", color: "#94A3B8" },
+  { label: "Émergent",     range: "30 – 40 €/session", color: "#3B82F6" },
+  { label: "Confirmé",     range: "40 – 50 €/session", color: "#10B981" },
+  { label: "Expérimenté",  range: "50 – 65 €/session", color: "#F59E0B" },
+  { label: "Expert",       range: "65 – 80 €/session", color: "#EF4444" },
+  { label: "Référence",    range: "80 – 90 €/session", color: "#7C3AED" },
 ];
 
 const PREMIUM_DOMAINS = ["Finance", "Tech", "Entrepreneurship"];
