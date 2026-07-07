@@ -1005,3 +1005,50 @@ export async function sendContactConfirmation(params: ContactFormParams) {
   else              console.log(`[email] sendContactConfirmation sent (id=${result.data?.id}) → ${email}`);
   return result;
 }
+
+// ─── 16. Signup confirmation ─────────────────────────────────────────────────
+// Sent directly by the app rather than by Supabase's mailer, so every send
+// is traceable in the Resend REST dashboard just like every other
+// transactional email in this file.
+
+export type SignupConfirmationParams = {
+  to:              string;
+  nom:             string;
+  role:            string;
+  confirmationUrl: string;
+};
+
+export async function sendSignupConfirmation(params: SignupConfirmationParams) {
+  const { to, nom, role, confirmationUrl } = params;
+  const roleLabel = role === "mentor" ? "Mentor" : role === "mentee" ? "Mentee" : "GrowVia user";
+
+  const body = `
+    ${h1(`Welcome to GrowVia, ${nom} 👋`)}
+    ${p(`Your ${roleLabel} account is almost ready. Confirm your email address by clicking the button below — it takes one click.`)}
+    ${btn("Confirm my email →", confirmationUrl)}
+    <br/>
+    ${p(`The link is valid for 24 hours. If it expires, sign in from <a href="${BASE_URL}/auth/login" style="color:#7C3AED;text-decoration:none;">${BASE_URL.replace("https://", "")}/auth/login</a> and use "Resend confirmation email".`)}
+    ${p(`If you didn't create this account, you can safely ignore this email.`)}
+    <br/>
+    <p style="margin:16px 0 0;color:#9ca3af;font-size:12px;line-height:1.5;word-break:break-all;">
+      Trouble with the button? Copy this URL into your browser:<br/>
+      <span style="color:#6b7280;">${confirmationUrl}</span>
+    </p>
+  `;
+
+  const r = getResend();
+  if (!r) {
+    console.error("[email] sendSignupConfirmation: RESEND_API_KEY not configured");
+    return { data: null, error: new Error("RESEND_API_KEY not configured") };
+  }
+  console.log(`[email] sendSignupConfirmation → ${to} (role=${role})`);
+  const result = await r.emails.send({
+    from:    FROM,
+    to,
+    subject: "Confirm your GrowVia email",
+    html:    layout(body),
+  });
+  if (result.error) console.error(`[email] sendSignupConfirmation failed for ${to}:`, result.error);
+  else              console.log(`[email] sendSignupConfirmation sent (id=${result.data?.id}) → ${to}`);
+  return result;
+}
