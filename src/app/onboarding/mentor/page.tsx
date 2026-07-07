@@ -33,8 +33,6 @@ const STYLE_OPTIONS = [
   { key: "networker",   label: "Network-focused",   desc: "Open doors and make introductions" },
   { key: "technical",   label: "Technical expert",  desc: "Share deep technical knowledge" },
 ];
-const FORMAT_OPTIONS = ["Video calls", "Messages", "Both"];
-
 const HOBBIES_OPTIONS = [
   "Sport", "Art", "Music", "Fashion", "Travel", "Photography",
   "Gaming", "Cooking", "Reading", "Entrepreneurship",
@@ -69,8 +67,8 @@ type S1 = {
 };
 type S2 = { secteurs: string[]; competences: CompetenceEntry[]; type_profils_aides: string[] };
 type S3 = {
-  style_mentorat: string; disponibilite_heures: string; max_mentees: number;
-  format_prefere: string; langues: string[]; motivation: string;
+  style_mentorat: string; max_mentees: number;
+  langues: string[]; motivation: string;
   hobbies: string[];
 };
 type S4 = { cv_url: string };
@@ -82,8 +80,8 @@ function computeCompletion(s1: S1, s2: S2, s3: S3, s4: S4): number {
     !!s1.entreprise.trim(), s1.annees_experience !== "",
     !!s1.localisation.trim(), !!s1.linkedin_url.trim(), !!s1.bio.trim(),
     s2.secteurs.length > 0, s2.competences.length > 0, s2.type_profils_aides.length > 0,
-    !!s3.style_mentorat, !!s3.disponibilite_heures, s3.max_mentees > 0,
-    !!s3.format_prefere, s3.langues.length > 0, !!s3.motivation.trim(),
+    !!s3.style_mentorat, s3.max_mentees > 0,
+    s3.langues.length > 0, !!s3.motivation.trim(),
     !!s4.cv_url,
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
@@ -226,10 +224,6 @@ export default function MentorOnboarding() {
   const [cvUploading, setCvUploading]       = useState(false);
   const [cvError, setCvError]               = useState<string | null>(null);
 
-  // Availability
-  const [availCount, setAvailCount] = useState(3);
-  const [availUnit, setAvailUnit]   = useState<"week" | "month">("week");
-
   // Language other dropdown
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [langSearch, setLangSearch]             = useState("");
@@ -252,8 +246,8 @@ export default function MentorOnboarding() {
   });
   const [s2, setS2] = useState<S2>({ secteurs: [], competences: [], type_profils_aides: [] });
   const [s3, setS3] = useState<S3>({
-    style_mentorat: "", disponibilite_heures: "", max_mentees: 3,
-    format_prefere: "", langues: [], motivation: "",
+    style_mentorat: "", max_mentees: 3,
+    langues: [], motivation: "",
     hobbies: [],
   });
   const [s4, setS4] = useState<S4>({ cv_url: "" });
@@ -334,26 +328,9 @@ export default function MentorOnboarding() {
           type_profils_aides: existing.type_profils_aides ?? [],
         });
 
-        // Parse disponibilite_heures, supports new string format and legacy number
-        const rawDisp = existing.disponibilite_heures;
-        if (typeof rawDisp === "string") {
-          const m = rawDisp.match(/^(\d+)h\/(week|month)$/);
-          if (m) {
-            setAvailCount(parseInt(m[1]));
-            setAvailUnit(m[2] as "week" | "month");
-          }
-        } else if (typeof rawDisp === "number" && rawDisp > 0) {
-          setAvailCount(rawDisp);
-          setAvailUnit("week");
-        }
-
         setS3({
           style_mentorat:      existing.style_mentorat ?? "",
-          disponibilite_heures: typeof rawDisp === "string" ? rawDisp
-                                : typeof rawDisp === "number" && rawDisp > 0 ? `${rawDisp}h/week`
-                                : "",
           max_mentees:         existing.max_mentees ?? 3,
-          format_prefere:      existing.format_prefere ?? "",
           langues:             existing.langues         ?? [],
           motivation:          existing.motivation      ?? "",
           hobbies:             existing.hobbies         ?? [],
@@ -421,13 +398,6 @@ export default function MentorOnboarding() {
     setS4({ cv_url: "" });
     setCvFileName("");
     setCvError(null);
-  }
-
-  // ── Availability ─────────────────────────────────────────────────────────────
-  function updateAvail(count: number, unit: "week" | "month") {
-    setAvailCount(count);
-    setAvailUnit(unit);
-    setS3(prev => ({ ...prev, disponibilite_heures: `${count}h/${unit}` }));
   }
 
   // ── Competences ──────────────────────────────────────────────────────────────
@@ -502,7 +472,7 @@ export default function MentorOnboarding() {
   function canProceed(): boolean {
     if (step === 1) return !!s1.nom.trim() && !!s1.poste_actuel.trim();
     if (step === 2) return !!s1.nom.trim() && s2.secteurs.length > 0;
-    if (step === 3) return !!s3.style_mentorat && !!s3.format_prefere && s3.langues.length > 0;
+    if (step === 3) return !!s3.style_mentorat && s3.langues.length > 0;
     return true;
   }
 
@@ -537,9 +507,7 @@ export default function MentorOnboarding() {
         competences:        s2.competences,
         type_profils_aides: s2.type_profils_aides,
         style_mentorat:      s3.style_mentorat      || null,
-        disponibilite_heures: s3.disponibilite_heures || null,
         max_mentees:         s3.max_mentees,
-        format_prefere:      s3.format_prefere      || null,
         langues:             s3.langues,
         motivation:          s3.motivation.trim()   || null,
         hobbies:             s3.hobbies,
@@ -1087,45 +1055,6 @@ export default function MentorOnboarding() {
                 </div>
               </div>
 
-              {/* Availability, count + unit toggle */}
-              <div>
-                <FieldLabel>Availability</FieldLabel>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {/* Number select */}
-                  <div className="relative">
-                    <select
-                      value={availCount}
-                      onChange={e => updateAvail(parseInt(e.target.value), availUnit)}
-                      className="pl-3 pr-8 py-2.5 rounded-xl border border-white/10 bg-[#0D0A1A] text-white text-sm focus:outline-none focus:border-[#7C3AED] appearance-none cursor-pointer">
-                      {Array.from({ length: 30 }, (_, i) => i + 1).map(n => (
-                        <option key={n} value={n}>{n}</option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-white/30">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="text-white/40 text-sm">hours</span>
-                  {/* Per week / Per month toggle */}
-                  <div className="flex rounded-xl border border-white/10 overflow-hidden">
-                    {(["week", "month"] as const).map(unit => (
-                      <button key={unit} type="button"
-                        onClick={() => updateAvail(availCount, unit)}
-                        className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-                          availUnit === unit
-                            ? "bg-[#7C3AED] text-white"
-                            : "text-white/50 hover:text-white/70"
-                        }`}>
-                        Per {unit}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="text-white/25 text-xs">→ {availCount}h/{availUnit}</span>
-                </div>
-              </div>
-
               {/* Max mentees */}
               <div>
                 <FieldLabel>Max simultaneous mentees</FieldLabel>
@@ -1139,24 +1068,6 @@ export default function MentorOnboarding() {
                           : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
                       }`}>
                       {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Format */}
-              <div>
-                <FieldLabel>Preferred format</FieldLabel>
-                <div className="flex gap-2 flex-wrap">
-                  {FORMAT_OPTIONS.map(f => (
-                    <button key={f} type="button"
-                      onClick={() => setS3(prev => ({ ...prev, format_prefere: f }))}
-                      className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-colors ${
-                        s3.format_prefere === f
-                          ? "border-[#7C3AED] bg-[#7C3AED]/10 text-white"
-                          : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
-                      }`}>
-                      {f}
                     </button>
                   ))}
                 </div>
