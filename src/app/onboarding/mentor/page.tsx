@@ -95,45 +95,6 @@ async function uploadToStorage(bucket: string, path: string, file: File): Promis
   return data.publicUrl;
 }
 
-// ─── Pricing grid ──────────────────────────────────────────────────────────────
-// Pricing tiers use neutral, positive labels so a first-time mentor never
-// sees a demeaning term like "Beginner" or "Junior". The floor is 20€ and
-// the ceiling is 90€ per session.
-const PRICING_GRID = [
-  { maxScore: 20,  level: "Accessible",   priceMin: 20, priceMax: 30 },
-  { maxScore: 40,  level: "Émergent",     priceMin: 30, priceMax: 40 },
-  { maxScore: 60,  level: "Confirmé",     priceMin: 40, priceMax: 50 },
-  { maxScore: 75,  level: "Expérimenté",  priceMin: 50, priceMax: 65 },
-  { maxScore: 90,  level: "Expert",       priceMin: 65, priceMax: 80 },
-  { maxScore: 100, level: "Référence",    priceMin: 80, priceMax: 90 },
-] as const;
-
-type PricingTier = typeof PRICING_GRID[number];
-
-function getPricingTier(score: number): PricingTier {
-  return PRICING_GRID.find(t => score <= t.maxScore) ?? PRICING_GRID[PRICING_GRID.length - 1];
-}
-
-function midPrice(tier: PricingTier): number {
-  return Math.round((tier.priceMin + tier.priceMax) / 2 / 5) * 5;
-}
-
-function calcMentorScore(s1: S1, s2: S2, s4: S4): number {
-  const years = s1.annees_experience !== "" ? Number(s1.annees_experience) : 0;
-  const expPts =
-    years <= 2 ? 5 : years <= 5 ? 12 : years <= 10 ? 20 :
-    years <= 15 ? 28 : years <= 20 ? 35 : 40;
-  const compCount = Math.min(s2.competences.length, 10);
-  const avgRating = compCount > 0
-    ? s2.competences.reduce((sum, c) => sum + c.rating, 0) / compCount : 0;
-  const compPts = Math.round((compCount / 10) * (avgRating / 5) * 40);
-  const profilePts = [
-    !!s1.bio.trim(), !!s1.photo_url, !!s4.cv_url,
-    !!s1.linkedin_url.trim(), s2.secteurs.length > 0,
-  ].filter(Boolean).length * 4;
-  return Math.min(expPts + compPts + profilePts, 100);
-}
-
 // ─── Shared UI helpers ─────────────────────────────────────────────────────────
 const inputCls =
   "w-full px-4 py-3 rounded-xl border border-white/10 bg-[#0D0A1A] text-white " +
@@ -203,12 +164,6 @@ export default function MentorOnboarding() {
   const [loading, setLoading]         = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError]             = useState<string | null>(null);
-  const [phase, setPhase]             = useState<"form" | "scoring">("form");
-  const [mentorScore, setMentorScore] = useState(0);
-  const [showPriceSlider, setShowPriceSlider] = useState(false);
-  const [sliderPrice, setSliderPrice] = useState(20);
-  const [savingPrice, setSavingPrice] = useState(false);
-  const [scoringError, setScoringError] = useState<string | null>(null);
   const [userId, setUserId]           = useState("");
   const [email, setEmail]             = useState("");
   const [authNom, setAuthNom]         = useState("");
@@ -518,17 +473,15 @@ export default function MentorOnboarding() {
       if (step === TOTAL_STEPS) {
         if (!s1.poste_actuel.trim()) throw new Error("'Job title' is empty, please go back to step 1.");
 
-        const score = calcMentorScore(s1, s2, s4);
-        const tier  = getPricingTier(score);
-
+        // Finalise the mentor row and mark onboarding complete.
         await supabase.from("mentors").upsert({
           ...allData,
-          mentor_score:     score,
-          survey_completed: true,
-          statut:           "active",
+          survey_completed:     true,
+          onboarding_completed: true,
+          statut:               "active",
         }).throwOnError();
 
-        // Best-effort AI score (never blocks completion)
+        // Best-effort AI-generated bio (never blocks completion).
         fetch("/api/mentor/ai-score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -552,9 +505,9 @@ export default function MentorOnboarding() {
           }
         }).catch(() => {});
 
-        setMentorScore(score);
-        setSliderPrice(midPrice(tier));
-        setPhase("scoring");
+        // ?onboarded=1 bypasses the dashboard onboarding_completed guard on
+        // its first render (see /dashboard loadData).
+        window.location.href = "/dashboard?onboarded=1";
         return;
       }
 
@@ -567,147 +520,6 @@ export default function MentorOnboarding() {
     }
   }
 
-  // ─── Scoring screen ──────────────────────────────────────────────────────────
-  if (phase === "scoring") {
-    const tier      = getPricingTier(mentorScore);
-    const recommended   = midPrice(tier);
-    const sliderFillPct = ((sliderPrice - 20) / (90 - 20)) * 100;
-
-    const ringColor =
-      mentorScore >= 91 ? "#A78BFA" :
-      mentorScore >= 76 ? "#10B981" :
-      mentorScore >= 61 ? "#3B82F6" :
-      mentorScore >= 41 ? "#F59E0B" :
-      mentorScore >= 21 ? "#94A3B8" : "#EF4444";
-
-    async function handleSavePrice(price: number) {
-      setSavingPrice(true);
-      setScoringError(null);
-      console.log("[handleSavePrice] called — price:", price, "email:", email, "userId:", userId);
-      try {
-        const res = await fetch("/api/mentor/save-onboarding", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            userId,
-            data: { session_price: price, onboarding_completed: true },
-          }),
-        });
-        const json = await res.json() as { error?: string; success?: boolean };
-        console.log("[handleSavePrice] API response:", res.status, json);
-        if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
-        console.log("[handleSavePrice] save confirmed — navigating");
-        // ?onboarded=1 bypasses the dashboard onboarding_completed guard (see loadData).
-        // Full page reload ensures the dashboard fetches fresh data rather than using
-        // any cached React state from this component.
-        window.location.href = "/dashboard?onboarded=1";
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Save failed, please try again.";
-        console.error("[handleSavePrice] error:", msg);
-        setScoringError(msg);
-        setSavingPrice(false);
-      }
-    }
-
-    const circumference = 2 * Math.PI * 42;
-    const dashFill = (mentorScore / 100) * circumference;
-
-    return (
-      <div className="min-h-screen bg-[#0D0A1A] flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md">
-          <button type="button"
-            onClick={() => { setPhase("form"); setStep(4); setShowPriceSlider(false); setScoringError(null); }}
-            className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors mb-6">
-            <ArrowLeft className="w-4 h-4" /> Retour à l'étape 4
-          </button>
-          {scoringError && (
-            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl mb-4">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" /> {scoringError}
-            </div>
-          )}
-          <div className="text-center mb-8">
-            <GrowViaLogo />
-            <h1 className="text-2xl font-extrabold text-white tracking-tight mb-1">Votre score de mentor</h1>
-            <p className="text-white/40 text-sm">Basé sur votre profil et votre expérience.</p>
-          </div>
-          <div className="rounded-2xl p-8 border border-white/[0.08]"
-            style={{ background: "#13111F", boxShadow: "0 8px 48px rgba(0,0,0,0.5)" }}>
-            <div className="flex flex-col items-center mb-8">
-              <div className="relative w-32 h-32 mb-4">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke={ringColor} strokeWidth="8"
-                    strokeLinecap="round" strokeDasharray={`${dashFill} ${circumference}`}
-                    style={{ transition: "stroke-dasharray 1s ease" }} />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-extrabold text-white leading-none">{mentorScore}</span>
-                  <span className="text-xs text-white/35 mt-0.5">/100</span>
-                </div>
-              </div>
-              <span className="text-xl font-bold text-white mb-1">{tier.level}</span>
-              <span className="text-xs text-white/40 uppercase tracking-widest">Score de mentor</span>
-            </div>
-            <div className="rounded-xl px-5 py-4 mb-6 border border-[#7C3AED]/25"
-              style={{ background: "rgba(124,58,237,0.08)" }}>
-              <p className="text-xs text-white/50 font-medium uppercase tracking-widest mb-1">
-                Fourchette recommandée
-              </p>
-              <p className="text-3xl font-extrabold text-[#A78BFA]">
-                {tier.priceMin}€ – {tier.priceMax}€
-              </p>
-              <p className="text-xs text-white/30 mt-1">par session · basé sur votre profil</p>
-            </div>
-            {showPriceSlider ? (
-              <div className="mb-2">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-white/60">Votre tarif</span>
-                  <span className="text-2xl font-extrabold text-white">
-                    {sliderPrice}€
-                    <span className="text-sm text-white/40 font-normal"> / session</span>
-                  </span>
-                </div>
-                <input type="range" min={20} max={90} step={5} value={sliderPrice}
-                  onChange={e => setSliderPrice(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, #7C3AED ${sliderFillPct}%, rgba(255,255,255,0.1) ${sliderFillPct}%)`,
-                    accentColor: "#7C3AED",
-                  }} />
-                <div className="flex justify-between mt-2 text-xs">
-                  <span className="text-white/30">20€</span>
-                  <span className="text-[#A78BFA]">Recommandé : {tier.priceMin}€–{tier.priceMax}€</span>
-                  <span className="text-white/30">90€</span>
-                </div>
-                <button onClick={() => handleSavePrice(sliderPrice)} disabled={savingPrice}
-                  className="w-full mt-5 text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm disabled:opacity-60"
-                  style={{ background: "#7C3AED" }}>
-                  {savingPrice
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Enregistrement…</>
-                    : <>Confirmer {sliderPrice}€ <ArrowRight className="w-4 h-4" /></>}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <button onClick={() => handleSavePrice(recommended)} disabled={savingPrice}
-                  className="w-full text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm disabled:opacity-60"
-                  style={{ background: "#7C3AED" }}>
-                  {savingPrice
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Enregistrement…</>
-                    : <><Check className="w-4 h-4" /> Accepter le prix recommandé ({recommended}€)</>}
-                </button>
-                <button onClick={() => setShowPriceSlider(true)}
-                  className="w-full py-3 text-sm font-medium text-[#A78BFA] hover:text-white transition-colors">
-                  Définir mon propre prix →
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // ─── Loading skeleton ────────────────────────────────────────────────────────
   if (pageLoading) {
